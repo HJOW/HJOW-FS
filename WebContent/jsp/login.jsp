@@ -3,7 +3,7 @@ JSONObject sessionMap = null;
 JSONObject accountOne = null;
 boolean needInvalidate = false;
 try {
-	String sessionJson = (String) session.getAttribute("fssession");
+	String sessionJson = (String) request.getSession().getAttribute("fssession");
     
     if(sessionJson != null) {
     	JSONParser parser = new JSONParser();
@@ -11,10 +11,9 @@ try {
     }
 	
     if(sessionMap != null) { if(sessionMap.get("id"    ) == null) sessionMap = null;         }
-    if(sessionMap != null) { if(sessionMap.get("pw"    ) == null) sessionMap = null;         }
     if(sessionMap != null) { if(sessionMap.get("idtype") == null) sessionMap = null;         }
     if(sessionMap != null) { if(sessionMap.get("nick"  ) == null) sessionMap = null;         }
-    if(sessionMap != null) { if(sessionMap.get("type"  ).equals("block")) sessionMap = null; } 
+    if(sessionMap != null) { if(sessionMap.get("idtype").equals("block")) sessionMap = null; } 
     if(sessionMap == null) needInvalidate = true;
 } catch(Throwable t) {
 	needInvalidate = true;
@@ -200,8 +199,12 @@ try {
                     accChanging = false;
 	        	}
 	        	
+	        	JSONObject accountJsonNew = new JSONObject();
+	        	accountJsonNew.putAll(accountOne);
+	        	accountJsonNew.remove("pw");
+	        	
 	        	sessionMap = accountOne;
-	            session.setAttribute("fssession", accountOne.toJSONString());
+	        	request.getSession().setAttribute("fssession", accountJsonNew.toJSONString());
 	            System.out.println("Login Accept : " + id + " at " + now);
 	            needInvalidate = false;
 	            json.put("success", new Boolean(true));
@@ -225,7 +228,7 @@ try {
 	t.printStackTrace();
 } finally {
 	if(needInvalidate) {
-		session.invalidate();
+		request.getSession().invalidate();
 		System.out.println("Session Invalidated");
 	}
 	if(r2 != null) r2.close();

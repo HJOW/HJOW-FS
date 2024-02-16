@@ -26,7 +26,8 @@ $(function() {
     var captchaHeight = parseInt("<%=captchaHeight + 180%>");
 	
     var form     = $('.form_fs');
-    var listRoot = $('.fs_list');
+    var tables   = $('.fs_table_list');
+    var listRoot = tables.find('.fs_list');
     var pathDisp = $('.path');
 
     var inpPath   = form.find('.hidden_path');
@@ -40,6 +41,7 @@ $(function() {
     pathDisp.text('');
 
     function fReload() {
+        tables.find('.col_controls').css('width', '10px');
     	listRoot.find('binded-click').each(function() { $(this).off('click'); });
     	listRoot.empty();
         pathDisp.text('');
@@ -55,25 +57,77 @@ $(function() {
 
                 listRoot.empty();
                 pathDisp.text('');
+
+                var idType = 'U';
+
+                if(data.session != null && typeof(data.session) != 'undefined') {
+                    if(data.session.id != null && typeof(data.session.id) != 'undefined' && data.session.idtype != null && typeof(data.session.idtype) != 'undefined') {
+                    	idType = String(data.session.idtype);
+                    }
+                }
+
+                if(idType == 'A') tables.find('.col_controls').css('width', '100px');
                 
                 if(! data.path == '') {
-                    listRoot.append("<tr class='element back'><td><a href='#' class='link_back'>[BACK]</a></td></tr>");
+                    listRoot.append("<tr class='element back'><td colspan='4'><a href='#' class='link_back'>[BACK]</a></td></tr>");
                 }
 
                 if(arDirs.length == 0 && arFiles.length == 0) {
-                	listRoot.append("<tr class='element empty'><td>Empty</td></tr>");
+                	listRoot.append("<tr class='element empty'><td colspan='4'>Empty</td></tr>");
                 }
 
                 var idx = 0;
                 
                 for(idx = 0; idx < arDirs.length; idx++) {
-                    listRoot.append("<tr class='element'><td>[DIR] <a href='#' class='link_dir' data-path='" + arDirs[idx].value + "'>" + arDirs[idx].name + "</a></td></tr>");
+                    var lvalue = String(arDirs[idx].value);
+                    var lname  = String(arDirs[idx].name);
                     
+                    listRoot.append("<tr class='element tr_dir_" + idx + "'><td>[DIR]</td><td colspan='2'><a href='#' class='link_dir' data-path=''></a></td><td class='td_buttons'></td></tr>");
+                    
+                    var tr = listRoot.find('.tr_dir_' + idx);
+                    var a  = tr.find('.link_dir');
+                    
+                    a.attr('data-path', lvalue);
+                    a.text(lname);
+
+                    if(idType == 'A') {
+                    	var tdBtns = tr.find('.td_buttons');
+                    	tdBtns.css('text-align', 'right');
+                    }
                 }
                 
                 for(idx = 0; idx < arFiles.length; idx++) {
-                    listRoot.append("<tr class='element'><td><a href='#' class='link_file' data-path='" + arFiles[idx].value + "' data-name='" + arFiles[idx].name + "'>" + arFiles[idx].name + " (" + arFiles[idx].size + ")" + "</a></td></tr>");
+                	var lvalue = String(arFiles[idx].value);
+                    var lname  = String(arFiles[idx].name);
+                    var lsize  = String(arFiles[idx].size);
                     
+                    listRoot.append("<tr class='element tr_file_" + idx + "'><td colspan='2'><a href='#' class='link_file' data-path='' data-name=''></a></td><td class='td_file_size'></td><td class='td_buttons'></td></tr>");
+                    
+                    var tr = listRoot.find('.tr_file_' + idx);
+                    var a  = tr.find('.link_file');
+                    
+                    a.attr('data-path', lvalue);
+                    a.attr('data-name', lname);
+                    a.text(lname);
+                    tr.find('.td_file_size').text('(' + lsize + ')');
+
+                    if(idType == 'A') {
+                        var tdBtns = tr.find('.td_buttons');
+                        tdBtns.css('text-align', 'right');
+                        tdBtns.append("<input type='button' class='btn_delete' value='X'/>");
+
+                        var btnDel = tdBtns.find('.btn_delete');
+                        btnDel.attr('data-path', a.attr('data-path'));
+                        btnDel.attr('data-name', a.attr('data-name'));
+
+                        btnDel.on('click', function() {
+                            var delpath = $(this).attr('data-path');
+                            var delname = $(this).attr('data-name');
+                            alert('Not supported yet.');
+                            // TODO
+                        });
+                        btnDel.addClass('binded_click');
+                    }
                 }
                 
                 arDirs  = null;
@@ -146,9 +200,12 @@ $(function() {
 	    </div>
 	    <div class='row fs_root'>
 	        <div class='col-sm-12'>
-		        <table class="table table-hover full">
+		        <table class="table table-hover full fs_table_list">
 		            <colgroup>
+		                <col style='width:50px;'/>
 		                <col/>
+		                <col style='width:100px;'/>
+		                <col style='width:10px;' class='col_controls'/>
 		            </colgroup>
 		            <tbody class='fs_list'>
 		            

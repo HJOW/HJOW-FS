@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="application/json; charset=UTF-8" pageEncoding="UTF-8" import="java.io.*, java.util.*, org.json.simple.*"%><%@ include file="common.pront.jsp"%><%
+<%@ page language="java" contentType="application/json; charset=UTF-8" pageEncoding="UTF-8" import="java.io.*, java.util.*, org.json.simple.*, org.json.simple.parser.*" session="true" %><%@ include file="common.pront.jsp"%><%
 String pathParam = request.getParameter("path");
 if(pathParam == null) pathParam = "";
 pathParam = pathParam.trim();
@@ -107,6 +107,31 @@ for(File f : chFiles) {
     files.add(fileOne);
 }
 json.put("files", files);
+
+JSONObject jsonSess = new JSONObject();
+try {
+	String sessionJson = (String) request.getSession().getAttribute("fssession");
+	if(sessionJson != null) {
+		sessionJson = sessionJson.trim();
+		if(! sessionJson.equals("")) {
+			JSONObject obj = (JSONObject) new JSONParser().parse(sessionJson);
+			if(obj != null) { if(obj.get("id"    ) == null) obj = null;         }
+		    if(obj != null) { if(obj.get("idtype") == null) obj = null;         }
+		    if(obj != null) { if(obj.get("nick"  ) == null) obj = null;         }
+		    if(obj != null) { if(obj.get("idtype").equals("block")) obj = null; } 
+		    if(obj != null) {
+		    	jsonSess.put("id"    , obj.get("id"));
+		    	jsonSess.put("idtype", obj.get("idtype"));
+		    	jsonSess.put("nick"  , obj.get("nick"));
+		    }
+		}
+	}
+} catch(Throwable t) {
+	t.printStackTrace();
+	request.getSession().removeAttribute("fssession");
+}
+json.put("session", jsonSess);
+
 response.reset();
 response.setContentType("application/json");
 response.setCharacterEncoding("UTF-8");

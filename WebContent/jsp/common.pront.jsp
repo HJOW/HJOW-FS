@@ -179,7 +179,7 @@ if(installed) {
 }
 
 if(noLogin) {
-	Object sessionMap = session.getAttribute("fssession");
-	if(sessionMap != null) session.removeAttribute("fssession");
+	Object sessionMap = request.getSession().getAttribute("fssession");
+	if(sessionMap != null) request.getSession().removeAttribute("fssession");
 }
 %>

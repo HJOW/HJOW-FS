@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.util.*, java.io.*, java.awt.*, java.awt.image.*, javax.imageio.*,org.apache.commons.codec.binary.Base64" %><%@ include file="common.pront.jsp"%><%
-String code = (String) session.getAttribute("captcha_code");
-Long   time = (Long)   session.getAttribute("captcha_time");
+String code = (String) request.getSession().getAttribute("captcha_code");
+Long   time = (Long)   request.getSession().getAttribute("captcha_time");
 
 if(code == null) {
     code = "REFRESH";
@@ -8,7 +8,7 @@ if(code == null) {
 
 if(now - time.longValue() >= captchaLimitTime) {
     code = "REFRESH";
-    session.setAttribute("captcha_code", code);
+    request.getSession().setAttribute("captcha_code", code);
 }
 
 int colorPad = 0;

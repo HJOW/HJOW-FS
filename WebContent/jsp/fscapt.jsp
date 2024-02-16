@@ -17,8 +17,8 @@ speed     = speed.replace("'", "").replace("\"", "").trim();
 int randomNo  = (int) Math.round(1000000 + Math.random() * 1000000 + Math.random() * 10000 + Math.random() * 100);
 String strRan = String.valueOf(randomNo).substring(0, 7);
 
-session.setAttribute("captcha_code", strRan);
-session.setAttribute("captcha_time", new Long(now));
+request.getSession().setAttribute("captcha_code", strRan);
+request.getSession().setAttribute("captcha_time", new Long(now));
 %>
 <!DOCTYPE html>
 <html>

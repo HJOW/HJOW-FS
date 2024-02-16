@@ -8,8 +8,8 @@ String speed     = request.getParameter("speed");
 String capt      = request.getParameter("captcha");
 String mode      = request.getParameter("mode");
 
-String code = (String) session.getAttribute("captcha_code");
-Long   time = (Long)   session.getAttribute("captcha_time");
+String code = (String) request.getSession().getAttribute("captcha_code");
+Long   time = (Long)   request.getSession().getAttribute("captcha_time");
 
 if(code == null) code = "REFRESH";
 if(capt == null) capt = "";
@@ -44,7 +44,7 @@ try {
 	
 	if(now - time.longValue() >= captchaLimitTime) {
 	    code = "REFRESH";
-	    session.setAttribute("captcha_code", code);
+	    request.getSession().setAttribute("captcha_code", code);
 	}
 	
     if(code.equals("REFRESH")) {
