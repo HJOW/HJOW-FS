@@ -31,28 +31,75 @@ $(function() {
     $('.btn_re').on('click', function() {
         location.reload();
     });
-    
+
+    var form  = $('.form');
+    var selMn = form.find('.sel_mode');
+    var btnDn = form.find('.btn_dn');
+
+    var fileName = form.find('.hid_name').val();
+    var ext      = '';
+
+    var spl = fileName.split('.');
+    if(spl.length >= 2) {
+    	for(var idx=0; idx<spl.length; idx++) {
+            ext = spl[idx];
+        }
+    }
+    ext = String(ext).toLowerCase();
+
+    selMn.empty();
+    if(ext == 'jpg' || ext == 'jpeg' || ext == 'png' || ext == 'gif' || ext == 'pdf') {
+    	selMn.append("<option value='DOWNLOAD'>DOWNLOAD</option>");
+    	selMn.append("<option value='VIEW'>VIEW</option>");
+    } else {
+        selMn.append("<option value='DOWNLOAD'>DOWNLOAD</option>");
+    }
+    selMn.val('DOWNLOAD');
+
+    $('.p_filename').text(fileName);
     $('.inp_captcha').focus();
+
+    console.log(ext);
 });
 </script>
 </head>
 <body>
-     <h3>Captcha Authentication</h3>
-     <div>
-         <p>For download <%= fileName %>...</p>
-     </div>
-     <div>
-         <iframe style='width: <%=captchaWidth + 10%>px; height: <%=captchaHeight + 10%>px;' src='fscaptin.jsp'></iframe>
-     </div>
-     <div>
-         <form action='fsdown.jsp' method='POST' class='form'>
-             <input type='hidden' name='path'     value='<%=pathParam%>'/>
-             <input type='hidden' name='filename' value='<%=fileName%>'/>
-             <input type='hidden' name='speed'    value='<%=speed%>'/>
-             <input type='text'   class='inp_captcha' name='captcha'/>
-             <input type='submit' class='btn_dn' value='Download Now !'/>
-             <input type='button' class='btn_re' value='Refresh'/>
-         </form>
-     </div>
+    <div class='fs_capt container show-grid full'>
+        <div class='row'>
+            <div class='col-sm-12'>
+                <h3>Captcha Authentication</h3>
+            </div>
+        </div>
+        <div class='row'>
+            <div class='col-sm-12'>
+                <p>For download</p>
+                <p class='p_filename'></p>
+            </div>
+        </div>
+        <div class='row'>
+            <div class='col-sm-12'>
+                <iframe style='width: <%=captchaWidth + 10%>px; height: <%=captchaHeight + 10%>px;' src='fscaptin.jsp'></iframe>
+            </div>
+        </div>
+        <form action='fsdown.jsp' method='POST' class='form' target='_blank'>
+            <input type='hidden' name='path'     class='hid_path' value='<%=pathParam%>'/>
+            <input type='hidden' name='filename' class='hid_name' value='<%=fileName%>'/>
+            <input type='hidden' name='speed'    class='hid_sped' value='<%=speed%>'/>
+            <div class='row'>
+                <div class='col-sm-6'>
+	                <input type='text'   class='inp_captcha' name='captcha' placeholder='Input the code'/>
+	                <input type='button' class='btn_re' value='Refresh'/>
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-sm-12'>
+                    <select name='mode' class='sel_mode'>
+                        <option value='DOWNLOAD' selected>DOWNLOAD</option>
+                    </select>
+                    <input type='submit' class='btn_dn' value='Now !'/>
+                </div>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

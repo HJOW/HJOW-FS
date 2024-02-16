@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.io.*, java.util.* " isErrorPage="true" %><%
-String excMsg = exception.getMessage();
-if(excMsg == null) excMsg = "";
+String excMsg = "";
+if(exception != null) excMsg = exception.getMessage();
+if(excMsg    == null) excMsg = "";
 excMsg = excMsg.replace("<", "&lt;").replace(">", "&gt;");
 %>
 <!DOCTYPE html>

@@ -22,8 +22,8 @@ if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
 <script type='text/javascript'>
 $(function() {
     var ctxPath = "<%=ctxPath%>";
-    var captchaWidth  = "<%=captchaWidth  + 100%>";
-    var captchaHeight = "<%=captchaHeight + 180%>";
+    var captchaWidth  = parseInt("<%=captchaWidth  + 100%>");
+    var captchaHeight = parseInt("<%=captchaHeight + 180%>");
 	
     var form     = $('.form_fs');
     var listRoot = $('.fs_list');
@@ -110,7 +110,7 @@ $(function() {
                 $('.link_file').each(function() {
                     var aLink = $(this);
                     aLink.on('click', function() {
-                        var popOpt = 'width=' + captchaWidth + "," + "height=" + captchaHeight;
+                        var popOpt = 'width=' + (captchaWidth + 50) + "," + "height=" + (captchaHeight + 50);
                         popOpt += ',scrollbars=no,status=no,location=no,toolbar=no';
                         window.open(ctxPath + '/jsp/' + 'fscapt.jsp?path=' + encodeURIComponent($('.hidden_path').val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')), 'captcha', popOpt);
                     });
