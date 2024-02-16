@@ -1,5 +1,7 @@
 # HJOW-FS
-JSP based simple File Storage
+JSP based simple File Storage.
+No JSTL, No Spring !
+Work on JDK 6 & Tomcat 7 or above !
 
 # Using...
 + jQuery (https://jquery.com/)
