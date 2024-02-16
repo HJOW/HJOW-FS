@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.io.*, java.util.* "%><%@ include file="common.pront.jsp"%><%
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.io.*, java.util.* " session="true"%><%@ include file="common.pront.jsp"%><%
 if(! installed) {
 	%>
 	<script type="text/javascript">

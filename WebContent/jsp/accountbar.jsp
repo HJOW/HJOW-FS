@@ -2,6 +2,7 @@
 if(! installed) {
 	%><div class='fs_accbar container show-grid full invisible'>Not installed</div><%
 } else if(! noLogin) {
+	String sessionJson = (String) session.getAttribute("fssession");
 %>
 <div class='fs_accbar container show-grid full'>
 	<script type='text/javascript'>

@@ -1,12 +1,9 @@
-<%@page import="org.omg.PortableInterceptor.SUCCESSFUL"%>
 <%@ page language="java" contentType="application/json; charset=UTF-8" pageEncoding="UTF-8" import="java.io.*, java.util.*, java.security.*, org.json.simple.*, org.json.simple.parser.*, org.apache.commons.codec.binary.Base64" session="true"%><%@ include file="common.pront.jsp"%><%
 JSONObject sessionMap = null;
 JSONObject accountOne = null;
 boolean needInvalidate = false;
 try {
 	String sessionJson = (String) session.getAttribute("fssession");
-	System.out.println(" SESSION ");
-    System.out.println(sessionJson);
     
     if(sessionJson != null) {
     	JSONParser parser = new JSONParser();
@@ -42,6 +39,10 @@ try {
 		throw new RuntimeException("Please install first !");
 	}
 	
+	if(fileConfigPath == null) {
+		throw new RuntimeException("Please install first !");
+	}
+	
 	File faJson = new File(fileConfigPath.getAbsolutePath() + File.separator + "accounts");
 	if(! faJson.exists()) faJson.mkdirs();
 	
@@ -49,6 +50,7 @@ try {
 	    sessionMap = null;
 	    needInvalidate = true;
 	    msg = "Log out complete";
+	    System.out.println("Session log out from " + request.getRemoteAddr());
 	}
 	
 	if(req.equals("login")) {
@@ -72,7 +74,7 @@ try {
 		if(id.contains("'") || id.contains("\"") || id.contains("/") || id.contains("\\") || id.contains(File.separator) || id.contains(".") || id.contains(" ") || id.contains("\n") || id.contains("\t")) throw new RuntimeException("ID can only contains alphabets and numbers !");
 		if(msg.equals("")) { if(pw.equals("")) msg = "Please input Password !"; }
 		
-		System.out.println("Login requested ! " + id + " at " + now);
+		System.out.println("Login requested ! " + id + " at " + now + " from " + request.getRemoteAddr());
 		
 		if(msg.equals("")) {
 			File fileAcc = new File(faJson.getAbsolutePath() + File.separator + id + ".json");
@@ -224,6 +226,7 @@ try {
 } finally {
 	if(needInvalidate) {
 		session.invalidate();
+		System.out.println("Session Invalidated");
 	}
 	if(r2 != null) r2.close();
 	if(r1 != null) r1.close();
