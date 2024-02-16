@@ -40,9 +40,9 @@ if(! pathDisp.startsWith("/")) pathDisp = "/" + pathDisp;
 
 JSONObject json = new JSONObject();
 json.put("type", "list");
-json.put("keyword", "keyword");
-json.put("path"   , "pathParam");
-json.put("dpath"  , "pathDisp");
+json.put("keyword", keyword);
+json.put("path"   , pathParam);
+json.put("dpath"  , pathDisp);
 
 JSONArray dirs = new JSONArray();
 for(File f : chDirs) {
