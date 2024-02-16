@@ -60,11 +60,11 @@ if(fileConfigPath == null || Math.abs(now - confReads) >= refreshConfGap) {
 		String s2 = "";
 		String s3 = "";
 		
-	    propIn = this.getClass().getResourceAsStream("/test.properties");
+	    propIn = this.getClass().getResourceAsStream("/fs.properties");
 	    if(propIn != null) {
 	    	Properties propTest = new Properties();
 	        propTest.load(propIn);
-	        // Check test.properties
+	        // Check fs.properties
 	        String t1 = propTest.getProperty("FS");
 	        String t2 = propTest.getProperty("RD");
 	        String t3 = propTest.getProperty("PW");
@@ -80,7 +80,7 @@ if(fileConfigPath == null || Math.abs(now - confReads) >= refreshConfGap) {
 	                if(cs == null) cs = "UTF-8";
 	                cs = cs.trim();
 	                
-	                // Get configuration directory from test.properties
+	                // Get configuration directory from fs.properties
 	                String cf = propTest.getProperty("CF");
 	                if(cf != null) {
 	                    cf = cf.trim();
@@ -101,7 +101,7 @@ if(fileConfigPath == null || Math.abs(now - confReads) >= refreshConfGap) {
 	        propTest = null;
 	        
 	        if(fileConfigPath != null) {
-	            // Close test.properties
+	            // Close fs.properties
 	            propIn.close();
 	            propIn = null;
 	            
@@ -146,7 +146,7 @@ if(fileConfigPath == null || Math.abs(now - confReads) >= refreshConfGap) {
                 }
 	        }
 	    } else {
-	        System.out.println("No test.properties !");
+	        System.out.println("No fs.properties !");
 	    }
 	} catch(Throwable t) {
 	    fileConfigPath = null;

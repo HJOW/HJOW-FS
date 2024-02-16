@@ -49,7 +49,7 @@ if(! installed) {
 		            </div>
 		            <div class='row'>
 		                <div class='col-sm-2' style='width:150px'>Password</div>
-		                <div class='col-sm-10'><input type='password' name='pw' class='full' placeholder="Password in test.properties"/></div>
+		                <div class='col-sm-10'><input type='password' name='pw' class='full' placeholder="Password in fs.properties"/></div>
 		            </div>
 		            <div class='row'>
                         <div class='col-sm-2' style='width:150px'>Accounts</div>

@@ -11,15 +11,15 @@ if(! installed) {
 		String passwords = request.getParameter("pw");
 		if(passwords == null) throw new RuntimeException("Please input Password !");
 		
-		propIn = this.getClass().getResourceAsStream("/test.properties");
-        if(propIn == null) throw new FileNotFoundException("No test.properties found at ./WEB-INF/classes/");
+		propIn = this.getClass().getResourceAsStream("/fs.properties");
+        if(propIn == null) throw new FileNotFoundException("No fs.properties found at ./WEB-INF/classes/");
         
         propTest = new Properties();
         propTest.load(propIn);
         
         propIn.close(); propIn = null;
         
-        // Check test.properties
+        // Check fs.properties
         String tx1 = propTest.getProperty("FS");
         String tx2 = propTest.getProperty("RD");
         String tx3 = propTest.getProperty("PW");
@@ -31,9 +31,9 @@ if(! installed) {
         propTest = null;
         
         if(tx1 == null || tx2 == null || tx3 == null || s1 == null || s2 == null || s3 == null) {
-        	throw new FileNotFoundException("No correct test.properties found at ./WEB-INF/classes/ ! Please check values !");
+        	throw new FileNotFoundException("No correct fs.properties found at ./WEB-INF/classes/ ! Please check values !");
         } else if(! (tx1.trim().equals("FileStorage") && tx2.trim().equals("SetConfigPathBelow"))) {
-        	throw new FileNotFoundException("No correct test.properties found at ./WEB-INF/classes/ ! Please check values !");
+        	throw new FileNotFoundException("No correct fs.properties found at ./WEB-INF/classes/ ! Please check values !");
         }
         
 		String roots = request.getParameter("rootdir");
