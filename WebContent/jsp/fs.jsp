@@ -110,6 +110,7 @@ $(function() {
                     a.attr('data-name', lname);
                     a.text(lname);
                     tr.find('.td_file_size').text('(' + lsize + ')');
+                    tr.find('.td_file_size').css('text-align', 'right');
 
                     if(idType == 'A') {
                         var tdBtns = tr.find('.td_buttons');
