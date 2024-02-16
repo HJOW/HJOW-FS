@@ -128,7 +128,7 @@ try {
 	}
 } catch(Throwable t) {
 	t.printStackTrace();
-	request.getSession().removeAttribute("fssession");
+	jsonSess.clear();
 }
 json.put("session", jsonSess);
 
