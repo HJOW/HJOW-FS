@@ -67,7 +67,7 @@ dirs = null;
 JSONArray files = new JSONArray();
 for(File f : chFiles) {
 	String name     = f.getName();
-    if(! keyword.equals("")) { if(! name.contains(keyword)) continue; }
+    if(! keyword.equals("")) { if(! name.toLowerCase().contains(keyword.toLowerCase())) continue; }
     
     String linkDisp = name.replace("\"", "'");
     

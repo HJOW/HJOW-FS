@@ -13,7 +13,7 @@ if(! installed) {
         <script type="text/javascript">
         $(function() {
         	var ctxPath = "<%=ctxPath%>";
-            var form    = $('.form_fs');
+            var form    = $('.form_fs_ins');
             var chkAc   = form.find('.chk_account');
 
             chkAc.on('change', function() {
@@ -37,7 +37,7 @@ if(! installed) {
             });
         });
         </script>
-        <form class='form_fs' onsubmit='return false;'>
+        <form class='form_fs_ins' onsubmit='return false;'>
             <div class='row'>
                 <div class='col-sm-2'><h2>FS Installation</h2></div>
             </div>

@@ -42,8 +42,8 @@ if(! installed) {
             }
 			inpReq.val('status');
 
-			var btnSearch = $('.btn_search');
-			if(btnSearch.length >= 1) btnSearch.trigger('click');
+			var formFList = $('.form_fs');
+			if(formFList.length >= 1) formFList.trigger('submit');
 	    }
 
 		formObj.on('submit', fLogin);

@@ -136,7 +136,7 @@ $(function() {
                                     dataType : 'JSON',
                                     success : function(data) {
                                         if(! data.success) alert(data.message);
-                                        btnSearch.trigger('click');
+                                        fReload();
                                     }
                                 });
                             }
@@ -193,8 +193,7 @@ $(function() {
         });
     }
 
-    btnSearch.on('click', fReload);
-    btnSearch.addClass('binded-click');
+    form.on('submit', fReload)
 
     btnUpload.on('click', function() {
         var paths = inpPath.val();
@@ -221,7 +220,7 @@ $(function() {
 	            <input type='text'   class='inp_search full' name='keyword' placeholder="디렉토리 내 검색"/>
 	        </div>
 	        <div class='col-sm-2'>
-	            <input type='button' class='btn_search full' value='검색'/>
+	            <input type='submit' class='btn_search full' value='검색'/>
 	        </div>
 	    </div>
 	    <div class='row fs_root'>
