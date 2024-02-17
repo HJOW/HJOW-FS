@@ -88,8 +88,10 @@ if(! installed) {
 	     </div>
 	</div>
 	<div class='row login_element logined'>
-	    <span class='span_type'></span> <span class='span_nick'></span> 님 환영합니다. 
-	    <input type='button' value='LOGOUT' class='btn_logout'/>
+	    <div class='col-sm-12'>
+	        <span class='span_type'></span> <span class='span_nick'></span> 님 환영합니다. 
+	        <input type='button' value='LOGOUT' class='btn_logout'/>
+	    </div>
 	</div>
 	</form>
 </div>

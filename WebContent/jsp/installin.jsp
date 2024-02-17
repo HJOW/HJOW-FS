@@ -46,6 +46,9 @@ if(! installed) {
 		rootPath = new File(roots);
 		if(! rootPath.exists()) rootPath.mkdirs();
 		
+		File garbage = new File(rootPath.getAbsolutePath() + File.separator + ".garbage");
+		if(! garbage.exists()) garbage.mkdirs();
+		
 		String useAccounts = request.getParameter("useaccount");
 		if(useAccounts != null) {
 			noLogin = (! Boolean.parseBoolean(useAccounts.trim()));

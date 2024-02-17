@@ -97,7 +97,6 @@ $(function() {
                 }
                 
                 for(idx = 0; idx < arFiles.length; idx++) {
-                	var lvalue = String(arFiles[idx].value);
                     var lname  = String(arFiles[idx].name);
                     var lsize  = String(arFiles[idx].size);
                     
@@ -106,7 +105,7 @@ $(function() {
                     var tr = listRoot.find('.tr_file_' + idx);
                     var a  = tr.find('.link_file');
                     
-                    a.attr('data-path', lvalue);
+                    a.attr('data-path', $('.hidden_path').val());
                     a.attr('data-name', lname);
                     a.text(lname);
                     tr.find('.td_file_size').text('(' + lsize + ')');
@@ -124,8 +123,21 @@ $(function() {
                         btnDel.on('click', function() {
                             var delpath = $(this).attr('data-path');
                             var delname = $(this).attr('data-name');
-                            alert('Not supported yet.');
-                            // TODO
+                            if(confirm('Really? Do you want to delete this file?')) {
+                                $.ajax({
+                                    url  : ctxPath + '/jsp/fsremove.jsp',
+                                    data : {
+                                        path : delpath,
+                                        name : delname
+                                    },
+                                    method : 'POST',
+                                    dataType : 'JSON',
+                                    success : function(data) {
+                                        if(! data.success) alert(data.message);
+                                        btnSearch.trigger('click');
+                                    }
+                                });
+                            }
                         });
                         btnDel.addClass('binded_click');
                     }

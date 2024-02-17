@@ -45,11 +45,16 @@ try {
 	File faJson = new File(fileConfigPath.getAbsolutePath() + File.separator + "accounts");
 	if(! faJson.exists()) faJson.mkdirs();
 	
+	if(req.equals("status")) {
+		json.put("success", new Boolean(true));
+	}
+	
 	if(req.equals("logout")) {
 	    sessionMap = null;
 	    needInvalidate = true;
 	    msg = "Log out complete";
 	    System.out.println("Session log out from " + request.getRemoteAddr());
+	    json.put("success", new Boolean(true));
 	}
 	
 	if(req.equals("login")) {

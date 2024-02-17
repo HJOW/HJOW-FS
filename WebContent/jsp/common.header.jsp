@@ -27,4 +27,10 @@ a {
 .invisible {
     display: none !important;
 }
+.fs_accbar {
+    padding-top: 10px;
+}
+.fs_search {
+    padding-bottom: 10px;
+}
 </style>
