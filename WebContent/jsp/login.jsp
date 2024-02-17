@@ -8,13 +8,13 @@ try {
     if(sessionJson != null) {
     	JSONParser parser = new JSONParser();
     	sessionMap = (JSONObject) parser.parse(sessionJson.trim());
+    	
+    	if(sessionMap != null) { if(sessionMap.get("id"    ) == null) sessionMap = null;         }
+        if(sessionMap != null) { if(sessionMap.get("idtype") == null) sessionMap = null;         }
+        if(sessionMap != null) { if(sessionMap.get("nick"  ) == null) sessionMap = null;         }
+        if(sessionMap != null) { if(sessionMap.get("idtype").equals("block")) sessionMap = null; } 
+        if(sessionMap == null) needInvalidate = true;
     }
-	
-    if(sessionMap != null) { if(sessionMap.get("id"    ) == null) sessionMap = null;         }
-    if(sessionMap != null) { if(sessionMap.get("idtype") == null) sessionMap = null;         }
-    if(sessionMap != null) { if(sessionMap.get("nick"  ) == null) sessionMap = null;         }
-    if(sessionMap != null) { if(sessionMap.get("idtype").equals("block")) sessionMap = null; } 
-    if(sessionMap == null) needInvalidate = true;
 } catch(Throwable t) {
 	needInvalidate = true;
     t.printStackTrace();
