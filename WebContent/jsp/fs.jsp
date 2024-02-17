@@ -33,6 +33,8 @@ $(function() {
     var inpPath   = form.find('.hidden_path');
     var inpSearch = form.find('.inp_search');
     var btnSearch = form.find('.btn_search');
+
+    var btnUpload = form.find('.btn_upload');
     
     var arDirs  = [];
     var arFiles = [];
@@ -194,16 +196,27 @@ $(function() {
     btnSearch.on('click', fReload);
     btnSearch.addClass('binded-click');
 
+    btnUpload.on('click', function() {
+        var paths = inpPath.val();
+        var popOpt = 'width=300,height=200,scrollbars=no,status=no,location=no,toolbar=no';
+        window.open(ctxPath + '/jsp/fsupload.jsp?path=' + encodeURIComponent(paths), 'upload', popOpt);
+    });
+
     fReload();
 });
 </script>
 <div class='fs_root container show-grid full'>
 	<form class='form_fs' onsubmit='return false;'>
 	    <input type='hidden' name='path' class='hidden_path' value='<%= pathParam %>'/>
+	    <div class='row fs_title'>
+	        <div class='col-sm-10'>
+                <h4 class='path_title'><span>현재 디렉토리 : </span><span class='path'></span></h4>
+            </div>
+            <div class='col-sm-2 login_element logined'>
+                <input type='button' class='btn_upload' value='업로드'/>
+            </div>
+	    </div>
 	    <div class='row fs_search'>
-	        <div class='col-sm-12'>
-	            <h4 class='path_title'><span>현재 디렉토리 : </span><span class='path'></span></h4>
-	        </div>
 	        <div class='col-sm-10'>
 	            <input type='text'   class='inp_search full' name='keyword' placeholder="디렉토리 내 검색"/>
 	        </div>

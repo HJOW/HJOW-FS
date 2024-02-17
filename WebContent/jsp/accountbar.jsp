@@ -41,6 +41,9 @@ if(! installed) {
                 $('.login_element.not_logined').removeClass('invisible');
             }
 			inpReq.val('status');
+
+			var btnSearch = $('.btn_search');
+			if(btnSearch.length >= 1) btnSearch.trigger('click');
 	    }
 
 		formObj.on('submit', fLogin);

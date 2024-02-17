@@ -49,6 +49,7 @@ for(File f : chDirs) {
 	String name = f.getName();
     if(! keyword.equals("")) { if(! name.contains(keyword)) continue; }
     if(name.equals(".garbage")) continue;
+    if(name.equals(".upload")) continue;
     
 	String linkDisp = f.getAbsolutePath().replace(rootPath.getAbsolutePath(), "").replace("\\", "/").replace("'", "").replace("\"", "");
     if(linkDisp.indexOf(".") >= 0) continue;

@@ -46,6 +46,7 @@ String salt = "fs";
 // Set Global Variables
 File rootPath  = null;
 File garbage   = null;
+File uploadd   = null;
 String ctxPath = request.getContextPath();
 
 if(fileConfigPath == null || Math.abs(now - confReads) >= refreshConfGap) {
@@ -174,6 +175,8 @@ if(installed) {
 	if(! rootPath.exists()) rootPath.mkdirs();
 	garbage = new File(rootPath.getAbsolutePath() + File.separator + ".garbage");
     if(! garbage.exists()) garbage.mkdirs();
+    uploadd = new File(rootPath.getAbsolutePath() + File.separator + ".upload");
+    if(! uploadd.exists()) uploadd.mkdirs();
 	if(conf.get("UseAccount") != null) {
 		noLogin = (! Boolean.parseBoolean(conf.get("UseAccount").toString().trim()));
 	}
