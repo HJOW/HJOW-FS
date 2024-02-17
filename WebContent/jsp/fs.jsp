@@ -211,7 +211,7 @@ $(function() {
 	        <div class='col-sm-10'>
                 <h4 class='path_title'><span>현재 디렉토리 : </span><span class='path'></span></h4>
             </div>
-            <div class='col-sm-2 login_element logined'>
+            <div class='col-sm-2 login_element logined invisible'>
                 <input type='button' class='btn_upload' value='업로드'/>
             </div>
 	    </div>
