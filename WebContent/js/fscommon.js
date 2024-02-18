@@ -84,6 +84,18 @@ function FSUtilClass() {
     	} catch(e) {}
     	return false;
     }
+    
+    this.detectLanguage = function detectLanguage() {
+        if(typeof(window.navigator.language)  != 'undefined') return window.navigator.language;
+        if(typeof(window.navigator.languages) != 'undefined') {
+            for(var idx=0; idx<window.navigator.languages.length; idx++) {
+                var langOne = window.navigator.languages[idx];
+                if(langOne.length == 2) return langOne;
+                if(langOne.length == 5) return langOne.substring(0, 2);
+            }
+        }
+        return 'ko';
+    }
 }
 
 var FSUtil = new FSUtilClass();
