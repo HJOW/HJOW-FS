@@ -1,13 +1,13 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.util.*, java.io.*, java.util.* " session="true" %><%@ include file="common.pront.jsp"%><%
-if(! installed) {
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, java.io.*, java.util.* " session="true" %><%@ include file="common.pront.jsp"%><%
+if(! fsc.installed) {
 	%><div class='fs_accbar container show-grid full invisible'>Not installed</div><%
-} else if(! noLogin) {
+} else if(! fsc.noLogin) {
 	String sessionJson = (String) request.getSession().getAttribute("fssession");
 %>
 <div class='fs_accbar container show-grid full'>
 	<script type='text/javascript'>
 	$(function() {
-		var ctxPath = "<%=ctxPath%>";
+		var ctxPath = "<%=fsc.ctxPath%>";
 	    var formObj = $('.form_fs_login');
 	    var inpReq  = formObj.find('.inp_req');
 	    var btnLogout = formObj.find('.btn_logout');

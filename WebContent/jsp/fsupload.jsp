@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.util.*"%><%@ include file="common.pront.jsp"%><%
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*"%><%@ include file="common.pront.jsp"%><%
 String pathParam = request.getParameter("path");
 if(pathParam == null) pathParam = "";
 pathParam = pathParam.trim();
@@ -10,11 +10,11 @@ if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
 <html>
 <head>
 <meta charset="UTF-8"/>
-<title><%= title %></title>
+<title><%= fsc.title %></title>
 <jsp:include page="./common.header.jsp"></jsp:include>
 <script type="text/javascript">
 $(function() {
-	var ctxPath = "<%=ctxPath%>";
+	var ctxPath = "<%=fsc.ctxPath%>";
 	var path    = "<%=pathParam%>";
 
 	$('.hidden_path').val(path);
@@ -23,7 +23,7 @@ $(function() {
 </script>
 </head>
 <body class='popup'>
-    <form action="<%=ctxPath%>/jsp/fsuploadin.jsp" method="post" enctype="multipart/form-data">
+    <form action="<%=fsc.ctxPath%>/jsp/fsuploadin.jsp" method="post" enctype="multipart/form-data">
     <input type='hidden' name='path' class='hidden_path'/>
     <div class='container show-grid full'>
         <div class='row'>

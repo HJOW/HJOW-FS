@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.util.*, java.io.*, java.util.*, org.json.simple.*, org.json.simple.parser.* "%><%@ include file="common.pront.jsp"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, java.io.*, java.util.*, org.json.simple.*, org.json.simple.parser.* "%><%@ include file="common.pront.jsp"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,13 +6,13 @@
 <title>FS Installation</title>
 <jsp:include page="./common.header.jsp"></jsp:include>
 </head><%
-if(! installed) {
+if(! fsc.installed) {
 	%>
 <body>
     <div class='fs_root container show-grid full fs_install'>
         <script type="text/javascript">
         $(function() {
-        	var ctxPath = "<%=ctxPath%>";
+        	var ctxPath = "<%=fsc.ctxPath%>";
             var form    = $('.form_fs_ins');
             var chkAc   = form.find('.chk_account');
 
@@ -90,10 +90,10 @@ if(! installed) {
 <body>
     <script type="text/javascript">
     $(function() {
-        location.href = "<%=ctxPath%>/index.jsp";
+        location.href = "<%=fsc.ctxPath%>/index.jsp";
     });
     </script>
-    <a href="<%=ctxPath%>/index.jsp">[Home]</a>
+    <a href="<%=fsc.ctxPath%>/index.jsp">[Home]</a>
 </body>
 </html>
 	<%

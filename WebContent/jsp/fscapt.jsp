@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.util.*, java.io.*, java.util.* "%><%@ include file="common.pront.jsp"%><%
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, java.io.*, java.util.* "%><%@ include file="common.pront.jsp"%><%
 request.setCharacterEncoding("UTF-8");
 String clients = request.getHeader("User-Agent");
 
@@ -27,7 +27,7 @@ request.getSession().setAttribute("captcha_time", new Long(now));
 <html>
 <head>
 <meta charset="UTF-8"/>
-<title><%= title %></title>
+<title><%= fsc.title %></title>
 <jsp:include page="./common.header.jsp"></jsp:include>
 <script type='text/javascript'>
 $(function() {
@@ -79,7 +79,7 @@ $(function() {
         </div>
         <div class='row'>
             <div class='col-sm-12 align_center'>
-                <iframe style='width: <%=captchaWidth + 10%>px; height: <%=captchaHeight + 10%>px;' src='fscaptin.jsp?theme=<%=theme%>'></iframe>
+                <iframe style='width: <%=fsc.captchaWidth + 10%>px; height: <%=fsc.captchaHeight + 10%>px;' src='fscaptin.jsp?theme=<%=theme%>'></iframe>
             </div>
         </div>
         <form action='fsdown.jsp' method='POST' class='form' target='_blank'>

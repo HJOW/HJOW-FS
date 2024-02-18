@@ -1,4 +1,4 @@
-package com.hjow.fs.util;
+package com.hjow.fs;
 
 public class FSUtils {
 	public static String removeSpecials(String originals) {

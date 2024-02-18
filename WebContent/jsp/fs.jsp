@@ -1,12 +1,12 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.util.*, java.io.*, java.util.* " session="true"%><%@ include file="common.pront.jsp"%><%
-if(! installed) {
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, java.io.*, java.util.* " session="true"%><%@ include file="common.pront.jsp"%><%
+if(! fsc.installed) {
 	%>
 	<script type="text/javascript">
 	$(function() {
-		location.href = "<%=ctxPath%>/jsp/install.jsp";
+		location.href = "<%=fsc.ctxPath%>/jsp/install.jsp";
 	});
 	</script>
-	<a href="<%=ctxPath%>/jsp/install.jsp">[Install]</a>
+	<a href="<%=fsc.ctxPath%>/jsp/install.jsp">[Install]</a>
 	<%
 } else {
 String pathParam = request.getParameter("path");
@@ -21,9 +21,9 @@ if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
 %>
 <script type='text/javascript'>
 $(function() {
-    var ctxPath = "<%=ctxPath%>";
-    var captchaWidth  = parseInt("<%=captchaWidth  + 100%>");
-    var captchaHeight = parseInt("<%=captchaHeight + 180%>");
+    var ctxPath = "<%=fsc.ctxPath%>";
+    var captchaWidth  = parseInt("<%=fsc.captchaWidth  + 100%>");
+    var captchaHeight = parseInt("<%=fsc.captchaHeight + 180%>");
 	
     var form     = $('.form_fs');
     var tables   = $('.fs_table_list');
@@ -218,7 +218,7 @@ $(function() {
 	    <input type='hidden' name='path' class='hidden_path' value='<%= pathParam %>'/>
 	    <div class='row fs_title'>
 	        <div class='col-sm-12'>
-	            <h2><%= title %></h2>
+	            <h2><%= fsc.title %></h2>
 	        </div>
 	    </div>
 	    <div class='row fs_directory'>
