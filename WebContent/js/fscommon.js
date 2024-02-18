@@ -62,6 +62,11 @@ if (!Array.isArray) {
 */
  
 function FSUtilClass() {
+    this.version = [];
+    this.version.push(1);
+    this.version.push(0);
+    this.version.push(0);
+
 	this.log = function(logContent) {
     	try {
     		try {

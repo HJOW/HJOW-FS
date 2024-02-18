@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%><%--
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.FSControl"%><%--
 Copyright 2024 HJOW (Heo Jin Won)
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,12 +22,19 @@ $(function(){
 		if(theme == null || typeof(theme) == 'undefined') theme = '';
 		window.open("<%=request.getContextPath()%>/jsp/fsabout.jsp?theme=" + theme, "pop_about", "width=580,height=600,scrollbars=no,status=no,location=no,toolbar=no");
 	});
+	footer.find('.span_js_version').text(FSUtil.version[0] + '.' + FSUtil.version[1] + '.' + FSUtil.version[2]);
 });
 </script>
 <div class='fs_footer footer container show-grid full'>
     <div class='row'>
         <div class='col-sm-12 align_center'>
-            <a href='#' class='a_footer'>FS - Copyright 2024 HJOW (Heo Jin Won)</a>
+            FS (
+            <span class='span_version'>
+                JS    <span class='span_js_version'></span>
+                Class <span class='span_class_version'><%= FSControl.VERSION[0] %>.<%= FSControl.VERSION[1] %>.<%= FSControl.VERSION[2] %></span>
+            </span>
+            ) - 
+            <a href='#' class='a_footer'>Copyright 2024 HJOW (Heo Jin Won)</a>
         </div>
     </div>
 </div>
