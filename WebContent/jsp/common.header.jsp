@@ -23,6 +23,17 @@ theme = FSUtils.removeSpecials(theme);
 <jsp:include page="common.header.libs.jsp"></jsp:include>
 <script type='text/javascript'>
 $(function() {
+	var lang = FSUtil.applyLanguage(bodys);
+	
+	var browser = FSUtil.detectBrowser();
+    if(browser.nm == 'ie' && browser.ver < 8) {
+        if(lang == 'ko') alert('이 웹 브라우저에서는 FS 를 원활히 사용할 수 없습니다.');
+        else             alert('FS does not support this web browser !');
+    }
+    if(browser.nm != 'ie' && browser.ver >= 20) {
+        // TODO : Go to modern web
+    }
+	
     var bodys = $('body');
     if(bodys.is('.popup')) bodys.removeClass('dark');
     bodys.removeAttr('data-theme');
@@ -38,8 +49,6 @@ $(function() {
         }
     }
     
-    var lang = FSUtil.applyLanguage(bodys);
-    
     $.ajax({
         url    : "<%=request.getContextPath()%>/jsp/login.jsp",
         data   : { req : 'language', language : lang, force : 'false' },
@@ -47,7 +56,5 @@ $(function() {
         dataType : "json",
         success : function(data) { }
     });
-    
-    FSUtil.log(FSUtil.detectBrowser());
 });
 </script>

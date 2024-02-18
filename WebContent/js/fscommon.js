@@ -126,14 +126,23 @@ function FSUtilClass() {
         }
         return 'en';
     }
+
+    this.parseFloatFirstBlock = function parseFloatFirstBlock(str) {
+        try {
+            var splits = String(str).split('.');
+            if(splits.length <= 1) return parseInt(splits[0]);
+            return parseFloat(splits[0] + '.' + splits[1]);
+        } catch(e) {
+            FSUtil.log('Error : ' + e);
+            return -1;
+        }
+    }
     
     this.detectBrowser = function detectBrowser() {
         var agent  = String(window.navigator.userAgent);
         var splits = agent.split(' ');
         var idx=0;
         
-        FSUtil.log('UserAgent : ' + agent);
-
         // Detect Microsoft Internet Explorer
         for(idx=0; idx<splits.length; idx++) {
             var blockOne = splits[idx];
@@ -145,12 +154,79 @@ function FSUtilClass() {
                 try {
                     var version = Math.round(parseFloat(String(splitIn[1])));
                     version += 4;
-                    res.ver = version;
+
+                    res.nm      = 'ie';
+                    res.ver     = version;
+                    res.version = version + '';
+                    
+                    // Check Compatible Mode
+                    var compatible = false;
+                    var idx2 = 0;
+                    for(idx2=0; idx2<splits.length; idx2++) {
+                        var blockTwo = splits[idx2];
+                        if(blockTwo.indexOf('compatible;') >= 0) { compatible = true; break; }
+                    }
+                    if(compatible) {
+                        res.compatible = {};
+                        res.compatible.name = res.name;
+                        res.compatible.nm   = res.nm;
+                        res.compatible.ver  = -1;
+                        
+                        var msieIdx = -1; 
+                        for(idx2=0; idx2<splits.length; idx2++) {
+                            var blockTwo = splits[idx2];
+                            if(blockTwo.indexOf('MSIE') >= 0) { msieIdx = idx2; break; }
+                        }
+                        if(msieIdx >= 0 && splits.length > msieIdx + 1) {
+                            var blockTwo = splits[msieIdx + 1];
+                            res.compatible.ver = FSUtil.parseFloatFirstBlock(blockTwo);
+                        }
+                        res.compatible.version = res.compatible.ver + '';
+                    } else {
+                        res.compatible = null;
+                    }
+                    
+                    res.agent = agent;
                     return res;
                 } catch(e) {
-                    return { name : res.name, ver : 'Unknown' };
+                    return { name : res.name, nm : 'ie', version : 'Unknown', ver : -1, agent : agent };
                 }
             }
+        }
+        
+        // Detect Opera
+        for(idx=0; idx<splits.length; idx++) {
+            var blockOne = splits[idx];
+            var splitIn  = blockOne.split('/');
+            if(splitIn.length != 2) continue;
+            if(splitIn[0] == 'OPR') return {
+                name : 'Opera',
+                nm   : 'opera',
+                version  : splitIn[1],
+                ver      : FSUtil.parseFloatFirstBlock(splitIn[1]),
+                agent    : agent
+            };
+            if(splitIn[0] == 'opera') return {
+                name : 'Opera',
+                nm   : 'opera',
+                version  : splitIn[1],
+                ver      : FSUtil.parseFloatFirstBlock(splitIn[1]),
+                agent    : agent
+            };
+        }
+        
+        // Detect Brave
+        for(idx=0; idx<splits.length; idx++) {
+            var blockOne = splits[idx];
+            var splitIn  = blockOne.split('/');
+            if(splitIn.length != 2) continue;
+            if(splitIn[0] == 'Brave') return {
+                name : 'Brave',
+                nm   : 'brave',
+                version  : splitIn[1],
+                ver      : FSUtil.parseFloatFirstBlock(splitIn[1]),
+                agent    : agent
+            };
         }
         
         // Detect Microsoft Edge
@@ -158,9 +234,19 @@ function FSUtilClass() {
             var blockOne = splits[idx];
             var splitIn  = blockOne.split('/');
             if(splitIn.length != 2) continue;
+            if(splitIn[0] == 'Edge') return {
+                name : 'Microsoft Edge',
+                nm   : 'edge',
+                version  : splitIn[1],
+                ver      : FSUtil.parseFloatFirstBlock(splitIn[1]),
+                agent    : agent
+            };
             if(splitIn[0] == 'Edg') return {
                 name : 'Microsoft Edge',
-                ver  : splitIn[1]
+                nm   : 'edge',
+                version  : splitIn[1],
+                ver      : FSUtil.parseFloatFirstBlock(splitIn[1]),
+                agent    : agent
             };
         }
         
@@ -171,7 +257,10 @@ function FSUtilClass() {
             if(splitIn.length != 2) continue;
             if(splitIn[0] == 'Chrome') return {
                 name : 'Google Chrome',
-                ver  : splitIn[1]
+                nm   : 'chrome',
+                version  : splitIn[1],
+                ver      : FSUtil.parseFloatFirstBlock(splitIn[1]),
+                agent    : agent
             };
         }
         
@@ -182,7 +271,24 @@ function FSUtilClass() {
             if(splitIn.length != 2) continue;
             if(splitIn[0] == 'Safari') return {
                 name : 'Apple Safari',
-                ver  : splitIn[1]
+                nm   : 'safari',
+                version  : splitIn[1],
+                ver      : FSUtil.parseFloatFirstBlock(splitIn[1]),
+                agent    : agent
+            };
+        }
+
+        // Detect Mypal
+        for(idx=0; idx<splits.length; idx++) {
+            var blockOne = splits[idx];
+            var splitIn  = blockOne.split('/');
+            if(splitIn.length != 2) continue;
+            if(splitIn[0] == 'Mypal') return {
+                name : 'Mypal',
+                nm   : 'mypal',
+                version  : splitIn[1],
+                ver      : FSUtil.parseFloatFirstBlock(splitIn[1]),
+                agent    : agent
             };
         }
         
@@ -192,12 +298,15 @@ function FSUtilClass() {
             var splitIn  = blockOne.split('/');
             if(splitIn.length != 2) continue;
             if(splitIn[0] == 'Firefox') return {
-                name : 'Mozilla Firefox',
-                ver  : splitIn[1]
+                name    : 'Mozilla Firefox',
+                nm      : 'firefox',
+                version : splitIn[1],
+                ver     : FSUtil.parseFloatFirstBlock(splitIn[1]),
+                agent   : agent
             };
         }
         
-        return { name : 'Unknown', ver : 'Unknown' };
+        return { name : 'Unknown', version : 'Unknown', ver : -1, agent : agent };
     };
     
     this.applyLanguage = function applyLanguage(range) {
