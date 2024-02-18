@@ -11,16 +11,13 @@ body.dark .container div, body.dark .container p, body.dark .container table {
     background-color: #3b3b3b;
 }
 
-body.dark input, body.dark textarea {
+body.dark input, body.dark textarea, body.dark select {
     background-color: #4b4b4b;
+    color: #C1C1C1;
 }
 
 body.dark div, body.dark p, body.dark h1, body.dark h2, body.dark h3, body.dark h4, body.dark h5, body.dark h6, body.dark table, body.dark td, body.dark th {
     color: #C9C9C9;
-}
-
-body.dark input, body.dark textarea {
-    color: #C1C1C1;
 }
 
 body.dark a {

@@ -36,7 +36,6 @@ int  captchaWidth     = 250;
 int  captchaHeight    = 100;
 int  captchaFontSize  = 80;
 long captchaLimitTime = 1000 * 60 * 5;
-boolean captDarkMode  = false;
 
 // Login Policy
 boolean noLogin = false;

@@ -187,6 +187,11 @@ $(function() {
                     });
                     aLink.addClass('binded-click');
                 });
+
+                $('.privilege_element').addClass('invisible');
+                if(data.privilege == 'edit') {
+                	$('.privilege_element').removeClass('invisible');
+                }
             }, error : function(jqXHR, textStatus, errorThrown) {
             	textStatus  = String(textStatus).replace(/[<>]+/g, '');
             	errorThrown = String(errorThrown).replace(/[<>]+/g, '');
@@ -220,8 +225,8 @@ $(function() {
 	        <div class='col-sm-10'>
                 <h4 class='path_title'><span>현재 디렉토리 : </span><span class='path'></span></h4>
             </div>
-            <div class='col-sm-2 login_element logined invisible'>
-                <input type='button' class='btn_upload' value='업로드'/>
+            <div class='col-sm-2'>
+                <input type='button' class='btn_upload privilege_element invisible' value='업로드'/>
             </div>
 	    </div>
 	    <div class='row fs_search'>

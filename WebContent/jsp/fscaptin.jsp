@@ -1,6 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.util.*, java.io.*, java.awt.*, java.awt.image.*, javax.imageio.*,org.apache.commons.codec.binary.Base64" %><%@ include file="common.pront.jsp"%><%
-String code = (String) request.getSession().getAttribute("captcha_code");
-Long   time = (Long)   request.getSession().getAttribute("captcha_time");
+String code  = (String) request.getSession().getAttribute("captcha_code");
+Long   time  = (Long)   request.getSession().getAttribute("captcha_time");
+String theme = request.getParameter("theme");
+
+boolean captDarkMode  = false;
+if(theme != null) {
+	if(theme.equals("dark")) captDarkMode =  true;
+}
 
 if(code == null) {
     code = "REFRESH";

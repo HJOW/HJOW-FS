@@ -109,14 +109,16 @@ for(File f : chFiles) {
     files.add(fileOne);
 }
 json.put("files", files);
+json.put("privilege", "view");
 
 JSONObject jsonSess = new JSONObject();
+JSONParser parser   = new JSONParser();
 try {
 	String sessionJson = (String) request.getSession().getAttribute("fssession");
 	if(sessionJson != null) {
 		sessionJson = sessionJson.trim();
 		if(! sessionJson.equals("")) {
-			JSONObject obj = (JSONObject) new JSONParser().parse(sessionJson);
+			JSONObject obj = (JSONObject) parser.parse(sessionJson);
 			if(obj != null) { if(obj.get("id"    ) == null) obj = null;         }
 		    if(obj != null) { if(obj.get("idtype") == null) obj = null;         }
 		    if(obj != null) { if(obj.get("nick"  ) == null) obj = null;         }
@@ -125,6 +127,38 @@ try {
 		    	jsonSess.put("id"    , obj.get("id"));
 		    	jsonSess.put("idtype", obj.get("idtype"));
 		    	jsonSess.put("nick"  , obj.get("nick"));
+		    }
+		    
+		    if(jsonSess.get("idtype").toString().equals("A")) json.put("privilege", "edit");
+		    
+		    Object oDirPrv = (Object) obj.get("privileges");
+		    if(oDirPrv != null) {
+		    	JSONArray dirPrv = null;
+	            if(oDirPrv instanceof JSONArray) {
+	                dirPrv = (JSONArray) oDirPrv;
+	            } else {
+	            	dirPrv = (JSONArray) parser.parse(oDirPrv.toString().trim());
+	            }
+	            
+	            for(Object row : dirPrv) {
+	            	JSONObject dirOne = null;
+	            	if(row instanceof JSONObject) dirOne = (JSONObject) row;
+	            	else                          dirOne = (JSONObject) parser.parse(row.toString().trim());
+	            	
+	            	try {
+	            		String dPath = dirOne.get("path"     ).toString();
+	            		String dPrv  = dirOne.get("privilege").toString();
+	            		
+	            		if(pathParam.startsWith(dPath)) {
+	            			if(dPrv.equals("edit")) {
+	            				json.put("privilege", "edit");
+	            				break;
+	            			}
+	            		}
+	            	} catch(Throwable t) {
+	            		System.out.println("Wrong account configuration - " + t.getMessage());
+	            	}
+	            }
 		    }
 		}
 	}

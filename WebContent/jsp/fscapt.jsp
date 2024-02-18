@@ -5,14 +5,17 @@ String clients = request.getHeader("User-Agent");
 String pathParam = request.getParameter("path");
 String fileName  = request.getParameter("filename");
 String speed     = request.getParameter("speed");
+String theme     = request.getParameter("theme");
 
 if(pathParam == null) pathParam = "";
 if(fileName  == null) fileName  = "";
 if(speed     == null) speed     = "";
+if(theme     == null) theme     = "";
 
 pathParam = pathParam.replace("'", "").replace("\"", "").replace(".", "").trim();
 fileName  = fileName.replace("'", "").replace("\"", "").trim();
 speed     = speed.replace("'", "").replace("\"", "").trim();
+theme     = theme.replace("'", "").replace("\"", "").replace("<", "").replace(">", "").replace("?", "").replace(".", "").replace("&", "").replace(" ", "").replace("\n", "").trim();
 
 int randomNo  = (int) Math.round(1000000 + Math.random() * 1000000 + Math.random() * 10000 + Math.random() * 100);
 String strRan = String.valueOf(randomNo).substring(0, 7);
@@ -76,7 +79,7 @@ $(function() {
         </div>
         <div class='row'>
             <div class='col-sm-12 align_center'>
-                <iframe style='width: <%=captchaWidth + 10%>px; height: <%=captchaHeight + 10%>px;' src='fscaptin.jsp'></iframe>
+                <iframe style='width: <%=captchaWidth + 10%>px; height: <%=captchaHeight + 10%>px;' src='fscaptin.jsp?theme=<%=theme%>'></iframe>
             </div>
         </div>
         <form action='fsdown.jsp' method='POST' class='form' target='_blank'>

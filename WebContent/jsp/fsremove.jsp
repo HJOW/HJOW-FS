@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="application/json; charset=UTF-8" pageEncoding="UTF-8" import="java.io.*, java.util.*, java.text.*, org.json.simple.*, org.json.simple.parser.*" session="true" %><%@ include file="common.pront.jsp"%><%
 String uId = "", uIdType = "";
+JSONArray dirPrv = null;
 try {
     String sessionJson = (String) request.getSession().getAttribute("fssession");
     
@@ -15,6 +16,15 @@ try {
         if(sessionMap != null) {
         	uId     = sessionMap.get("id"    ).toString();
         	uIdType = sessionMap.get("idtype").toString();
+        	
+        	Object oDirPrv = (Object) sessionMap.get("privileges");
+            if(oDirPrv != null) {
+                if(oDirPrv instanceof JSONArray) {
+                    dirPrv = (JSONArray) oDirPrv;
+                } else {
+                    dirPrv = (JSONArray) parser.parse(oDirPrv.toString().trim());
+                }
+            }
         }
     }
 } catch(Throwable t) {
@@ -26,14 +36,41 @@ json.put("success", new Boolean(false));
 json.put("message", "");
 
 try {
-	if(uIdType.equals("A")) {
-		String pathParam = request.getParameter("path");
-	    if(pathParam == null) pathParam = "";
-	    pathParam = pathParam.trim();
-	    if(pathParam.equals("/")) pathParam = "";
-	    pathParam = pathParam.replace(".", "").replace("'", "").replace("\"", "").replace("\\", "/").trim(); // 상대경로 방지를 위해 . 기호는 반드시 제거 !
-	    if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
-
+	String pathParam = request.getParameter("path");
+    if(pathParam == null) pathParam = "";
+    pathParam = pathParam.trim();
+    if(pathParam.equals("/")) pathParam = "";
+    pathParam = pathParam.replace(".", "").replace("'", "").replace("\"", "").replace("\\", "/").trim(); // 상대경로 방지를 위해 . 기호는 반드시 제거 !
+    if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
+	
+	boolean hasPriv = false;
+	if(uIdType.equals("A")) hasPriv = true;
+	
+	if(! hasPriv) {
+        JSONParser parser = new JSONParser();
+        for(Object row : dirPrv) {
+            JSONObject dirOne = null;
+            if(row instanceof JSONObject) dirOne = (JSONObject) row;
+            else                          dirOne = (JSONObject) parser.parse(row.toString().trim());
+            
+            try {
+                String dPath = dirOne.get("path"     ).toString();
+                String dPrv  = dirOne.get("privilege").toString();
+                
+                if(pathParam.startsWith(dPath)) {
+                    if(dPrv.equals("edit")) {
+                        hasPriv = true;
+                        break;
+                    }
+                }
+            } catch(Throwable t) {
+                System.out.println("Wrong account configuration - " + t.getMessage());
+            }
+        }
+	}
+	if(dirPrv != null) dirPrv.clear();
+	
+	if(hasPriv) {
 	    String fileName = request.getParameter("name");
 	    
 	    File file = new File(rootPath.getAbsolutePath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileName);
@@ -53,7 +90,7 @@ try {
 	    json.put("success", new Boolean(true));
 	} else {
 		json.put("success", new Boolean(false));
-		json.put("message", "No privilege");
+        json.put("message", "No privilege");
 	}
 } catch(Throwable t) {
 	t.printStackTrace();
