@@ -197,10 +197,19 @@ $(function() {
                 $('.privilege_element').addClass('invisible');
                 if(data.privilege == 'edit') {
                 	$('.privilege_element').removeClass('invisible');
+                	FSUtil.applyDragAndDrop($('body'), ctxPath, inpPath.val());
+                } else {
+                	$('body').find('.filednd').each(function() {
+                		var area = $(this);
+                        area.off('drop');
+                        area.off('dragover');
+                        area.off('dragenter');
+                        area.off('dragleave');
+                        area.removeClass('filedndin');
+                	});
                 }
                 
                 FSUtil.applyLanguage();
-                FSUtil.applyDragAndDrop($('body'), ctxPath, inpPath.val());
             }, error : function(jqXHR, textStatus, errorThrown) {
             	textStatus  = String(textStatus).replace(/[<>]+/g, '');
             	errorThrown = String(errorThrown).replace(/[<>]+/g, '');

@@ -151,6 +151,7 @@ function FSUtilClass() {
             var area = $(this);
             area.off('drop');
             area.off('dragover');
+            area.off('dragenter');
             area.off('dragleave');
             area.removeClass('filedndin');
            
@@ -198,6 +199,12 @@ function FSUtilClass() {
             });
             
             area.on('dragover', function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                $(this).addClass('filedndin');
+            });
+            
+            area.on('dragenter', function(e) {
                 e.stopPropagation();
                 e.preventDefault();
                 $(this).addClass('filedndin');
