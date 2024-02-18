@@ -1,7 +1,10 @@
 # HJOW-FS
 JSP based simple File Storage.
+This project is for classic web browsers, and classic JDK runtime.
 No JSTL, No Spring !
 Work on JDK 6 & Tomcat 7 or above !
+
+(Developing modern version will be started soon)
 
 # Using...
 + jQuery (https://jquery.com/)
