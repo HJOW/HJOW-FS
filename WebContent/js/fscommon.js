@@ -125,6 +125,7 @@ function FSUtilClass() {
                 else if(typeof(attrEn ) != 'undefined') elementOne.attr(attrTar, attrEn);
             });
         }
+        return lang;
     }
 }
 

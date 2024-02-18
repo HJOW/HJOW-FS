@@ -1100,6 +1100,34 @@ public class FSControl {
 				json.put("success", new Boolean(true));
 			}
 			
+			if(req.equals("language")) {
+				String lang = request.getParameter("language");
+				String frce = request.getParameter("force");
+				if(lang == null) lang = "";
+				lang = FSUtils.removeSpecials(lang);
+				
+				if(frce == null) frce = "false";
+				
+				boolean applys = false;
+				if(request.getSession().getAttribute("fslanguage") != null) {
+					if(Boolean.parseBoolean(frce)) {
+						applys = true;
+					}
+				} else {
+					applys = true;
+				}
+				
+				if(applys) {
+					if(lang.equals("")) {
+						request.getSession().removeAttribute("fslanguage");
+					} else {
+						request.getSession().setAttribute("fslanguage", lang);
+					}
+				}
+				
+				json.put("success", new Boolean(true));
+			}
+			
 			if(req.equals("logout")) {
 			    sessionMap = null;
 			    needInvalidate = true;
@@ -1276,6 +1304,8 @@ public class FSControl {
 				json.put("idtype", sessionMap.get("idtype"));
 				json.put("nick"  , sessionMap.get("nick"));
 			}
+			
+			if(request.getSession().getAttribute("fslanguage") != null) json.put("language", request.getSession().getAttribute("fslanguage"));
 			
 			json.put("message", msg);
 		} catch(Throwable t) {

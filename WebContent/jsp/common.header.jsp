@@ -33,6 +33,14 @@ $(function() {
         }
     }
     
-    FSUtil.applyLanguage(bodys);
+    var lang = FSUtil.applyLanguage(bodys);
+    
+    $.ajax({
+        url    : "<%=ctxPathCmm%>/jsp/login.jsp",
+        data   : { req : 'language', language : lang, force : 'false' },
+        method : "POST",
+        dataType : "json",
+        success : function(data) { }
+    });
 });
 </script>

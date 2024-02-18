@@ -82,7 +82,7 @@ if(! fsc.installed) {
 	             <div class='col-sm-10'><input type='text' name='id' class='full'/></div>
 	         </div>
 	         <div class='row'>
-	             <div class='col-sm-2 login_element' style='width:100px' data-lang-en='Password'>암호</div>
+	             <div class='col-sm-2 lang_element' style='width:100px' data-lang-en='Password'>암호</div>
 	             <div class='col-sm-10'><input type='password' name='pw' class='full'/></div>
 	         </div>
 	     </div>
