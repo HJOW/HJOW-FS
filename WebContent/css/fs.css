@@ -18,6 +18,10 @@ a {
 .invisible {
     display: none !important;
 }
+.fs_filedndacts {
+	overflow: hidden;
+	height: 0px;
+}
 .fs_search {
     padding-bottom: 10px;
 }

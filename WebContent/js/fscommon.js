@@ -78,6 +78,16 @@ function FSUtilClass() {
         return res;
     }
     
+    this.openPopupHtml = function openPopupHtml(htmls, title, spec) {
+        if(spec  == null || typeof(spec ) == 'undefined') spec  = "scrollbars=no,status=no,location=no,toolbar=no";
+        if(title == null || typeof(title) == 'undefined') title = "pop_" + Math.random();
+        
+        var pop = window.open("", String(title), spec);
+        FSUtil.log(htmls);
+        pop.document.write(String(htmls));
+        return pop;
+    }
+    
     this.detectDark = function detectDark() {
     	try {
     		return eval("window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches");
@@ -86,7 +96,6 @@ function FSUtilClass() {
     }
     
     this.detectLanguage = function detectLanguage() {
-        // return 'en';
         if(typeof(window.navigator.language)  != 'undefined') return window.navigator.language;
         if(typeof(window.navigator.languages) != 'undefined') {
             for(var idx=0; idx<window.navigator.languages.length; idx++) {
@@ -126,6 +135,80 @@ function FSUtilClass() {
             });
         }
         return lang;
+    }
+    
+    this.applyDragAndDrop = function applyDragAndDrop(range, ctxPath, path) {
+        if(typeof(range) == 'undefined') range = $('body');
+        else range = $(range);
+        
+        var hiddenPlace = range.find('.fs_filedndacts');
+        if(hiddenPlace == null || typeof(hiddenPlace) == 'undefined' || hiddenPlace.length <= 0) {
+            range.append("<div class='fs_filedndacts'></div>");
+            hiddenPlace = range.find('.fs_filedndacts');
+        }
+        
+        range.find('.filednd').each(function() {
+            var area = $(this);
+            area.off('drop');
+            area.off('dragover');
+            area.off('dragleave');
+            area.removeClass('filedndin');
+           
+            area.on('drop', function(e) {
+                e.preventDefault();
+                var dataTrans = e.originalEvent.dataTransfer;
+                if(typeof(dataTrans      ) == 'undefined') return;
+                if(typeof(dataTrans.files) == 'undefined') return;
+                
+                var files = dataTrans.files;
+                if(files.length <= 0) return;
+                
+                hiddenPlace.empty();
+                
+                var hiddFormHtml = "<form class='form_fs_dnd' action='" + ctxPath + "/jsp/fsuploadin.jsp" + "' method='POST' enctype='multipart/form-data'>";
+                hiddFormHtml += "</form>";
+                hiddenPlace.append(hiddFormHtml);
+                
+                var formObj = hiddenPlace.find('.form_fs_dnd');
+                var formData = new FormData(formObj[0]);
+                formData.append("path", path);
+                
+                for(var idx=0; idx<files.length; idx++) {
+                    var fileOne = files[idx];
+                    
+                    formData.append('file' + idx, fileOne);
+                }
+                
+                $.ajax({
+                    url : ctxPath + '/jsp/fsuploadin.jsp',
+                    data : formData,
+                    method : 'POST',
+                    enctype : 'multipart/form-data',
+                    processData : false,
+                    contentType : false,
+                    loader : false,
+                    cache : false,
+                    dataType : 'html',
+                    success : function(dataHtml) {
+                        FSUtil.openPopupHtml(dataHtml, null, 'width=400,height=300,scrollbars=no,status=no,location=no,toolbar=no');
+                    }, error : function(jqXHR, textStatus, errorThrown) {
+                        alert('Error : ' + textStatus);
+                    }
+                });
+            });
+            
+            area.on('dragover', function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                $(this).addClass('filedndin');
+            });
+            
+            area.on('dragleave', function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                $(this).removeClass('filedndin');
+            });
+        });
     }
 }
 

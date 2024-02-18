@@ -1048,6 +1048,13 @@ public class FSControl {
 			    if(! dest.exists()) dest.mkdirs();
 
 			    File fdest = new File(dest.getAbsolutePath() + File.separator + file.getName());
+			    if(fdest.exists()) {
+			    	int index = 0;
+			    	while(fdest.exists()) {
+			    		index++;
+			    		fdest = new File(dest.getAbsolutePath() + File.separator + file.getName() + "." + index);
+			    	}
+			    }
 			    file.renameTo(fdest);
 			    json.put("success", new Boolean(true));
 			} else {

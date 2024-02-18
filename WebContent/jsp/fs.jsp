@@ -75,7 +75,7 @@ $(function() {
                 }
 
                 if(arDirs.length == 0 && arFiles.length == 0) {
-                	listRoot.append("<tr class='element empty'><td colspan='4' class='lang_element' data-lang-en='Empty'>비어 있음</td></tr>");
+                	listRoot.append("<tr class='element empty'><td colspan='4' class='lang_element filednd' data-lang-en='Empty'>비어 있음</td></tr>");
                 }
 
                 var idx = 0;
@@ -103,7 +103,7 @@ $(function() {
                     var lname  = String(arFiles[idx].name);
                     var lsize  = String(arFiles[idx].size);
                     
-                    listRoot.append("<tr class='element tr_file_" + idx + "'><td colspan='2'><a href='#' class='link_file' data-path='' data-name=''></a></td><td class='td_file_size'></td><td class='td_buttons'></td></tr>");
+                    listRoot.append("<tr class='element tr_file_" + idx + "'><td colspan='2' class='filednd'><a href='#' class='link_file' data-path='' data-name=''></a></td><td class='td_file_size filednd'></td><td class='td_buttons'></td></tr>");
                     
                     var tr = listRoot.find('.tr_file_' + idx);
                     var a  = tr.find('.link_file');
@@ -200,6 +200,7 @@ $(function() {
                 }
                 
                 FSUtil.applyLanguage();
+                FSUtil.applyDragAndDrop($('body'), ctxPath, inpPath.val());
             }, error : function(jqXHR, textStatus, errorThrown) {
             	textStatus  = String(textStatus).replace(/[<>]+/g, '');
             	errorThrown = String(errorThrown).replace(/[<>]+/g, '');
