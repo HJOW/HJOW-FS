@@ -52,14 +52,15 @@ $(function() {
 
     selMn.empty();
     if(ext == 'jpg' || ext == 'jpeg' || ext == 'png' || ext == 'gif' || ext == 'pdf') {
-    	selMn.append("<option value='DOWNLOAD'>DOWNLOAD</option>");
-    	selMn.append("<option value='VIEW'>VIEW</option>");
+    	selMn.append("<option value='DOWNLOAD' class='lang_element' data-lang-en='DOWNLOAD'>다운로드</option>");
+    	selMn.append("<option value='VIEW'     class='lang_element' data-lang-en='VIEW'    >보기</option>");
     } else {
-        selMn.append("<option value='DOWNLOAD'>DOWNLOAD</option>");
+        selMn.append("<option value='DOWNLOAD' class='lang_element' data-lang-en='DOWNLOAD'>다운로드</option>");
     }
     selMn.val('DOWNLOAD');
 
     $('.p_filename').text(fileName);
+    $('.p_filename').attr('title', fileName);
     $('.inp_captcha').focus();
 });
 </script>
@@ -68,13 +69,14 @@ $(function() {
     <div class='fs_capt container show-grid full'>
         <div class='row'>
             <div class='col-sm-12'>
-                <h3>Captcha Authentication</h3>
+                <h3 class='lang_element' data-lang-en='Captcha Authentication'>Captcha 인증</h3>
             </div>
         </div>
         <div class='row'>
             <div class='col-sm-12'>
-                <p>For download</p>
-                <p class='p_filename'></p>
+                <p class='lang_element' data-lang-en='For download...'></p>
+                <p class='p_filename ellipsis'></p>
+                <p class='lang_element' data-lang-en=''>파일 다운로드를 위해 인증 코드 입력</p>
             </div>
         </div>
         <div class='row'>
@@ -88,16 +90,16 @@ $(function() {
             <input type='hidden' name='speed'    class='hid_sped' value='<%=speed%>'/>
             <div class='row'>
                 <div class='col-sm-6 align_center'>
-	                <input type='text'   class='inp_captcha' name='captcha' placeholder='Input the code'/>
-	                <input type='button' class='btn_re' value='Refresh'/>
+	                <input type='text'   class='inp_captcha lang_attr_element' name='captcha' placeholder='위의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code above'/>
+	                <input type='button' class='btn_re lang_attr_element' value='새로고침' data-lang-target='value' data-lang-en='Refresh'/>
                 </div>
             </div>
             <div class='row'>
                 <div class='col-sm-12 align_right'>
                     <select name='mode' class='sel_mode'>
-                        <option value='DOWNLOAD' selected>DOWNLOAD</option>
+                        <option value='DOWNLOAD' class='lang_element' data-lang-en='DOWNLOAD' selected>다운로드</option>
                     </select>
-                    <input type='submit' class='btn_dn' value='Now !'/>
+                    <input type='submit' class='btn_dn lang_attr_element' value='실행' data-lang-target='value' data-lang-en='Now !'/>
                 </div>
             </div>
         </form>

@@ -86,6 +86,7 @@ function FSUtilClass() {
     }
     
     this.detectLanguage = function detectLanguage() {
+        // return 'en';
         if(typeof(window.navigator.language)  != 'undefined') return window.navigator.language;
         if(typeof(window.navigator.languages) != 'undefined') {
             for(var idx=0; idx<window.navigator.languages.length; idx++) {
@@ -94,7 +95,36 @@ function FSUtilClass() {
                 if(langOne.length == 5) return langOne.substring(0, 2);
             }
         }
-        return 'ko';
+        return 'en';
+    }
+    
+    this.applyLanguage = function applyLanguage(range) {
+        if(typeof(range) == 'undefined') range = $('body');
+        else range = $(range);
+        
+        var lang = FSUtil.detectLanguage();
+        if(lang != 'ko') {
+            range.find('.lang_element').each(function() {
+                var elementOne = $(this);
+                var attrEn  = elementOne.attr('data-lang-en');
+                var attrLoc = elementOne.attr('data-lang-' + lang);
+                
+                if(     typeof(attrLoc) != 'undefined') elementOne.text(attrLoc);
+                else if(typeof(attrEn ) != 'undefined') elementOne.text(attrEn);
+            });
+            
+            range.find('.lang_attr_element').each(function() {
+                var elementOne = $(this);
+                var attrTar = elementOne.attr('data-lang-target');
+                var attrEn  = elementOne.attr('data-lang-en');
+                var attrLoc = elementOne.attr('data-lang-' + lang);
+                
+                if(typeof(attrTar) == 'undefined') return;
+                
+                if(     typeof(attrLoc) != 'undefined') elementOne.attr(attrTar, attrLoc);
+                else if(typeof(attrEn ) != 'undefined') elementOne.attr(attrTar, attrEn);
+            });
+        }
     }
 }
 

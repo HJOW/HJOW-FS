@@ -82,18 +82,18 @@ if(! fsc.installed) {
 	             <div class='col-sm-10'><input type='text' name='id' class='full'/></div>
 	         </div>
 	         <div class='row'>
-	             <div class='col-sm-2' style='width:100px'>Password</div>
+	             <div class='col-sm-2 login_element' style='width:100px' data-lang-en='Password'>암호</div>
 	             <div class='col-sm-10'><input type='password' name='pw' class='full'/></div>
 	         </div>
 	     </div>
 	     <div class='col-sm-2 padding_top_10'>
-	         <div class='col-sm-12'><input type='submit' value='LOGIN' class='full' style='height:50px;'/></div>
+	         <div class='col-sm-12'><input type='submit' value='로그인' class='full lang_attr_element' style='height:50px;' data-lang-target='value' data-lang-en='LOGIN'/></div>
 	     </div>
 	</div>
 	<div class='row login_element logined'>
 	    <div class='col-sm-12'>
-	        <span class='span_type'></span> <span class='span_nick'></span> 님 환영합니다. 
-	        <input type='button' value='LOGOUT' class='btn_logout'/>
+	        <span class='lang_element' data-lang-en='Welcome, '></span><span class='span_type'></span> <span class='span_nick'></span><span class='lang_element' data-lang-en=''> 님 환영합니다.</span> 
+	        <input type='button' value='로그아웃' class='btn_logout lang_attr_element' data-lang-target='value' data-lang-en='LOGOUT'/>
 	    </div>
 	</div>
 	</form>

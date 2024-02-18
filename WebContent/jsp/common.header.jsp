@@ -32,5 +32,7 @@ $(function() {
         	bodys.addClass('dark');
         }
     }
+    
+    FSUtil.applyLanguage(bodys);
 });
 </script>
