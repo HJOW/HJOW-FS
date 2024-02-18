@@ -271,10 +271,18 @@ public class FSControl {
 			OutputStream fileOut  = null;
 			try {
 				String passwords = request.getParameter("pw");
-				if(passwords == null) throw new RuntimeException("Please input Password !");
+				if(passwords == null) {
+					String rex = "Please input Password !";
+					if(getLanguage(request).equals("ko")) rex = "비밀번호를 입력해 주세요.";
+					throw new RuntimeException(rex);
+				}
 				
 				propIn = this.getClass().getResourceAsStream("/fs.properties");
-		        if(propIn == null) throw new FileNotFoundException("No fs.properties found at ./WEB-INF/classes/");
+		        if(propIn == null) {
+		        	String rex = "No fs.properties found at ./WEB-INF/classes/";
+					if(getLanguage(request).equals("ko")) rex = "fs.properties 파일을 찾을 수 없습니다. ./WEB-INF/classes/ 경로 상에 이 파일이 있어야 합니다.";
+		        	throw new FileNotFoundException(rex);
+		        }
 		        
 		        propTest = new Properties();
 		        propTest.load(propIn);
@@ -293,9 +301,13 @@ public class FSControl {
 		        propTest = null;
 		        
 		        if(tx1 == null || tx2 == null || tx3 == null || s1 == null || s2 == null || s3 == null) {
-		        	throw new FileNotFoundException("No correct fs.properties found at ./WEB-INF/classes/ ! Please check values !");
+		        	String rex = "No correct fs.properties found at ./WEB-INF/classes/ ! Please check values !";
+					if(getLanguage(request).equals("ko")) rex = "fs.properties 파일 내용이 올바르지 않습니다. ./WEB-INF/classes/ 경로 상에 이 파일이 있습니다. 파일 내용을 점검해 주세요.";
+		        	throw new FileNotFoundException(rex);
 		        } else if(! (tx1.trim().equals("FileStorage") && tx2.trim().equals("SetConfigPathBelow"))) {
-		        	throw new FileNotFoundException("No correct fs.properties found at ./WEB-INF/classes/ ! Please check values !");
+		        	String rex = "No correct fs.properties found at ./WEB-INF/classes/ ! Please check values !";
+					if(getLanguage(request).equals("ko")) rex = "fs.properties 파일 내용이 올바르지 않습니다. ./WEB-INF/classes/ 경로 상에 이 파일이 있습니다. 파일 내용을 점검해 주세요.";
+		        	throw new FileNotFoundException(rex);
 		        }
 		        
 		        String titles = request.getParameter("title");
@@ -304,7 +316,9 @@ public class FSControl {
 		        if(titles.equals("")) titles = "File Storage";
 		        
 				String roots = request.getParameter("rootdir");
-				if(roots == null) throw new RuntimeException("Please input the Root Directory !");
+				if(roots == null) {
+					throw new RuntimeException("Please input the Root Directory !");
+				}
 				
 				if(! passwords.trim().equals(tx3.trim())) {
 					throw new RuntimeException("Wrong installation password !");
@@ -1078,6 +1092,8 @@ public class FSControl {
 		JSONObject json = new JSONObject();
 		json.put("success", new Boolean(false));
 		json.put("message", "");
+		
+		String lang = getLanguage(request);
 
 		FileInputStream fIn = null;
 		Reader r1 = null, r2 = null;
@@ -1086,11 +1102,13 @@ public class FSControl {
 			String msg = "";
 			
 			if(! installed) {
-				throw new RuntimeException("Please install first !");
+				if(lang.equals("ko")) throw new RuntimeException("FS 설치를 먼저 진행해 주세요.");
+				else                  throw new RuntimeException("Please install first !");
 			}
 			
 			if(fileConfigPath == null) {
-				throw new RuntimeException("Please install first !");
+				if(lang.equals("ko")) throw new RuntimeException("FS 설치를 먼저 진행해 주세요.");
+				else                  throw new RuntimeException("Please install first !");
 			}
 			
 			File faJson = new File(fileConfigPath.getAbsolutePath() + File.separator + "accounts");
@@ -1101,10 +1119,10 @@ public class FSControl {
 			}
 			
 			if(req.equals("language")) {
-				String lang = request.getParameter("language");
+				String tlng = request.getParameter("language");
 				String frce = request.getParameter("force");
-				if(lang == null) lang = "";
-				lang = FSUtils.removeSpecials(lang);
+				if(tlng == null) tlng = "";
+				tlng = FSUtils.removeSpecials(tlng);
 				
 				if(frce == null) frce = "false";
 				
@@ -1118,10 +1136,10 @@ public class FSControl {
 				}
 				
 				if(applys) {
-					if(lang.equals("")) {
+					if(tlng.equals("")) {
 						request.getSession().removeAttribute("fslanguage");
 					} else {
-						request.getSession().setAttribute("fslanguage", lang);
+						request.getSession().setAttribute("fslanguage", tlng);
 					}
 				}
 				
@@ -1131,7 +1149,8 @@ public class FSControl {
 			if(req.equals("logout")) {
 			    sessionMap = null;
 			    needInvalidate = true;
-			    msg = "Log out complete";
+			    if(lang.equals("ko")) msg = "로그아웃 되었습니다."; 
+			    else                  msg = "Log out complete";
 			    System.out.println("Session log out from " + request.getRemoteAddr());
 			    json.put("success", new Boolean(true));
 			}
@@ -1141,7 +1160,8 @@ public class FSControl {
 				sessionMap = null;
 				
 				if(noLogin) {
-		            throw new RuntimeException("No-Login Mode !");
+					if(lang.equals("ko")) throw new RuntimeException("계정 기능이 비활성화되어 있습니다.");
+					else                  throw new RuntimeException("No-Login Mode !");
 		        }
 				
 				String id = request.getParameter("id");
@@ -1152,10 +1172,18 @@ public class FSControl {
 				
 				id = id.trim(); pw = pw.trim();
 				
-				if(id.equals("")) msg = "Please input ID !";
+				if(id.equals("")) {
+					if(lang.equals("ko")) msg = "ID를 입력해 주세요.";
+					else                  msg = "Please input ID !";
+				}
 				
 				if(id.contains("'") || id.contains("\"") || id.contains("/") || id.contains("\\") || id.contains(File.separator) || id.contains(".") || id.contains(" ") || id.contains("\n") || id.contains("\t")) throw new RuntimeException("ID can only contains alphabets and numbers !");
-				if(msg.equals("")) { if(pw.equals("")) msg = "Please input Password !"; }
+				if(msg.equals("")) { 
+					if(pw.equals("")) {
+						if(lang.equals("ko")) msg = "암호를 입력해 주세요.";
+						else                  msg = "Please input Password !";
+					}
+				}
 				
 				System.out.println("Login requested ! " + id + " at " + now + " from " + request.getRemoteAddr());
 				
@@ -1215,7 +1243,8 @@ public class FSControl {
 			            
 			            if(now - failTime >= 1000L * 60 * loginFailOverMinute) failCnt = 0;
 			            if(failCnt >= loginFailCountLimit) {
-			                msg = "Cannot login now ! Please try later.";
+			            	if(lang.equals("ko")) msg = "지금 로그인할 수 없습니다. 잠시 후 다시 시도해 주세요.";
+			            	else                  msg = "Cannot login now ! Please try later.";
 			            }
 			        }
 			        
@@ -1241,7 +1270,10 @@ public class FSControl {
 			                    	while(accChanging) {
 			                    		loops++;
 			                    		if(!accChanging) break;
-			                    		if(loops >= 10000L) throw new RuntimeException("The server is busy. Please try later.");
+			                    		if(loops >= 10000L) {
+			                    			if(lang.equals("ko")) throw new RuntimeException("서버가 아직 로그인 처리를 할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+			                    			else                  throw new RuntimeException("The server is busy. Please try later.");
+			                    		}
 			                    		Thread.sleep(100L);
 			                    	}
 			                    }
@@ -1268,7 +1300,10 @@ public class FSControl {
 		                        while(accChanging) {
 		                            loops++;
 		                            if(!accChanging) break;
-		                            if(loops >= 10000L) throw new RuntimeException("The server is busy. Please try later.");
+		                            if(loops >= 10000L) {
+		                            	if(lang.equals("ko")) throw new RuntimeException("서버가 아직 로그인 처리를 할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+		                    			else                  throw new RuntimeException("The server is busy. Please try later.");
+		                            }
 		                            Thread.sleep(100L);
 		                        }
 		                    }
@@ -1326,4 +1361,9 @@ public class FSControl {
 		}
 		return json;
 	}
+	public String getLanguage(HttpServletRequest request) {
+    	String lang = (String) request.getSession().getAttribute("fslanguage");
+    	if(lang == null) lang = "en";
+    	return lang;
+    }
 }

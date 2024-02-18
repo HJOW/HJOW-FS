@@ -6,7 +6,7 @@ if(! fsc.installed) {
 		location.href = "<%=fsc.ctxPath%>/jsp/install.jsp";
 	});
 	</script>
-	<a href="<%=fsc.ctxPath%>/jsp/install.jsp">[Install]</a>
+	<a href="<%=fsc.ctxPath%>/jsp/install.jsp" class='lang_element' data-lang-en='[Install]'>[설치]</a>
 	<%
 } else {
 String pathParam = request.getParameter("path");
