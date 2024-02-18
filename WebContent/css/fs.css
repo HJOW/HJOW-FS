@@ -1,0 +1,41 @@
+@charset "UTF-8";
+body {
+    margin: 0; padding: 0;
+}
+body, div, span, a, p, pre, input {
+    font-family : D2Coding, NanumGothicCoding, '나눔고딕코딩', NanumGothic, '나눔고딕', 돋움;
+}
+body td.td_mark_dir, body.dark div.td_mark_dir {
+    color: #C4B73B;
+}
+.full {
+    width: 100%;
+}
+a {
+    color : blue;
+    text-decoration: none;
+}
+.invisible {
+    display: none !important;
+}
+.fs_search {
+    padding-bottom: 10px;
+}
+.align_center {
+	text-align: center;
+}
+.align_right {
+	text-align: right;
+}
+.margin_top_10 {
+	margin-top: 10px;
+}
+.margin_bottom_10 {
+    margin-bottom: 10px;
+}
+.padding_top_10 {
+    padding-top: 10px;
+}
+.padding_bottom_10 {
+    padding-bottom: 10px;
+}

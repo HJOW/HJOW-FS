@@ -36,6 +36,11 @@ if(! installed) {
         	throw new FileNotFoundException("No correct fs.properties found at ./WEB-INF/classes/ ! Please check values !");
         }
         
+        String titles = request.getParameter("title");
+        if(titles == null) titles = "File Storage";
+        titles = titles.trim();
+        if(titles.equals("")) titles = "File Storage";
+        
 		String roots = request.getParameter("rootdir");
 		if(roots == null) throw new RuntimeException("Please input the Root Directory !");
 		
@@ -111,6 +116,7 @@ if(! installed) {
 		
 		conf.clear();
 		
+		conf.put("Title", titles);
 		conf.put("Path", rootPath.getAbsolutePath());
 		conf.put("UseAccount", new Boolean(! noLogin));
 		conf.put("Installed", new Boolean(true));

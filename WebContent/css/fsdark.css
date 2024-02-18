@@ -1,0 +1,38 @@
+@charset "UTF-8";
+body.dark {
+	background-color: #2b2b2b;
+}
+
+body.dark .container {
+	background-color: #2f2f2f;
+}
+
+body.dark .container div, body.dark .container p, body.dark .container table {
+    background-color: #3b3b3b;
+}
+
+body.dark input, body.dark textarea {
+    background-color: #4b4b4b;
+}
+
+body.dark div, body.dark p, body.dark h1, body.dark h2, body.dark h3, body.dark h4, body.dark h5, body.dark h6, body.dark table, body.dark td, body.dark th {
+    color: #C9C9C9;
+}
+
+body.dark input, body.dark textarea {
+    color: #C1C1C1;
+}
+
+body.dark a {
+	color: #5B5AFF;
+}
+
+body.dark td.td_mark_dir, body.dark div.td_mark_dir {
+	color: #E8DB5F;
+}
+
+body.dark .table-hover {
+  > tbody > tr:hover {
+    background-color: #4b4b4b;
+  }
+}

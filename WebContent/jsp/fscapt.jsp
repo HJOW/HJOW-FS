@@ -24,7 +24,7 @@ request.getSession().setAttribute("captcha_time", new Long(now));
 <html>
 <head>
 <meta charset="UTF-8"/>
-<title>File Storage</title>
+<title><%= title %></title>
 <jsp:include page="./common.header.jsp"></jsp:include>
 <script type='text/javascript'>
 $(function() {
@@ -63,7 +63,7 @@ $(function() {
 });
 </script>
 </head>
-<body>
+<body class='popup'>
     <div class='fs_capt container show-grid full'>
         <div class='row'>
             <div class='col-sm-12'>
@@ -77,7 +77,7 @@ $(function() {
             </div>
         </div>
         <div class='row'>
-            <div class='col-sm-12'>
+            <div class='col-sm-12 align_center'>
                 <iframe style='width: <%=captchaWidth + 10%>px; height: <%=captchaHeight + 10%>px;' src='fscaptin.jsp'></iframe>
             </div>
         </div>
@@ -86,13 +86,13 @@ $(function() {
             <input type='hidden' name='filename' class='hid_name' value='<%=fileName%>'/>
             <input type='hidden' name='speed'    class='hid_sped' value='<%=speed%>'/>
             <div class='row'>
-                <div class='col-sm-6'>
+                <div class='col-sm-6 align_center'>
 	                <input type='text'   class='inp_captcha' name='captcha' placeholder='Input the code'/>
 	                <input type='button' class='btn_re' value='Refresh'/>
                 </div>
             </div>
             <div class='row'>
-                <div class='col-sm-12'>
+                <div class='col-sm-12 align_right'>
                     <select name='mode' class='sel_mode'>
                         <option value='DOWNLOAD' selected>DOWNLOAD</option>
                     </select>

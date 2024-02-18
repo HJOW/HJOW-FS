@@ -9,6 +9,9 @@ boolean installed = false;
 long now = System.currentTimeMillis();
 String cs = "UTF-8";
 
+// Title
+String title = "File Storage";
+
 // Installation Status
 File fileConfigPath = null;
 
@@ -182,6 +185,10 @@ if(installed) {
 	}
 	if(conf.get("Salt") != null) {
 		salt = conf.get("Salt").toString().trim();
+	}
+	if(conf.get("Title") != null) {
+		String tx = conf.get("Title").toString().trim();
+		if(! tx.equals("")) title = tx;
 	}
 }
 

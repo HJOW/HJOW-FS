@@ -76,7 +76,7 @@ if(! installed) {
 	<form onsubmit='return false' class='form_fs_login'>
 	<input type='hidden' name='req' value='status' class='inp_req'/>
 	<div class='row login_element not_logined'>
-	     <div class='col-sm-10 container show-grid'>
+	     <div class='col-sm-10 container show-grid padding_top_10'>
 	         <div class='row'>
 	             <div class='col-sm-2' style='width:100px'>ID</div>
 	             <div class='col-sm-10'><input type='text' name='id' class='full'/></div>
@@ -86,7 +86,7 @@ if(! installed) {
 	             <div class='col-sm-10'><input type='password' name='pw' class='full'/></div>
 	         </div>
 	     </div>
-	     <div class='col-sm-2'>
+	     <div class='col-sm-2 padding_top_10'>
 	         <div class='col-sm-12'><input type='submit' value='LOGIN' class='full' style='height:50px;'/></div>
 	     </div>
 	</div>

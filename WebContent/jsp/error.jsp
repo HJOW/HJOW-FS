@@ -8,7 +8,7 @@ excMsg = excMsg.replace("<", "&lt;").replace(">", "&gt;");
 <html>
 <head>
 <meta charset="UTF-8"/>
-<title>File Storage</title>
+<title>Error</title>
 <jsp:include page="./common.header.jsp"></jsp:include>
 </head>
 <body>

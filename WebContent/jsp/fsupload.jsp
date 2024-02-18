@@ -10,7 +10,7 @@ if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
 <html>
 <head>
 <meta charset="UTF-8"/>
-<title>File Storage</title>
+<title><%= title %></title>
 <jsp:include page="./common.header.jsp"></jsp:include>
 <script type="text/javascript">
 $(function() {
@@ -22,7 +22,7 @@ $(function() {
 });
 </script>
 </head>
-<body>
+<body class='popup'>
     <form action="<%=ctxPath%>/jsp/fsuploadin.jsp" method="post" enctype="multipart/form-data">
     <input type='hidden' name='path' class='hidden_path'/>
     <div class='container show-grid full'>
@@ -37,7 +37,7 @@ $(function() {
             </div>
         </div>
         <div class='row'>
-            <div class='col-sm-12 dummy'>
+            <div class='col-sm-12 dummy margin_bottom_10'>
             
             </div>
         </div>
@@ -47,12 +47,12 @@ $(function() {
             </div>
         </div>
         <div class='row'>
-            <div class='col-sm-12 dummy'>
+            <div class='col-sm-12 dummy margin_bottom_10'>
             
             </div>
         </div>
         <div class='row'>
-            <div class='col-sm-12'>
+            <div class='col-sm-12 align_right'>
                 <input type='submit' value='UPLOAD'/>
             </div>
         </div>

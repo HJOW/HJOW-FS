@@ -6,7 +6,7 @@
 <title>File Storage</title>
 <jsp:include page="./jsp/common.header.jsp"></jsp:include>
 </head>
-<body>
+<body class='dark'>
     <jsp:include page="./jsp/accountbar.jsp"></jsp:include>
     <jsp:include page="./jsp/fs.jsp"></jsp:include>
 </body>

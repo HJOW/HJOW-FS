@@ -3,7 +3,7 @@
 <html>
 <head>
 <meta charset="UTF-8"/>
-<title>FS</title>
+<title>FS Installation</title>
 <jsp:include page="./common.header.jsp"></jsp:include>
 </head><%
 if(! installed) {
@@ -43,6 +43,10 @@ if(! installed) {
             </div>
             <div class='row'>
 		        <div class='col-sm-10 container show-grid'>
+		            <div class='row'>
+                        <div class='col-sm-2' style='width:150px'>Title</div>
+                        <div class='col-sm-10'><input type='text' name='title' class='full' placeholder="Title" value="File Storage"/></div>
+                    </div>
 		            <div class='row'>
 		                <div class='col-sm-2' style='width:150px'>Root Directory</div>
 		                <div class='col-sm-10'><input type='text' name='rootdir' class='full' placeholder="Root Directory for sharing"/></div>

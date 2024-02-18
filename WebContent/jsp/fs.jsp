@@ -84,7 +84,7 @@ $(function() {
                     var lvalue = String(arDirs[idx].value);
                     var lname  = String(arDirs[idx].name);
                     
-                    listRoot.append("<tr class='element tr_dir_" + idx + "'><td>[DIR]</td><td colspan='2'><a href='#' class='link_dir' data-path=''></a></td><td class='td_buttons'></td></tr>");
+                    listRoot.append("<tr class='element tr_dir_" + idx + "'><td class='td_mark_dir'>[DIR]</td><td colspan='2'><a href='#' class='link_dir' data-path=''></a></td><td class='td_buttons'></td></tr>");
                     
                     var tr = listRoot.find('.tr_dir_' + idx);
                     var a  = tr.find('.link_dir');
@@ -181,7 +181,9 @@ $(function() {
                     aLink.on('click', function() {
                         var popOpt = 'width=' + (captchaWidth + 50) + "," + "height=" + (captchaHeight + 50);
                         popOpt += ',scrollbars=no,status=no,location=no,toolbar=no';
-                        window.open(ctxPath + '/jsp/' + 'fscapt.jsp?path=' + encodeURIComponent($('.hidden_path').val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')), 'captcha', popOpt);
+                        var theme = '';
+                        if($('body').is('.dark')) theme='dark';
+                        window.open(ctxPath + '/jsp/' + 'fscapt.jsp?theme=' + theme + '&path=' + encodeURIComponent($('.hidden_path').val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')), 'captcha', popOpt);
                     });
                     aLink.addClass('binded-click');
                 });
@@ -198,7 +200,9 @@ $(function() {
     btnUpload.on('click', function() {
         var paths = inpPath.val();
         var popOpt = 'width=300,height=200,scrollbars=no,status=no,location=no,toolbar=no';
-        window.open(ctxPath + '/jsp/fsupload.jsp?path=' + encodeURIComponent(paths), 'upload', popOpt);
+        var theme = '';
+        if($('body').is('.dark')) theme='dark';
+        window.open(ctxPath + '/jsp/fsupload.jsp?theme=' + theme + '&path=' + encodeURIComponent(paths), 'upload', popOpt);
     });
 
     fReload();
@@ -208,6 +212,11 @@ $(function() {
 	<form class='form_fs' onsubmit='return false;'>
 	    <input type='hidden' name='path' class='hidden_path' value='<%= pathParam %>'/>
 	    <div class='row fs_title'>
+	        <div class='col-sm-12'>
+	            <h2><%= title %></h2>
+	        </div>
+	    </div>
+	    <div class='row fs_directory'>
 	        <div class='col-sm-10'>
                 <h4 class='path_title'><span>현재 디렉토리 : </span><span class='path'></span></h4>
             </div>
