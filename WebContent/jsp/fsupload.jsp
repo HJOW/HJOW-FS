@@ -28,7 +28,7 @@ $(function() {
     <div class='container show-grid full'>
         <div class='row'>
             <div class='col-sm-12'>
-                <h4>Upload</h4>
+                <h4 class='lang_element' data-lang-en='Upload'>업로드</h4>
             </div>
         </div>
         <div class='row'>
@@ -53,7 +53,7 @@ $(function() {
         </div>
         <div class='row'>
             <div class='col-sm-12 align_right'>
-                <input type='submit' value='UPLOAD'/>
+                <input type='submit' value='업로드' class='lang_attr_element' data-lang-target='value' data-lang-en='UPLOAD'/>
             </div>
         </div>
     </div>

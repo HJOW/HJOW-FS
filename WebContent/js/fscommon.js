@@ -192,6 +192,8 @@ function FSUtilClass() {
                     dataType : 'html',
                     success : function(dataHtml) {
                         FSUtil.openPopupHtml(dataHtml, null, 'width=400,height=300,scrollbars=no,status=no,location=no,toolbar=no');
+                        var formFList = $('.form_fs');
+                        if(formFList.length >= 1) formFList.trigger('submit');
                     }, error : function(jqXHR, textStatus, errorThrown) {
                         alert('Error : ' + textStatus);
                     }

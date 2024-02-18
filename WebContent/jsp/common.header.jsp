@@ -9,13 +9,16 @@ theme = FSUtils.removeSpecials(theme);
 $(function() {
     var bodys = $('body');
     if(bodys.is('.popup')) bodys.removeClass('dark');
+    bodys.removeAttr('data-theme');
     
     var theme = "<%=theme%>";
     if(theme != '') {
         bodys.addClass(theme);
+        bodys.attr('data-theme', theme);
     } else if(! bodys.is('.popup')) {
         if(FSUtil.detectDark()) {
         	bodys.addClass('dark');
+        	bodys.attr('data-theme', 'dark');
         }
     }
     
