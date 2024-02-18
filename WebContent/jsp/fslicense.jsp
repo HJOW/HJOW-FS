@@ -27,4 +27,5 @@ jQuery UI (https://jquery.com/)
 bootstrap (https://getbootstrap.com/)
 Apache Common Codec (https://commons.apache.org/proper/commons-codec/)
 json-simple (https://github.com/fangyidong/json-simple)
+favicon from freepik.com (https://kr.freepik.com/icon/files_220980#fromView=search&term=Folder&track=ais&page=1&position=30)
 </textarea>

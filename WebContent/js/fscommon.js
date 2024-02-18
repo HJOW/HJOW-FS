@@ -127,6 +127,60 @@ function FSUtilClass() {
         return 'en';
     }
     
+    this.detectBrowser = function detectBrowser() {
+        var agent  = String(window.navigator.userAgent);
+        var splits = agent.split(' ');
+        var idx=0;
+        
+        FSUtil.log('UserAgent : ' + agent);
+        
+        // Detect Microsoft Edge
+        for(idx=0; idx<splits.length; idx++) {
+            var blockOne = splits[idx];
+            var splitIn  = blockOne.split('/');
+            if(splitIn.length != 2) continue;
+            if(splitIn[0] == 'Edg') return {
+                name : 'Microsoft Edge',
+                ver  : splitIn[1]
+            };
+        }
+        
+        // Detect Google Chrome
+        for(idx=0; idx<splits.length; idx++) {
+            var blockOne = splits[idx];
+            var splitIn  = blockOne.split('/');
+            if(splitIn.length != 2) continue;
+            if(splitIn[0] == 'Chrome') return {
+                name : 'Google Chrome',
+                ver  : splitIn[1]
+            };
+        }
+        
+        // Safari
+        for(idx=0; idx<splits.length; idx++) {
+            var blockOne = splits[idx];
+            var splitIn  = blockOne.split('/');
+            if(splitIn.length != 2) continue;
+            if(splitIn[0] == 'Safari') return {
+                name : 'Apple Safari',
+                ver  : splitIn[1]
+            };
+        }
+        
+        // Firefox
+        for(idx=0; idx<splits.length; idx++) {
+            var blockOne = splits[idx];
+            var splitIn  = blockOne.split('/');
+            if(splitIn.length != 2) continue;
+            if(splitIn[0] == 'Firefox') return {
+                name : 'Mozilla Firefox',
+                ver  : splitIn[1]
+            };
+        }
+        
+        return { name : 'Unknown', ver : 'Unknown' };
+    };
+    
     this.applyLanguage = function applyLanguage(range) {
         if(typeof(range) == 'undefined') range = $('body');
         else range = $(range);

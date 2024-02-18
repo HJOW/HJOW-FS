@@ -47,5 +47,7 @@ $(function() {
         dataType : "json",
         success : function(data) { }
     });
+    
+    FSUtil.log(FSUtil.detectBrowser());
 });
 </script>
