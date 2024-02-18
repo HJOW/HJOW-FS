@@ -65,6 +65,11 @@ if(! fsc.installed) {
                 <div class='col-sm-2'><h2>FS Installation</h2></div>
             </div>
             <div class='row'>
+                <div class='col-sm-12'>
+                    <jsp:include page="fslicense.jsp"></jsp:include>
+                </div>
+            </div>
+            <div class='row'>
 		        <div class='col-sm-10 container show-grid'>
 		            <div class='row'>
                         <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Title'>타이틀</div>

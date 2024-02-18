@@ -6,7 +6,7 @@ $(function(){
 	aLink.on('click', function() {
 		var theme = $('body').attr('data-theme');
 		if(theme == null || typeof(theme) == 'undefined') theme = '';
-		window.open("<%=request.getContextPath()%>/jsp/fsabout.jsp?theme=" + theme, "pop_about", "width=500,height=600,scrollbars=no,status=no,location=no,toolbar=no");
+		window.open("<%=request.getContextPath()%>/jsp/fsabout.jsp?theme=" + theme, "pop_about", "width=580,height=600,scrollbars=no,status=no,location=no,toolbar=no");
 	});
 });
 </script>
