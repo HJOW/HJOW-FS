@@ -133,6 +133,25 @@ function FSUtilClass() {
         var idx=0;
         
         FSUtil.log('UserAgent : ' + agent);
+
+        // Detect Microsoft Internet Explorer
+        for(idx=0; idx<splits.length; idx++) {
+            var blockOne = splits[idx];
+            var splitIn  = blockOne.split('/');
+            if(splitIn.length != 2) continue;
+            if(splitIn[0] == 'Trident') {
+                var res = {};
+                res.name = 'Microsoft Internet Explorer';
+                try {
+                    var version = Math.round(parseFloat(String(splitIn[1])));
+                    version += 4;
+                    res.ver = version;
+                    return res;
+                } catch(e) {
+                    return { name : res.name, ver : 'Unknown' };
+                }
+            }
+        }
         
         // Detect Microsoft Edge
         for(idx=0; idx<splits.length; idx++) {
@@ -156,7 +175,7 @@ function FSUtilClass() {
             };
         }
         
-        // Safari
+        // Detect Safari
         for(idx=0; idx<splits.length; idx++) {
             var blockOne = splits[idx];
             var splitIn  = blockOne.split('/');
@@ -167,7 +186,7 @@ function FSUtilClass() {
             };
         }
         
-        // Firefox
+        // Detect Firefox
         for(idx=0; idx<splits.length; idx++) {
             var blockOne = splits[idx];
             var splitIn  = blockOne.split('/');
