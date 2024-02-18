@@ -27,6 +27,10 @@ $(function() {
     var theme = "<%=theme%>";
     if(theme != '') {
         bodys.addClass(theme);
+    } else if(! bodys.is('.popup')) {
+        if(FSUtil.detectDark()) {
+        	bodys.addClass('dark');
+        }
     }
 });
 </script>

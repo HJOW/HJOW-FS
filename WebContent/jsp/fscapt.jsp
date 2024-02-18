@@ -58,8 +58,6 @@ $(function() {
 
     $('.p_filename').text(fileName);
     $('.inp_captcha').focus();
-
-    console.log(ext);
 });
 </script>
 </head>
