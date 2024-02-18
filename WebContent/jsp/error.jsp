@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.io.*, java.util.* " isErrorPage="true" %><%
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.util.*, java.io.*, java.util.* " isErrorPage="true" %><%
 String excMsg = "";
 if(exception != null) excMsg = exception.getMessage();
 if(excMsg    == null) excMsg = "";

@@ -40,7 +40,7 @@ try {
     if(pathParam == null) pathParam = "";
     pathParam = pathParam.trim();
     if(pathParam.equals("/")) pathParam = "";
-    pathParam = pathParam.replace(".", "").replace("'", "").replace("\"", "").replace("\\", "/").trim(); // 상대경로 방지를 위해 . 기호는 반드시 제거 !
+    pathParam = FSUtils.removeSpecials(pathParam, false, true, true, false, true).replace("\\", "/").trim();
     if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
 	
 	boolean hasPriv = false;

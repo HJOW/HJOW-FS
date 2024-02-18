@@ -1,4 +1,4 @@
-<%@ page language="java" import="java.util.*, java.net.*, java.io.*" %><%@ include file="common.pront.jsp"%><%
+<%@ page language="java" import="com.hjow.fs.util.*, java.util.*, java.net.*, java.io.*" %><%@ include file="common.pront.jsp"%><%
 request.setCharacterEncoding("UTF-8");
 String clients = request.getHeader("User-Agent");
 
@@ -19,7 +19,7 @@ mode = mode.trim().toUpperCase();
 if(pathParam == null) pathParam = "";
 pathParam = pathParam.trim();
 if(pathParam.equals("/")) pathParam = "";
-pathParam = pathParam.replace(".", "").replace("'", "").replace("\"", "").replace("\\", "/").trim(); // 상대경로 방지를 위해 . 기호는 반드시 제거 !
+pathParam = FSUtils.removeSpecials(pathParam, false, true, true, false, true).replace("\\", "/").trim();
 if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
 
 if(speed != null) {
@@ -57,6 +57,7 @@ try {
 
     file = new File(rootPath.getAbsolutePath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileName);
     if(! file.exists()) {
+    	System.out.println("No File ! " + file.getAbsolutePath() + " <-- " + rootPath.getAbsolutePath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileName);
         throw new FileNotFoundException("There is no file !");
     }
     if(file.isDirectory()) {

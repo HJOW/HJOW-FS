@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.io.*, java.util.* " session="true" %><%@ include file="common.pront.jsp"%><%
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.util.*, java.io.*, java.util.* " session="true" %><%@ include file="common.pront.jsp"%><%
 if(! installed) {
 	%><div class='fs_accbar container show-grid full invisible'>Not installed</div><%
 } else if(! noLogin) {

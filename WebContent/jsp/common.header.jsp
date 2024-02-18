@@ -1,9 +1,9 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%><%
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.util.*"%><%
 String ctxPathCmm = request.getContextPath();
 String theme      = request.getParameter("theme");
 
 if(theme == null) theme = "";
-theme = theme.replace("'", "").replace("\"", "").replace("<", "").replace(">", "").replace(" ", "").replace("\n", "").replace("\t", "").replace("\\", "").replace("/", "").trim();
+theme = FSUtils.removeSpecials(theme);
 %>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/jquery-ui.css"/>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/jquery-ui.structure.css"/>

@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="java.io.*, java.util.* "%><%@ include file="common.pront.jsp"%><%
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.util.*, java.io.*, java.util.* "%><%@ include file="common.pront.jsp"%><%
 request.setCharacterEncoding("UTF-8");
 String clients = request.getHeader("User-Agent");
 
@@ -12,10 +12,10 @@ if(fileName  == null) fileName  = "";
 if(speed     == null) speed     = "";
 if(theme     == null) theme     = "";
 
-pathParam = pathParam.replace("'", "").replace("\"", "").replace(".", "").trim();
-fileName  = fileName.replace("'", "").replace("\"", "").trim();
-speed     = speed.replace("'", "").replace("\"", "").trim();
-theme     = theme.replace("'", "").replace("\"", "").replace("<", "").replace(">", "").replace("?", "").replace(".", "").replace("&", "").replace(" ", "").replace("\n", "").trim();
+pathParam = FSUtils.removeSpecials(pathParam, false, true, true, false, true).replace("\\", "/").trim();
+fileName  = FSUtils.removeSpecials(fileName, false, true, true, true, false).replace("?", "").replace("&", "").trim();
+speed     = FSUtils.removeSpecials(speed   ).replace("?", "").replace("&", "").trim();
+theme     = FSUtils.removeSpecials(theme   ).replace("?", "").replace("&", "").trim();
 
 int randomNo  = (int) Math.round(1000000 + Math.random() * 1000000 + Math.random() * 10000 + Math.random() * 100);
 String strRan = String.valueOf(randomNo).substring(0, 7);

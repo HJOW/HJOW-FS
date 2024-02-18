@@ -1,14 +1,14 @@
-<%@ page language="java" contentType="application/json; charset=UTF-8" pageEncoding="UTF-8" import="java.io.*, java.util.*, org.json.simple.*, org.json.simple.parser.*" session="true" %><%@ include file="common.pront.jsp"%><%
+<%@ page language="java" contentType="application/json; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.util.*, java.io.*, java.util.*, org.json.simple.*, org.json.simple.parser.*" session="true" %><%@ include file="common.pront.jsp"%><%
 String pathParam = request.getParameter("path");
 if(pathParam == null) pathParam = "";
 pathParam = pathParam.trim();
 if(pathParam.equals("/")) pathParam = "";
-pathParam = pathParam.replace(".", "").replace("'", "").replace("\"", "").replace("\\", "/").trim(); // 상대경로 방지를 위해 . 기호는 반드시 제거 !
+pathParam = FSUtils.removeSpecials(pathParam, false, true, true, false, true).replace("\\", "/").trim();
 if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
 
 String keyword = request.getParameter("keyword");
 if(keyword == null) keyword = "";
-keyword = keyword.replace("'", "").replace("\"", "").trim();
+keyword = keyword.replace("'", "").replace("\"", "").replace("<", "").replace(">", "").trim();
 
 File dir = new File(rootPath.getAbsolutePath() + File.separator + pathParam);
 
