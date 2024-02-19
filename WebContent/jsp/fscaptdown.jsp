@@ -35,8 +35,8 @@ theme     = FSUtils.removeSpecials(theme   ).replace("?", "").replace("&", "").t
 int randomNo  = (int) Math.round(1000000 + Math.random() * 1000000 + Math.random() * 10000 + Math.random() * 100);
 String strRan = String.valueOf(randomNo).substring(0, 7);
 
-request.getSession().setAttribute("captcha_code", strRan);
-request.getSession().setAttribute("captcha_time", new Long(now));
+request.getSession().setAttribute("fsd_captcha_code", strRan);
+request.getSession().setAttribute("fsd_captcha_time", new Long(now));
 %>
 <!DOCTYPE html>
 <html>
@@ -96,7 +96,7 @@ $(function() {
         </div>
         <div class='row'>
             <div class='col-sm-12 align_center'>
-                <iframe style='width: <%=fsc.captchaWidth + 10%>px; height: <%=fsc.captchaHeight + 10%>px;' src='fscaptin.jsp?theme=<%=theme%>'></iframe>
+                <iframe style='width: <%=fsc.captchaWidth + 10%>px; height: <%=fsc.captchaHeight + 10%>px;' src='fscaptin.jsp?key=fsd&theme=<%=theme%>'></iframe>
             </div>
         </div>
         <form action='fsdown.jsp' method='POST' class='form' target='_blank'>

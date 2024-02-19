@@ -54,7 +54,7 @@ import com.oreilly.servlet.MultipartRequest;
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 
 public class FSControl {
-	public static final int[] VERSION = {1, 0, 0, 1};
+	public static final int[] VERSION = {1, 0, 0, 2};
 	
 	private static FSControl instance = null;
 	
@@ -819,8 +819,8 @@ public class FSControl {
 		String capt      = request.getParameter("captcha");
 		String mode      = request.getParameter("mode");
 
-		String code = (String) request.getSession().getAttribute("captcha_code");
-		Long   time = (Long)   request.getSession().getAttribute("captcha_time");
+		String code = (String) request.getSession().getAttribute("fsd_captcha_code");
+		Long   time = (Long)   request.getSession().getAttribute("fsd_captcha_time");
 
 		if(code == null) code = "REFRESH";
 		if(capt == null) capt = "";

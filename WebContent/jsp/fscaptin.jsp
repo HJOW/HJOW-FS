@@ -14,9 +14,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-String code  = (String) request.getSession().getAttribute("captcha_code");
-Long   time  = (Long)   request.getSession().getAttribute("captcha_time");
+String key   = request.getParameter("key");
 String theme = request.getParameter("theme");
+
+String code  = (String) request.getSession().getAttribute(key + "_captcha_code");
+Long   time  = (Long)   request.getSession().getAttribute(key + "_captcha_time");
 
 if(time == null) time = new Long(0L);
 String bs64str = fsc.createCaptchaBase64(request, code, time.longValue(), theme);

@@ -204,7 +204,7 @@ $(function() {
                         popOpt += ',scrollbars=no,status=no,location=no,toolbar=no';
                         var theme = '';
                         if($('body').is('.dark')) theme='dark';
-                        window.open(ctxPath + '/jsp/' + 'fscapt.jsp?theme=' + theme + '&path=' + encodeURIComponent($('.hidden_path').val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')), 'captcha', popOpt);
+                        window.open(ctxPath + '/jsp/' + 'fscaptdown.jsp?theme=' + theme + '&path=' + encodeURIComponent($('.hidden_path').val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')), 'captcha', popOpt);
                     });
                     aLink.addClass('binded-click');
                 });
