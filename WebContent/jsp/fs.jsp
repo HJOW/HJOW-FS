@@ -37,9 +37,10 @@ if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
 <script type='text/javascript'>
 $(function() {
     var ctxPath = "<%=fsc.ctxPath%>";
+    var useCaptchaDown = <%=fsc.captchaDownload ? "true" : "false"%>;
     var captchaWidth  = parseInt("<%=fsc.captchaWidth  + 100%>");
     var captchaHeight = parseInt("<%=fsc.captchaHeight + 180%>");
-	
+    
     var form     = $('.form_fs');
     var tables   = $('.fs_table_list');
     var listRoot = tables.find('.fs_list');
@@ -204,7 +205,11 @@ $(function() {
                         popOpt += ',scrollbars=no,status=no,location=no,toolbar=no';
                         var theme = '';
                         if($('body').is('.dark')) theme='dark';
-                        window.open(ctxPath + '/jsp/' + 'fscaptdown.jsp?theme=' + theme + '&path=' + encodeURIComponent($('.hidden_path').val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')), 'captcha', popOpt);
+                        if(useCaptchaDown) {
+                        	window.open(ctxPath + '/jsp/' + 'fscaptdown.jsp?theme=' + theme + '&path=' + encodeURIComponent($('.hidden_path').val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')), 'download', popOpt);
+                        } else {
+                        	window.open(ctxPath + '/jsp/' + 'fsdown.jsp?path=' + encodeURIComponent($('.hidden_path').val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')), 'download', popOpt);
+                        }
                     });
                     aLink.addClass('binded-click');
                 });

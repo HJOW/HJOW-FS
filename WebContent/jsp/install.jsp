@@ -99,6 +99,17 @@ if(! fsc.installed) {
 		                <div class='col-sm-10'><input type='password' name='pw' class='full lang_attr_element' placeholder="fs.properties 에 있는 암호" data-lang-target='placeholder' data-lang-en='Password in fs.properties'/></div>
 		            </div>
 		            <div class='row'>
+                        <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Captcha'>캡차</div>
+                        <div class='col-sm-10'>
+                            <span>
+                                <label><input type='checkbox' name='usecaptchadown'  class='chk_captcha_down'  value="true"/><span class='lang_element' data-lang-en='Ask on download'>다운로드 시 요구</span></label>
+                            </span>
+                            <span class='onlyaccount invisible'>
+                                <label><input type='checkbox' name='usecaptchalogin' class='chk_captcha_login' value="true"/><span class='lang_element' data-lang-en='Ask on login'   >로그인 시 요구</span></label>
+                            </span>
+                        </div>
+                    </div>
+		            <div class='row'>
                         <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Accounts'>계정</div>
                         <div class='col-sm-10'><label><input type='checkbox' name='useaccount' class='chk_account' value="true"/><span class='lang_element' data-lang-en='Use Accounts'>계정 기능 사용</span></label></div>
                     </div>

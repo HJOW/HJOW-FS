@@ -76,7 +76,12 @@ $(function() {
 
     $('.p_filename').text(fileName);
     $('.p_filename').attr('title', fileName);
+    
+    <% if(fsc.captchaDownload) { %>
     $('.inp_captcha_d').focus();
+    <% } else { %>
+    $('.div_captcha_download').addClass('invisible');
+    <% } %>
 });
 </script>
 </head>
@@ -84,17 +89,17 @@ $(function() {
     <div class='fs_capt container show-grid full'>
         <div class='row'>
             <div class='col-sm-12'>
-                <h3 class='lang_element' data-lang-en='Captcha Authentication'>Captcha 인증</h3>
+                <h3 class='lang_element' data-lang-en='Download'>다운로드</h3>
             </div>
         </div>
-        <div class='row'>
+        <div class='row div_captcha_download'>
             <div class='col-sm-12'>
                 <p class='lang_element' data-lang-en='For download...'></p>
                 <p class='p_filename ellipsis'></p>
                 <p class='lang_element' data-lang-en=''>파일 다운로드를 위해 인증 코드 입력</p>
             </div>
         </div>
-        <div class='row'>
+        <div class='row div_captcha_download'>
             <div class='col-sm-12 align_center'>
                 <iframe style='width: <%=fsc.captchaWidth + 10%>px; height: <%=fsc.captchaHeight + 10%>px;' src='fscaptin.jsp?key=fsd&theme=<%=theme%>'></iframe>
             </div>
@@ -103,7 +108,7 @@ $(function() {
             <input type='hidden' name='path'     class='hid_path' value='<%=pathParam%>'/>
             <input type='hidden' name='filename' class='hid_name' value='<%=fileName%>'/>
             <input type='hidden' name='speed'    class='hid_sped' value='<%=speed%>'/>
-            <div class='row'>
+            <div class='row div_captcha_download'>
                 <div class='col-sm-6 align_center'>
 	                <input type='text'   class='inp_captcha_d lang_attr_element' name='captcha' placeholder='위의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code above'/>
 	                <input type='button' class='btn_re lang_attr_element' value='새로고침' data-lang-target='value' data-lang-en='Refresh'/>

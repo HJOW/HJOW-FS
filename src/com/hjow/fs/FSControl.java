@@ -90,6 +90,7 @@ public class FSControl {
 	public int  sleepRoutine = 100;
 
 	// Captcha
+	public boolean captchaDownload = true, captchaLogin = true;
 	public int  captchaWidth     = 250;
 	public int  captchaHeight    = 40;
 	public int  captchaFontSize  = 30;
@@ -262,6 +263,12 @@ public class FSControl {
 				if(conf.get("UseAccount") != null) {
 					noLogin = (! Boolean.parseBoolean(conf.get("UseAccount").toString().trim()));
 				}
+				if(conf.get("UseCaptchaDown") != null) {
+					captchaDownload = Boolean.parseBoolean(conf.get("UseCaptchaDown").toString().trim());
+				}
+				if(conf.get("UseCaptchaLogin") != null) {
+					captchaLogin = Boolean.parseBoolean(conf.get("UseCaptchaLogin").toString().trim());
+				}
 				if(conf.get("Salt") != null) {
 					salt = conf.get("Salt").toString().trim();
 				}
@@ -349,10 +356,20 @@ public class FSControl {
 				garbage = new File(rootPath.getAbsolutePath() + File.separator + ".garbage");
 				if(! garbage.exists()) garbage.mkdirs();
 				
-				String useAccounts = request.getParameter("useaccount");
-				if(useAccounts != null) {
-					noLogin = (! Boolean.parseBoolean(useAccounts.trim()));
+				String sUseCaptchaDown  = request.getParameter("usecaptchadown");
+				String sUseCaptchaLogin = request.getParameter("usecaptchalogin");
+				
+				boolean useCaptchaDown  = false;
+				boolean useCaptchaLogin = false;
+				
+				if(sUseCaptchaDown != null) useCaptchaDown = Boolean.parseBoolean(sUseCaptchaDown.trim());
+				
+				String sUseAccounts = request.getParameter("useaccount");
+				if(sUseAccounts != null) {
+					noLogin = (! Boolean.parseBoolean(sUseAccounts.trim()));
 					if(! noLogin) {
+						if(sUseCaptchaLogin != null) useCaptchaLogin = Boolean.parseBoolean(sUseCaptchaLogin.trim());
+						
 						String adminId, adminPw, aSalt;
 						adminId = request.getParameter("adminid");
 						adminPw = request.getParameter("adminpw");
@@ -414,11 +431,13 @@ public class FSControl {
 				conf.put("Title", titles);
 				conf.put("Path", rootPath.getAbsolutePath());
 				conf.put("UseAccount", new Boolean(! noLogin));
-				conf.put("Installed", new Boolean(true));
+				conf.put("UseCaptchaDown" , new Boolean(useCaptchaDown));
+				conf.put("UseCaptchaLogin", new Boolean(useCaptchaLogin));
 				conf.put("S1", s1);
 		        conf.put("S2", s2);
 		        conf.put("S3", s3);
 		        conf.put("Salt", salt);
+		        conf.put("Installed", new Boolean(true));
 				
 				File fJson = new File(fileConfigPath.getAbsolutePath() + File.separator + "config.json");
 				fileOut = new FileOutputStream(fJson);
@@ -822,11 +841,11 @@ public class FSControl {
 		String pathParam = request.getParameter("path");
 		String fileName  = request.getParameter("filename");
 		String speed     = request.getParameter("speed");
-		String capt      = request.getParameter("captcha");
 		String mode      = request.getParameter("mode");
 
-		String code = (String) request.getSession().getAttribute("fsd_captcha_code");
-		Long   time = (Long)   request.getSession().getAttribute("fsd_captcha_time");
+		String capt      = request.getParameter("captcha");
+		String code      = (String) request.getSession().getAttribute("fsd_captcha_code");
+		Long   time      = (Long)   request.getSession().getAttribute("fsd_captcha_time");
 
 		if(code == null) code = "REFRESH";
 		if(capt == null) capt = "";
@@ -855,18 +874,20 @@ public class FSControl {
 		File file = null;
 		byte[] buffers = new byte[bufferSize];
 		try {
-			if(! code.equals(capt)) {
-				throw new RuntimeException("Wrong captcha code !");
-		    }
-			
-			if(now - time.longValue() >= captchaLimitTime) {
-			    code = "REFRESH";
-			    request.getSession().setAttribute("fsd_captcha_code", code);
+			if(captchaDownload) {
+				if(! code.equals(capt)) {
+					throw new RuntimeException("Wrong captcha code !");
+			    }
+				
+				if(now - time.longValue() >= captchaLimitTime) {
+				    code = "REFRESH";
+				    request.getSession().setAttribute("fsd_captcha_code", code);
+				}
+				
+			    if(code.equals("REFRESH")) {
+			    	throw new RuntimeException("Too old captcha code !");
+			    }
 			}
-			
-		    if(code.equals("REFRESH")) {
-		    	throw new RuntimeException("Too old captcha code !");
-		    }
 		    
 		    if(fileName == null || fileName.equals("")) {
 		        throw new FileNotFoundException("File name is needed.");
@@ -1215,27 +1236,29 @@ public class FSControl {
 					}
 				}
 				
-				String ccapt = request.getParameter("captcha");
-				String ccode = (String) request.getSession().getAttribute("fsl_captcha_code");
-				Long   ctime = (Long)   request.getSession().getAttribute("fsl_captcha_time");
-				
-				if(ccode == null) ccode = "REFRESH";
-				if(ccapt == null) ccapt = "";
-				
-				if(! ccode.equals(ccapt)) {
-					if(lang.equals("ko")) throw new RuntimeException("Wrong captcha code !");
-					else                  throw new RuntimeException("코드를 올바르게 입력해 주세요.");
-			    }
-				
-				if(now - ctime.longValue() >= captchaLimitTime) {
-				    ccode = "REFRESH";
-				    request.getSession().setAttribute("fsl_captcha_code", ccode);
+				if(captchaLogin) {
+					String ccapt = request.getParameter("captcha");
+					String ccode = (String) request.getSession().getAttribute("fsl_captcha_code");
+					Long   ctime = (Long)   request.getSession().getAttribute("fsl_captcha_time");
+					
+					if(ccode == null) ccode = "REFRESH";
+					if(ccapt == null) ccapt = "";
+					
+					if(! ccode.equals(ccapt)) {
+						if(lang.equals("ko")) throw new RuntimeException("Wrong captcha code !");
+						else                  throw new RuntimeException("코드를 올바르게 입력해 주세요.");
+				    }
+					
+					if(now - ctime.longValue() >= captchaLimitTime) {
+					    ccode = "REFRESH";
+					    request.getSession().setAttribute("fsl_captcha_code", ccode);
+					}
+					
+				    if(ccode.equals("REFRESH")) {
+				        if(lang.equals("ko")) throw new RuntimeException("Too old captcha code !");
+						else                  throw new RuntimeException("코드가 오래되었습니다. 새로 고침 후 이용해 주세요.");
+				    }
 				}
-				
-			    if(ccode.equals("REFRESH")) {
-			        if(lang.equals("ko")) throw new RuntimeException("Too old captcha code !");
-					else                  throw new RuntimeException("코드가 오래되었습니다. 새로 고침 후 이용해 주세요.");
-			    }
 				
 				System.out.println("Login requested ! " + id + " at " + now + " from " + request.getRemoteAddr());
 				

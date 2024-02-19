@@ -93,30 +93,34 @@ if(! fsc.installed) {
 	            }
 	        });
 		});
+	    
+	    <% if(! fsc.captchaLogin) { %>
+	    $('.div_captcha_login').addClass('invisible');
+	    <% } %>
 	});
 	</script>
 	<form onsubmit='return false' class='form_fs_login'>
 	<input type='hidden' name='req' value='status' class='inp_req'/>
 	<div class='row login_element not_logined'>
-	     <div class='col-sm-5 container show-grid padding_top_10'>
+	     <div class='col-sm-4 container show-grid padding_top_10' style='width:270px;'>
 	         <div class='row'>
-	             <div class='col-sm-12'>
-	                 <span style='display: inline-block; width:80px'>ID</span><input type='text' name='id' class='inp_login_element'/>
+	             <div class='col-xs-12'>
+	                 <span style='display: inline-block; width:80px'>ID</span><input type='text' name='id' class='inp_login_element' style='width: 150px;'/>
 	             </div>
 	         </div>
 	         <div class='row'>
-	             <div class='col-sm-12'>
-	                 <span style='display: inline-block; width:80px' class='lang_element' data-lang-en='Password'>암호</span><input type='password' name='pw' class='inp_login_element'/>
+	             <div class='col-xs-12'>
+	                 <span style='display: inline-block; width:80px' class='lang_element' data-lang-en='Password'>암호</span><input type='password' name='pw' class='inp_login_element' style='width: 150px;'/>
 	             </div>
 	         </div>
 	     </div>
-	     <div class='col-sm-3 padding_top_10' >
+	     <div class='col-sm-4 padding_top_10 div_captcha_login' style='width: <%=(fsc.captchaWidth + 10)%>px;'>
 	         <iframe style='width: <%=(fsc.captchaWidth + 5)%>px; height: <%=(fsc.captchaHeight + 5)%>px; border:0; margin-bottom: -5px;' class='if_captcha_l' src='<%=fsc.ctxPath%>/jsp/fscaptin.jsp?key=fsl&scale=1&theme='></iframe>
 	     </div>
-	     <div class='col-sm-3 padding_top_20' style='vertical-align: middle;'>
+	     <div class='col-sm-2 padding_top_20 div_captcha_login' style='margin-left: 10px; width: <%=((fsc.captchaWidth / 2) + 10)%>px; text-align: left; vertical-align: middle;'>
 	         <input  style='width: <%=((fsc.captchaWidth / 2) + 5)%>px; height: <%=((fsc.captchaHeight / 2) + 5)%>px;' type='text' class='inp_captcha_l inp_login_element lang_attr_element' name='captcha' placeholder='옆의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code left'/>
 	     </div>
-	     <div class='col-sm-1 padding_top_10'>
+	     <div class='col-sm-2 padding_top_10'>
 	         <input type='submit' value='로그인' class='full lang_attr_element' data-lang-target='value' data-lang-en='LOGIN' style='height: 50px;'/>
 	     </div>
 	</div>
