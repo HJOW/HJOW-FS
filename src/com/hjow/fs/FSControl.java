@@ -54,7 +54,7 @@ import com.oreilly.servlet.MultipartRequest;
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 
 public class FSControl {
-	public static final int[] VERSION = {1, 0, 0, 2};
+	public static final int[] VERSION = {1, 0, 0, 3};
 	
 	private static FSControl instance = null;
 	
@@ -89,11 +89,13 @@ public class FSControl {
 	// Perform downloading thread's sleeping cycle (times) - Downloading speed faster when this value is become lower.
 	public int  sleepRoutine = 100;
 
+	// Captcha
 	public int  captchaWidth     = 250;
-	public int  captchaHeight    = 100;
-	public int  captchaFontSize  = 80;
+	public int  captchaHeight    = 40;
+	public int  captchaFontSize  = 30;
+	public int  captchaNoises    = 20;
 	public long captchaLimitTime = 1000 * 60 * 5;
-
+	
 	// Login Policy
 	public boolean noLogin = false;
 	public int loginFailCountLimit = 10;
@@ -617,7 +619,7 @@ public class FSControl {
 		return json;
 	}
 	
-	public String createCaptchaBase64(HttpServletRequest request, String code, long time, String theme) {
+	public String createCaptchaBase64(HttpServletRequest request, String key, String code, long time, double scale, String theme) {
 		initialize(request);
 		
 		try {
@@ -634,11 +636,15 @@ public class FSControl {
 
 			if(now - time >= captchaLimitTime) {
 			    code = "REFRESH";
-			    request.getSession().setAttribute("captcha_code", code);
+			    request.getSession().setAttribute(key + "_captcha_code", code);
 			}
 
 			int colorPad = 0;
 			if(captDarkMode) colorPad = 100;
+			
+			int captchaWidth     = (int) (this.captchaWidth    * scale);
+			int captchaHeight    = (int) (this.captchaHeight   * scale);
+			int captchaFontSize  = (int) (this.captchaFontSize * scale);
 
 			BufferedImage image    = new BufferedImage(captchaWidth, captchaHeight, BufferedImage.TYPE_INT_RGB);
 			Graphics2D    graphics = image.createGraphics();
@@ -656,7 +662,7 @@ public class FSControl {
 			Font font = new Font("Serif", Font.BOLD, captchaFontSize);
 
 			// 방해물 출력
-			for(int ndx=0; ndx<10; ndx++) {
+			for(int ndx=0; ndx<captchaNoises; ndx++) {
 			    int x1, y1, x2, y2;
 			    x1 = (int) (Math.random() * captchaWidth);
 			    y1 = (int) (Math.random() * captchaHeight);
@@ -672,11 +678,11 @@ public class FSControl {
 			    graphics.setColor(new Color( (colorPad + (int) (Math.random() * 120)), (colorPad + (int) (Math.random() * 120)), (colorPad + (int) (Math.random() * 120))  ));
 			    
 			    int nowX = x + metrics.charWidth(charNow) / 2;
-			    int ang  = (((int) Math.random()) * 41) - 20;
+			    int ang  = ((int) (Math.random() * 41)) - 20;
 			    
 			    graphics.rotate(Math.toRadians(ang), nowX, y);
-			    graphics.setFont(font);
-			    graphics.drawString(String.valueOf(charNow), nowX, y + ((int) ((Math.random() * captchaHeight) / 2.0)));
+			    graphics.setFont(font.deriveFont(Font.BOLD, captchaFontSize + ((int) Math.random() * 4) - 2));
+			    graphics.drawString(String.valueOf(charNow), nowX, y + ((int) ((Math.random() * captchaHeight) / 3.0)));
 			    graphics.rotate(Math.toRadians(ang) * (-1), nowX, y);
 			    
 			    x += metrics.charWidth(charNow) + gap;
@@ -850,16 +856,16 @@ public class FSControl {
 		byte[] buffers = new byte[bufferSize];
 		try {
 			if(! code.equals(capt)) {
-		        throw new RuntimeException("Wrong captcha code !");
+				throw new RuntimeException("Wrong captcha code !");
 		    }
 			
 			if(now - time.longValue() >= captchaLimitTime) {
 			    code = "REFRESH";
-			    request.getSession().setAttribute("captcha_code", code);
+			    request.getSession().setAttribute("fsd_captcha_code", code);
 			}
 			
 		    if(code.equals("REFRESH")) {
-		        throw new RuntimeException("Too old captcha code !");
+		    	throw new RuntimeException("Too old captcha code !");
 		    }
 		    
 		    if(fileName == null || fileName.equals("")) {
@@ -1208,6 +1214,28 @@ public class FSControl {
 						else                  msg = "Please input Password !";
 					}
 				}
+				
+				String ccapt = request.getParameter("captcha");
+				String ccode = (String) request.getSession().getAttribute("fsl_captcha_code");
+				Long   ctime = (Long)   request.getSession().getAttribute("fsl_captcha_time");
+				
+				if(ccode == null) ccode = "REFRESH";
+				if(ccapt == null) ccapt = "";
+				
+				if(! ccode.equals(ccapt)) {
+					if(lang.equals("ko")) throw new RuntimeException("Wrong captcha code !");
+					else                  throw new RuntimeException("코드를 올바르게 입력해 주세요.");
+			    }
+				
+				if(now - ctime.longValue() >= captchaLimitTime) {
+				    ccode = "REFRESH";
+				    request.getSession().setAttribute("fsl_captcha_code", ccode);
+				}
+				
+			    if(ccode.equals("REFRESH")) {
+			        if(lang.equals("ko")) throw new RuntimeException("Too old captcha code !");
+					else                  throw new RuntimeException("코드가 오래되었습니다. 새로 고침 후 이용해 주세요.");
+			    }
 				
 				System.out.println("Login requested ! " + id + " at " + now + " from " + request.getRemoteAddr());
 				

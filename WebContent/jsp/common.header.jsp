@@ -44,9 +44,15 @@ $(function() {
         bodys.attr('data-theme', theme);
     } else if(! bodys.is('.popup')) {
         if(FSUtil.detectDark()) {
-        	bodys.addClass('dark');
-        	bodys.attr('data-theme', 'dark');
+        	theme = 'dark';
+        	bodys.addClass(theme);
+            bodys.attr('data-theme', theme);
         }
+    }
+    
+    var captLogin = $('.if_captcha_l');
+    if(captLogin != null && typeof(captLogin) != 'undefined' && captLogin.length >= 1) {
+    	captLogin.attr('src', "<%=request.getContextPath()%>/jsp/fscaptin.jsp?key=fsl&randomize=true&scale=1&theme=" + theme);
     }
     
     $.ajax({

@@ -76,7 +76,7 @@ $(function() {
 
     $('.p_filename').text(fileName);
     $('.p_filename').attr('title', fileName);
-    $('.inp_captcha').focus();
+    $('.inp_captcha_d').focus();
 });
 </script>
 </head>
@@ -105,7 +105,7 @@ $(function() {
             <input type='hidden' name='speed'    class='hid_sped' value='<%=speed%>'/>
             <div class='row'>
                 <div class='col-sm-6 align_center'>
-	                <input type='text'   class='inp_captcha lang_attr_element' name='captcha' placeholder='위의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code above'/>
+	                <input type='text'   class='inp_captcha_d lang_attr_element' name='captcha' placeholder='위의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code above'/>
 	                <input type='button' class='btn_re lang_attr_element' value='새로고침' data-lang-target='value' data-lang-en='Refresh'/>
                 </div>
             </div>

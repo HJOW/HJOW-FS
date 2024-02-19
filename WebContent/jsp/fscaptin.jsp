@@ -16,12 +16,30 @@ limitations under the License.
 */
 String key   = request.getParameter("key");
 String theme = request.getParameter("theme");
+String randm = request.getParameter("randomize");
+String scale = request.getParameter("scale");
 
 String code  = (String) request.getSession().getAttribute(key + "_captcha_code");
 Long   time  = (Long)   request.getSession().getAttribute(key + "_captcha_time");
 
+if(randm != null) {
+	boolean randomize = Boolean.parseBoolean(randm);
+	if(randomize) {
+		int randomNo  = (int) Math.round(1000000 + Math.random() * 1000000 + Math.random() * 10000 + Math.random() * 100);
+		String strRan = String.valueOf(randomNo).substring(0, 7);
+		
+		code = strRan;
+		time = new Long(now);
+
+		request.getSession().setAttribute(key + "_captcha_code", code);
+		request.getSession().setAttribute(key + "_captcha_time", time);
+	}
+}
+
+if(scale == null) scale = "1.0";
+
 if(time == null) time = new Long(0L);
-String bs64str = fsc.createCaptchaBase64(request, code, time.longValue(), theme);
+String bs64str = fsc.createCaptchaBase64(request, key, code, time.longValue(), Double.parseDouble(scale), theme);
 
 boolean captDarkMode  = false;
 if(theme != null) {
@@ -33,6 +51,9 @@ if(theme != null) {
 <head>
     <jsp:include page="./common.header.jsp"></jsp:include>
     <script type='text/javascript'>
+    function iRefresh() {
+    	location.reload();
+    }
     $(function() {
         setTimeout(function() { location.reload(); }, <%= fsc.captchaLimitTime %>);
         if(<%=captDarkMode%>) { $('body').css('background-color', 'black'); }
