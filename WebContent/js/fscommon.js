@@ -66,6 +66,7 @@ function FSUtilClass() {
     this.version.push(1);
     this.version.push(0);
     this.version.push(0);
+    this.version.push(1);
 
 	this.log = function(logContent) {
     	try {
@@ -141,6 +142,26 @@ function FSUtilClass() {
             FSUtil.log('Error : ' + e);
             return -1;
         }
+    }
+    
+    this.detectStorage = function detectStorage() {
+        try {
+            var locals = eval('localStorage');
+            if(locals == null || typeof(locals) == 'undefined') {
+                return false;
+            }
+            if(typeof(locals.setItem) == 'undefined' || typeof(locals.getItem) == 'undefined' || typeof(locals.clear) == 'undefined' ) {
+                return false;
+            }
+            var sessions = eval('localStorage');
+            if(sessions == null || typeof(sessions) == 'undefined') {
+                return false;
+            }
+            if(typeof(sessions.setItem) == 'undefined' || typeof(sessions.getItem) == 'undefined' || typeof(sessions.clear) == 'undefined' ) {
+                return false;
+            }
+            return true;
+        } catch(e) { return false; }
     }
     
     this.detectBrowser = function detectBrowser() {

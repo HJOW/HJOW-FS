@@ -22,7 +22,9 @@ $(function(){
 		if(theme == null || typeof(theme) == 'undefined') theme = '';
 		window.open("<%=request.getContextPath()%>/jsp/fsabout.jsp?theme=" + theme, "pop_about", "width=580,height=600,scrollbars=no,status=no,location=no,toolbar=no");
 	});
-	footer.find('.span_js_version').text(FSUtil.version[0] + '.' + FSUtil.version[1] + '.' + FSUtil.version[2]);
+	var spanJs = footer.find('.span_js_version');
+	spanJs.text(FSUtil.version[0] + '.' + FSUtil.version[1] + '.' + FSUtil.version[2]);
+	spanJs.attr('title', 'Build ' + FSUtil.version[3]);
 });
 </script>
 <div class='fs_footer footer container show-grid full'>
@@ -31,7 +33,7 @@ $(function(){
             FS (
             <span class='span_version'>
                 JS    <span class='span_js_version'></span>
-                Class <span class='span_class_version'><%= FSControl.VERSION[0] %>.<%= FSControl.VERSION[1] %>.<%= FSControl.VERSION[2] %></span>
+                Class <span class='span_class_version' title="Build <%=FSControl.VERSION[3]%>"><%= FSControl.VERSION[0] %>.<%= FSControl.VERSION[1] %>.<%= FSControl.VERSION[2] %></span>
             </span>
             ) - 
             <a href='#' class='a_footer'>Copyright 2024 HJOW (Heo Jin Won)</a>
