@@ -52,6 +52,7 @@ $(function() {
     var btnSearch = form.find('.btn_search');
 
     var btnUpload = form.find('.btn_upload');
+    var btnMkdir  = form.find('.btn_mkdir');
     var btnConfig = form.find('.btn_config');
     
     var arDirs  = [];
@@ -201,6 +202,40 @@ $(function() {
                     if(idType == 'A') {
                     	var tdBtns = tr.find('.td_buttons');
                     	tdBtns.css('text-align', 'right');
+                    	
+                    	if(typeof(arDirs[idx].elements) != 'undefined') {
+                    		if(arDirs[idx].elements <= 0) {
+                    			tdBtns.append("<input type='button' class='btn_delete' value='X'/>");
+                    			
+                    			var btnDel = tdBtns.find('.btn_delete');
+                                btnDel.attr('data-path', a.attr('data-path'));
+                                btnDel.attr('data-name', a.attr('data-name'));
+
+                                btnDel.on('click', function() {
+                                    var delpath = $(this).attr('data-path');
+                                    
+                                    var confirmMsg = 'Really? Do you want to delete this directory?';
+                                    if(FSUtil.detectLanguage() == 'ko') confirmMsg = '이 폴더를 정말 삭제하시겠습니까?';
+                                    
+                                    if(confirm(confirmMsg)) {
+                                        $.ajax({
+                                            url  : ctxPath + '/jsp/fsremove.jsp',
+                                            data : {
+                                                path : delpath,
+                                                dels : 'dir'
+                                            },
+                                            method : 'POST',
+                                            dataType : 'JSON',
+                                            success : function(data) {
+                                                if(! data.success) alert(data.message);
+                                                fReload();
+                                            }
+                                        });
+                                    }
+                                });
+                                btnDel.addClass('binded_click');
+                    		}
+                    	}
                     }
                 }
                 
@@ -242,7 +277,8 @@ $(function() {
                                     url  : ctxPath + '/jsp/fsremove.jsp',
                                     data : {
                                         path : delpath,
-                                        name : delname
+                                        name : delname,
+                                        dels : 'file'
                                     },
                                     method : 'POST',
                                     dataType : 'JSON',
@@ -348,6 +384,68 @@ $(function() {
         if($('body').is('.dark')) theme='dark';
         window.open(ctxPath + '/jsp/fsadmin.jsp?theme=' + theme, 'config', popOpt);
     });
+    
+    btnMkdir.on('click', function() {
+    	var msg = 'Please input the name for new folder. (No dot, /, quotes, <>, ?, &)';
+    	if(FSUtil.detectLanguage() == 'ko') msg = '생성할 폴더 이름을 입력해 주세요. (마침표, /, 따옴표, <>, ?, & 를 넣을 수 없습니다.)';
+    	
+    	var dirName = prompt(msg, '');
+    	
+    	if(dirName == null || typeof(dirName) == 'undefined') {
+    		return;
+    	}
+    	dirName = dirName.trim();
+    	if(dirName == '') return;
+    	
+    	if(dirName.indexOf('.') >= 0) {
+    		msg = 'Wrong name !';
+            if(FSUtil.detectLanguage() == 'ko') msg = '폴더 이름으로 적합하지 않습니다.';
+            alert(msg);
+            return;
+    	}
+    	
+    	if(dirName.indexOf('/') >= 0 || dirName.indexOf('\\') >= 0) {
+            msg = 'Wrong name !';
+            if(FSUtil.detectLanguage() == 'ko') msg = '폴더 이름으로 적합하지 않습니다.';
+            alert(msg);
+            return;
+        }
+    	
+    	if(dirName.indexOf("'") >= 0 || dirName.indexOf('"') >= 0) {
+            msg = 'Wrong name !';
+            if(FSUtil.detectLanguage() == 'ko') msg = '폴더 이름으로 적합하지 않습니다.';
+            alert(msg);
+            return;
+        }
+    	
+    	if(dirName.indexOf("<") >= 0 || dirName.indexOf('>') >= 0) {
+            msg = 'Wrong name !';
+            if(FSUtil.detectLanguage() == 'ko') msg = '폴더 이름으로 적합하지 않습니다.';
+            alert(msg);
+            return;
+        }
+    	
+    	if(dirName.indexOf("?") >= 0 || dirName.indexOf('&') >= 0) {
+            msg = 'Wrong name !';
+            if(FSUtil.detectLanguage() == 'ko') msg = '폴더 이름으로 적합하지 않습니다.';
+            alert(msg);
+            return;
+        }
+    	
+    	$.ajax({
+            url  : ctxPath + '/jsp/fsmkdir.jsp',
+            data : {
+                path : inpPath.val(),
+                name : dirName
+            },
+            method : 'POST',
+            dataType : 'JSON',
+            success : function(data) {
+                if(! data.success) alert(data.message);
+                fReload();
+            }
+        });
+    });
 
     fReload();
 });
@@ -366,6 +464,7 @@ $(function() {
             </div>
             <div class='col-sm-2'>
                 <input type='button' class='btn_upload privilege_element invisible lang_attr_element' value='업로드' data-lang-target='value' data-lang-en='Upload'/>
+                <input type='button' class='btn_mkdir  privilege_element invisible lang_attr_element' value='새 폴더' data-lang-target='value' data-lang-en='New Folder'/>
                 <input type='button' class='btn_config privilege_element only_admin invisible lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config'/>
             </div>
 	    </div>

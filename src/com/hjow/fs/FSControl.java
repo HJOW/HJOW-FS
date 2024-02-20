@@ -786,6 +786,7 @@ public class FSControl {
 		    child.put("type", "dir");
 		    child.put("name", name);
 		    child.put("value", linkDisp);
+		    try { child.put("elements", f.list().length); } catch(Exception ignores) { }
 		    dirs.add(child);
 		}
 		json.put("directories", dirs);
@@ -1259,6 +1260,88 @@ public class FSControl {
 	}
 	
 	@SuppressWarnings("unchecked")
+	public JSONObject mkdir(HttpServletRequest request) {
+		JSONObject json = new JSONObject();
+		String uIdType = "";
+		JSONArray dirPrv = null;
+		try {
+			JSONObject sessionMap = getSessionObject(request);
+			
+		    if(sessionMap != null) {
+	        	// uId     = sessionMap.get("id"    ).toString();
+	        	uIdType = sessionMap.get("idtype").toString();
+	        	
+	        	Object oDirPrv = (Object) sessionMap.get("privileges");
+	            if(oDirPrv != null) {
+	                if(oDirPrv instanceof JSONArray) {
+	                    dirPrv = (JSONArray) oDirPrv;
+	                } else {
+	                    dirPrv = (JSONArray) new JSONParser().parse(oDirPrv.toString().trim());
+	                }
+	            }
+	        }
+		} catch(Throwable t) {
+		    t.printStackTrace();
+		}
+
+		json.put("success", new Boolean(false));
+		json.put("message", "");
+		
+		try {
+			String pathParam = request.getParameter("path");
+		    if(pathParam == null) pathParam = "";
+		    pathParam = pathParam.trim();
+		    if(pathParam.equals("/")) pathParam = "";
+		    pathParam = FSUtils.removeSpecials(pathParam, false, true, true, false, true).replace("\\", "/").trim();
+		    if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
+		    
+			boolean hasPriv = false;
+			if(uIdType.equals("A")) hasPriv = true;
+			
+			if(! hasPriv) {
+		        JSONParser parser = new JSONParser();
+		        for(Object row : dirPrv) {
+		            JSONObject dirOne = null;
+		            if(row instanceof JSONObject) dirOne = (JSONObject) row;
+		            else                          dirOne = (JSONObject) parser.parse(row.toString().trim());
+		            
+		            try {
+		                String dPath = dirOne.get("path"     ).toString();
+		                String dPrv  = dirOne.get("privilege").toString();
+		                
+		                if(pathParam.startsWith(dPath)) {
+		                    if(dPrv.equals("edit")) {
+		                        hasPriv = true;
+		                        break;
+		                    }
+		                }
+		            } catch(Throwable t) {
+		                System.out.println("Wrong account configuration - " + t.getMessage());
+		            }
+		        }
+			}
+			if(dirPrv != null) dirPrv.clear();
+			
+			if(hasPriv) {
+			    String dirName = request.getParameter("name");
+			    dirName = FSUtils.removeSpecials(dirName, false, true, true, true, true);
+			    
+			    File file = new File(rootPath.getAbsolutePath() + File.separator + pathParam.replace("/", File.separator) + File.separator + dirName);
+			    file.mkdirs();
+			    json.put("success", new Boolean(true));
+			} else {
+				json.put("success", new Boolean(false));
+		        json.put("message", "No privilege");
+			}
+		} catch(Throwable t) {
+			t.printStackTrace();
+			json.put("success", new Boolean(false));
+			json.put("message", "Error : " + t.getMessage());
+		}
+		return json;
+	}
+	
+	@SuppressWarnings("unchecked")
 	public JSONObject remove(HttpServletRequest request) {
 		JSONObject json = new JSONObject();
 		String uIdType = "";
@@ -1293,6 +1376,9 @@ public class FSControl {
 		    if(pathParam.equals("/")) pathParam = "";
 		    pathParam = FSUtils.removeSpecials(pathParam, false, true, true, false, true).replace("\\", "/").trim();
 		    if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
+		    
+		    String delType = request.getParameter("dels");
+		    if(delType == null) delType = "file";
 			
 			boolean hasPriv = false;
 			if(uIdType.equals("A")) hasPriv = true;
@@ -1323,13 +1409,23 @@ public class FSControl {
 			
 			if(hasPriv) {
 			    String fileName = request.getParameter("name");
+			    File file;
 			    
-			    File file = new File(rootPath.getAbsolutePath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileName);
+			    if(delType.equals("dir")) file = new File(rootPath.getAbsolutePath() + File.separator + pathParam.replace("/", File.separator));
+			    else                      file = new File(rootPath.getAbsolutePath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileName);
+			    
 			    if(! file.exists()) {
+			    	System.out.println("There is no file ! " + file.getAbsolutePath());
 			        throw new FileNotFoundException("There is no file !");
 			    }
+			    
 			    if(file.isDirectory()) {
-			        throw new FileNotFoundException("Cannot delete directory !");
+			    	if(! delType.equals("dir")) throw new RuntimeException("Wrong parameter. Please reload the page !");
+			    	
+			    	File[] children = file.listFiles();
+			    	if(children.length >= 1) throw new FileNotFoundException("Cannot delete non-empty directory !");
+			    } else {
+			    	if(! delType.equals("file")) throw new RuntimeException("Wrong parameter. Please reload the page !");
 			    }
 			    
 			    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
