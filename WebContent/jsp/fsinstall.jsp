@@ -61,7 +61,7 @@ if(! fsc.installed) {
 
             form.on('submit', function() {
                 $.ajax({
-                	url    : ctxPath + "/jsp/installin.jsp",
+                	url    : ctxPath + "/jsp/fsinstallin.jsp",
                     data   : form.serialize(),
                     method : "POST",
                     dataType : "json",

@@ -56,7 +56,7 @@ $(function() {
     }
     
     $.ajax({
-        url    : "<%=request.getContextPath()%>/jsp/login.jsp",
+        url    : "<%=request.getContextPath()%>/jsp/fslogin.jsp",
         data   : { req : 'language', language : lang, force : 'false' },
         method : "POST",
         dataType : "json",

@@ -7,7 +7,7 @@
 <jsp:include page="./jsp/common.header.jsp"></jsp:include>
 </head>
 <body>
-    <jsp:include page="./jsp/accountbar.jsp"></jsp:include>
+    <jsp:include page="./jsp/fsaccountbar.jsp"></jsp:include>
     <jsp:include page="./jsp/fs.jsp"></jsp:include>
 </body>
 </html>

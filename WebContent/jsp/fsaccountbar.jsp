@@ -35,7 +35,7 @@ if(! fsc.installed) {
 	    function fLogin() {
 	    	inpReq.val('login');
 	    	$.ajax({
-	            url    : ctxPath + "/jsp/login.jsp",
+	            url    : ctxPath + "/jsp/fslogin.jsp",
 	            data   : formObj.serialize(),
 	            method : "POST",
 	            dataType : "json",
@@ -72,7 +72,7 @@ if(! fsc.installed) {
 
 		inpReq.val('status');
 	    $.ajax({
-	    	url    : ctxPath + "/jsp/login.jsp",
+	    	url    : ctxPath + "/jsp/fslogin.jsp",
             data   : formObj.serialize(),
             method : "POST",
             dataType : "json",
@@ -84,7 +84,7 @@ if(! fsc.installed) {
 	    btnLogout.on('click', function() {
 	    	inpReq.val('logout');
 	        $.ajax({
-	            url    : ctxPath + "/jsp/login.jsp",
+	            url    : ctxPath + "/jsp/fslogin.jsp",
 	            data   : formObj.serialize(),
 	            method : "POST",
 	            dataType : "json",

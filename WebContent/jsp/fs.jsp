@@ -18,10 +18,10 @@ if(! fsc.installed) {
 	%>
 	<script type="text/javascript">
 	$(function() {
-		location.href = "<%=fsc.ctxPath%>/jsp/install.jsp";
+		location.href = "<%=fsc.ctxPath%>/jsp/fsinstall.jsp";
 	});
 	</script>
-	<a href="<%=fsc.ctxPath%>/jsp/install.jsp" class='lang_element' data-lang-en='[Install]'>[설치]</a>
+	<a href="<%=fsc.ctxPath%>/jsp/fsinstall.jsp" class='lang_element' data-lang-en='[Install]'>[설치]</a>
 	<%
 } else {
 String pathParam = request.getParameter("path");

@@ -54,7 +54,7 @@ import com.oreilly.servlet.MultipartRequest;
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 
 public class FSControl {
-	public static final int[] VERSION = {1, 0, 0, 3};
+	public static final int[] VERSION = {1, 0, 0, 5};
 	
 	private static FSControl instance = null;
 	
