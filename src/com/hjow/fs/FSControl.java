@@ -19,6 +19,9 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -37,13 +40,17 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.Icon;
+import javax.swing.filechooser.FileSystemView;
 
 import org.apache.commons.codec.binary.Base64;
 import org.json.simple.JSONArray;
@@ -54,7 +61,7 @@ import com.oreilly.servlet.MultipartRequest;
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 
 public class FSControl {
-	public static final int[] VERSION = {1, 0, 0, 5};
+	public static final int[] VERSION = {1, 0, 0, 6};
 	
 	private static FSControl instance = null;
 	
@@ -75,7 +82,11 @@ public class FSControl {
 	// Storage Root Directory
 	public String storPath  = "/fsdir/storage/";
 
+	// Reading configuration file time gap (milliseconds)
 	public long   refreshConfGap = 4000L;
+	
+	// Read and display file icon
+	public boolean readFileIcon = true;
 
 	// Download limit size (KB)
 	public long   limitSize = 10 * 1024 * 1024;
@@ -272,6 +283,9 @@ public class FSControl {
 				if(conf.get("LimitUploadSize") != null) {
 					limitSize = Long.parseLong(conf.get("LimitUploadSize").toString().trim());
 				}
+				if(conf.get("ReadFileIcon") != null) {
+					readFileIcon = Boolean.parseBoolean(conf.get("ReadFileIcon").toString().trim());
+				}
 				if(conf.get("Salt") != null) {
 					salt = conf.get("Salt").toString().trim();
 				}
@@ -366,15 +380,18 @@ public class FSControl {
 				
 				String sMaxSize = request.getParameter("limitsize");
 				if(sMaxSize == null) sMaxSize = "" + (1024 * 1024);
-				Long.parseLong(sMaxSize); // Checking valid number)
+				Long.parseLong(sMaxSize); // Checking valid number
 				
 				String sUseCaptchaDown  = request.getParameter("usecaptchadown");
 				String sUseCaptchaLogin = request.getParameter("usecaptchalogin");
+				String sReadFileIcon    = request.getParameter("readfileicon");
 				
 				boolean useCaptchaDown  = false;
 				boolean useCaptchaLogin = false;
+				boolean useReadFileIcon = false;
 				
-				if(sUseCaptchaDown != null) useCaptchaDown = Boolean.parseBoolean(sUseCaptchaDown.trim());
+				if(sUseCaptchaDown != null) useCaptchaDown  = Boolean.parseBoolean(sUseCaptchaDown.trim());
+				if(sReadFileIcon   != null) useReadFileIcon = Boolean.parseBoolean(sReadFileIcon.trim());
 				
 				String sUseAccounts = request.getParameter("useaccount");
 				if(sUseAccounts != null) {
@@ -446,6 +463,7 @@ public class FSControl {
 				conf.put("UseCaptchaDown" , new Boolean(useCaptchaDown));
 				conf.put("UseCaptchaLogin", new Boolean(useCaptchaLogin));
 				conf.put("LimitUploadSize", sMaxSize);
+				conf.put("ReadFileIcon", new Boolean(useReadFileIcon));
 				conf.put("S1", s1);
 		        conf.put("S2", s2);
 		        conf.put("S3", s3);
@@ -649,6 +667,52 @@ public class FSControl {
 		json.put("session", jsonSess);
 		
 		return json;
+	}
+	
+	public Map<File, String> getIcons(List<File> files, Color background) {
+		Map<File, String> iconMap = new HashMap<File, String>();
+		
+		for(File f : files) {
+			Icon icon = FileSystemView.getFileSystemView().getSystemIcon(f);
+			BufferedImage img = null;
+			Graphics2D g = null;
+			try {
+				// Icon to BufferedImage
+				int w = icon.getIconWidth();
+	            int h = icon.getIconHeight();
+	            int gp = 2;
+	            int imgWidth  = w + (gp * 2);
+	            int imgHeight = h + (gp * 2);
+	            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+	            GraphicsDevice gd = ge.getDefaultScreenDevice();
+	            GraphicsConfiguration gc = gd.getDefaultConfiguration();
+	            img = gc.createCompatibleImage(imgWidth, imgHeight);
+	            g = img.createGraphics();
+	            g.setColor(background);
+	            g.fillRect(0, 0, imgWidth, imgHeight);
+	            icon.paintIcon(null, g, gp, gp);
+	            g.dispose(); g = null;
+	            ge = null;
+	            gd = null;
+	            gc = null;
+	            
+				ByteArrayOutputStream collector = new ByteArrayOutputStream();
+				ImageIO.write(img, "png", collector);
+				img = null;
+				
+				String binary = Base64.encodeBase64String(collector.toByteArray());
+				collector = null;
+				
+				iconMap.put(f, "data:image/png;base64, " + binary);
+			} catch(Throwable t) {
+				t.printStackTrace();
+				continue;
+			} finally {
+				if(g != null) g.dispose();
+			}
+		}
+		
+		return iconMap;
 	}
 	
 	public String createCaptchaBase64(HttpServletRequest request, String key, String code, long time, double scale, String theme) {

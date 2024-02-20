@@ -37,6 +37,7 @@ if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
 <script type='text/javascript'>
 $(function() {
     var ctxPath = "<%=fsc.ctxPath%>";
+    var useIcon        = <%=fsc.readFileIcon    ? "true" : "false"%>;
     var useCaptchaDown = <%=fsc.captchaDownload ? "true" : "false"%>;
     var captchaWidth  = parseInt("<%=fsc.captchaWidth  + 100%>");
     var captchaHeight = parseInt("<%=fsc.captchaHeight + 180%>");
@@ -57,6 +58,83 @@ $(function() {
 
     listRoot.empty();
     pathDisp.text('');
+    
+    function fIconize() {
+    	if(! useIcon) {
+    		listRoot.find('.tr_dir.no_icon').removeClass('no_icon');
+    		listRoot.find('.tr_file.no_icon').removeClass('no_icon');
+    		return;
+    	}
+    	
+    	listRoot.find('.tr_dir.no_icon').each(function() {
+    		var tdIcon = $(this).find('.td_mark_dir');
+    		tdIcon.empty();
+    		tdIcon.append("<img style='width: 20px; height: 20px;'/>");
+    		tdIcon.find('img').attr('src', ctxPath + '/css/images/dir.ico');
+    	});
+    	
+    	var iconizeIndex = 0;
+        var iconizeArray = [];
+        var breaks = false;
+        var bkColor = {r : 255, g : 255, b : 255};
+        if($('body').is('.dark')) bkColor = {r : 59, g : 59, b : 59};
+        
+        listRoot.find('.tr_file.no_icon').each(function() {
+        	if(breaks) return;
+        	
+            var fileNm = $(this).find('a.link_file').attr('data-name');
+            if(typeof(fileNm) != 'undefined') {
+            	var tries = $(this).attr('data-try');
+                
+                if(tries == null || typeof(tries) == 'undefined' || tries == '') tries = 0;
+                else tries = parseInt(String(tries).trim());
+                
+                tries++;
+                $(this).attr('data-try', '' + tries);
+                
+                if(tries >= 3) return;
+            	iconizeArray.push(fileNm);
+            }
+            
+            if(iconizeArray.length >= 10) {
+            	var filelist = '';
+            	for(var fdx=0; fdx<iconizeArray.length; fdx++) {
+            		if(filelist != '') filelist += ',';
+            		filelist += iconizeArray[fdx];
+            	}
+                $.ajax({
+                	url  : ctxPath + "/jsp/fsfileicons.jsp",
+                	data : { path : inpPath.val(), files : filelist, br : bkColor.r, bg : bkColor.g, bb : bkColor.b },
+                	method : 'POST',
+                	dataType : 'json',
+                	success : function(data) {
+                		if(data.success) {
+                			$.each(data.data, function(dFileName, dImage) {
+                				listRoot.find('.tr_file.no_icon').each(function() {
+                					if(! $(this).is('.no_icon')) return;
+                					
+                					var inFileNm = $(this).find('a.link_file').attr('data-name');
+                					if(inFileNm != dFileName) return;
+                					
+                					var tdIcon = $(this).find('.td_mark_file');
+                					tdIcon.empty();
+                					tdIcon.append("<img style='width: 20px; height: 20px;'/>");
+                					tdIcon.find('img').attr('src', dImage);
+                					
+                					$(this).removeClass('no_icon');
+                					$(this).addClass('icon');
+                				});
+                			});
+                		}
+                	}, complete : function() {
+                		fIconize();
+                	}
+                });
+                iconizeArray = [];
+                breaks = true;
+            }
+        });
+    }
 
     function fReload() {
         tables.find('.col_controls').css('width', '10px');
@@ -100,7 +178,7 @@ $(function() {
                     var lvalue = String(arDirs[idx].value);
                     var lname  = String(arDirs[idx].name);
                     
-                    listRoot.append("<tr class='element tr_dir_" + idx + "'><td class='td_mark_dir'>[DIR]</td><td colspan='2'><a href='#' class='link_dir' data-path=''></a></td><td class='td_buttons'></td></tr>");
+                    listRoot.append("<tr class='element tr_dir tr_dir_" + idx + "'><td class='td_mark_dir'>[DIR]</td><td colspan='2'><a href='#' class='link_dir' data-path=''></a></td><td class='td_buttons'></td></tr>");
                     
                     var tr = listRoot.find('.tr_dir_' + idx);
                     var a  = tr.find('.link_dir');
@@ -108,6 +186,7 @@ $(function() {
                     a.attr('data-path', lvalue);
                     a.text(lname);
                     a.addClass('ellipsis');
+                    tr.addClass('no_icon');
 
                     if(idType == 'A') {
                     	var tdBtns = tr.find('.td_buttons');
@@ -119,15 +198,16 @@ $(function() {
                     var lname  = String(arFiles[idx].name);
                     var lsize  = String(arFiles[idx].size);
                     
-                    listRoot.append("<tr class='element tr_file_" + idx + "'><td colspan='2' class='filednd'><a href='#' class='link_file' data-path='' data-name=''></a></td><td class='td_file_size filednd'></td><td class='td_buttons'></td></tr>");
+                    listRoot.append("<tr class='element tr_file tr_file_" + idx + "'><td class='td_mark_file filednd'>[FILE]</td><td class='filednd'><a href='#' class='link_file' data-path='' data-name=''></a></td><td class='td_file_size filednd'></td><td class='td_buttons'></td></tr>");
                     
                     var tr = listRoot.find('.tr_file_' + idx);
                     var a  = tr.find('.link_file');
                     
-                    a.attr('data-path', $('.hidden_path').val());
+                    a.attr('data-path', inpPath.val());
                     a.attr('data-name', lname);
                     a.text(lname);
                     a.addClass('ellipsis');
+                    tr.addClass('no_icon');
                     tr.find('.td_file_size').text(lsize);
                     tr.find('.td_file_size').css('text-align', 'right');
 
@@ -176,7 +256,7 @@ $(function() {
                 $('.link_back').each(function() {
                     var aLink = $(this);
                     aLink.on('click', function() {
-                        var lists = $('.hidden_path').val().split('/');
+                        var lists = inpPath.val().split('/');
                         var newPath = '';
                         for(var ldx = 0; ldx < lists.length - 1; ldx++) {
                             if(ldx >= 1) newPath += '/';
@@ -206,9 +286,9 @@ $(function() {
                         var theme = '';
                         if($('body').is('.dark')) theme='dark';
                         if(useCaptchaDown) {
-                        	window.open(ctxPath + '/jsp/' + 'fscaptdown.jsp?theme=' + theme + '&path=' + encodeURIComponent($('.hidden_path').val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')), 'download', popOpt);
+                        	window.open(ctxPath + '/jsp/' + 'fscaptdown.jsp?theme=' + theme + '&path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')), 'download', popOpt);
                         } else {
-                        	window.open(ctxPath + '/jsp/' + 'fsdown.jsp?path=' + encodeURIComponent($('.hidden_path').val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')), 'download', popOpt);
+                        	window.open(ctxPath + '/jsp/' + 'fsdown.jsp?path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')), 'download', popOpt);
                         }
                     });
                     aLink.addClass('binded-click');
@@ -230,6 +310,7 @@ $(function() {
                 }
                 
                 FSUtil.applyLanguage();
+                fIconize();
             }, error : function(jqXHR, textStatus, errorThrown) {
             	textStatus  = String(textStatus).replace(/[<>]+/g, '');
             	errorThrown = String(errorThrown).replace(/[<>]+/g, '');

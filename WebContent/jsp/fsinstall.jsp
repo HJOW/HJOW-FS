@@ -133,6 +133,14 @@ if(! fsc.installed) {
                         <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Salt'>Salt</div>
                         <div class='col-sm-10'><input type='password' name='salt' class='full' placeholder="Salt" value='fs'/></div>
                     </div>
+                    <div class='row'>
+                        <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='ETC'>기타</div>
+                        <div class='col-sm-10'>
+                            <span>
+                                <label><input type='checkbox' name='readfileicon'  class='chk_read_icon'  value="true"/><span class='lang_element' data-lang-en="Read file's icon">파일 아이콘 읽기</span></label>
+                            </span>
+                        </div>
+                    </div>
 		        </div>
 		        <div class='col-sm-2'>
 		            <div class='col-sm-12'><input type='submit' value='설치' class='full lang_attr_element' style='height:50px;' data-lang-target='value' data-lang-en='Install'/></div>
