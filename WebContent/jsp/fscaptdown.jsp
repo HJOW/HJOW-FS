@@ -28,7 +28,7 @@ if(speed     == null) speed     = "";
 if(theme     == null) theme     = "";
 
 pathParam = FSUtils.removeSpecials(pathParam, false, true, true, false, true).replace("\\", "/").trim();
-fileName  = FSUtils.removeSpecials(fileName, false, true, true, true, false).replace("?", "").replace("&", "").trim();
+fileName  = FSUtils.removeSpecials(fileName, false, true, true, true, false).replace("..", "").replace("?", "").replace("&", "").trim();
 speed     = FSUtils.removeSpecials(speed   ).replace("?", "").replace("&", "").trim();
 theme     = FSUtils.removeSpecials(theme   ).replace("?", "").replace("&", "").trim();
 
