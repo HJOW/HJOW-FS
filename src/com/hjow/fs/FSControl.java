@@ -305,6 +305,7 @@ public class FSControl {
 					if(getLanguage(request).equals("ko")) rex = "비밀번호를 입력해 주세요.";
 					throw new RuntimeException(rex);
 				}
+				passwords = passwords.trim();
 				
 				propIn = this.getClass().getResourceAsStream("/fs.properties");
 		        if(propIn == null) {
@@ -349,8 +350,12 @@ public class FSControl {
 					throw new RuntimeException("Please input the Root Directory !");
 				}
 				
-				if(! passwords.trim().equals(tx3.trim())) {
-					throw new RuntimeException("Wrong installation password !");
+				if(! passwords.equals(tx3.trim())) {
+					MessageDigest digest = MessageDigest.getInstance("SHA-256");
+					byte[] pwbytes = digest.digest(passwords.getBytes("UTF-8"));
+					if(! Base64.encodeBase64String(pwbytes).equals(tx3.trim())) {
+						throw new RuntimeException("Wrong installation password !");
+					}
 				}
 				
 				rootPath = new File(roots);
