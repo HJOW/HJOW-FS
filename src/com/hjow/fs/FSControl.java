@@ -269,6 +269,9 @@ public class FSControl {
 				if(conf.get("UseCaptchaLogin") != null) {
 					captchaLogin = Boolean.parseBoolean(conf.get("UseCaptchaLogin").toString().trim());
 				}
+				if(conf.get("LimitUploadSize") != null) {
+					limitSize = Long.parseLong(conf.get("LimitUploadSize").toString().trim());
+				}
 				if(conf.get("Salt") != null) {
 					salt = conf.get("Salt").toString().trim();
 				}
@@ -356,6 +359,10 @@ public class FSControl {
 				garbage = new File(rootPath.getAbsolutePath() + File.separator + ".garbage");
 				if(! garbage.exists()) garbage.mkdirs();
 				
+				String sMaxSize = request.getParameter("limitsize");
+				if(sMaxSize == null) sMaxSize = "" + (1024 * 1024);
+				Long.parseLong(sMaxSize); // Checking valid number)
+				
 				String sUseCaptchaDown  = request.getParameter("usecaptchadown");
 				String sUseCaptchaLogin = request.getParameter("usecaptchalogin");
 				
@@ -433,6 +440,7 @@ public class FSControl {
 				conf.put("UseAccount", new Boolean(! noLogin));
 				conf.put("UseCaptchaDown" , new Boolean(useCaptchaDown));
 				conf.put("UseCaptchaLogin", new Boolean(useCaptchaLogin));
+				conf.put("LimitUploadSize", sMaxSize);
 				conf.put("S1", s1);
 		        conf.put("S2", s2);
 		        conf.put("S3", s3);
