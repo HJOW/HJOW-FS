@@ -60,19 +60,15 @@ $(function() {
     pathDisp.text('');
     
     function fIconize() {
-    	if(! useIcon) {
-    		listRoot.find('.tr_dir.no_icon').removeClass('no_icon');
-    		listRoot.find('.tr_file.no_icon').removeClass('no_icon');
-    		return;
-    	}
-    	
     	listRoot.find('.tr_dir.no_icon').each(function() {
     		var tdIcon = $(this).find('.td_mark_dir');
     		tdIcon.empty();
     		tdIcon.append("<img style='width: 20px; height: 20px;'/>");
     		tdIcon.find('img').attr('src', ctxPath + '/css/images/dir.ico');
+    		tdIcon.find('img').attr('alt', 'Directory');
     	});
     	
+    	var iconizeWorkSize = 10;
     	var iconizeIndex = 0;
         var iconizeArray = [];
         var breaks = false;
@@ -81,6 +77,14 @@ $(function() {
         
         listRoot.find('.tr_file.no_icon').each(function() {
         	if(breaks) return;
+        	
+        	var tdIcon = $(this).find('.td_mark_file');
+            tdIcon.empty();
+            tdIcon.append("<img style='width: 20px; height: 20px;'/>");
+            tdIcon.find('img').attr('src', ctxPath + '/css/images/files.png');
+            tdIcon.find('img').attr('alt', 'File');
+            
+            if(! useIcon) return;
         	
             var fileNm = $(this).find('a.link_file').attr('data-name');
             if(typeof(fileNm) != 'undefined') {
@@ -96,12 +100,15 @@ $(function() {
             	iconizeArray.push(fileNm);
             }
             
-            if(iconizeArray.length >= 10) {
+            if(iconizeArray.length >= iconizeWorkSize) {
             	var filelist = '';
-            	for(var fdx=0; fdx<iconizeArray.length; fdx++) {
+            	var fdx=0;
+            	for(fdx=0; fdx<iconizeArray.length; fdx++) {
             		if(filelist != '') filelist += ',';
             		filelist += iconizeArray[fdx];
             	}
+            	var workingArray = iconizeArray;
+            	iconizeArray = [];
                 $.ajax({
                 	url  : ctxPath + "/jsp/fsfileicons.jsp",
                 	data : { path : inpPath.val(), files : filelist, br : bkColor.r, bg : bkColor.g, bb : bkColor.b },
@@ -109,6 +116,7 @@ $(function() {
                 	dataType : 'json',
                 	success : function(data) {
                 		if(data.success) {
+                			// Apply received icon
                 			$.each(data.data, function(dFileName, dImage) {
                 				listRoot.find('.tr_file.no_icon').each(function() {
                 					if(! $(this).is('.no_icon')) return;
@@ -116,10 +124,11 @@ $(function() {
                 					var inFileNm = $(this).find('a.link_file').attr('data-name');
                 					if(inFileNm != dFileName) return;
                 					
-                					var tdIcon = $(this).find('.td_mark_file');
-                					tdIcon.empty();
-                					tdIcon.append("<img style='width: 20px; height: 20px;'/>");
-                					tdIcon.find('img').attr('src', dImage);
+                					var inTdIcon = $(this).find('.td_mark_file');
+                					inTdIcon.empty();
+                					inTdIcon.append("<img style='width: 20px; height: 20px;'/>");
+                					inTdIcon.find('img').attr('src', dImage);
+                					inTdIcon.find('img').attr('alt', 'File');
                 					
                 					$(this).removeClass('no_icon');
                 					$(this).addClass('icon');
@@ -130,7 +139,6 @@ $(function() {
                 		fIconize();
                 	}
                 });
-                iconizeArray = [];
                 breaks = true;
             }
         });
