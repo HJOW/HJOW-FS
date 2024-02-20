@@ -19,7 +19,7 @@ if(! fsc.installed) {
 } else if(! fsc.noLogin) {
 	String sessionJson = (String) request.getSession().getAttribute("fssession");
 %>
-<div class='fs_accbar container show-grid full'>
+<div class='fs_accbar container valign_middle full'>
 	<script type='text/javascript'>
 	$(function() {
 		var ctxPath = "<%=fsc.ctxPath%>";
@@ -101,8 +101,8 @@ if(! fsc.installed) {
 	</script>
 	<form onsubmit='return false' class='form_fs_login'>
 	<input type='hidden' name='req' value='status' class='inp_req'/>
-	<div class='row login_element not_logined'>
-	     <div class='col-sm-4 container show-grid padding_top_10' style='width:270px;'>
+	<div class='row login_element not_logined padding_top_10'>
+	     <div class='container show-grid d_inline_block valign_middle' style='width:270px; height: 60px; '>
 	         <div class='row'>
 	             <div class='col-xs-12'>
 	                 <span style='display: inline-block; width:80px'>ID</span><input type='text' name='id' class='inp_login_element' style='width: 150px;'/>
@@ -114,17 +114,17 @@ if(! fsc.installed) {
 	             </div>
 	         </div>
 	     </div>
-	     <div class='col-sm-4 padding_top_10 div_captcha_login' style='width: <%=(fsc.captchaWidth + 10)%>px;'>
-	         <iframe style='width: <%=(fsc.captchaWidth + 5)%>px; height: <%=(fsc.captchaHeight + 5)%>px; border:0; margin-bottom: -5px;' class='if_captcha_l' src='<%=fsc.ctxPath%>/jsp/fscaptin.jsp?key=fsl&scale=1&theme='></iframe>
+	     <div class='div_captcha_login d_inline_block valign_middle' style='width: <%=(fsc.captchaWidth + 10)%>px;  height: 60px;'>
+	         <iframe style='width: <%=(fsc.captchaWidth + 5)%>px; height: <%=(fsc.captchaHeight + 5)%>px; border:0;' class='if_captcha_l valign_middle' src='<%=fsc.ctxPath%>/jsp/fscaptin.jsp?key=fsl&scale=1&theme='></iframe>
 	     </div>
-	     <div class='col-sm-2 padding_top_20 div_captcha_login' style='margin-left: 10px; width: <%=((fsc.captchaWidth / 2) + 10)%>px; text-align: left; vertical-align: middle;'>
-	         <input  style='width: <%=((fsc.captchaWidth / 2) + 5)%>px; height: <%=((fsc.captchaHeight / 2) + 5)%>px;' type='text' class='inp_captcha_l inp_login_element lang_attr_element' name='captcha' placeholder='옆의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code left'/>
+	     <div class='div_captcha_login d_inline_block valign_middle padding_top_10' style='margin-left: 10px; width: <%=((fsc.captchaWidth / 2) + 10)%>px;  height: 60px; text-align: left;'>
+	         <input  style='width: <%=((fsc.captchaWidth / 2) + 5)%>px; height: <%=((fsc.captchaHeight / 2) + 5)%>px;' type='text' class='inp_captcha_l inp_login_element lang_attr_element valign_middle' name='captcha' placeholder='옆의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code left'/>
 	     </div>
-	     <div class='col-sm-2 padding_top_10'>
-	         <input type='submit' value='로그인' class='full lang_attr_element' data-lang-target='value' data-lang-en='LOGIN' style='height: 50px;'/>
+	     <div class='d_inline_block valign_middle' style='width:100px;  height: 60px;'>
+	         <input type='submit' value='로그인' class='lang_attr_element' data-lang-target='value' data-lang-en='LOGIN' style='height: 50px;'/>
 	     </div>
 	</div>
-	<div class='row login_element logined'>
+	<div class='row login_element logined padding_top_10'>
 	    <div class='col-sm-12'>
 	        <span class='lang_element' data-lang-en='Welcome, '></span><span class='span_type'></span> <span class='span_nick'></span><span class='lang_element' data-lang-en=''> 님 환영합니다.</span> 
 	        <input type='button' value='로그아웃' class='btn_logout lang_attr_element' data-lang-target='value' data-lang-en='LOGOUT'/>

@@ -70,6 +70,13 @@ a {
 .padding_bottom_20 {
     padding-bottom: 20px;
 }
+.d_inline_block{
+	display: inline-block;
+	margin-left: 5px;
+}
+.valign_middle {
+	vertical-align: middle;
+}
 .ellipsis {
 	overflow: hidden;
     white-space: nowrap;
