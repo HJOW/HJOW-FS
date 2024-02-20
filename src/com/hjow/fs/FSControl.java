@@ -508,6 +508,11 @@ public class FSControl {
 		String lang = "en";
 		
 		try {
+			if(noLogin) {
+				if(lang.equals("ko")) throw new RuntimeException("이 작업을 수행할 권한이 없습니다.");
+				else                  throw new RuntimeException("No privilege");
+			}
+			
 			sessionMap = getSessionObject(request);
 			lang       = getLanguage(request);
 			
