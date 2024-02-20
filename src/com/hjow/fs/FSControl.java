@@ -771,56 +771,18 @@ public class FSControl {
 		json.put("path"   , pathParam);
 		json.put("dpath"  , pathDisp);
 
-		JSONArray dirs = new JSONArray();
-		for(File f : chDirs) {
-			String name = f.getName();
-		    if(! keyword.equals("")) { if(! name.contains(keyword)) continue; }
-		    if(name.equals(".garbage")) continue;
-		    if(name.equals(".upload")) continue;
-		    
-			String linkDisp = f.getAbsolutePath().replace(instance.rootPath.getAbsolutePath(), "").replace("\\", "/").replace("'", "").replace("\"", "");
-		    if(linkDisp.indexOf(".") >= 0) continue;
-		    if(linkDisp.indexOf("/") == 0) linkDisp = linkDisp.substring(1);
-		    
-		    JSONObject child = new JSONObject();
-		    child.put("type", "dir");
-		    child.put("name", name);
-		    child.put("value", linkDisp);
-		    try { child.put("elements", f.list().length); } catch(Exception ignores) { }
-		    dirs.add(child);
-		}
-		json.put("directories", dirs);
-		dirs = null;
-
-		JSONArray files = new JSONArray();
-		for(File f : chFiles) {
-			String name     = f.getName();
-		    if(! keyword.equals("")) { if(! name.toLowerCase().contains(keyword.toLowerCase())) continue; }
-		    
-		    String linkDisp = name.replace("\"", "'");
-		    
-		    JSONObject fileOne = new JSONObject();
-		    
-		    fileOne.put("type", "file");
-		    fileOne.put("name", linkDisp);
-		    fileOne.put("size", getFileSize(f));
-		    
-		    files.add(fileOne);
-		}
-		json.put("files", files);
-		json.put("privilege", "view");
-
 		JSONObject jsonSess = new JSONObject();
 		JSONParser parser   = new JSONParser();
 		try {
 			jsonSess = getSessionObject(request);
+			JSONArray dirPrv = null;
+			String idtype = "U";
 			if(jsonSess != null) {
 				if(jsonSess.get("idtype") != null) {
-					if(jsonSess.get("idtype").toString().equals("A")) json.put("privilege", "edit");
-					
+					idtype = jsonSess.get("idtype").toString();
 					Object oDirPrv = (Object) jsonSess.get("privileges");
 				    if(oDirPrv != null) {
-				    	JSONArray dirPrv = null;
+				    	dirPrv = null;
 			            if(oDirPrv instanceof JSONArray) {
 			                dirPrv = (JSONArray) oDirPrv;
 			            } else {
@@ -836,7 +798,7 @@ public class FSControl {
 			            		String dPath = dirOne.get("path"     ).toString();
 			            		String dPrv  = dirOne.get("privilege").toString();
 			            		
-			            		if(pathParam.startsWith(dPath)) {
+			            		if(pathParam.startsWith(dPath) || ("/" + pathParam).startsWith(dPath)) {
 			            			if(dPrv.equals("edit")) {
 			            				json.put("privilege", "edit");
 			            				break;
@@ -847,8 +809,98 @@ public class FSControl {
 			            	}
 			            }
 				    }
+				    if(idtype.equals("A")) json.put("privilege", "edit");
 				}
 			}
+			if(dirPrv == null) dirPrv = new JSONArray();
+			
+			Object oHiddenDir = conf.get("HiddenDirs");
+			List<String> hiddenDirList = new ArrayList<String>();
+			
+			if(oHiddenDir != null) {
+				JSONArray hiddenDir = null;
+				if(oHiddenDir instanceof JSONArray) hiddenDir = (JSONArray) oHiddenDir;
+				else                                hiddenDir = (JSONArray) new JSONParser().parse(oHiddenDir.toString().trim());
+				oHiddenDir = null;
+				if(hiddenDir != null) {
+					for(Object obj : hiddenDir) {
+						hiddenDirList.add(obj.toString().trim());
+					}
+				}
+				
+				if(idtype.equals("A")) {
+					hiddenDirList.clear();
+				} else {
+					for(Object row : dirPrv) {
+		            	JSONObject dirOne = null;
+		            	if(row instanceof JSONObject) dirOne = (JSONObject) row;
+		            	else                          dirOne = (JSONObject) parser.parse(row.toString().trim());
+		            	
+		            	try {
+		            		String dPath = dirOne.get("path"     ).toString();
+		            		String dPrv  = dirOne.get("privilege").toString();
+		            		
+		            		int hdx=0;
+		            		while(hdx < hiddenDirList.size()) {
+		            			String hiddenDirOne = hiddenDirList.get(hdx);
+		            			if(hiddenDirOne.startsWith(dPath) || ("/" + hiddenDirOne).startsWith(dPath)) {
+			            			if(dPrv.equals("view") || dPrv.equals("edit")) {
+			            				hiddenDirList.remove(hdx);
+			            				continue;
+			            			}
+			            		}
+		            			hdx++;
+		            		}
+		            	} catch(Throwable t) {
+		            		System.out.println("Wrong account configuration - " + t.getMessage());
+		            	}
+		            }
+				}
+			}
+
+			JSONArray dirs = new JSONArray();
+			for(File f : chDirs) {
+				String name = f.getName();
+			    if(! keyword.equals("")) { if(! name.contains(keyword)) continue; }
+			    if(name.equals(".garbage")) continue;
+			    if(name.equals(".upload" )) continue;
+			    
+				String linkDisp = f.getAbsolutePath().replace(instance.rootPath.getAbsolutePath(), "").replace("\\", "/").replace("'", "").replace("\"", "");
+			    if(linkDisp.indexOf(".") >= 0) continue;
+			    if(linkDisp.indexOf("/") == 0) linkDisp = linkDisp.substring(1);
+			    
+			    for(String h : hiddenDirList) {
+			    	if(linkDisp.startsWith(h)) continue;
+			    	if(("/" + linkDisp).startsWith(h)) continue;
+			    }
+			    
+			    JSONObject child = new JSONObject();
+			    child.put("type", "dir");
+			    child.put("name", name);
+			    child.put("value", linkDisp);
+			    try { child.put("elements", f.list().length); } catch(Exception ignores) { }
+			    dirs.add(child);
+			}
+			json.put("directories", dirs);
+			dirs = null;
+
+			JSONArray files = new JSONArray();
+			for(File f : chFiles) {
+				String name     = f.getName();
+			    if(! keyword.equals("")) { if(! name.toLowerCase().contains(keyword.toLowerCase())) continue; }
+			    
+			    String linkDisp = name.replace("\"", "'");
+			    
+			    JSONObject fileOne = new JSONObject();
+			    
+			    fileOne.put("type", "file");
+			    fileOne.put("name", linkDisp);
+			    fileOne.put("size", getFileSize(f));
+			    
+			    files.add(fileOne);
+			}
+			json.put("files", files);
+			json.put("privilege", "view");
 		} catch(Throwable t) {
 			t.printStackTrace();
 			if(jsonSess != null) jsonSess.clear();
@@ -1033,7 +1085,7 @@ public class FSControl {
 		                String dPath = dirOne.get("path"     ).toString();
 		                String dPrv  = dirOne.get("privilege").toString();
 		                
-		                if(pathParam.startsWith(dPath)) {
+		                if(pathParam.startsWith(dPath) || ("/" + pathParam).startsWith(dPath)) {
 		                    if(dPrv.equals("edit")) {
 		                    	hasPriv = true;
 		                        break;
@@ -1309,7 +1361,7 @@ public class FSControl {
 		                String dPath = dirOne.get("path"     ).toString();
 		                String dPrv  = dirOne.get("privilege").toString();
 		                
-		                if(pathParam.startsWith(dPath)) {
+		                if(pathParam.startsWith(dPath) || ("/" + pathParam).startsWith(dPath)) {
 		                    if(dPrv.equals("edit")) {
 		                        hasPriv = true;
 		                        break;
@@ -1394,7 +1446,7 @@ public class FSControl {
 		                String dPath = dirOne.get("path"     ).toString();
 		                String dPrv  = dirOne.get("privilege").toString();
 		                
-		                if(pathParam.startsWith(dPath)) {
+		                if(pathParam.startsWith(dPath) || ("/" + pathParam).startsWith(dPath)) {
 		                    if(dPrv.equals("edit")) {
 		                        hasPriv = true;
 		                        break;
