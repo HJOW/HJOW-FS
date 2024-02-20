@@ -56,12 +56,13 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import com.oreilly.servlet.MultipartRequest;
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 
 public class FSControl {
-	public static final int[] VERSION = {1, 0, 0, 6};
+	public static final int[] VERSION = {1, 0, 0, 7};
 	
 	private static FSControl instance = null;
 	
@@ -494,6 +495,187 @@ public class FSControl {
 	}
 	
 	@SuppressWarnings("unchecked")
+	public JSONObject admin(HttpServletRequest request) throws Exception {
+		JSONObject json       = new JSONObject();
+		JSONObject jsonConfig = new JSONObject();
+		
+		Properties   propTest = new Properties();
+	    InputStream  propIn   = null;
+		OutputStream fileOut  = null;
+		Reader rd1 = null, rd2 = null;
+		
+		JSONObject sessionMap = null;
+		String lang = "en";
+		
+		try {
+			sessionMap = getSessionObject(request);
+			lang       = getLanguage(request);
+			
+			if(sessionMap == null) {
+				if(lang.equals("ko")) throw new RuntimeException("이 작업을 수행할 권한이 없습니다.");
+				else                  throw new RuntimeException("No privilege");
+			}
+			
+			Object idtype = sessionMap.get("idtype");
+			if(idtype == null) {
+				if(lang.equals("ko")) throw new RuntimeException("이 작업을 수행할 권한이 없습니다.");
+				else                  throw new RuntimeException("No privilege");
+			}
+			if(! idtype.toString().equals("A")) {
+				if(lang.equals("ko")) throw new RuntimeException("이 작업을 수행할 권한이 없습니다.");
+				else                  throw new RuntimeException("No privilege");
+			}
+			
+			String req = request.getParameter("req");
+			if(req == null) {
+				String rex = "Wrong request !";
+				if(getLanguage(request).equals("ko")) rex = "올바르지 않은 네트워크 요청으로 작업이 거부되었습니다. 새로고침 후 다시 이용해 주세요.";
+				throw new RuntimeException(rex);
+			}
+			
+			propIn = this.getClass().getResourceAsStream("/fs.properties");
+	        if(propIn == null) {
+	        	String rex = "No fs.properties found at ./WEB-INF/classes/";
+				if(getLanguage(request).equals("ko")) rex = "fs.properties 파일을 찾을 수 없습니다. ./WEB-INF/classes/ 경로 상에 이 파일이 있어야 합니다.";
+	        	throw new FileNotFoundException(rex);
+	        }
+	        
+	        propTest = new Properties();
+	        propTest.load(propIn);
+	        
+	        propIn.close(); propIn = null;
+	        
+	        // Check fs.properties
+	        String tx1 = propTest.getProperty("FS");
+	        String tx2 = propTest.getProperty("RD");
+	        String tx3 = propTest.getProperty("PW");
+	        String s1  = propTest.getProperty("S1");
+	        String s2  = propTest.getProperty("S2");
+	        String s3  = propTest.getProperty("S3");
+	        
+	        propTest.clear();
+	        propTest = null;
+	        
+	        if(tx1 == null || tx2 == null || tx3 == null || s1 == null || s2 == null || s3 == null) {
+	        	String rex = "No correct fs.properties found at ./WEB-INF/classes/ ! Please check values !";
+				if(getLanguage(request).equals("ko")) rex = "fs.properties 파일 내용이 올바르지 않습니다. ./WEB-INF/classes/ 경로 상에 이 파일이 있습니다. 파일 내용을 점검해 주세요.";
+	        	throw new FileNotFoundException(rex);
+	        } else if(! (tx1.trim().equals("FileStorage") && tx2.trim().equals("SetConfigPathBelow"))) {
+	        	String rex = "No correct fs.properties found at ./WEB-INF/classes/ ! Please check values !";
+				if(getLanguage(request).equals("ko")) rex = "fs.properties 파일 내용이 올바르지 않습니다. ./WEB-INF/classes/ 경로 상에 이 파일이 있습니다. 파일 내용을 점검해 주세요.";
+	        	throw new FileNotFoundException(rex);
+	        }
+	        
+	        File fJson = new File(fileConfigPath.getAbsolutePath() + File.separator + "config.json");
+	        
+	        if(! fJson.exists()) {
+                // Not exist, create
+                fileOut = new FileOutputStream(fJson);
+                fileOut.write("{}".getBytes(cs));
+                fileOut.close(); fileOut = null;
+            }
+            
+            propIn = new FileInputStream(fJson);
+            rd1 = new InputStreamReader(propIn, cs);
+            rd2 = new BufferedReader(rd1);
+            
+            StringBuilder lineCollection = new StringBuilder("");
+            String line;
+            while(true) {
+            	line = ((BufferedReader) rd2).readLine();
+            	if(line == null) break;
+            	lineCollection = lineCollection.append("\n").append(line); 
+            }
+            
+            rd2.close(); rd2 = null;
+            rd1.close(); rd1 = null;
+            propIn.close(); propIn = null;
+            
+            JSONParser parser = new JSONParser();
+            jsonConfig = (JSONObject) parser.parse(lineCollection.toString().trim());
+            
+            json.put("message", "");
+			
+			if(req.equals("update")) {
+				String titles = request.getParameter("title");
+		        if(titles == null) titles = "File Storage";
+		        titles = titles.trim();
+		        if(titles.equals("")) titles = "File Storage";
+		        
+				if(! rootPath.exists()) rootPath.mkdirs();
+				
+				garbage = new File(rootPath.getAbsolutePath() + File.separator + ".garbage");
+				if(! garbage.exists()) garbage.mkdirs();
+				
+				String sMaxSize = request.getParameter("limitsize");
+				if(sMaxSize == null) sMaxSize = "" + (1024 * 1024);
+				Long.parseLong(sMaxSize); // Checking valid number
+				
+				String sUseCaptchaDown  = request.getParameter("usecaptchadown");
+				String sUseCaptchaLogin = request.getParameter("usecaptchalogin");
+				String sReadFileIcon    = request.getParameter("readfileicon");
+				
+				boolean useCaptchaDown  = false;
+				boolean useCaptchaLogin = false;
+				boolean useReadFileIcon = false;
+				
+				if(sUseCaptchaDown != null) useCaptchaDown  = Boolean.parseBoolean(sUseCaptchaDown.trim());
+				if(sReadFileIcon   != null) useReadFileIcon = Boolean.parseBoolean(sReadFileIcon.trim());
+				
+				String sUseAccounts = request.getParameter("useaccount");
+				if(sUseAccounts != null) {
+					noLogin = (! Boolean.parseBoolean(sUseAccounts.trim()));
+					if(! noLogin) {
+						if(sUseCaptchaLogin != null) useCaptchaLogin = Boolean.parseBoolean(sUseCaptchaLogin.trim());
+					}
+				} else {
+					noLogin = true;
+				}
+				
+				conf.put("Title", titles);
+				conf.put("UseAccount", new Boolean(! noLogin));
+				conf.put("UseCaptchaDown" , new Boolean(useCaptchaDown));
+				conf.put("UseCaptchaLogin", new Boolean(useCaptchaLogin));
+				conf.put("LimitUploadSize", sMaxSize);
+				conf.put("ReadFileIcon", new Boolean(useReadFileIcon));
+				conf.put("Installed", new Boolean(true));
+				
+				fileOut = new FileOutputStream(fJson);
+				fileOut.write(conf.toJSONString().getBytes(cs));
+				fileOut.close(); fileOut = null;
+				
+				System.out.println("Configuration Updated by " + sessionMap.get("id") + " when " + System.currentTimeMillis());
+				jsonConfig.clear();
+				jsonConfig.putAll(conf);
+				
+				json.put("message", "Update Success !");
+			}
+			
+			jsonConfig.remove("Path");
+			jsonConfig.remove("S1");
+			jsonConfig.remove("S2");
+			jsonConfig.remove("S3");
+			jsonConfig.remove("Salt");
+			
+			json.put("success", new Boolean(true));
+			json.put("config" , jsonConfig);
+			
+		} catch(Throwable t) {
+			json.put("success", new Boolean(false));
+			if(t instanceof RuntimeException) {
+				json.put("message", t.getMessage());
+			} else {
+				json.put("message", "Error : " + t.getMessage());
+			}
+		} finally {
+			if(fileOut != null) fileOut.close();
+			if(propIn  != null) propIn.close();
+		}
+		
+		return json;
+	}
+	
+	@SuppressWarnings("unchecked")
 	public JSONObject list(HttpServletRequest request, String pPath, String pKeyword) {
 		initialize(request);
 		
@@ -571,38 +753,9 @@ public class FSControl {
 		    
 		    JSONObject fileOne = new JSONObject();
 		    
-		    //  파일 이름 옆에 출력할 용량 텍스트 생성
-		    long   lSize = f.length();
-		    String sUnit = "byte";
-		    String comp  = "" + lSize + " " + sUnit;
-		    
-		    if(lSize < 0) lSize = 0;
-		    if(lSize <= 1) {
-		        sUnit = "byte";
-		        comp = lSize + " " + sUnit;
-		    }
-		    
-		    if(lSize >= 1024) {
-		        sUnit = "KB";
-		        comp  = (Math.round(( lSize / 1024.0 ) * 10) / 10.0) + " " + sUnit;
-		        lSize = lSize / 1024;
-		    }
-		    
-		    if(lSize >= 1024) {
-		        sUnit = "MB";
-		        comp  = (Math.round(( lSize / 1024.0 ) * 10) / 10.0) + " " + sUnit;
-		        lSize = lSize / 1024;
-		    }
-		    
-		    if(lSize >= 1024) {
-		        sUnit = "GB";
-		        comp  = (Math.round(( lSize / 1024.0 ) * 10) / 10.0) + " " + sUnit;
-		        lSize = lSize / 1024;
-		    }
-		    
 		    fileOne.put("type", "file");
 		    fileOne.put("name", linkDisp);
-		    fileOne.put("size", comp);
+		    fileOne.put("size", getFileSize(f));
 		    
 		    files.add(fileOne);
 		}
@@ -612,24 +765,12 @@ public class FSControl {
 		JSONObject jsonSess = new JSONObject();
 		JSONParser parser   = new JSONParser();
 		try {
-			String sessionJson = (String) request.getSession().getAttribute("fssession");
-			if(sessionJson != null) {
-				sessionJson = sessionJson.trim();
-				if(! sessionJson.equals("")) {
-					JSONObject obj = (JSONObject) parser.parse(sessionJson);
-					if(obj != null) { if(obj.get("id"    ) == null) obj = null;         }
-				    if(obj != null) { if(obj.get("idtype") == null) obj = null;         }
-				    if(obj != null) { if(obj.get("nick"  ) == null) obj = null;         }
-				    if(obj != null) { if(obj.get("idtype").equals("block")) obj = null; } 
-				    if(obj != null) {
-				    	jsonSess.put("id"    , obj.get("id"));
-				    	jsonSess.put("idtype", obj.get("idtype"));
-				    	jsonSess.put("nick"  , obj.get("nick"));
-				    }
-				    
-				    if(jsonSess.get("idtype").toString().equals("A")) json.put("privilege", "edit");
-				    
-				    Object oDirPrv = (Object) obj.get("privileges");
+			jsonSess = getSessionObject(request);
+			if(jsonSess != null) {
+				if(jsonSess.get("idtype") != null) {
+					if(jsonSess.get("idtype").toString().equals("A")) json.put("privilege", "edit");
+					
+					Object oDirPrv = (Object) jsonSess.get("privileges");
 				    if(oDirPrv != null) {
 				    	JSONArray dirPrv = null;
 			            if(oDirPrv instanceof JSONArray) {
@@ -662,7 +803,7 @@ public class FSControl {
 			}
 		} catch(Throwable t) {
 			t.printStackTrace();
-			jsonSess.clear();
+			if(jsonSess != null) jsonSess.clear();
 		}
 		json.put("session", jsonSess);
 		
@@ -804,31 +945,21 @@ public class FSControl {
 		String uIdType = "", msg = "";
 		JSONArray dirPrv = null;
 		try {
-		    String sessionJson = (String) request.getSession().getAttribute("fssession");
-		    
-		    if(sessionJson != null) {
-		        JSONParser parser = new JSONParser();
-		        JSONObject sessionMap = (JSONObject) parser.parse(sessionJson.trim());
-		        
-		        if(sessionMap != null) { if(sessionMap.get("id"    ) == null) sessionMap = null;         }
-		        if(sessionMap != null) { if(sessionMap.get("idtype") == null) sessionMap = null;         }
-		        if(sessionMap != null) { if(sessionMap.get("nick"  ) == null) sessionMap = null;         }
-		        if(sessionMap != null) { if(sessionMap.get("idtype").equals("block")) sessionMap = null; } 
-		        
-		        if(sessionMap != null) {
-		            // uId     = sessionMap.get("id"    ).toString();
-		            uIdType = sessionMap.get("idtype").toString();
-		            
-		            Object oDirPrv = (Object) sessionMap.get("privileges");
-		            if(oDirPrv != null) {
-		                if(oDirPrv instanceof JSONArray) {
-		                    dirPrv = (JSONArray) oDirPrv;
-		                } else {
-		                    dirPrv = (JSONArray) parser.parse(oDirPrv.toString().trim());
-		                }
-		            }
-		        }
-		    }
+			JSONObject sessionMap = getSessionObject(request);
+			
+		    if(sessionMap != null) {
+	            // uId     = sessionMap.get("id"    ).toString();
+	            uIdType = sessionMap.get("idtype").toString();
+	            
+	            Object oDirPrv = (Object) sessionMap.get("privileges");
+	            if(oDirPrv != null) {
+	                if(oDirPrv instanceof JSONArray) {
+	                    dirPrv = (JSONArray) oDirPrv;
+	                } else {
+	                    dirPrv = (JSONArray) new JSONParser().parse(oDirPrv.toString().trim());
+	                }
+	            }
+	        }
 		    
 		    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
 		    File dest = new File(uploadd.getAbsolutePath() + File.separator + dateFormat.format(new java.util.Date(System.currentTimeMillis())));
@@ -1086,31 +1217,21 @@ public class FSControl {
 		String uIdType = "";
 		JSONArray dirPrv = null;
 		try {
-		    String sessionJson = (String) request.getSession().getAttribute("fssession");
-		    
-		    if(sessionJson != null) {
-		        JSONParser parser = new JSONParser();
-		        JSONObject sessionMap = (JSONObject) parser.parse(sessionJson.trim());
-		        
-		        if(sessionMap != null) { if(sessionMap.get("id"    ) == null) sessionMap = null;         }
-		        if(sessionMap != null) { if(sessionMap.get("idtype") == null) sessionMap = null;         }
-		        if(sessionMap != null) { if(sessionMap.get("nick"  ) == null) sessionMap = null;         }
-		        if(sessionMap != null) { if(sessionMap.get("idtype").equals("block")) sessionMap = null; } 
-		        
-		        if(sessionMap != null) {
-		        	// uId     = sessionMap.get("id"    ).toString();
-		        	uIdType = sessionMap.get("idtype").toString();
-		        	
-		        	Object oDirPrv = (Object) sessionMap.get("privileges");
-		            if(oDirPrv != null) {
-		                if(oDirPrv instanceof JSONArray) {
-		                    dirPrv = (JSONArray) oDirPrv;
-		                } else {
-		                    dirPrv = (JSONArray) parser.parse(oDirPrv.toString().trim());
-		                }
-		            }
-		        }
-		    }
+			JSONObject sessionMap = getSessionObject(request);
+			
+		    if(sessionMap != null) {
+	        	// uId     = sessionMap.get("id"    ).toString();
+	        	uIdType = sessionMap.get("idtype").toString();
+	        	
+	        	Object oDirPrv = (Object) sessionMap.get("privileges");
+	            if(oDirPrv != null) {
+	                if(oDirPrv instanceof JSONArray) {
+	                    dirPrv = (JSONArray) oDirPrv;
+	                } else {
+	                    dirPrv = (JSONArray) new JSONParser().parse(oDirPrv.toString().trim());
+	                }
+	            }
+	        }
 		} catch(Throwable t) {
 		    t.printStackTrace();
 		}
@@ -1503,6 +1624,7 @@ public class FSControl {
 			if(needInvalidate) {
 				request.getSession().invalidate();
 				System.out.println("Session Invalidated");
+				json.put("invalidated", new Boolean(true));
 			}
 			if(r2 != null) r2.close();
 			if(r1 != null) r1.close();
@@ -1512,6 +1634,62 @@ public class FSControl {
 			accChanging = false;
 		}
 		return json;
+	}
+	@SuppressWarnings("unchecked")
+	public JSONObject getSessionObject(HttpServletRequest request) throws ParseException {
+		String sessionJson = (String) request.getSession().getAttribute("fssession");
+		if(sessionJson != null) {
+			sessionJson = sessionJson.trim();
+			if(! sessionJson.equals("")) {
+				JSONObject obj = (JSONObject) new JSONParser().parse(sessionJson);
+				if(obj != null) { if(obj.get("id"    ) == null) obj = null;         }
+			    if(obj != null) { if(obj.get("idtype") == null) obj = null;         }
+			    if(obj != null) { if(obj.get("nick"  ) == null) obj = null;         }
+			    if(obj != null) {
+			    	JSONObject jsonSess = new JSONObject();
+			    	jsonSess.putAll(obj);
+			    	jsonSess.remove("pw");
+			    	return jsonSess;
+			    }
+			}
+		}
+		return null;
+	}
+	public String getFileSize(File f) {
+	    long   lSize = f.length();
+	    String sUnit = "byte";
+	    String comp  = "" + lSize + " " + sUnit;
+	    
+	    if(lSize < 0) lSize = 0;
+	    if(lSize <= 1) {
+	        sUnit = "byte";
+	        comp = lSize + " " + sUnit;
+	    }
+	    
+	    if(lSize >= 1024) {
+	        sUnit = "KB";
+	        comp  = (Math.round(( lSize / 1024.0 ) * 10) / 10.0) + " " + sUnit;
+	        lSize = lSize / 1024;
+	    }
+	    
+	    if(lSize >= 1024) {
+	        sUnit = "MB";
+	        comp  = (Math.round(( lSize / 1024.0 ) * 10) / 10.0) + " " + sUnit;
+	        lSize = lSize / 1024;
+	    }
+	    
+	    if(lSize >= 1024) {
+	        sUnit = "GB";
+	        comp  = (Math.round(( lSize / 1024.0 ) * 10) / 10.0) + " " + sUnit;
+	        lSize = lSize / 1024;
+	    }
+	    
+	    if(lSize >= 1024) {
+	        sUnit = "TB";
+	        comp  = (Math.round(( lSize / 1024.0 ) * 10) / 10.0) + " " + sUnit;
+	    }
+	    
+	    return comp;
 	}
 	public String getLanguage(HttpServletRequest request) {
     	String lang = (String) request.getSession().getAttribute("fslanguage");

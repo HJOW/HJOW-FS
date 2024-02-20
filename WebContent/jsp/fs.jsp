@@ -52,6 +52,7 @@ $(function() {
     var btnSearch = form.find('.btn_search');
 
     var btnUpload = form.find('.btn_upload');
+    var btnConfig = form.find('.btn_config');
     
     var arDirs  = [];
     var arFiles = [];
@@ -316,6 +317,9 @@ $(function() {
                         area.removeClass('filedndin');
                 	});
                 }
+                if(idType != 'A') {
+                	$('.only_admin ').addClass('invisible');
+                }
                 
                 FSUtil.applyLanguage();
                 fIconize();
@@ -336,6 +340,13 @@ $(function() {
         if($('body').is('.dark')) theme='dark';
         window.open(ctxPath + '/jsp/fsupload.jsp?theme=' + theme + '&path=' + encodeURIComponent(paths), 'upload', popOpt);
     });
+    
+    btnConfig.on('click', function() {
+        var popOpt = 'width=750,height=550,scrollbars=no,status=no,location=no,toolbar=no';
+        var theme = '';
+        if($('body').is('.dark')) theme='dark';
+        window.open(ctxPath + '/jsp/fsadmin.jsp?theme=' + theme, 'config', popOpt);
+    });
 
     fReload();
 });
@@ -354,6 +365,7 @@ $(function() {
             </div>
             <div class='col-sm-2'>
                 <input type='button' class='btn_upload privilege_element invisible lang_attr_element' value='업로드' data-lang-target='value' data-lang-en='Upload'/>
+                <input type='button' class='btn_config privilege_element only_admin invisible lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config'/>
             </div>
 	    </div>
 	    <div class='row fs_search'>

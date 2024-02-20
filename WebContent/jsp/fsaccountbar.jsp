@@ -47,6 +47,7 @@ if(! fsc.installed) {
 
 		function fRef(data, alerts) {
 			if(alerts && (! data.success)) alert(data.message);
+			if(data.needrefresh) { location.reload(); return; }
 			$('.login_element').addClass('invisible');
 			if(data.logined) {
 				$('.login_element.logined').removeClass('invisible');

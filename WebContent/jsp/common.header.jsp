@@ -60,7 +60,11 @@ $(function() {
         data   : { req : 'language', language : lang, force : 'false' },
         method : "POST",
         dataType : "json",
-        success : function(data) { }
+        success : function(data) {
+        	if(data) {
+        		if(data.needrefresh) location.reload();
+        	}
+        }
     });
 });
 </script>
