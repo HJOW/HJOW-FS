@@ -1200,6 +1200,7 @@ public class FSControl {
 		    if(fileName == null || fileName.equals("")) {
 		        throw new FileNotFoundException("File name is needed.");
 		    }
+		    fileName = fileName.replace("/", "").replace("\\", "").replace("..", "");
 
 		    file = new File(rootPath.getAbsolutePath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileName);
 		    if(! file.exists()) {
