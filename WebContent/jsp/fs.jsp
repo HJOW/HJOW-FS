@@ -296,7 +296,7 @@ $(function() {
                         if(useCaptchaDown) {
                         	window.open(ctxPath + '/jsp/' + 'fscaptdown.jsp?theme=' + theme + '&path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')), 'download', popOpt);
                         } else {
-                        	window.open(ctxPath + '/jsp/' + 'fsdown.jsp?path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')), 'download', popOpt);
+                        	location.href = ctxPath + '/jsp/' + 'fsdown.jsp?path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name'));
                         }
                     });
                     aLink.addClass('binded-click');
