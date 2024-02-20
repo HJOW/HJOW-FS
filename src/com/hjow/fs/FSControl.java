@@ -619,23 +619,13 @@ public class FSControl {
 				boolean useCaptchaLogin = false;
 				boolean useReadFileIcon = false;
 				
-				if(sUseCaptchaDown != null) useCaptchaDown  = Boolean.parseBoolean(sUseCaptchaDown.trim());
-				if(sReadFileIcon   != null) useReadFileIcon = Boolean.parseBoolean(sReadFileIcon.trim());
-				
-				String sUseAccounts = request.getParameter("useaccount");
-				if(sUseAccounts != null) {
-					noLogin = (! Boolean.parseBoolean(sUseAccounts.trim()));
-					if(! noLogin) {
-						if(sUseCaptchaLogin != null) useCaptchaLogin = Boolean.parseBoolean(sUseCaptchaLogin.trim());
-					}
-				} else {
-					noLogin = true;
-				}
+				if(sUseCaptchaDown  != null) useCaptchaDown  = Boolean.parseBoolean(sUseCaptchaDown.trim());
+				if(sUseCaptchaLogin != null) useCaptchaLogin = Boolean.parseBoolean(sUseCaptchaLogin.trim());
+				if(sReadFileIcon    != null) useReadFileIcon = Boolean.parseBoolean(sReadFileIcon.trim());
 				
 				conf.put("Title", titles);
-				conf.put("UseAccount", new Boolean(! noLogin));
 				conf.put("UseCaptchaDown" , new Boolean(useCaptchaDown));
-				conf.put("UseCaptchaLogin", new Boolean(useCaptchaLogin));
+				if(! noLogin) conf.put("UseCaptchaLogin", new Boolean(useCaptchaLogin));
 				conf.put("LimitUploadSize", sMaxSize);
 				conf.put("ReadFileIcon", new Boolean(useReadFileIcon));
 				conf.put("Installed", new Boolean(true));
@@ -649,16 +639,68 @@ public class FSControl {
 				jsonConfig.putAll(conf);
 				
 				json.put("message", "Update Success !");
+			} else if(req.equals("reset")) {
+				String passwords = request.getParameter("pw");
+				if(passwords == null) {
+					String rex = "Please input Password !";
+					if(lang.equals("ko")) rex = "비밀번호를 입력해 주세요.";
+					throw new RuntimeException(rex);
+				}
+				passwords = passwords.trim();
+				
+				if(! passwords.equals(tx3.trim())) {
+					MessageDigest digest = MessageDigest.getInstance("SHA-256");
+					byte[] pwbytes = digest.digest(passwords.getBytes("UTF-8"));
+					if(! Base64.encodeBase64String(pwbytes).equals(tx3.trim())) {
+						String rex = "Wrong installation password !";
+						if(lang.equals("ko")) rex = "비밀번호를 올바르게 입력해 주세요.";
+						throw new RuntimeException(rex);
+					}
+				}
+				
+				System.out.println("Reset requested by " + sessionMap.get("id") + " when " + System.currentTimeMillis());
+				
+				installed = false;
+				conf.clear();
+				
+				File[] listConfigs = fileConfigPath.listFiles();
+				for(File f : listConfigs) {
+					if(f.getName().startsWith("backup") || f.getName().startsWith("bak")) continue;
+					if(f.isDirectory()) {
+						File[] children = f.listFiles();
+						for(File c : children) {
+							if(c.getName().startsWith("backup") || c.getName().startsWith("bak")) continue;
+							if(c.isDirectory()) {
+								File[] grands = c.listFiles();
+								for(File g : grands) {
+									if(g.isDirectory()) continue;
+									g.delete();
+								}
+							} else {
+								c.delete();
+							}
+						}
+					} else {
+						f.delete();
+					}
+				}
+				
+				System.out.println("Reset completed.");
+				json.put("reset", new Boolean(true));
+				json.put("message", "Reset Success !");
+				request.getSession().invalidate();
 			}
 			
-			jsonConfig.remove("Path");
-			jsonConfig.remove("S1");
-			jsonConfig.remove("S2");
-			jsonConfig.remove("S3");
-			jsonConfig.remove("Salt");
+			if(! req.equals("reset")) {
+				jsonConfig.remove("Path");
+				jsonConfig.remove("S1");
+				jsonConfig.remove("S2");
+				jsonConfig.remove("S3");
+				jsonConfig.remove("Salt");
+				json.put("config" , jsonConfig);
+			}
 			
 			json.put("success", new Boolean(true));
-			json.put("config" , jsonConfig);
 			
 		} catch(Throwable t) {
 			json.put("success", new Boolean(false));

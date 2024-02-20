@@ -39,6 +39,8 @@ limitations under the License.
             
             FSUtil.applyLanguage(bodys);
             
+            var beforeAccountFeatEnabled = false;
+            
             $.ajax({
                 url    : ctxPath + "/jsp/fslogin.jsp",
                 data   : { req : 'status' },
@@ -64,6 +66,7 @@ limitations under the License.
                         	form.find("[name='title']").val(conf['Title']);
                         	
                         	if(conf['UseAccount']) {
+                        		beforeAccountFeatEnabled = true;
                         		form.find("[name='useaccount']").prop('checked', true);
                         		form.find('.onlyaccount').removeClass('invisible');
                         		
@@ -73,7 +76,9 @@ limitations under the License.
                                 	form.find("[name='usecaptchalogin']").prop('checked', false);
                                 }
                         	} else {
+                        		beforeAccountFeatEnabled = false;
                         		form.find("[name='useaccount']").prop('checked', false);
+                        		form.find("[name='useaccount']").prop('disabled', true);
                         		form.find('.onlyaccount').addClass('invisible');
                         		form.find("[name='usecaptchalogin']").prop('checked', false);
                         	}
@@ -108,19 +113,36 @@ limitations under the License.
                                     }
                                 });
                             });
+                        	
+                        	var formReset = $('.form_fs_reset');
+                        	formReset.on('submit', function() {
+                                $.ajax({
+                                    url    : ctxPath + "/jsp/fsadminin.jsp",
+                                    data   : formReset.serialize(),
+                                    method : "POST",
+                                    dataType : "json",
+                                    success : function(data) {
+                                        alert(data.message);
+                                        if(data.reset) window.close();
+                                    }
+                                });
+                            });
                         }
                 	});
                 }
             });
         });
         </script>
+        <div class='row'>
+            <div class='col-sm-12'><h2>FS Administration Center</h2></div>
+        </div>
         <form class='form_fs_admin' onsubmit='return false;'>
             <input type='hidden' name='req' value='status' class='hidden_req'/>
             <div class='row'>
-                <div class='col-sm-12'><h2>FS Administration Center</h2></div>
+                <div class='col-sm-12'><h3 class='lang_element' data-lang-en='Configuration'>설정</h3></div>
             </div>
             <div class='row'>
-		        <div class='col-sm-10 container show-grid'>
+		        <div class='col-sm-12 container show-grid'>
 		            <div class='row'>
                         <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Title'>타이틀</div>
                         <div class='col-sm-10'><input type='text' name='title' class='full' placeholder="Title" value="File Storage"/></div>
@@ -156,11 +178,32 @@ limitations under the License.
                             </span>
                         </div>
                     </div>
-		        </div>
-		        <div class='col-sm-2'>
-		            <div class='col-sm-12'><input type='submit' value='적용' class='full lang_attr_element btn_apply' style='height:50px;' data-lang-target='value' data-lang-en='Apply'/></div>
+                    <div class='row'>
+		                <div class='col-sm-12 align_center'>
+		                    <input type='submit' value='적용' class='full lang_attr_element btn_apply' style='height:50px;' data-lang-target='value' data-lang-en='Apply'/>
+		                </div>
+		            </div>
 		        </div>
 		    </div>
+        </form>
+        <form class='form_fs_reset' onsubmit='return false;'>
+            <input type='hidden' name='req' value='reset' class='hidden_req'/>
+            <div class='row'>
+                <div class='col-sm-12'><h3 class='lang_element' data-lang-en='Reset'>초기화</h3></div>
+            </div>
+            <div class='row'>
+                <div class='col-sm-12 container show-grid'>
+                    <div class='row'>
+                        <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Password'>암호</div>
+                        <div class='col-sm-10'><input type='password' name='pw' class='full lang_attr_element' placeholder="fs.properties 에 있는 암호" data-lang-target='placeholder' data-lang-en='Password in fs.properties'/></div>
+                    </div>
+                    <div class='row'>
+                        <div class='col-sm-12 align_center'>
+                            <input type='submit' value='초기화' class='full lang_attr_element btn_apply' style='height:50px;' data-lang-target='value' data-lang-en='Reset'/>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </form>
     </div>
     <jsp:include page="common.footer.jsp"></jsp:include>
