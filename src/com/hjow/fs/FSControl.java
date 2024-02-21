@@ -63,7 +63,7 @@ import com.oreilly.servlet.MultipartRequest;
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 
 public class FSControl {
-	public static final int[] VERSION = {1, 0, 1, 8};
+	public static final int[] VERSION = {1, 0, 0, 7};
 	
 	private static FSControl instance = null;
 	
