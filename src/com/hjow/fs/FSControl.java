@@ -475,14 +475,14 @@ public class FSControl {
 				conf.clear();
 				
 				String sHiddenDir = "";
-				sHiddenDir += "# Hidden Directory List";
-				sHiddenDir += "#    These directories will be hidden and revealed only for privileged user (and administrator).";
-				sHiddenDir += "#    As a relative path from FS root directory.";
-				sHiddenDir += "# For example";
-				sHiddenDir += "# [";
-				sHiddenDir += "#     \"/HiddenDir1\"";
-				sHiddenDir += "#     \"/Updates/HiddenDir2\"";
-				sHiddenDir += "# ]";
+				sHiddenDir += "# Hidden Directory List" + "\n";
+				sHiddenDir += "#    These directories will be hidden and revealed only for privileged user (and administrator)." + "\n";
+				sHiddenDir += "#    As a relative path from FS root directory." + "\n";
+				sHiddenDir += "# For example" + "\n";
+				sHiddenDir += "# [" + "\n";
+				sHiddenDir += "#     \"/HiddenDir1\"" + "\n";
+				sHiddenDir += "#     \"/Updates/HiddenDir2\"" + "\n";
+				sHiddenDir += "# ]" + "\n";
 				sHiddenDir += "[]";
 				
 				conf.put("Title", titles);

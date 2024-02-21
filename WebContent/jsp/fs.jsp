@@ -413,7 +413,7 @@ $(function() {
     });
     
     btnConfig.on('click', function() {
-        var popOpt = 'width=750,height=550,scrollbars=no,status=no,location=no,toolbar=no';
+        var popOpt = 'width=750,height=550,scrollbars=yes,status=no,location=no,toolbar=no';
         var theme = '';
         if($('body').is('.dark')) theme='dark';
         window.open(ctxPath + '/jsp/fsadmin.jsp?theme=' + theme, 'config', popOpt);
