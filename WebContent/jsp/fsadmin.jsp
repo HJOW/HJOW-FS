@@ -85,6 +85,11 @@ limitations under the License.
                         	form.find("[name='rootdir']").val('...');
                         	form.find("[name='rootdir']").prop('disabled', true);
                         	
+                        	var hddirs = conf['HiddenDirs'];
+                        	if(typeof(hddirs) != 'string') hddirs = JSON.stringify(hddirs);
+                        	if(typeof(conf['sHiddenDirs']) != 'undefined') hddirs = conf['sHiddenDirs'];
+                        	form.find("[name='hiddendirs']").val(hddirs);
+                        	
                         	form.find("[name='limitsize']").val(conf['LimitUploadSize']);
                         	
                         	if(conf['UseCaptchaDown']) {
@@ -173,6 +178,12 @@ limitations under the License.
 		            <div class='row'>
                         <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Accounts'>계정</div>
                         <div class='col-sm-10'><label><input type='checkbox' name='useaccount' class='chk_account' value="true"/><span class='lang_element' data-lang-en='Use Accounts'>계정 기능 사용</span></label></div>
+                    </div>
+                    <div class='row'>
+                        <div class='col-sm-12'>
+                            <div><h4 class='lang_element' data-lang-en='Hidden Folders'>숨김 폴더</h4></div>
+                            <div><textarea name='hiddendirs' class='full'>[]</textarea></div>
+                        </div>
                     </div>
                     <div class='row'>
                         <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='ETC'>기타</div>

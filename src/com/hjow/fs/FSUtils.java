@@ -15,6 +15,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
  */
 
+import java.util.StringTokenizer;
+
 public class FSUtils {
 	public static String removeSpecials(String originals) {
 		return removeSpecials(originals, true, true, true, true, true);
@@ -28,5 +30,51 @@ public class FSUtils {
     	if(noTagBlace) res = res.replace("<", "").replace(">", "");
     	if(noDot     ) res = res.replace(".", "");
     	return res.trim();
+    }
+    public static String removeLineComments(String original, char commentStartChar) {
+    	boolean firstline = true;
+    	StringBuilder result = new StringBuilder("");
+    	StringTokenizer lineTokenizer = new StringTokenizer(original, "\n");
+    	while(lineTokenizer.hasMoreTokens()) {
+    		String line = lineTokenizer.nextToken();
+    		StringBuilder resLine = new StringBuilder("");
+    		
+    		char quote = ' ';
+    		for(int idx=0; idx<line.length(); idx++) {
+    			char charOne = line.charAt(idx);
+    			
+    			if(quote == ' ') {
+    				if(charOne == '"') {
+    					quote = '"';
+    					resLine = resLine.append(String.valueOf(charOne));
+    					continue;
+    				} else if(charOne == '\'') {
+    					quote = '\'';
+    					resLine = resLine.append(String.valueOf(charOne));
+    					continue;
+    				}
+    				if(charOne == commentStartChar) break;
+    			} else if(quote == '\'') {
+    				if(charOne == '\'') {
+    					quote = ' ';
+    					resLine = resLine.append(String.valueOf(charOne));
+    					continue;
+    				}
+    			} else if(quote == '"') {
+    				if(charOne == '"') {
+    					quote = ' ';
+    					resLine = resLine.append(String.valueOf(charOne));
+    					continue;
+    				}
+    			}
+    			
+    			resLine = resLine.append(String.valueOf(charOne));
+    		}
+    		
+    		if(firstline) result = result.append("\n");
+    		result = result.append(resLine.toString());
+    		firstline = false;
+    	}
+    	return result.toString();
     }
 }

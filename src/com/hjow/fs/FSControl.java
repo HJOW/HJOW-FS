@@ -450,6 +450,11 @@ public class FSControl {
 						adminAc.put("fail_cnt", "0");
 						adminAc.put("fail_time", "0");
 						
+						JSONArray prvgroup = new JSONArray();
+						prvgroup.add("user");
+						prvgroup.add("admin");
+						adminAc.put("privgroup", prvgroup);
+						
 						MessageDigest digest = MessageDigest.getInstance("SHA-256");
 						byte[] res = digest.digest((s1 + adminPw + s2 + salt + adminId + s3).getBytes(cs));
 						adminAc.put("pw", Base64.encodeBase64String(res));
@@ -469,7 +474,20 @@ public class FSControl {
 				
 				conf.clear();
 				
+				String sHiddenDir = "";
+				sHiddenDir += "# Hidden Directory List";
+				sHiddenDir += "#    These directories will be hidden and revealed only for privileged user (and administrator).";
+				sHiddenDir += "#    As a relative path from FS root directory.";
+				sHiddenDir += "# For example";
+				sHiddenDir += "# [";
+				sHiddenDir += "#     \"/HiddenDir1\"";
+				sHiddenDir += "#     \"/Updates/HiddenDir2\"";
+				sHiddenDir += "# ]";
+				sHiddenDir += "[]";
+				
 				conf.put("Title", titles);
+				conf.put("sHiddenDirs", sHiddenDir);
+				conf.put("HiddenDirs", new JSONArray());
 				conf.put("Path", rootPath.getAbsolutePath());
 				conf.put("UseAccount", new Boolean(! noLogin));
 				conf.put("UseCaptchaDown" , new Boolean(useCaptchaDown));
@@ -624,6 +642,13 @@ public class FSControl {
 				garbage = new File(rootPath.getAbsolutePath() + File.separator + ".garbage");
 				if(! garbage.exists()) garbage.mkdirs();
 				
+				String sHiddenDirs = request.getParameter("hiddendirs");
+				if(sHiddenDirs == null) sHiddenDirs = "[]";
+				sHiddenDirs = sHiddenDirs.trim();
+				if(sHiddenDirs.equals("")) sHiddenDirs = "[]";
+				Object hiddenDirs = parser.parse(FSUtils.removeLineComments(sHiddenDirs, '#').trim()); // Checking valid JSON
+				if(! (hiddenDirs instanceof JSONArray)) throw new RuntimeException("'Hidden Folders' Should be a JSON array.");
+				
 				String sMaxSize = request.getParameter("limitsize");
 				if(sMaxSize == null) sMaxSize = "" + (1024 * 1024);
 				Long.parseLong(sMaxSize); // Checking valid number
@@ -645,6 +670,8 @@ public class FSControl {
 				if(sReadFileIcon    != null) useReadFileIcon = Boolean.parseBoolean(sReadFileIcon.trim());
 				
 				conf.put("Title", titles);
+				conf.put("sHiddenDirs", sHiddenDirs);
+				conf.put("HiddenDirs", hiddenDirs);
 				conf.put("UseCaptchaDown" , new Boolean(useCaptchaDown));
 				if(! noLogin) conf.put("UseCaptchaLogin", new Boolean(useCaptchaLogin));
 				conf.put("LimitUploadSize", sMaxSize);
@@ -1265,7 +1292,79 @@ public class FSControl {
 			    	throw new RuntimeException("Too old captcha code !");
 			    }
 			}
-		    
+			
+			Object oHiddenDir = conf.get("HiddenDirs");
+			List<String> hiddenDirList = new ArrayList<String>();
+			
+			if(oHiddenDir != null) {
+				JSONObject jsonSess = getSessionObject(request);
+				String idtype = "U";
+				if(jsonSess != null) {
+					JSONArray dirPrv = null;
+					JSONParser parser = new JSONParser();
+					if(jsonSess.get("idtype") != null) {
+						idtype = jsonSess.get("idtype").toString();
+						if(! idtype.equals("A")) {
+							Object oDirPrv = (Object) jsonSess.get("privileges");
+						    if(oDirPrv != null) {
+						    	dirPrv = null;
+					            if(oDirPrv instanceof JSONArray) {
+					                dirPrv = (JSONArray) oDirPrv;
+					            } else {
+					            	dirPrv = (JSONArray) parser.parse(oDirPrv.toString().trim());
+					            }
+						    }
+						}
+					}
+					if(dirPrv == null) dirPrv = new JSONArray();
+					
+					JSONArray hiddenDir = null;
+					if(oHiddenDir instanceof JSONArray) hiddenDir = (JSONArray) oHiddenDir;
+					else                                hiddenDir = (JSONArray) new JSONParser().parse(oHiddenDir.toString().trim());
+					oHiddenDir = null;
+					
+					if(idtype.equals("A")) {
+						hiddenDirList.clear();
+					} else {
+						if(hiddenDir != null) {
+							for(Object obj : hiddenDir) {
+								hiddenDirList.add(obj.toString().trim());
+							}
+						}
+						
+						for(Object row : dirPrv) {
+			            	JSONObject dirOne = null;
+			            	if(row instanceof JSONObject) dirOne = (JSONObject) row;
+			            	else                          dirOne = (JSONObject) parser.parse(row.toString().trim());
+			            	
+			            	try {
+			            		String dPath = dirOne.get("path"     ).toString();
+			            		String dPrv  = dirOne.get("privilege").toString();
+			            		
+			            		int hdx=0;
+			            		while(hdx < hiddenDirList.size()) {
+			            			String hiddenDirOne = hiddenDirList.get(hdx);
+			            			if(hiddenDirOne.startsWith(dPath) || ("/" + hiddenDirOne).startsWith(dPath)) {
+				            			if(dPrv.equals("view") || dPrv.equals("edit")) {
+				            				hiddenDirList.remove(hdx);
+				            				continue;
+				            			}
+				            		}
+			            			hdx++;
+			            		}
+			            	} catch(Throwable t) {
+			            		System.out.println("Wrong account configuration - " + t.getMessage());
+			            	}
+			            }
+					}
+				}
+			}
+			
+			for(String h : hiddenDirList) {
+		    	if(pathParam.startsWith(h))         throw new RuntimeException("No privilege");
+		    	if(("/" + pathParam).startsWith(h)) throw new RuntimeException("No privilege");
+		    }
+			
 		    if(fileName == null || fileName.equals("")) {
 		        throw new FileNotFoundException("File name is needed.");
 		    }
@@ -1362,12 +1461,17 @@ public class FSControl {
 		    try { outputs.close();   } catch(Throwable te) {}
 		    return null;
 		} catch(Throwable tx) {
-			// tx.printStackTrace();
 			System.out.println("Exception message while sending file : " + tx.getMessage());
-			response.reset();
-			response.setContentType("text/html;charset=UTF-8");
+			if((tx instanceof java.net.SocketException) && tx.getMessage().indexOf("socket write error") >= 0) {
+				// NOTHING
+			} else {
+				System.out.println("Exception message while sending file : " + tx.getMessage());
+				response.reset();
+				response.setContentType("text/html;charset=UTF-8");
+				
+				results = results.append("<pre>").append("Error : ").append(tx.getMessage()).append("</pre>");
+			}
 			
-			results = results.append("<pre>").append("Error : ").append(tx.getMessage()).append("</pre>");
 			/*
 			StackTraceElement[] elements = tx.getStackTrace();
 			for(StackTraceElement e : elements) {
@@ -1914,6 +2018,9 @@ public class FSControl {
 			    	JSONObject jsonSess = new JSONObject();
 			    	jsonSess.putAll(obj);
 			    	jsonSess.remove("pw");
+			    	
+			    	if(jsonSess.get("privgroup") == null) jsonSess.put("privgroup", new JSONArray());
+			    	
 			    	return jsonSess;
 			    }
 			}
