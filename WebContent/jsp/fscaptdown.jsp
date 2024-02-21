@@ -104,7 +104,7 @@ $(function() {
                 <iframe style='width: <%=fsc.captchaWidth + 10%>px; height: <%=fsc.captchaHeight + 10%>px;' src='fscaptin.jsp?key=fsd&theme=<%=theme%>'></iframe>
             </div>
         </div>
-        <form action='fsdown.jsp' method='POST' class='form' target='_blank'>
+        <form action='fsdown.jsp' method='POST' class='form' target='_self'>
             <input type='hidden' name='path'     class='hid_path' value='<%=pathParam%>'/>
             <input type='hidden' name='filename' class='hid_name' value='<%=fileName%>'/>
             <input type='hidden' name='speed'    class='hid_sped' value='<%=speed%>'/>
