@@ -25,7 +25,10 @@ String keyword = request.getParameter("keyword");
 if(keyword == null) keyword = "";
 keyword = keyword.replace("'", "").replace("\"", "").replace("<", "").replace(">", "").trim();
 
-JSONObject json = fsc.list(request, pathParam, keyword);
+String excepts = request.getParameter("excepts");
+if(excepts == null) excepts = "";
+
+JSONObject json = fsc.list(request, pathParam, keyword, excepts);
 
 response.reset();
 response.setContentType("application/json");

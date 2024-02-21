@@ -48,6 +48,7 @@ $(function() {
     var pathDisp = $('.path');
 
     var inpPath   = form.find('.hidden_path');
+    var inpExcep  = form.find('.hidden_excepts');
     var inpSearch = form.find('.inp_search');
     var btnSearch = form.find('.btn_search');
 
@@ -147,11 +148,19 @@ $(function() {
         });
     }
 
-    function fReload() {
-        tables.find('.col_controls').css('width', '10px');
-    	listRoot.find('binded-click').each(function() { $(this).off('click'); });
-    	listRoot.empty();
-        pathDisp.text('');
+    function fReload(firsts) {
+    	if(firsts) {
+    		tables.find('.col_controls').css('width', '10px');
+            listRoot.find('binded-click').each(function() { $(this).off('click'); });
+            
+            listRoot.empty();
+            listRoot.append("<tr class='element element_special progressing'><td colspan='4'>...</td></tr>");
+            pathDisp.text('');
+            
+            inpExcep.val('');
+    	}
+    	
+    	var expVal = inpExcep.val();
         
     	$.ajax({
             url    : ctxPath + "/jsp/fslist.jsp",
@@ -162,8 +171,12 @@ $(function() {
                 arDirs  = data.directories;
                 arFiles = data.files;
 
-                listRoot.empty();
-                pathDisp.text('');
+                if(firsts) {
+                	listRoot.empty();
+                    pathDisp.text('');
+                } else {
+                	listRoot.find('.progressing').remove();
+                }
 
                 var idType = 'U';
 
@@ -176,11 +189,11 @@ $(function() {
                 if(idType == 'A') tables.find('.col_controls').css('width', '100px');
                 
                 if(! data.path == '') {
-                    listRoot.append("<tr class='element back'><td colspan='4'><a href='#' class='link_back lang_element' data-lang-en='[BACK]'>[뒤로 가기]</a></td></tr>");
+                    listRoot.append("<tr class='element element_special back'><td colspan='4'><a href='#' class='link_back lang_element' data-lang-en='[BACK]'>[뒤로 가기]</a></td></tr>");
                 }
 
                 if(arDirs.length == 0 && arFiles.length == 0) {
-                	listRoot.append("<tr class='element empty'><td colspan='4' class='lang_element filednd' data-lang-en='Empty'>비어 있음</td></tr>");
+                	listRoot.append("<tr class='element element_special empty'><td colspan='4' class='lang_element filednd' data-lang-en='Empty'>비어 있음</td></tr>");
                 }
 
                 var idx = 0;
@@ -188,6 +201,9 @@ $(function() {
                 for(idx = 0; idx < arDirs.length; idx++) {
                     var lvalue = String(arDirs[idx].value);
                     var lname  = String(arDirs[idx].name);
+                    
+                    if(expVal != '') expVal += ',';
+                    expVal += lname;
                     
                     listRoot.append("<tr class='element tr_dir tr_dir_" + idx + "'><td class='td_mark_dir'>[DIR]</td><td colspan='2'><a href='#' class='link_dir' data-path=''></a></td><td class='td_buttons'></td></tr>");
                     
@@ -228,7 +244,7 @@ $(function() {
                                             dataType : 'JSON',
                                             success : function(data) {
                                                 if(! data.success) alert(data.message);
-                                                fReload();
+                                                fReload(true);
                                             }
                                         });
                                     }
@@ -242,6 +258,9 @@ $(function() {
                 for(idx = 0; idx < arFiles.length; idx++) {
                     var lname  = String(arFiles[idx].name);
                     var lsize  = String(arFiles[idx].size);
+                    
+                    if(expVal != '') expVal += ',';
+                    expVal += lname;
                     
                     listRoot.append("<tr class='element tr_file tr_file_" + idx + "'><td class='td_mark_file filednd'>[FILE]</td><td class='filednd'><a href='#' class='link_file' data-path='' data-name=''></a></td><td class='td_file_size filednd'></td><td class='td_buttons'></td></tr>");
                     
@@ -284,7 +303,7 @@ $(function() {
                                     dataType : 'JSON',
                                     success : function(data) {
                                         if(! data.success) alert(data.message);
-                                        fReload();
+                                        fReload(true);
                                     }
                                 });
                             }
@@ -292,6 +311,8 @@ $(function() {
                         btnDel.addClass('binded_click');
                     }
                 }
+                
+                inpExcep.val(expVal);
                 
                 arDirs  = null;
                 arFiles = null;
@@ -310,7 +331,7 @@ $(function() {
                         }
 
                         inpPath.val(newPath);
-                        fReload();
+                        fReload(true);
                     });
                     aLink.addClass('binded-click');
                 });
@@ -319,7 +340,7 @@ $(function() {
                     var aLink = $(this);
                     aLink.on('click', function() {
                     	inpPath.val($(this).attr('data-path'));
-                    	fReload();
+                    	fReload(true);
                     });
                     aLink.addClass('binded-click');
                 });
@@ -358,8 +379,23 @@ $(function() {
                 	$('.only_admin ').addClass('invisible');
                 }
                 
+                if(typeof(data.skipped) != 'undefined') {
+                    if(data.skipped >= 1) {
+                        listRoot.append("<tr class='element element_special askmore'><td colspan='4'><a href='#' class='a_askmore lang_element' data-lang-en='More...'>더 조회하기...</a></td></tr>");
+                        listRoot.find('.a_askmore').on('click', function() {
+                        	listRoot.find('.askmore').find('.binded_click').off('click');
+                        	listRoot.find('.askmore').remove();
+                        	
+                        	fReload(false);
+                        });
+                        listRoot.find('.a_askmore').addClass('binded_click');
+                    }
+                }
+                
                 FSUtil.applyLanguage();
                 fIconize();
+                
+                console.log(data);
             }, error : function(jqXHR, textStatus, errorThrown) {
             	textStatus  = String(textStatus).replace(/[<>]+/g, '');
             	errorThrown = String(errorThrown).replace(/[<>]+/g, '');
@@ -368,7 +404,7 @@ $(function() {
         });
     }
 
-    form.on('submit', fReload)
+    form.on('submit', function() { fReload(true); });
 
     btnUpload.on('click', function() {
         var paths = inpPath.val();
@@ -442,17 +478,18 @@ $(function() {
             dataType : 'JSON',
             success : function(data) {
                 if(! data.success) alert(data.message);
-                fReload();
+                fReload(true);
             }
         });
     });
 
-    fReload();
+    fReload(true);
 });
 </script>
 <div class='fs_root container show-grid full'>
 	<form class='form_fs' onsubmit='return false;'>
-	    <input type='hidden' name='path' class='hidden_path' value='<%= pathParam %>'/>
+	    <input type='hidden' name='path'    class='hidden_path'    value='<%= pathParam %>'/>
+	    <input type='hidden' name='excepts' class='hidden_excepts' value=''/>
 	    <div class='row fs_title'>
 	        <div class='col-sm-12'>
 	            <h2><%= fsc.title %></h2>

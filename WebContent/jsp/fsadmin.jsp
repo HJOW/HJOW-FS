@@ -156,6 +156,10 @@ limitations under the License.
                         <div class='col-sm-10'><input type='number' name='limitsize' class='full lang_attr_element' placeholder="한 번에 업로드할 수 있는 최대 용량 (KB)" data-lang-target='placeholder' data-lang-en='Maximum size for upload at once (KB)' title='Maximum size for upload at once (KB)' value='10485760'/></div>
 		            </div>
 		            <div class='row'>
+                        <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Output Count'>출력 최대 갯수</div>
+                        <div class='col-sm-10'><input type='number' name='limitcount' class='full lang_attr_element' placeholder="파일 목록 한번 불러올 때 가져올 최대 갯수" data-lang-target='placeholder' data-lang-en='Maximum count of files on single networking' title='Maximum count of files on single networking' value='1000'/></div>
+                    </div>
+		            <div class='row'>
                         <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Captcha'>캡차</div>
                         <div class='col-sm-10'>
                             <span>

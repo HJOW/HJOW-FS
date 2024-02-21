@@ -39,6 +39,7 @@ import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -91,6 +92,9 @@ public class FSControl {
 
 	// Download limit size (KB)
 	public long   limitSize = 10 * 1024 * 1024;
+	
+	// Display limit count on one page
+	public int    limitCount = 1000;
 
 	// Perform downloading buffer size (bytes)
 	public int  bufferSize   = 1024 * 10;
@@ -284,6 +288,9 @@ public class FSControl {
 				if(conf.get("LimitUploadSize") != null) {
 					limitSize = Long.parseLong(conf.get("LimitUploadSize").toString().trim());
 				}
+				if(conf.get("LimitFilesSinglePage") != null) {
+					limitCount = Integer.parseInt(conf.get("LimitFilesSinglePage").toString().trim());
+				}
 				if(conf.get("ReadFileIcon") != null) {
 					readFileIcon = Boolean.parseBoolean(conf.get("ReadFileIcon").toString().trim());
 				}
@@ -383,6 +390,10 @@ public class FSControl {
 				if(sMaxSize == null) sMaxSize = "" + (1024 * 1024);
 				Long.parseLong(sMaxSize); // Checking valid number
 				
+				String sMaxCount = request.getParameter("limitcount");
+				if(sMaxCount == null) sMaxCount = "1000";
+				Integer.parseInt(sMaxCount); // Checking valid number
+				
 				String sUseCaptchaDown  = request.getParameter("usecaptchadown");
 				String sUseCaptchaLogin = request.getParameter("usecaptchalogin");
 				String sReadFileIcon    = request.getParameter("readfileicon");
@@ -464,6 +475,7 @@ public class FSControl {
 				conf.put("UseCaptchaDown" , new Boolean(useCaptchaDown));
 				conf.put("UseCaptchaLogin", new Boolean(useCaptchaLogin));
 				conf.put("LimitUploadSize", sMaxSize);
+				conf.put("LimitFilesSinglePage", sMaxCount);
 				conf.put("ReadFileIcon", new Boolean(useReadFileIcon));
 				conf.put("S1", s1);
 		        conf.put("S2", s2);
@@ -616,6 +628,10 @@ public class FSControl {
 				if(sMaxSize == null) sMaxSize = "" + (1024 * 1024);
 				Long.parseLong(sMaxSize); // Checking valid number
 				
+				String sMaxCount = request.getParameter("limitcount");
+				if(sMaxCount == null) sMaxCount = "1000";
+				Integer.parseInt(sMaxCount); // Checking valid number
+				
 				String sUseCaptchaDown  = request.getParameter("usecaptchadown");
 				String sUseCaptchaLogin = request.getParameter("usecaptchalogin");
 				String sReadFileIcon    = request.getParameter("readfileicon");
@@ -632,6 +648,7 @@ public class FSControl {
 				conf.put("UseCaptchaDown" , new Boolean(useCaptchaDown));
 				if(! noLogin) conf.put("UseCaptchaLogin", new Boolean(useCaptchaLogin));
 				conf.put("LimitUploadSize", sMaxSize);
+				conf.put("LimitFilesSinglePage", sMaxCount);
 				conf.put("ReadFileIcon", new Boolean(useReadFileIcon));
 				conf.put("Installed", new Boolean(true));
 				
@@ -723,8 +740,10 @@ public class FSControl {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public JSONObject list(HttpServletRequest request, String pPath, String pKeyword) {
+	public JSONObject list(HttpServletRequest request, String pPath, String pKeyword, String pExcept) {
 		initialize(request);
+		
+		JSONObject json = new JSONObject();
 		
 		String pathParam = pPath;
 		if(pathParam == null) pathParam = "";
@@ -737,26 +756,73 @@ public class FSControl {
 		if(keyword == null) keyword = "";
 		keyword = keyword.replace("'", "").replace("\"", "").replace("<", "").replace(">", "").trim();
 
+		List<String> excepts = new ArrayList<String>();
+		pExcept = pExcept.trim();
+		if(! pExcept.equals("")) {
+			StringTokenizer excTokenizer = new StringTokenizer(pExcept, ",");
+			while(excTokenizer.hasMoreTokens()) {
+				String eOne = excTokenizer.nextToken().trim();
+				if(! excepts.contains(eOne)) excepts.add(eOne);
+			}
+			excTokenizer = null;
+		}
+		pExcept = null;
+		
 		File dir = new File(instance.rootPath.getAbsolutePath() + File.separator + pathParam);
 
 		File[] list = dir.listFiles();
+		List<File> fileList = new ArrayList<File>();
 		if(list == null) list = new File[0];
-
+		
+		int excepted  = 0;
+		
+		for(File f : list) {
+			String nm = f.getName();
+			if(excepts.contains(nm)) {
+				excepted++;
+				continue;
+			}
+			fileList.add(f);
+		}
+		list = null;
+		
+		Collections.sort(fileList, new Comparator<File>() {
+			@Override
+			public int compare(File o1, File o2) {
+				if(o1.isDirectory() && (! o2.isDirectory())) return -1;
+				if((! o1.isDirectory()) && o2.isDirectory()) return 1;
+				return (o1.getName().compareTo(o2.getName()));
+			}
+		});
+		
 		List<File> chDirs  = new ArrayList<File>();
 		List<File> chFiles = new ArrayList<File>();
-
-		for(File f : list) {
+		
+		int fileIndex = 0;
+		int skipped   = 0;
+		for(File f : fileList) {
+			String nm = f.getName();
+			if(limitCount >= 0 && fileIndex >= limitCount) {
+				skipped++;
+				continue;
+			}
 		    if(f.isDirectory()) {
-		        String nm = f.getName();
 		        if(nm.indexOf(".") >= 0) continue;
 		        chDirs.add(f);
 		    } else {
 		        if(f.length() / 1024 >= instance.limitSize) continue;
 		        chFiles.add(f);
 		    }
+		    fileIndex++;
 		}
 
-		list = null;
+		fileList.clear();
+		fileList = null;
+		excepts.clear();
+		excepts = null;
+		
+		json.put("skipped" , new Integer(skipped ));
+		json.put("excepted", new Integer(excepted));
 
 		Collections.sort(chDirs);
 		Collections.sort(chFiles);
@@ -764,8 +830,7 @@ public class FSControl {
 		String pathDisp = pathParam; // 화면 출력용
 		if(pathDisp.startsWith("//")) pathDisp = pathDisp.substring(1);
 		if(! pathDisp.startsWith("/")) pathDisp = "/" + pathDisp;
-
-		JSONObject json = new JSONObject();
+		
 		json.put("type", "list");
 		json.put("keyword", keyword);
 		json.put("path"   , pathParam);
@@ -780,36 +845,39 @@ public class FSControl {
 			if(jsonSess != null) {
 				if(jsonSess.get("idtype") != null) {
 					idtype = jsonSess.get("idtype").toString();
-					Object oDirPrv = (Object) jsonSess.get("privileges");
-				    if(oDirPrv != null) {
-				    	dirPrv = null;
-			            if(oDirPrv instanceof JSONArray) {
-			                dirPrv = (JSONArray) oDirPrv;
-			            } else {
-			            	dirPrv = (JSONArray) parser.parse(oDirPrv.toString().trim());
-			            }
-			            
-			            for(Object row : dirPrv) {
-			            	JSONObject dirOne = null;
-			            	if(row instanceof JSONObject) dirOne = (JSONObject) row;
-			            	else                          dirOne = (JSONObject) parser.parse(row.toString().trim());
-			            	
-			            	try {
-			            		String dPath = dirOne.get("path"     ).toString();
-			            		String dPrv  = dirOne.get("privilege").toString();
-			            		
-			            		if(pathParam.startsWith(dPath) || ("/" + pathParam).startsWith(dPath)) {
-			            			if(dPrv.equals("edit")) {
-			            				json.put("privilege", "edit");
-			            				break;
-			            			}
-			            		}
-			            	} catch(Throwable t) {
-			            		System.out.println("Wrong account configuration - " + t.getMessage());
-			            	}
-			            }
-				    }
-				    if(idtype.equals("A")) json.put("privilege", "edit");
+					if(! idtype.equals("A")) {
+						Object oDirPrv = (Object) jsonSess.get("privileges");
+					    if(oDirPrv != null) {
+					    	dirPrv = null;
+				            if(oDirPrv instanceof JSONArray) {
+				                dirPrv = (JSONArray) oDirPrv;
+				            } else {
+				            	dirPrv = (JSONArray) parser.parse(oDirPrv.toString().trim());
+				            }
+				            
+				            for(Object row : dirPrv) {
+				            	JSONObject dirOne = null;
+				            	if(row instanceof JSONObject) dirOne = (JSONObject) row;
+				            	else                          dirOne = (JSONObject) parser.parse(row.toString().trim());
+				            	
+				            	try {
+				            		String dPath = dirOne.get("path"     ).toString();
+				            		String dPrv  = dirOne.get("privilege").toString();
+				            		
+				            		if(pathParam.startsWith(dPath) || ("/" + pathParam).startsWith(dPath)) {
+				            			if(dPrv.equals("edit")) {
+				            				json.put("privilege", "edit");
+				            				break;
+				            			}
+				            		}
+				            	} catch(Throwable t) {
+				            		System.out.println("Wrong account configuration - " + t.getMessage());
+				            	}
+				            }
+					    }
+					} else {
+						json.put("privilege", "edit");
+					}
 				}
 			}
 			if(dirPrv == null) dirPrv = new JSONArray();
@@ -822,15 +890,16 @@ public class FSControl {
 				if(oHiddenDir instanceof JSONArray) hiddenDir = (JSONArray) oHiddenDir;
 				else                                hiddenDir = (JSONArray) new JSONParser().parse(oHiddenDir.toString().trim());
 				oHiddenDir = null;
-				if(hiddenDir != null) {
-					for(Object obj : hiddenDir) {
-						hiddenDirList.add(obj.toString().trim());
-					}
-				}
 				
 				if(idtype.equals("A")) {
 					hiddenDirList.clear();
 				} else {
+					if(hiddenDir != null) {
+						for(Object obj : hiddenDir) {
+							hiddenDirList.add(obj.toString().trim());
+						}
+					}
+					
 					for(Object row : dirPrv) {
 		            	JSONObject dirOne = null;
 		            	if(row instanceof JSONObject) dirOne = (JSONObject) row;
@@ -900,7 +969,7 @@ public class FSControl {
 			    files.add(fileOne);
 			}
 			json.put("files", files);
-			json.put("privilege", "view");
+			if(json.get("privilege") == null) json.put("privilege", "view");
 		} catch(Throwable t) {
 			t.printStackTrace();
 			if(jsonSess != null) jsonSess.clear();
