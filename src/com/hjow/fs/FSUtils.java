@@ -15,6 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
  */
 
+import java.io.File;
 import java.util.StringTokenizer;
 
 public class FSUtils {
@@ -77,4 +78,41 @@ public class FSUtils {
     	}
     	return result.toString();
     }
+    
+    public static String getFileSize(File f) {
+	    long   lSize = f.length();
+	    String sUnit = "byte";
+	    String comp  = "" + lSize + " " + sUnit;
+	    
+	    if(lSize < 0) lSize = 0;
+	    if(lSize <= 1) {
+	        sUnit = "byte";
+	        comp = lSize + " " + sUnit;
+	    }
+	    
+	    if(lSize >= 1024) {
+	        sUnit = "KB";
+	        comp  = (Math.round(( lSize / 1024.0 ) * 10) / 10.0) + " " + sUnit;
+	        lSize = lSize / 1024;
+	    }
+	    
+	    if(lSize >= 1024) {
+	        sUnit = "MB";
+	        comp  = (Math.round(( lSize / 1024.0 ) * 10) / 10.0) + " " + sUnit;
+	        lSize = lSize / 1024;
+	    }
+	    
+	    if(lSize >= 1024) {
+	        sUnit = "GB";
+	        comp  = (Math.round(( lSize / 1024.0 ) * 10) / 10.0) + " " + sUnit;
+	        lSize = lSize / 1024;
+	    }
+	    
+	    if(lSize >= 1024) {
+	        sUnit = "TB";
+	        comp  = (Math.round(( lSize / 1024.0 ) * 10) / 10.0) + " " + sUnit;
+	    }
+	    
+	    return comp;
+	}
 }

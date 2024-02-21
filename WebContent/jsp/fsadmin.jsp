@@ -23,7 +23,7 @@ limitations under the License.
 <jsp:include page="./common.header.jsp"></jsp:include>
 </head>
 <body>
-    <div class='fs_root container show-grid full fs_admin'>
+    <div class='fs_root full fs_admin'>
         <script type="text/javascript">
         $(function() {
         	var bodys = $('body');
@@ -82,6 +82,10 @@ limitations under the License.
                         		form.find('.onlyaccount').addClass('invisible');
                         		form.find("[name='usecaptchalogin']").prop('checked', false);
                         	}
+                        	if(conf['UseConsole']) { } else {
+                        		$(".admintab[data-target='terminal']").remove();
+                        		$(".adminelement_terminal ").remove();
+                        	}
                         	form.find("[name='rootdir']").val('...');
                         	form.find("[name='rootdir']").prop('disabled', true);
                         	
@@ -103,6 +107,7 @@ limitations under the License.
                             } else {
                                 form.find("[name='readfileicon']").prop('checked', false);
                             }
+                        	console.log(conf);
                         }, error : function(jqXHR, textStatus, errorThrown) {
                         	alert('Error : ' + textStatus + '\n' + errorThrown)
                         }, complete : function() {
@@ -136,90 +141,118 @@ limitations under the License.
                 	});
                 }
             });
+            
+            var tabButtons = $('.flatbuttons');
+            
+            tabButtons.find('.admintab').each(function() {
+            	$(this).on('click', function() {
+            		tabButtons.find('.admintab').removeClass('thick');
+            		$(this).addClass('thick');
+            		
+            		$('.adminelement').addClass('invisible');
+            		$('.adminelement_' + $(this).attr('data-target')).removeClass('invisible');
+            	});
+            })
         });
         </script>
-        <div class='row'>
-            <div class='col-sm-12'><h2>FS Administration Center</h2></div>
+        <div class='container show-grid full'>
+            <div class='row'>
+                <div class='col-sm-12'><h2>FS Administration Center</h2></div>
+            </div>
+            <div class='row'>
+                <div class='col-sm-12 flatbuttons'>
+                    <a href='#' class='flatbutton admintab lang_element thick' data-lang-en='Config'   data-target='config'   style='margin-left: -5px; border-top: 0; border-left: 0;'>설정</a>
+                    <a href='#' class='flatbutton admintab lang_element'       data-lang-en='Terminal' data-target='terminal' style='margin-left: -5px; border-top: 0; border-left: 0;'>터미널</a>
+                    <a href='#' class='flatbutton admintab lang_element'       data-lang-en='Reset'    data-target='reset'    style='margin-left: -5px; border-top: 0; border-left: 0;'>초기화</a>
+                </div>
+            </div>
         </div>
-        <form class='form_fs_admin' onsubmit='return false;'>
-            <input type='hidden' name='req' value='status' class='hidden_req'/>
-            <div class='row'>
-                <div class='col-sm-12'><h3 class='lang_element' data-lang-en='Configuration'>설정</h3></div>
-            </div>
-            <div class='row'>
-		        <div class='col-sm-12 container show-grid'>
-		            <div class='row'>
-                        <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Title'>타이틀</div>
-                        <div class='col-sm-10'><input type='text' name='title' class='full' placeholder="Title" value="File Storage"/></div>
-                    </div>
-		            <div class='row'>
-		                <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Root Directory'>최상위 경로</div>
-		                <div class='col-sm-10'><input type='text' name='rootdir' class='full lang_attr_element' placeholder="공유할 파일이 있는 최상위 경로를 입력" data-lang-target='placeholder' data-lang-en='Root Directory for sharing'/></div>
-		            </div>
-		            <div class='row'>
-		                <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Limit Size (KB)'>용량 제한 (KB)</div>
-                        <div class='col-sm-10'><input type='number' name='limitsize' class='full lang_attr_element' placeholder="한 번에 업로드할 수 있는 최대 용량 (KB)" data-lang-target='placeholder' data-lang-en='Maximum size for upload at once (KB)' title='Maximum size for upload at once (KB)' value='10485760'/></div>
-		            </div>
-		            <div class='row'>
-                        <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Output Count'>출력 최대 갯수</div>
-                        <div class='col-sm-10'><input type='number' name='limitcount' class='full lang_attr_element' placeholder="파일 목록 한번 불러올 때 가져올 최대 갯수" data-lang-target='placeholder' data-lang-en='Maximum count of files on single networking' title='Maximum count of files on single networking' value='1000'/></div>
-                    </div>
-		            <div class='row'>
-                        <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Captcha'>캡차</div>
-                        <div class='col-sm-10'>
-                            <span>
-                                <label><input type='checkbox' name='usecaptchadown'  class='chk_captcha_down'  value="true"/><span class='lang_element' data-lang-en='Ask on download'>다운로드 시 요구</span></label>
-                            </span>
-                            <span class='onlyaccount invisible'>
-                                <label><input type='checkbox' name='usecaptchalogin' class='chk_captcha_login' value="true"/><span class='lang_element' data-lang-en='Ask on login'   >로그인 시 요구</span></label>
-                            </span>
+        <div class='container show-grid adminelement adminelement_config full'>
+            <form class='form_fs_admin' onsubmit='return false;'>
+                <input type='hidden' name='req' value='status' class='hidden_req'/>
+                <div class='row'>
+                    <div class='col-sm-12'><h3 class='lang_element' data-lang-en='Configuration'>설정</h3></div>
+                </div>
+                <div class='row'>
+                    <div class='col-sm-12 container show-grid'>
+                        <div class='row'>
+                            <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Title'>타이틀</div>
+                            <div class='col-sm-10'><input type='text' name='title' class='full' placeholder="Title" value="File Storage"/></div>
                         </div>
-                    </div>
-		            <div class='row'>
-                        <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Accounts'>계정</div>
-                        <div class='col-sm-10'><label><input type='checkbox' name='useaccount' class='chk_account' value="true"/><span class='lang_element' data-lang-en='Use Accounts'>계정 기능 사용</span></label></div>
-                    </div>
-                    <div class='row'>
-                        <div class='col-sm-12'>
-                            <div><h4 class='lang_element' data-lang-en='Hidden Folders'>숨김 폴더</h4></div>
-                            <div><textarea name='hiddendirs' class='full'>[]</textarea></div>
+                        <div class='row'>
+                            <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Root Directory'>최상위 경로</div>
+                            <div class='col-sm-10'><input type='text' name='rootdir' class='full lang_attr_element' placeholder="공유할 파일이 있는 최상위 경로를 입력" data-lang-target='placeholder' data-lang-en='Root Directory for sharing'/></div>
                         </div>
-                    </div>
-                    <div class='row'>
-                        <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='ETC'>기타</div>
-                        <div class='col-sm-10'>
-                            <span>
-                                <label><input type='checkbox' name='readfileicon'  class='chk_read_icon'  value="true"/><span class='lang_element' data-lang-en="Read file's icon">파일 아이콘 읽기</span></label>
-                            </span>
+                        <div class='row'>
+                            <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Limit Size (KB)'>용량 제한 (KB)</div>
+                            <div class='col-sm-10'><input type='number' name='limitsize' class='full lang_attr_element' placeholder="한 번에 업로드할 수 있는 최대 용량 (KB)" data-lang-target='placeholder' data-lang-en='Maximum size for upload at once (KB)' title='Maximum size for upload at once (KB)' value='10485760'/></div>
                         </div>
-                    </div>
-                    <div class='row'>
-		                <div class='col-sm-12 align_center'>
-		                    <input type='submit' value='적용' class='full lang_attr_element btn_apply' style='height:50px;' data-lang-target='value' data-lang-en='Apply'/>
-		                </div>
-		            </div>
-		        </div>
-		    </div>
-        </form>
-        <form class='form_fs_reset' onsubmit='return false;'>
-            <input type='hidden' name='req' value='reset' class='hidden_req'/>
-            <div class='row'>
-                <div class='col-sm-12'><h3 class='lang_element' data-lang-en='Reset'>초기화</h3></div>
-            </div>
-            <div class='row'>
-                <div class='col-sm-12 container show-grid'>
-                    <div class='row'>
-                        <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Password'>암호</div>
-                        <div class='col-sm-10'><input type='password' name='pw' class='full lang_attr_element' placeholder="fs.properties 에 있는 암호" data-lang-target='placeholder' data-lang-en='Password in fs.properties'/></div>
-                    </div>
-                    <div class='row'>
-                        <div class='col-sm-12 align_center'>
-                            <input type='submit' value='초기화' class='full lang_attr_element btn_apply' style='height:50px;' data-lang-target='value' data-lang-en='Reset'/>
+                        <div class='row'>
+                            <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Output Count'>출력 최대 갯수</div>
+                            <div class='col-sm-10'><input type='number' name='limitcount' class='full lang_attr_element' placeholder="파일 목록 한번 불러올 때 가져올 최대 갯수" data-lang-target='placeholder' data-lang-en='Maximum count of files on single networking' title='Maximum count of files on single networking' value='1000'/></div>
+                        </div>
+                        <div class='row'>
+                            <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Captcha'>캡차</div>
+                            <div class='col-sm-10'>
+                                <span>
+                                    <label><input type='checkbox' name='usecaptchadown'  class='chk_captcha_down'  value="true"/><span class='lang_element' data-lang-en='Ask on download'>다운로드 시 요구</span></label>
+                                </span>
+                                <span class='onlyaccount invisible'>
+                                    <label><input type='checkbox' name='usecaptchalogin' class='chk_captcha_login' value="true"/><span class='lang_element' data-lang-en='Ask on login'   >로그인 시 요구</span></label>
+                                </span>
+                            </div>
+                        </div>
+                        <div class='row'>
+                            <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Accounts'>계정</div>
+                            <div class='col-sm-10'><label><input type='checkbox' name='useaccount' class='chk_account' value="true"/><span class='lang_element' data-lang-en='Use Accounts'>계정 기능 사용</span></label></div>
+                        </div>
+                        <div class='row'>
+                            <div class='col-sm-12'>
+                                <div><h4 class='lang_element' data-lang-en='Hidden Folders'>숨김 폴더</h4></div>
+                                <div><textarea name='hiddendirs' class='full'>[]</textarea></div>
+                            </div>
+                        </div>
+                        <div class='row'>
+                            <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='ETC'>기타</div>
+                            <div class='col-sm-10'>
+                                <span>
+                                    <label><input type='checkbox' name='readfileicon'  class='chk_read_icon'  value="true"/><span class='lang_element' data-lang-en="Read file's icon">파일 아이콘 읽기</span></label>
+                                </span>
+                            </div>
+                        </div>
+                        <div class='row'>
+                            <div class='col-sm-12 align_center'>
+                                <input type='submit' value='적용' class='full lang_attr_element btn_apply' style='height:50px;' data-lang-target='value' data-lang-en='Apply'/>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
+        <div class='container show-grid adminelement adminelement_terminal invisible full'>
+            <jsp:include page="fsconsole.jsp"></jsp:include>
+        </div>
+        <div class='container show-grid adminelement adminelement_reset invisible full'>
+            <form class='form_fs_reset' onsubmit='return false;'>
+                <input type='hidden' name='req' value='reset' class='hidden_req'/>
+                <div class='row'>
+                    <div class='col-sm-12'><h3 class='lang_element' data-lang-en='Reset'>초기화</h3></div>
+                </div>
+                <div class='row'>
+                    <div class='col-sm-12 container show-grid'>
+                        <div class='row'>
+                            <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Password'>암호</div>
+                            <div class='col-sm-10'><input type='password' name='pw' class='full lang_attr_element' placeholder="fs.properties 에 있는 암호" data-lang-target='placeholder' data-lang-en='Password in fs.properties'/></div>
+                        </div>
+                        <div class='row'>
+                            <div class='col-sm-12 align_center'>
+                                <input type='submit' value='초기화' class='full lang_attr_element btn_apply' style='height:50px;' data-lang-target='value' data-lang-en='Reset'/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
     <jsp:include page="common.footer.jsp"></jsp:include>
 </body>

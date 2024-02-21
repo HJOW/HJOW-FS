@@ -27,8 +27,9 @@ body td.td_mark_dir, body.dark div.td_mark_dir {
     width: 100%;
 }
 a {
-    color : blue;
+    color: rgb(90, 120, 200);
     text-decoration: none;
+    text-decoration-line: none;
 }
 .invisible {
     display: none !important;
@@ -84,4 +85,64 @@ a {
 }
 .filedndin {
 	background-color: red !important;
+}
+a.flatbutton, input.flatbutton, button.flatbutton { 
+	background-color: rgb(255, 255, 255);
+    border: 1px solid rgb(90, 120, 200);
+    color: rgb(90, 120, 200);
+    font-family: D2Coding, 'D2 coding', NanumGothicCoding, '나눔고딕코딩', NanumGothic, '나눔고딕', 돋움;
+    font-weight: bolder;
+    min-height: 25px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 11px;
+    padding-right: 11px;
+    border-radius: 1px;
+    cursor: pointer;
+    text-decoration: none;
+    text-decoration-line: none;
+}
+a.flatbutton.thick, input.flatbutton.thick, button.flatbutton.thick {
+	border: 3px solid rgb(90, 120, 200);
+	background-color: rgb(200, 200, 200);
+}
+a.flatbutton.green, input.flatbutton.green, button.flatbutton.green {
+    border: 1px solid rgb(90, 200, 120);
+    color: rgb(90, 200, 120);
+}
+a.flatbutton.green.thick, input.flatbutton.green.thick, button.flatbutton.green.thick {
+	border: 3px solid rgb(90, 200, 120);
+}
+a.flatbutton.red, input.flatbutton.red, button.flatbutton.red {
+    border: 1px solid rgb(200, 120, 120);
+    color: rgb(200, 120, 120);
+}
+a.flatbutton.red.thick, input.flatbutton.red.thick, button.flatbutton.red.thick {
+	border: 3px solid rgb(200, 120, 120);
+}
+a.flatbutton.disabled, body.dark input.flatbutton.disabled, body.dark button.flatbutton.disabled {
+    border: 1px solid rgb(180, 180, 180);
+    color: rgb(180, 180, 180);
+}
+a.flatbutton.disabled.thick, body.dark input.flatbutton.disabled.thick, body.dark button.flatbutton.disabled.thick {
+	border: 3px solid rgb(180, 180, 180);
+}
+a.flatbutton:hover, input.flatbutton:hover, button.flatbutton:hover {
+	background-color: rgb(110, 150, 230);
+    box-shadow: 2px 2px 2px 0 rgb(70, 100, 150);
+}
+a.flatbutton.green:hover, input.flatbutton.green:hover, button.flatbutton.green:hover {
+	background-color: rgb(110, 230, 150);
+}
+a.flatbutton.red:hover, input.flatbutton.red:hover, button.flatbutton.red:hover {
+    background-color: rgb(220, 130, 130);
+}
+a.flatbutton.disabled:hover, input.flatbutton.disabled:hover, button.flatbutton.disabled:hover {
+	background-color: rgb(255, 255, 255);
+    border: 1px solid rgb(180, 180, 180);
+    box-shadow: 0;
+}
+a.flatbutton.disabled.thick:hover, input.flatbutton.disabled.thick:hover, button.flatbutton.disabled.thick:hover {
+	background-color: rgb(200, 200, 200);
+    border: 3px solid rgb(180, 180, 180);
 }

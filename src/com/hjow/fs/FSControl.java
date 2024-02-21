@@ -118,12 +118,14 @@ public class FSControl {
 	public int loginFailCountLimit = 10;
 	public int loginFailOverMinute = 10;
 	
+	public boolean noTerminal = true;
+	
 	public String salt = "fs";
 	public File rootPath  = null;
 	public File garbage   = null;
 	public File uploadd   = null;
 	public String ctxPath = "";
-
+	
 	private FSControl() {
 		
 	}
@@ -207,7 +209,7 @@ public class FSControl {
 				            propIn = null;
 				            
 				            // Find config.json from configuration path
-				            File fJson = new File(fileConfigPath.getAbsolutePath() + File.separator + "config.json");
+				            File fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "config.json");
 				            if(! fJson.exists()) {
 				                // Not exist, create
 				                fileOut = new FileOutputStream(fJson);
@@ -241,7 +243,7 @@ public class FSControl {
 				            lineCollection = null;
 				            
 				            // Find accounts.json from configuration path
-			                File faJson = new File(fileConfigPath.getAbsolutePath() + File.separator + "accounts");
+			                File faJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts");
 			                if(! faJson.exists()) {
 			                    faJson.mkdirs();
 			                }
@@ -272,12 +274,15 @@ public class FSControl {
 				}
 				rootPath  = new File(storPath);
 				if(! rootPath.exists()) rootPath.mkdirs();
-				garbage = new File(rootPath.getAbsolutePath() + File.separator + ".garbage");
+				garbage = new File(rootPath.getCanonicalPath() + File.separator + ".garbage");
 			    if(! garbage.exists()) garbage.mkdirs();
-			    uploadd = new File(rootPath.getAbsolutePath() + File.separator + ".upload");
+			    uploadd = new File(rootPath.getCanonicalPath() + File.separator + ".upload");
 			    if(! uploadd.exists()) uploadd.mkdirs();
 				if(conf.get("UseAccount") != null) {
 					noLogin = (! Boolean.parseBoolean(conf.get("UseAccount").toString().trim()));
+				}
+				if(conf.get("UseConsole") != null) {
+					noTerminal = (! Boolean.parseBoolean(conf.get("UseConsole").toString().trim()));
 				}
 				if(conf.get("UseCaptchaDown") != null) {
 					captchaDownload = Boolean.parseBoolean(conf.get("UseCaptchaDown").toString().trim());
@@ -307,6 +312,8 @@ public class FSControl {
 				Object sessionMap = request.getSession().getAttribute("fssession");
 				if(sessionMap != null) request.getSession().removeAttribute("fssession");
 			}
+			
+			FSConsole.init(rootPath);
 		} catch(Throwable thx) {
 			thx.printStackTrace();
 			throw new RuntimeException(thx.getMessage(), thx);
@@ -383,7 +390,7 @@ public class FSControl {
 				rootPath = new File(roots);
 				if(! rootPath.exists()) rootPath.mkdirs();
 				
-				garbage = new File(rootPath.getAbsolutePath() + File.separator + ".garbage");
+				garbage = new File(rootPath.getCanonicalPath() + File.separator + ".garbage");
 				if(! garbage.exists()) garbage.mkdirs();
 				
 				String sMaxSize = request.getParameter("limitsize");
@@ -459,10 +466,10 @@ public class FSControl {
 						byte[] res = digest.digest((s1 + adminPw + s2 + salt + adminId + s3).getBytes(cs));
 						adminAc.put("pw", Base64.encodeBase64String(res));
 						
-						File faJson = new File(fileConfigPath.getAbsolutePath() + File.separator + "accounts");
+						File faJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts");
 				        if(! faJson.exists()) faJson.mkdirs();
 				        
-				        File fileAcc = new File(fileConfigPath.getAbsolutePath() + File.separator + "accounts" + File.separator + adminId + ".json");
+				        File fileAcc = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts" + File.separator + adminId + ".json");
 				        fileAcc.getCanonicalPath(); // Check valid
 				        fileOut = new FileOutputStream(fileAcc);
 				        fileOut.write(adminAc.toJSONString().getBytes(cs));
@@ -488,7 +495,7 @@ public class FSControl {
 				conf.put("Title", titles);
 				conf.put("sHiddenDirs", sHiddenDir);
 				conf.put("HiddenDirs", new JSONArray());
-				conf.put("Path", rootPath.getAbsolutePath());
+				conf.put("Path", rootPath.getCanonicalPath());
 				conf.put("UseAccount", new Boolean(! noLogin));
 				conf.put("UseCaptchaDown" , new Boolean(useCaptchaDown));
 				conf.put("UseCaptchaLogin", new Boolean(useCaptchaLogin));
@@ -501,7 +508,7 @@ public class FSControl {
 		        conf.put("Salt", salt);
 		        conf.put("Installed", new Boolean(true));
 				
-				File fJson = new File(fileConfigPath.getAbsolutePath() + File.separator + "config.json");
+				File fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "config.json");
 				fileOut = new FileOutputStream(fJson);
 				fileOut.write(conf.toJSONString().getBytes(cs));
 				fileOut.close(); fileOut = null;
@@ -601,7 +608,7 @@ public class FSControl {
 	        	throw new FileNotFoundException(rex);
 	        }
 	        
-	        File fJson = new File(fileConfigPath.getAbsolutePath() + File.separator + "config.json");
+	        File fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "config.json");
 	        
 	        if(! fJson.exists()) {
                 // Not exist, create
@@ -639,7 +646,7 @@ public class FSControl {
 		        
 				if(! rootPath.exists()) rootPath.mkdirs();
 				
-				garbage = new File(rootPath.getAbsolutePath() + File.separator + ".garbage");
+				garbage = new File(rootPath.getCanonicalPath() + File.separator + ".garbage");
 				if(! garbage.exists()) garbage.mkdirs();
 				
 				String sHiddenDirs = request.getParameter("hiddendirs");
@@ -767,6 +774,73 @@ public class FSControl {
 	}
 	
 	@SuppressWarnings("unchecked")
+	public JSONObject console(HttpServletRequest request) throws Exception {
+		JSONObject json       = new JSONObject();
+				
+		JSONObject sessionMap = null;
+		String lang = "en";
+		
+		try {
+			if(noLogin) {
+				if(lang.equals("ko")) throw new RuntimeException("이 작업을 수행할 권한이 없습니다.");
+				else                  throw new RuntimeException("No privilege");
+			}
+			
+			sessionMap = getSessionObject(request);
+			lang       = getLanguage(request);
+			
+			if(sessionMap == null) {
+				if(lang.equals("ko")) throw new RuntimeException("이 작업을 수행할 권한이 없습니다.");
+				else                  throw new RuntimeException("No privilege");
+			}
+			
+			Object idtype = sessionMap.get("idtype");
+			if(idtype == null) {
+				if(lang.equals("ko")) throw new RuntimeException("이 작업을 수행할 권한이 없습니다.");
+				else                  throw new RuntimeException("No privilege");
+			}
+			if(! idtype.toString().equals("A")) {
+				if(lang.equals("ko")) throw new RuntimeException("이 작업을 수행할 권한이 없습니다.");
+				else                  throw new RuntimeException("No privilege");
+			}
+			
+            json.put("message", "");
+			
+            FSConsole console = (FSConsole) request.getSession().getAttribute("fsscen");
+            if(console == null) {
+            	console = FSConsole.getInstance();
+            	request.getSession().setAttribute("fsscen", console);
+            }
+            
+            String path, command;
+            path    = request.getParameter("path");
+            command = request.getParameter("command");
+            
+            if(path    == null) throw new RuntimeException("Wrong parameter. Please refresh the page !");
+            if(command == null) command = "";
+            
+            console.setPath(path);
+            
+            FSConsoleResult rs = console.run(sessionMap.get("id").toString(), command);
+            
+			json.put("success", new Boolean(true));
+			json.put("path"   , rs.getPath());
+			json.put("display", rs.getDisplay());
+			json.put("displaynull", new Boolean(rs.isNulll()));
+			
+		} catch(Throwable t) {
+			json.put("success", new Boolean(false));
+			if(t instanceof RuntimeException) {
+				json.put("message", t.getMessage());
+			} else {
+				json.put("message", "Error : " + t.getMessage());
+			}
+		}
+		
+		return json;
+	}
+	
+	@SuppressWarnings("unchecked")
 	public JSONObject list(HttpServletRequest request, String pPath, String pKeyword, String pExcept) {
 		initialize(request);
 		
@@ -795,77 +869,78 @@ public class FSControl {
 		}
 		pExcept = null;
 		
-		File dir = new File(instance.rootPath.getAbsolutePath() + File.separator + pathParam);
-
-		File[] list = dir.listFiles();
-		List<File> fileList = new ArrayList<File>();
-		if(list == null) list = new File[0];
-		
-		int excepted  = 0;
-		
-		for(File f : list) {
-			String nm = f.getName();
-			if(excepts.contains(nm)) {
-				excepted++;
-				continue;
-			}
-			fileList.add(f);
-		}
-		list = null;
-		
-		Collections.sort(fileList, new Comparator<File>() {
-			@Override
-			public int compare(File o1, File o2) {
-				if(o1.isDirectory() && (! o2.isDirectory())) return -1;
-				if((! o1.isDirectory()) && o2.isDirectory()) return 1;
-				return (o1.getName().compareTo(o2.getName()));
-			}
-		});
-		
-		List<File> chDirs  = new ArrayList<File>();
-		List<File> chFiles = new ArrayList<File>();
-		
-		int fileIndex = 0;
-		int skipped   = 0;
-		for(File f : fileList) {
-			String nm = f.getName();
-			if(limitCount >= 0 && fileIndex >= limitCount) {
-				skipped++;
-				continue;
-			}
-		    if(f.isDirectory()) {
-		        if(nm.indexOf(".") >= 0) continue;
-		        chDirs.add(f);
-		    } else {
-		        if(f.length() / 1024 >= instance.limitSize) continue;
-		        chFiles.add(f);
-		    }
-		    fileIndex++;
-		}
-
-		fileList.clear();
-		fileList = null;
-		excepts.clear();
-		excepts = null;
-		
-		json.put("skipped" , new Integer(skipped ));
-		json.put("excepted", new Integer(excepted));
-
-		Collections.sort(chDirs);
-		Collections.sort(chFiles);
-
-		String pathDisp = pathParam; // 화면 출력용
-		if(pathDisp.startsWith("//")) pathDisp = pathDisp.substring(1);
-		if(! pathDisp.startsWith("/")) pathDisp = "/" + pathDisp;
-		
-		json.put("type", "list");
-		json.put("keyword", keyword);
-		json.put("path"   , pathParam);
-		json.put("dpath"  , pathDisp);
-
 		JSONObject jsonSess = new JSONObject();
 		JSONParser parser   = new JSONParser();
+		
 		try {
+		    File dir = new File(instance.rootPath.getCanonicalPath() + File.separator + pathParam);
+            
+		    File[] list = dir.listFiles();
+		    List<File> fileList = new ArrayList<File>();
+		    if(list == null) list = new File[0];
+		    
+		    int excepted  = 0;
+		    
+		    for(File f : list) {
+		    	String nm = f.getName();
+		    	if(excepts.contains(nm)) {
+		    		excepted++;
+		    		continue;
+		    	}
+		    	fileList.add(f);
+		    }
+		    list = null;
+		    
+		    Collections.sort(fileList, new Comparator<File>() {
+		    	@Override
+		    	public int compare(File o1, File o2) {
+		    		if(o1.isDirectory() && (! o2.isDirectory())) return -1;
+		    		if((! o1.isDirectory()) && o2.isDirectory()) return 1;
+		    		return (o1.getName().compareTo(o2.getName()));
+		    	}
+		    });
+		    
+		    List<File> chDirs  = new ArrayList<File>();
+		    List<File> chFiles = new ArrayList<File>();
+		    
+		    int fileIndex = 0;
+		    int skipped   = 0;
+		    for(File f : fileList) {
+		    	String nm = f.getName();
+		    	if(limitCount >= 0 && fileIndex >= limitCount) {
+		    		skipped++;
+		    		continue;
+		    	}
+		        if(f.isDirectory()) {
+		            if(nm.indexOf(".") >= 0) continue;
+		            chDirs.add(f);
+		        } else {
+		            if(f.length() / 1024 >= instance.limitSize) continue;
+		            chFiles.add(f);
+		        }
+		        fileIndex++;
+		    }
+            
+		    fileList.clear();
+		    fileList = null;
+		    excepts.clear();
+		    excepts = null;
+		    
+		    json.put("skipped" , new Integer(skipped ));
+		    json.put("excepted", new Integer(excepted));
+            
+		    Collections.sort(chDirs);
+		    Collections.sort(chFiles);
+            
+		    String pathDisp = pathParam; // 화면 출력용
+		    if(pathDisp.startsWith("//")) pathDisp = pathDisp.substring(1);
+		    if(! pathDisp.startsWith("/")) pathDisp = "/" + pathDisp;
+		    
+		    json.put("type", "list");
+		    json.put("keyword", keyword);
+		    json.put("path"   , pathParam);
+		    json.put("dpath"  , pathDisp);
+
 			jsonSess = getSessionObject(request);
 			JSONArray dirPrv = null;
 			String idtype = "U";
@@ -961,7 +1036,7 @@ public class FSControl {
 			    if(name.equals(".garbage")) continue;
 			    if(name.equals(".upload" )) continue;
 			    
-				String linkDisp = f.getAbsolutePath().replace(instance.rootPath.getAbsolutePath(), "").replace("\\", "/").replace("'", "").replace("\"", "");
+				String linkDisp = f.getCanonicalPath().replace(instance.rootPath.getCanonicalPath(), "").replace("\\", "/").replace("'", "").replace("\"", "");
 			    if(linkDisp.indexOf(".") >= 0) continue;
 			    if(linkDisp.indexOf("/") == 0) linkDisp = linkDisp.substring(1);
 			    
@@ -991,7 +1066,7 @@ public class FSControl {
 			    
 			    fileOne.put("type", "file");
 			    fileOne.put("name", linkDisp);
-			    fileOne.put("size", getFileSize(f));
+			    fileOne.put("size", FSUtils.getFileSize(f));
 			    
 			    files.add(fileOne);
 			}
@@ -1158,12 +1233,12 @@ public class FSControl {
 	        }
 		    
 		    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-		    File dest = new File(uploadd.getAbsolutePath() + File.separator + dateFormat.format(new java.util.Date(System.currentTimeMillis())));
+		    File dest = new File(uploadd.getCanonicalPath() + File.separator + dateFormat.format(new java.util.Date(System.currentTimeMillis())));
 		    if(! dest.exists()) dest.mkdirs();
 		    
 		    int maxSize = Integer.MAX_VALUE;
 		    if(limitSize * 1024L < maxSize) maxSize = (int) (limitSize * 1024L); 
-		    MultipartRequest mReq = new MultipartRequest(request, dest.getAbsolutePath(), maxSize, cs, new DefaultFileRenamePolicy());
+		    MultipartRequest mReq = new MultipartRequest(request, dest.getCanonicalPath(), maxSize, cs, new DefaultFileRenamePolicy());
 		    
 		    String pathParam = mReq.getParameter("path");
 		    
@@ -1203,14 +1278,14 @@ public class FSControl {
 		    	String fileName = mReq.getFilesystemName(fileElem);
 		    	String fileOrig = mReq.getOriginalFileName(fileElem);
 		    	
-		    	File fileOne = new File(dest.getAbsolutePath() + File.separator + fileName);
-		    	File destFil = new File(rootPath.getAbsolutePath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileOrig);
+		    	File fileOne = new File(dest.getCanonicalPath() + File.separator + fileName);
+		    	File destFil = new File(rootPath.getCanonicalPath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileOrig);
 		    	
 		    	if(destFil.exists()) {
 		    		int dupx = 0;
 		    		while(destFil.exists()) {
 		    			dupx++;
-		    			destFil = new File(rootPath.getAbsolutePath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileOrig + "." + dupx);
+		    			destFil = new File(rootPath.getCanonicalPath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileOrig + "." + dupx);
 		    		}
 		    	}
 		    	
@@ -1218,8 +1293,8 @@ public class FSControl {
 		    		fileOne.renameTo(destFil);
 		    	} else {
 		    		System.out.println("Upload complete but cannot move the file from temp directory to destination !");
-		    		System.out.println("File : " + fileOne.getAbsolutePath());
-		    		System.out.println("Dest : " + destFil.getAbsolutePath());
+		    		System.out.println("File : " + fileOne.getCanonicalPath());
+		    		System.out.println("Dest : " + destFil.getCanonicalPath());
 		    		System.out.println("COS File System Name : " + fileName);
 		    		System.out.println("COS Original Name : " + fileOrig);
 		    	}
@@ -1370,9 +1445,9 @@ public class FSControl {
 		    }
 		    fileName = fileName.replace("/", "").replace("\\", "").replace("..", "");
 
-		    file = new File(rootPath.getAbsolutePath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileName);
+		    file = new File(rootPath.getCanonicalPath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileName);
 		    if(! file.exists()) {
-		    	System.out.println("No File ! " + file.getAbsolutePath() + " <-- " + rootPath.getAbsolutePath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileName);
+		    	System.out.println("No File ! " + file.getCanonicalPath() + " <-- " + rootPath.getCanonicalPath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileName);
 		        throw new FileNotFoundException("There is no file !");
 		    }
 		    if(file.isDirectory()) {
@@ -1552,7 +1627,7 @@ public class FSControl {
 			    String dirName = request.getParameter("name");
 			    dirName = FSUtils.removeSpecials(dirName, false, true, true, true, true);
 			    
-			    File file = new File(rootPath.getAbsolutePath() + File.separator + pathParam.replace("/", File.separator) + File.separator + dirName);
+			    File file = new File(rootPath.getCanonicalPath() + File.separator + pathParam.replace("/", File.separator) + File.separator + dirName);
 			    file.mkdirs();
 			    json.put("success", new Boolean(true));
 			} else {
@@ -1637,11 +1712,11 @@ public class FSControl {
 			    String fileName = request.getParameter("name");
 			    File file;
 			    
-			    if(delType.equals("dir")) file = new File(rootPath.getAbsolutePath() + File.separator + pathParam.replace("/", File.separator));
-			    else                      file = new File(rootPath.getAbsolutePath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileName);
+			    if(delType.equals("dir")) file = new File(rootPath.getCanonicalPath() + File.separator + pathParam.replace("/", File.separator));
+			    else                      file = new File(rootPath.getCanonicalPath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileName);
 			    
 			    if(! file.exists()) {
-			    	System.out.println("There is no file ! " + file.getAbsolutePath());
+			    	System.out.println("There is no file ! " + file.getCanonicalPath());
 			        throw new FileNotFoundException("There is no file !");
 			    }
 			    
@@ -1655,15 +1730,15 @@ public class FSControl {
 			    }
 			    
 			    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-			    File dest = new File(garbage.getAbsolutePath() + File.separator + dateFormat.format(new java.util.Date(System.currentTimeMillis())));
+			    File dest = new File(garbage.getCanonicalPath() + File.separator + dateFormat.format(new java.util.Date(System.currentTimeMillis())));
 			    if(! dest.exists()) dest.mkdirs();
 
-			    File fdest = new File(dest.getAbsolutePath() + File.separator + file.getName());
+			    File fdest = new File(dest.getCanonicalPath() + File.separator + file.getName());
 			    if(fdest.exists()) {
 			    	int index = 0;
 			    	while(fdest.exists()) {
 			    		index++;
-			    		fdest = new File(dest.getAbsolutePath() + File.separator + file.getName() + "." + index);
+			    		fdest = new File(dest.getCanonicalPath() + File.separator + file.getName() + "." + index);
 			    	}
 			    }
 			    file.renameTo(fdest);
@@ -1729,7 +1804,7 @@ public class FSControl {
 				else                  throw new RuntimeException("Please install first !");
 			}
 			
-			File faJson = new File(fileConfigPath.getAbsolutePath() + File.separator + "accounts");
+			File faJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts");
 			if(! faJson.exists()) faJson.mkdirs();
 			
 			if(req.equals("status")) {
@@ -1830,7 +1905,7 @@ public class FSControl {
 				System.out.println("Login requested ! " + id + " at " + now + " from " + request.getRemoteAddr());
 				
 				if(msg.equals("")) {
-					File fileAcc = new File(faJson.getAbsolutePath() + File.separator + id + ".json");
+					File fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".json");
 					fileAcc.getCanonicalPath(); // Check valid
 				    if(fileAcc.exists()) {
 				        StringBuilder lineCollector = new StringBuilder("");
@@ -1922,7 +1997,7 @@ public class FSControl {
 			                    
 			                    accChanging = true;
 			                    				
-			                    File fileAcc = new File(faJson.getAbsolutePath() + File.separator + id + ".json");
+			                    File fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".json");
 			                    fOut = new FileOutputStream(fileAcc);
 			                    fOut.write(accountOne.toJSONString().getBytes(cs));
 			                    fOut.close(); fOut = null;
@@ -1952,7 +2027,7 @@ public class FSControl {
 			        		
 			        		accChanging = true;
 		                    
-		                    File fileAcc = new File(faJson.getAbsolutePath() + File.separator + id + ".json");
+		                    File fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".json");
 		                    fOut = new FileOutputStream(fileAcc);
 		                    fOut.write(accountOne.toJSONString().getBytes(cs));
 		                    fOut.close(); fOut = null;
@@ -2027,42 +2102,7 @@ public class FSControl {
 		}
 		return null;
 	}
-	public String getFileSize(File f) {
-	    long   lSize = f.length();
-	    String sUnit = "byte";
-	    String comp  = "" + lSize + " " + sUnit;
-	    
-	    if(lSize < 0) lSize = 0;
-	    if(lSize <= 1) {
-	        sUnit = "byte";
-	        comp = lSize + " " + sUnit;
-	    }
-	    
-	    if(lSize >= 1024) {
-	        sUnit = "KB";
-	        comp  = (Math.round(( lSize / 1024.0 ) * 10) / 10.0) + " " + sUnit;
-	        lSize = lSize / 1024;
-	    }
-	    
-	    if(lSize >= 1024) {
-	        sUnit = "MB";
-	        comp  = (Math.round(( lSize / 1024.0 ) * 10) / 10.0) + " " + sUnit;
-	        lSize = lSize / 1024;
-	    }
-	    
-	    if(lSize >= 1024) {
-	        sUnit = "GB";
-	        comp  = (Math.round(( lSize / 1024.0 ) * 10) / 10.0) + " " + sUnit;
-	        lSize = lSize / 1024;
-	    }
-	    
-	    if(lSize >= 1024) {
-	        sUnit = "TB";
-	        comp  = (Math.round(( lSize / 1024.0 ) * 10) / 10.0) + " " + sUnit;
-	    }
-	    
-	    return comp;
-	}
+	
 	public String getLanguage(HttpServletRequest request) {
     	String lang = (String) request.getSession().getAttribute("fslanguage");
     	if(lang == null) lang = "en";
