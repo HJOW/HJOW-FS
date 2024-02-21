@@ -18,7 +18,7 @@ body {
     margin: 0; padding: 0;
 }
 body, div, span, a, p, pre, input {
-    font-family : D2Coding, NanumGothicCoding, '나눔고딕코딩', NanumGothic, '나눔고딕', 돋움;
+    font-family : D2Coding, 'D2 coding', NanumGothicCoding, '나눔고딕코딩', NanumGothic, '나눔고딕', 돋움;
 }
 body td.td_mark_dir, body.dark div.td_mark_dir {
     color: #C4B73B;

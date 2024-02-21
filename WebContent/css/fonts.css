@@ -1,0 +1,14 @@
+@charset "UTF-8";
+
+@font-face {
+    font-family: 'D2 coding';
+    font-style: normal;
+    font-weight: 400;
+    src: url('D2Coding.eot');
+    src: local('※'), local('D2Coding'),
+        url('../fonts/D2Coding.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/D2Coding.woff2') format('x-woff2'),
+        url('../fonts/D2Coding.woff') format('woff'),
+        url('../fonts/D2Coding.ttf') format('truetype'),
+        url('../fonts/D2Coding.svg') format('svg');
+}
