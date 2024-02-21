@@ -394,8 +394,6 @@ $(function() {
                 
                 FSUtil.applyLanguage();
                 fIconize();
-                
-                console.log(data);
             }, error : function(jqXHR, textStatus, errorThrown) {
             	textStatus  = String(textStatus).replace(/[<>]+/g, '');
             	errorThrown = String(errorThrown).replace(/[<>]+/g, '');
