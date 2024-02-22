@@ -1,6 +1,5 @@
-package com.hjow.fs;
 /*
-Copyright 2024 HJOW (Heo Jin Won)
+Copyright 2019 HJOW
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,31 +13,30 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
+package com.hjow.fs.console.cmd;
 
 import java.io.File;
-import java.io.Serializable;
 
-public abstract class FSScriptTool implements Serializable {
-	private static final long serialVersionUID = -768709662832694881L;
-	protected static File rootPath = null;
-	protected FSConsole console = null;
-	
-	synchronized void init(File rtPath) {
-		if(rootPath != null) return;
-		rootPath = rtPath;
-	}
-	
-	FSConsole getConsole() {
-		return console;
+import com.hjow.fs.console.FSConsole;
+
+public class FSConsolePwd implements FSConsoleCommand {
+	@Override
+	public String getName() {
+		return "pwd";
 	}
 
-	void setConsole(FSConsole console) {
-		this.console = console;
+	@Override
+	public String getShortName() {
+		return null;
 	}
-	
-	public abstract String getVariableName();
-	
+
+	@Override
+	public Object run(FSConsole console, File root, String parameter) throws Throwable {
+		return console.getPath();
+	}
+
+	@Override
 	public void dispose() {
-		this.console = null;
+		
 	}
 }
