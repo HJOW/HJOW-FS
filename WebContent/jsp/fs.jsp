@@ -33,6 +33,8 @@ if(pathParam.equals("/")) pathParam = "";
 pathParam = FSUtils.removeSpecials(pathParam, false, true, true, false, true).replace("\\", "/").trim();
 
 if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
+
+boolean useConsole = (! fsc.noTerminal);
 %>
 <script type='text/javascript'>
 $(function() {
@@ -480,6 +482,15 @@ $(function() {
             }
         });
     });
+    
+    <% if(useConsole) { %>
+    var btnConsole = form.find('.btn_console');
+    btnConsole.on('click', function() {
+    	var theme = '';
+        if($('body').is('.dark')) theme='dark';
+    	window.open(ctxPath + '/jsp/fsconsolepop.jsp?theme=' + theme, 'console', 'width=750,height=450,scrollbars=yes,status=no,location=no,toolbar=no');
+    });
+    <% } %>
 
     fReload(true);
 });
@@ -498,9 +509,12 @@ $(function() {
                 <h4 class='path_title'><span class='lang_element' data-lang-en='Current Directory : '>현재 디렉토리 : </span><span class='path'></span></h4>
             </div>
             <div class='col-sm-2'>
-                <input type='button' class='btn_upload privilege_element invisible lang_attr_element' value='업로드' data-lang-target='value' data-lang-en='Upload'/>
-                <input type='button' class='btn_mkdir  privilege_element invisible lang_attr_element' value='새 폴더' data-lang-target='value' data-lang-en='New Folder'/>
-                <input type='button' class='btn_config privilege_element only_admin invisible lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config'/>
+                <input type='button' class='btn_upload  privilege_element invisible lang_attr_element' value='업로드' data-lang-target='value' data-lang-en='Upload'/>
+                <input type='button' class='btn_mkdir   privilege_element invisible lang_attr_element' value='새 폴더' data-lang-target='value' data-lang-en='New Folder'/>
+                <input type='button' class='btn_config  privilege_element only_admin invisible lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config'/>
+                <% if(useConsole) { %>
+                <input type='button' class='btn_console privilege_element only_admin invisible lang_attr_element' value='콘솔' data-lang-target='value' data-lang-en='Console'/>
+                <% } %>
             </div>
 	    </div>
 	    <div class='row fs_search'>

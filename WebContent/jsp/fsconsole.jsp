@@ -18,7 +18,11 @@ $(function() {
             success : function(data) {
                 inpTermPath.val(data.path);
                 if(! data.displaynull) taTermDisp.val(taTermDisp.val() + '\n' + data.display);
-                inpTermCons.prop('readonly', false);
+            }, error : function(jqXHR, textStatus, errorThrown) {
+            	taTermDisp.val(taTermDisp.val() + '\n' + 'Error ! ' + textStatus + '\n    ' + errorThrown);
+            }, complete : function() {
+            	taTermDisp.scrollTop(taTermDisp[0].scrollHeight);
+            	inpTermCons.prop('readonly', false);
                 inpTermCons.val('');
                 inpTermCons.focus();
             }

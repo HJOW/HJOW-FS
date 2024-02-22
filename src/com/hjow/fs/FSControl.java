@@ -669,14 +669,17 @@ public class FSControl {
 				String sUseCaptchaDown  = request.getParameter("usecaptchadown");
 				String sUseCaptchaLogin = request.getParameter("usecaptchalogin");
 				String sReadFileIcon    = request.getParameter("readfileicon");
+				String sUseConsole      = request.getParameter("useconsole");
 				
 				boolean useCaptchaDown  = false;
 				boolean useCaptchaLogin = false;
 				boolean useReadFileIcon = false;
+				boolean useConsole      = false;
 				
 				if(sUseCaptchaDown  != null) useCaptchaDown  = Boolean.parseBoolean(sUseCaptchaDown.trim());
 				if(sUseCaptchaLogin != null) useCaptchaLogin = Boolean.parseBoolean(sUseCaptchaLogin.trim());
 				if(sReadFileIcon    != null) useReadFileIcon = Boolean.parseBoolean(sReadFileIcon.trim());
+				if(sUseConsole      != null) useConsole      = Boolean.parseBoolean(sUseConsole.trim());
 				
 				conf.put("Title", titles);
 				conf.put("sHiddenDirs", sHiddenDirs);
@@ -686,6 +689,7 @@ public class FSControl {
 				conf.put("LimitUploadSize", sMaxSize);
 				conf.put("LimitFilesSinglePage", sMaxCount);
 				conf.put("ReadFileIcon", new Boolean(useReadFileIcon));
+				conf.put("UseConsole", new Boolean(useConsole));
 				conf.put("Installed", new Boolean(true));
 				
 				fileOut = new FileOutputStream(fJson);
