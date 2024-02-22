@@ -19,11 +19,15 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
+import com.hjow.fs.console.cmd.FSConsoleCat;
 import com.hjow.fs.console.cmd.FSConsoleCd;
 import com.hjow.fs.console.cmd.FSConsoleCommand;
+import com.hjow.fs.console.cmd.FSConsoleFirst;
 import com.hjow.fs.console.cmd.FSConsoleLs;
+import com.hjow.fs.console.cmd.FSConsoleNow;
 import com.hjow.fs.console.cmd.FSConsolePwd;
 
 public class FSConsole implements Serializable {
@@ -35,6 +39,9 @@ public class FSConsole implements Serializable {
 		commands.add(FSConsoleCd.class);
 		commands.add(FSConsoleLs.class);
 		commands.add(FSConsolePwd.class);
+		commands.add(FSConsoleFirst.class);
+		commands.add(FSConsoleNow.class);
+		commands.add(FSConsoleCat.class);
 	}
 	public static FSConsole getInstance() {
 		FSConsole c = new FSConsole();
@@ -55,8 +62,8 @@ public class FSConsole implements Serializable {
 	public void setPath(String path) {
 		this.path = path;
 	}
-	public FSConsoleResult run(String id, String command) {
-		System.out.println("Console called by " + id + " - " + command);
+	public FSConsoleResult run(Map<String, Object> sessionMap, String command) {
+		System.out.println("Console called by " + sessionMap.get("id") + " - " + command);
 		
 		FSConsoleResult res = null;
 		
@@ -107,7 +114,7 @@ public class FSConsole implements Serializable {
 				
 				if(commandOne == null) throw new NullPointerException("Cannot found correct command.");
 				
-				Object result = commandOne.run(this, rootPath, parameter.toString().trim());
+				Object result = commandOne.run(this, sessionMap, rootPath, parameter.toString().trim());
 				if(result instanceof FSConsoleResult) {
 					res = (FSConsoleResult) result;
 				} else {

@@ -7,9 +7,9 @@ $(function() {
     var inpTermPath  = formTerminal.find('.tf_terminal_path');
     var inpTermCons  = formTerminal.find('.tf_terminal_console');
     
-    formTerminal.on('submit', function() {
-        inpTermCons.prop('readonly', true);
-        taTermDisp.val(taTermDisp.val() + '\n' + '>> ' + inpTermCons.val());
+    function fRun(displayInput, callback) {
+    	inpTermCons.prop('readonly', true);
+        if(displayInput) taTermDisp.val(taTermDisp.val() + '\n' + '>> ' + inpTermCons.val());
         $.ajax({
             url    : ctxPathIn + "/jsp/fsconsolein.jsp",
             data   : formTerminal.serialize(),
@@ -19,15 +19,22 @@ $(function() {
                 inpTermPath.val(data.path);
                 if(! data.displaynull) taTermDisp.val(taTermDisp.val() + '\n' + data.display);
             }, error : function(jqXHR, textStatus, errorThrown) {
-            	taTermDisp.val(taTermDisp.val() + '\n' + 'Error ! ' + textStatus + '\n    ' + errorThrown);
+                taTermDisp.val(taTermDisp.val() + '\n' + 'Error ! ' + textStatus + '\n    ' + errorThrown);
             }, complete : function() {
-            	taTermDisp.scrollTop(taTermDisp[0].scrollHeight);
-            	inpTermCons.prop('readonly', false);
+                taTermDisp.scrollTop(taTermDisp[0].scrollHeight);
+                inpTermCons.prop('readonly', false);
                 inpTermCons.val('');
                 inpTermCons.focus();
+                if(typeof(callback) == 'function') callback();
             }
         });
+    }
+    
+    formTerminal.on('submit', function() {
+        fRun(true);
     });
+    
+    fRun(false);
 });
 </script>
 <form class='form_fs_terminal' onsubmit='return false;'>
@@ -39,7 +46,7 @@ $(function() {
     </div>
     <div class='row'>
         <div class='col-sm-12 align_left'>
-            <input type='text' name='command' class='tf_terminal_console' style='min-width: 500px;'/>
+            <input type='text' name='command' class='tf_terminal_console' style='min-width: 500px;' value='first'/>
             <input type='submit' value='>'/>
         </div>
     </div>

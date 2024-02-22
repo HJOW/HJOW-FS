@@ -16,26 +16,29 @@ limitations under the License.
 package com.hjow.fs.console.cmd;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 import com.hjow.fs.console.FSConsole;
 
-public class FSConsolePwd implements FSConsoleCommand {
+public class FSConsoleNow implements FSConsoleCommand {
 	private static final long serialVersionUID = -7119930100808982618L;
+	public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm");
 
 	@Override
 	public String getName() {
-		return "pwd";
+		return "now";
 	}
 
 	@Override
 	public String getShortName() {
-		return null;
+		return "date";
 	}
 
 	@Override
 	public Object run(FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable {
-		return console.getPath();
+		return dateFormat.format(new Date(System.currentTimeMillis()));
 	}
 
 	@Override

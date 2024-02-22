@@ -16,11 +16,14 @@ limitations under the License.
 package com.hjow.fs.console.cmd;
 
 import java.io.File;
+import java.io.Serializable;
+import java.util.Map;
+
 import com.hjow.fs.console.FSConsole;
 
-public interface FSConsoleCommand {
+public interface FSConsoleCommand extends Serializable {
 	public String getName();
 	public String getShortName();
-	public Object run(FSConsole console, File root, String parameter) throws Throwable;
+	public Object run(FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable;
     public void   dispose();
 }

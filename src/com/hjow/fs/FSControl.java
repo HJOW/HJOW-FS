@@ -827,7 +827,13 @@ public class FSControl {
             
             console.setPath(path);
             
-            FSConsoleResult rs = console.run(sessionMap.get("id").toString(), command);
+            Map<String, Object> sessionNewMap = new HashMap<String, Object>();
+            sessionNewMap.put("id"        , sessionMap.get("id"));
+            sessionNewMap.put("idtype"    , sessionMap.get("idtype"));
+            sessionNewMap.put("privileges", sessionMap.get("privileges"));
+            sessionNewMap.put("privgroup" , sessionMap.get("privgroup"));
+            
+            FSConsoleResult rs = console.run(sessionNewMap, command);
             
 			json.put("success", new Boolean(true));
 			json.put("path"   , rs.getPath());

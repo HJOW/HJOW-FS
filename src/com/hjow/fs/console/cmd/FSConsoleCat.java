@@ -15,24 +15,27 @@ limitations under the License.
  */
 package com.hjow.fs.console.cmd;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
 import java.util.Map;
 
 import com.hjow.fs.console.FSConsole;
 import com.hjow.fs.console.FSConsoleResult;
 
-public class FSConsoleCd implements FSConsoleCommand {
+public class FSConsoleCat implements FSConsoleCommand {
 	private static final long serialVersionUID = -7285961249387718237L;
 
 	@Override
 	public String getName() {
-		return "cd";
+		return "read";
 	}
 
 	@Override
 	public String getShortName() {
-		return null;
+		return "cat";
 	}
 
 	@Override
@@ -42,20 +45,49 @@ public class FSConsoleCd implements FSConsoleCommand {
 		
 		pathCalc = fileCalc.getCanonicalPath();
 		
-		if(! fileCalc.exists()     ) throw new FileNotFoundException("No such a directory !");
-		if(! fileCalc.isDirectory()) throw new FileNotFoundException("No such a directory !");
+		if(! fileCalc.exists()   ) throw new FileNotFoundException("No such a file !");
+		if(fileCalc.isDirectory()) throw new FileNotFoundException("No such a file !");
 		if(! pathCalc.startsWith(root.getCanonicalPath())) throw new RuntimeException("Cannot access these path !");
 		if(pathCalc.startsWith(new File(root.getCanonicalPath() + File.separator + ".garbage").getCanonicalPath())) throw new RuntimeException("Cannot access these path !");
 		if(pathCalc.startsWith(new File(root.getCanonicalPath() + File.separator + ".upload" ).getCanonicalPath())) throw new RuntimeException("Cannot access these path !");
 		
-		pathCalc = pathCalc.replace(root.getCanonicalPath(), "");
+		StringBuilder res = new StringBuilder("");
 		
-		FSConsoleResult rs = new FSConsoleResult();
-		rs.setNulll(true);
-		rs.setDisplay(null);
-		rs.setPath(pathCalc);
-		rs.setSuccess(true);
-		return rs;
+		FileInputStream   fIn = null;
+		InputStreamReader rd1 = null;
+		Throwable caught = null;
+		
+		char[] buffer = new char[32];
+		int r = 0, i = 0, bytes = 0;
+		try {
+			fIn = new FileInputStream(fileCalc);
+			rd1 = new InputStreamReader(fIn, "UTF-8");
+			
+			while(true) {
+				r = rd1.read(buffer);
+				if(r < 0) break;
+				for(i=0; i<r; i++) {
+					res = res.append(buffer[i]);
+				}
+				bytes += r;
+				if(bytes >= 1024 * 64) {
+					res = res.append("\n...");
+					break;
+				}
+			}
+			
+			rd1.close(); rd1 = null;
+			fIn.close(); fIn = null;
+		} catch(Throwable t) {
+			caught = t;
+		} finally {
+			if(rd1 != null) rd1.close();
+			if(fIn != null) fIn.close();
+		}
+		
+		if(caught != null) throw caught;
+		
+		return res.toString();
 	}
 
 	@Override
