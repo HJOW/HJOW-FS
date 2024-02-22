@@ -31,7 +31,7 @@ $(function() {
         <div class='col-sm-12'><input type='text' class='tf_terminal_path full' name='path' value='/' style='border: 0' readonly/></div>
     </div>
     <div class='row'>
-        <div class='col-sm-12'><textarea class='ta_terminal full' style='min-height: 400px;' readonly></textarea></div>
+        <div class='col-sm-12'><textarea class='ta_terminal full' style='min-height: 390px;' readonly></textarea></div>
     </div>
     <div class='row'>
         <div class='col-sm-12 align_left'>

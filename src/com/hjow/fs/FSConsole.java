@@ -17,17 +17,31 @@ limitations under the License.
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+import com.hjow.fs.sctools.FSConsoleTool;
+
 public class FSConsole implements Serializable {
 	private static final long serialVersionUID = 7995402708882449267L;
 	private static final ScriptEngineManager scman = new ScriptEngineManager();
-	private static FSConsoleTool tool = null;
+	private static List<Class<? extends FSScriptTool>> toolClasses = new ArrayList<Class<? extends FSScriptTool>>();
 	public static void init(File rootPath) {
-		FSConsoleTool.init(rootPath);
-		tool = new FSConsoleTool();
+		toolClasses.add(FSConsoleTool.class);
+		
+		for(Class<? extends FSScriptTool> c : toolClasses) {
+			try {
+				FSScriptTool tempInstance = c.newInstance();
+				tempInstance.init(rootPath);
+				tempInstance.dispose();
+			} catch(Throwable ex) {
+				System.out.println("Error when initialize " + c.getName());
+				ex.printStackTrace();
+			}
+		}
 	}
 	public static FSConsole getInstance() {
 		FSConsole c = new FSConsole();
@@ -51,11 +65,20 @@ public class FSConsole implements Serializable {
 	public FSConsoleResult run(String id, String command) {
 		System.out.println("Console called by " + id + " - " + command);
 		
-		tool.setConsole(this);
-		
 		engine.put("path", getPath());
-		engine.put("tool", tool);
-		engine.put("t", tool);
+		
+		List<FSScriptTool> tools = new ArrayList<FSScriptTool>();
+		for(Class<? extends FSScriptTool> c : toolClasses) {
+			try {
+				FSScriptTool tool = c.newInstance();
+				tool.setConsole(this);
+				tools.add(tool);
+				engine.put(tool.getVariableName(), tool);
+			} catch(Throwable ex) {
+				System.out.println("Error when prepare " + c.getName());
+				ex.printStackTrace();
+			}
+		}
 		
 		FSConsoleResult res =  new FSConsoleResult();
 		res.setPath(getPath());
@@ -74,7 +97,11 @@ public class FSConsole implements Serializable {
 					} else {
 						preRes.setPath(getPath());
 					}
-					tool.setConsole(null);
+					
+					for(FSScriptTool t : tools) {
+						t.dispose();
+					}
+					tools.clear();
 					return preRes;
 				}
 				res.setDisplay(String.valueOf(rs));
@@ -84,7 +111,10 @@ public class FSConsole implements Serializable {
 			res.setSuccess(false);
 			res.setDisplay("Error : " + t.getMessage());
 		}
-		tool.setConsole(null);
+		for(FSScriptTool t : tools) {
+			t.dispose();
+		}
+		tools.clear();
 		engine.put("tool", null);
 		engine.put("t", null);
 		return res;
