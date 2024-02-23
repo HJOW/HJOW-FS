@@ -832,6 +832,7 @@ public class FSControl {
             sessionNewMap.put("idtype"    , sessionMap.get("idtype"));
             sessionNewMap.put("privileges", sessionMap.get("privileges"));
             sessionNewMap.put("privgroup" , sessionMap.get("privgroup"));
+            sessionNewMap.put("lang"      , lang);
             
             FSConsoleResult rs = console.run(sessionNewMap, command);
             

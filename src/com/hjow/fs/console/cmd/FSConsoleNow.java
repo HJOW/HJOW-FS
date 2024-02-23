@@ -23,7 +23,7 @@ import java.util.Map;
 import com.hjow.fs.console.FSConsole;
 
 public class FSConsoleNow implements FSConsoleCommand {
-	private static final long serialVersionUID = -7119930100808982618L;
+	private static final long serialVersionUID = 5419787181379926840L;
 	public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm");
 
 	@Override
@@ -42,7 +42,7 @@ public class FSConsoleNow implements FSConsoleCommand {
 	}
 
 	@Override
-	public void dispose() {
-		
+	public String getHelp(String lang, boolean detail) {
+		return "";
 	}
 }

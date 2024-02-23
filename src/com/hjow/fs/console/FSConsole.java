@@ -18,6 +18,8 @@ limitations under the License.
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -49,18 +51,27 @@ public class FSConsole implements Serializable {
 	}
 	
     protected String path;
-    List<FSConsoleCommand> cmds = new ArrayList<FSConsoleCommand>();
+    protected List<FSConsoleCommand> cmds = new ArrayList<FSConsoleCommand>();
     
     private FSConsole() {
     	for(Class<? extends FSConsoleCommand> c : commands) {
 			try { cmds.add(c.newInstance()); } catch(Throwable t) { System.out.println("Fail to initialize console command " + c + " - Error : " + t.getMessage()); }
 		}
+    	Collections.sort(cmds, new Comparator<FSConsoleCommand>() {
+			@Override
+			public int compare(FSConsoleCommand o1, FSConsoleCommand o2) {
+				return o1.getName().compareTo(o2.getName());
+			}
+		});
     }
 	public String getPath() {
 		return path;
 	}
 	public void setPath(String path) {
 		this.path = path;
+	}
+	public List<FSConsoleCommand> getCommands() {
+		return cmds;
 	}
 	public FSConsoleResult run(Map<String, Object> sessionMap, String command) {
 		System.out.println("Console called by " + sessionMap.get("id") + " - " + command);
@@ -144,10 +155,5 @@ public class FSConsole implements Serializable {
 		
 		if(multipleRes.size() == 1) return multipleRes.get(0);
 		else return new FSConsoleMultipleResult(multipleRes);
-	}
-	
-	public synchronized void dispose() {
-		for(FSConsoleCommand c : cmds) { c.dispose(); }
-		cmds.clear();
 	}
 }

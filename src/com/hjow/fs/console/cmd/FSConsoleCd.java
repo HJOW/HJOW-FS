@@ -23,7 +23,7 @@ import com.hjow.fs.console.FSConsole;
 import com.hjow.fs.console.FSConsoleResult;
 
 public class FSConsoleCd implements FSConsoleCommand {
-	private static final long serialVersionUID = -7285961249387718237L;
+	private static final long serialVersionUID = 1383533904014034021L;
 
 	@Override
 	public String getName() {
@@ -59,7 +59,7 @@ public class FSConsoleCd implements FSConsoleCommand {
 	}
 
 	@Override
-	public void dispose() {
-		
+	public String getHelp(String lang, boolean detail) {
+		return "";
 	}
 }

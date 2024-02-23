@@ -24,6 +24,6 @@ import com.hjow.fs.console.FSConsole;
 public interface FSConsoleCommand extends Serializable {
 	public String getName();
 	public String getShortName();
+	public String getHelp(String lang, boolean detail);
 	public Object run(FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable;
-    public void   dispose();
 }

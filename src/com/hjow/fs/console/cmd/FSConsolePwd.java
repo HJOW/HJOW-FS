@@ -21,7 +21,7 @@ import java.util.Map;
 import com.hjow.fs.console.FSConsole;
 
 public class FSConsolePwd implements FSConsoleCommand {
-	private static final long serialVersionUID = -7119930100808982618L;
+	private static final long serialVersionUID = -1371251238129639475L;
 
 	@Override
 	public String getName() {
@@ -39,7 +39,7 @@ public class FSConsolePwd implements FSConsoleCommand {
 	}
 
 	@Override
-	public void dispose() {
-		
+	public String getHelp(String lang, boolean detail) {
+		return "";
 	}
 }

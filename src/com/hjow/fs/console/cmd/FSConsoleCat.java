@@ -15,7 +15,6 @@ limitations under the License.
  */
 package com.hjow.fs.console.cmd;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -23,10 +22,9 @@ import java.io.InputStreamReader;
 import java.util.Map;
 
 import com.hjow.fs.console.FSConsole;
-import com.hjow.fs.console.FSConsoleResult;
 
 public class FSConsoleCat implements FSConsoleCommand {
-	private static final long serialVersionUID = -7285961249387718237L;
+	private static final long serialVersionUID = -167214053198674139L;
 
 	@Override
 	public String getName() {
@@ -91,7 +89,7 @@ public class FSConsoleCat implements FSConsoleCommand {
 	}
 
 	@Override
-	public void dispose() {
-		
+	public String getHelp(String lang, boolean detail) {
+		return "";
 	}
 }
