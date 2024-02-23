@@ -22,17 +22,17 @@ import java.util.Map;
 import com.hjow.fs.console.FSConsole;
 import com.hjow.fs.console.FSConsoleResult;
 
-public class FSConsoleCd implements FSConsoleCommand {
-	private static final long serialVersionUID = -6401676768399101638L;
+public class FSConsoleDown implements FSConsoleCommand {
+	private static final long serialVersionUID = -435109197370300784L;
 
 	@Override
 	public String getName() {
-		return "cd";
+		return "download";
 	}
 
 	@Override
 	public String getShortName() {
-		return null;
+		return "down";
 	}
 
 	@Override
@@ -42,19 +42,19 @@ public class FSConsoleCd implements FSConsoleCommand {
 		
 		pathCalc = fileCalc.getCanonicalPath();
 		
-		if(! fileCalc.exists()     ) throw new FileNotFoundException("No such a directory !");
-		if(! fileCalc.isDirectory()) throw new FileNotFoundException("No such a directory !");
+		if(! fileCalc.exists()   ) throw new FileNotFoundException("No such a file !");
+		if(fileCalc.isDirectory()) throw new FileNotFoundException("No such a file !");
 		if(! pathCalc.startsWith(root.getCanonicalPath())) throw new RuntimeException("Cannot access these path !");
 		if(pathCalc.startsWith(new File(root.getCanonicalPath() + File.separator + ".garbage").getCanonicalPath())) throw new RuntimeException("Cannot access these path !");
 		if(pathCalc.startsWith(new File(root.getCanonicalPath() + File.separator + ".upload" ).getCanonicalPath())) throw new RuntimeException("Cannot access these path !");
 		
-		pathCalc = pathCalc.replace(root.getCanonicalPath(), "");
-		
 		FSConsoleResult rs = new FSConsoleResult();
-		rs.setNulll(true);
-		rs.setDisplay(null);
-		rs.setPath(pathCalc);
+		rs.setDisplay("Downloading will be started soon...");
+		rs.setNulll(false);
+		rs.setPath(console.getPath());
+		rs.setDownloadAccepted(fileCalc.getName());
 		rs.setSuccess(true);
+		
 		return rs;
 	}
 
@@ -63,33 +63,33 @@ public class FSConsoleCd implements FSConsoleCommand {
 		StringBuilder res = new StringBuilder("");
 		if(detail) {
 			if(lang.equals("ko")) {
-				res = res.append(" * cd").append("\n");
+				res = res.append(" * download").append("\n");
 				res = res.append("                                                                        ").append("\n");
-				res = res.append("    작업할 디렉토리를 변경합니다.                                       ").append("\n");
-				res = res.append("    매개변수로 디렉토리명을 받습니다.                                   ").append("\n");
-				res = res.append("    상대경로 사용이 가능합니다.                                         ").append("\n");
+				res = res.append("    매개변수로 파일명을 받습니다.                                       ").append("\n");
+				res = res.append("    파일 다운로드를 요청합니다. 성공 시 다운로드 창이 나타납니다.       ").append("\n");
+				res = res.append("    디렉토리는 다운로드할 수 없습니다.                                  ").append("\n");
 				res = res.append("                                                                        ").append("\n");
 				res = res.append(" * 예").append("\n");
 				res = res.append("                                                                        ").append("\n");
-				res = res.append("    cd Directory1                                                       ").append("\n");
+				res = res.append("    download Test1.txt                                                  ").append("\n");
 				res = res.append("                                                                        ").append("\n");
 			} else {
-				res = res.append(" * cd").append("\n");
+				res = res.append(" * download").append("\n");
 				res = res.append("                                                                        ").append("\n");
-				res = res.append("    Go to another directory as a work target.                           ").append("\n");
-				res = res.append("    Need parameter as a directory name.                                 ").append("\n");
-				res = res.append("    You can use relative path.                                          ").append("\n");
+				res = res.append("    Need one parameter which is a file's name.                          ").append("\n");
+				res = res.append("    Download file.                                                      ").append("\n");
+				res = res.append("    Cannot download directories.                                        ").append("\n");
 				res = res.append("                                                                        ").append("\n");
 				res = res.append(" * example").append("\n");
 				res = res.append("                                                                        ").append("\n");
-				res = res.append("    cd Directory1                                                       ").append("\n");
+				res = res.append("    download Test1.txt                                                       ").append("\n");
 				res = res.append("                                                                        ").append("\n");
 			}
 		} else {
 			if(lang.equals("ko")) {
-				res = res.append("현재 디렉토리 내 파일과 디렉토리 목록을 볼 수 있습니다.").append("\n");
+				res = res.append("파일을 다운로드합니다.").append("\n");
 			} else {
-				res = res.append("Print all of files and directories in this directory.").append("\n");
+				res = res.append("Download file.").append("\n");
 			}
 		}
 		return res.toString().trim();

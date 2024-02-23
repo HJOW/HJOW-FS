@@ -23,6 +23,7 @@ public class FSConsoleResult implements Serializable {
 	protected boolean nulll   = false;
     protected String  display = "";
     protected String  path    = null;
+    protected String downloadAccepted = null;
 	public boolean isSuccess() {
 		return success;
 	}
@@ -46,5 +47,11 @@ public class FSConsoleResult implements Serializable {
 	}
 	public void setPath(String path) {
 		this.path = path;
+	}
+	public String getDownloadAccepted() {
+		return downloadAccepted;
+	}
+	public void setDownloadAccepted(String downloadAccepted) {
+		this.downloadAccepted = downloadAccepted;
 	}
 }

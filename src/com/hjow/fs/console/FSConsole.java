@@ -27,7 +27,9 @@ import java.util.StringTokenizer;
 import com.hjow.fs.console.cmd.FSConsoleCat;
 import com.hjow.fs.console.cmd.FSConsoleCd;
 import com.hjow.fs.console.cmd.FSConsoleCommand;
+import com.hjow.fs.console.cmd.FSConsoleDown;
 import com.hjow.fs.console.cmd.FSConsoleFirst;
+import com.hjow.fs.console.cmd.FSConsoleHelp;
 import com.hjow.fs.console.cmd.FSConsoleLs;
 import com.hjow.fs.console.cmd.FSConsoleNow;
 import com.hjow.fs.console.cmd.FSConsolePwd;
@@ -36,14 +38,33 @@ public class FSConsole implements Serializable {
 	private static final long serialVersionUID = 7995402708882449267L;
 	private static List<Class<? extends FSConsoleCommand>> commands = new ArrayList<Class<? extends FSConsoleCommand>>();
 	private static File rootPath = null;
+	
 	public static void init(File rootPath) {
+		init(rootPath, null);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void init(File rootPath, List<String> commandClasses) {
 		FSConsole.rootPath = rootPath;
-		commands.add(FSConsoleCd.class);
-		commands.add(FSConsoleLs.class);
-		commands.add(FSConsolePwd.class);
-		commands.add(FSConsoleFirst.class);
-		commands.add(FSConsoleNow.class);
 		commands.add(FSConsoleCat.class);
+		commands.add(FSConsoleCd.class);
+		commands.add(FSConsoleDown.class);
+		commands.add(FSConsoleFirst.class);
+		commands.add(FSConsoleHelp.class);
+		commands.add(FSConsoleLs.class);
+		commands.add(FSConsoleNow.class);
+		commands.add(FSConsolePwd.class);
+		
+		if(commandClasses != null) {
+			for(String c : commandClasses) {
+				try {
+					Class<? extends FSConsoleCommand> classObj = (Class<? extends FSConsoleCommand>) Class.forName(c);
+					commands.add(classObj);
+				} catch(ClassNotFoundException e) {
+					System.out.println("Cannot found " + c + " - " + e.getMessage());
+				}
+			}
+		}
 	}
 	public static FSConsole getInstance() {
 		FSConsole c = new FSConsole();

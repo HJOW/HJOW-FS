@@ -21,7 +21,7 @@ import java.util.Map;
 import com.hjow.fs.console.FSConsole;
 
 public class FSConsolePwd implements FSConsoleCommand {
-	private static final long serialVersionUID = -1371251238129639475L;
+	private static final long serialVersionUID = 8206351811941412312L;
 
 	@Override
 	public String getName() {
@@ -40,6 +40,36 @@ public class FSConsolePwd implements FSConsoleCommand {
 
 	@Override
 	public String getHelp(String lang, boolean detail) {
-		return "";
+		StringBuilder res = new StringBuilder("");
+		if(detail) {
+			if(lang.equals("ko")) {
+				res = res.append(" * pwd").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append("    현재 작업 대상으로 선택된 디렉토리 경로를 봅니다.                   ").append("\n");
+				res = res.append("    매개변수가 필요하지 않습니다.                                       ").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append(" * 예").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append("    pwd                                                                 ").append("\n");
+				res = res.append("                                                                        ").append("\n");
+			} else {
+				res = res.append(" * pwd").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append("    Show the target directory's path.                                   ").append("\n");
+				res = res.append("    No parameter needs.                                                 ").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append(" * example").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append("    pwd                                                                 ").append("\n");
+				res = res.append("                                                                        ").append("\n");
+			}
+		} else {
+			if(lang.equals("ko")) {
+				res = res.append("현재 작업 대상으로 선택된 디렉토리 경로를 봅니다.").append("\n");
+			} else {
+				res = res.append("Show the target directory's path.").append("\n");
+			}
+		}
+		return res.toString().trim();
 	}
 }

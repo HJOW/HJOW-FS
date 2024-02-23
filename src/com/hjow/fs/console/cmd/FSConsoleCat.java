@@ -90,6 +90,38 @@ public class FSConsoleCat implements FSConsoleCommand {
 
 	@Override
 	public String getHelp(String lang, boolean detail) {
-		return "";
+		StringBuilder res = new StringBuilder("");
+		if(detail) {
+			if(lang.equals("ko")) {
+				res = res.append(" * cat").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append("    매개변수로 파일명을 받습니다.                                       ").append("\n");
+				res = res.append("    파일을 최대 10 KB 까지 읽어 내용을 출력합니다.                      ").append("\n");
+				res = res.append("    디렉토리는 읽을 수 없으며, UTF-8 인코딩으로 읽습니다.               ").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append(" * 예").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append("    cat Test1.txt                                                       ").append("\n");
+				res = res.append("                                                                        ").append("\n");
+			} else {
+				res = res.append(" * cat").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append("    Need one parameter which is a file's name.                          ").append("\n");
+				res = res.append("    Read file's content and print. (Max 10 KB)                          ").append("\n");
+				res = res.append("    Cannot read directory. Read file as a UTF-8 text file.              ").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append(" * example").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append("    cat Test1.txt                                                       ").append("\n");
+				res = res.append("                                                                        ").append("\n");
+			}
+		} else {
+			if(lang.equals("ko")) {
+				res = res.append("텍스트 파일 내용을 보는 데 사용됩니다.").append("\n");
+			} else {
+				res = res.append("Read and see file's content as a text.").append("\n");
+			}
+		}
+		return res.toString().trim();
 	}
 }

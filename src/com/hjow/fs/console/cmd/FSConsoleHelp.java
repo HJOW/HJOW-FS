@@ -7,7 +7,7 @@ import java.util.Map;
 import com.hjow.fs.console.FSConsole;
 
 public class FSConsoleHelp implements FSConsoleCommand {
-	private static final long serialVersionUID = -1045910686449876799L;
+	private static final long serialVersionUID = 1631964078215746471L;
 
 	@Override
 	public String getName() {

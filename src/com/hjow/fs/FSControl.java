@@ -36,6 +36,11 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -128,6 +133,9 @@ public class FSControl {
 	public File uploadd   = null;
 	public String ctxPath = "";
 	
+	protected boolean useJDBC = false;
+	protected String dbType = null, jdbcClass = null, jdbcUrl = null, jdbcId = null, jdbcPw = null;
+	
 	private FSControl() {
 		
 	}
@@ -146,12 +154,15 @@ public class FSControl {
 	
 	@SuppressWarnings("unchecked")
 	protected synchronized void initialize(HttpServletRequest request) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 		try {
 			long now = System.currentTimeMillis();
 			
 			// Set Global Variables
 			ctxPath = request.getContextPath();
-
+			
 			if(fileConfigPath == null || Math.abs(now - confReads) >= refreshConfGap) {
 				confReads = now;
 				
@@ -202,14 +213,61 @@ public class FSControl {
 				            }
 				        }
 				        
+				        // Check JDBC option exists and avail
+				        String pDB = propTest.getProperty("DB");
+				        if(pDB != null) {
+				        	if(pDB.equalsIgnoreCase("Y") || pDB.equalsIgnoreCase("YES") || pDB.equalsIgnoreCase("TRUE")) {
+				        		useJDBC = true;
+				        		
+				        		dbType    = propTest.getProperty("DB_TYPE");
+				        		jdbcClass = propTest.getProperty("DB_CLASS");
+				        		jdbcUrl   = propTest.getProperty("DB_URL");
+				        		jdbcId    = propTest.getProperty("DB_USER");
+				        		jdbcPw    = propTest.getProperty("DB_PW");
+				        		
+				        		if(dbType == null || jdbcClass == null || jdbcUrl == null || jdbcId == null || jdbcPw == null) useJDBC = false;
+				        		if(useJDBC) {
+				        			dbType    = dbType.trim().toLowerCase();
+				        			jdbcClass = jdbcClass.trim();
+					        		jdbcUrl   = jdbcUrl.trim();
+					        		jdbcId    = jdbcId.trim();
+					        		jdbcPw    = jdbcPw.trim();
+					        		
+					        		try { Class.forName(jdbcClass); } catch(ClassNotFoundException e) { System.out.println("No jdbc driver found - " + jdbcClass); useJDBC = false; } 
+				        		}
+				        	}
+				        }
+				        
 				        propTest.clear();
 				        propTest = null;
 				        
-				        if(fileConfigPath != null) {
-				            // Close fs.properties
-				            propIn.close();
-				            propIn = null;
-				            
+				        // Close fs.properties
+			            propIn.close();
+			            propIn = null;
+				        
+			            // Read configs
+				        if(useJDBC) {
+				        	conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+				        	
+				        	pstmt = conn.prepareStatement("SELECT JSONCONFIG FROM FS_CONFIG");
+							rs    = pstmt.executeQuery();
+							
+							String confJson = null;
+							while(rs.next()) {
+								confJson = rs.getString("JSONCONFIG");
+							}
+							
+							rs.close(); rs = null;
+							pstmt.close(); pstmt = null;
+							conn.close(); conn = null;
+							
+							JSONParser parser = new JSONParser();
+				            conf = (JSONObject) parser.parse(confJson);
+				            conf.put("S1", s1);
+				            conf.put("S2", s2);
+				            conf.put("S3", s3);
+				        	
+				        } else if(fileConfigPath != null) {
 				            // Find config.json from configuration path
 				            File fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "config.json");
 				            if(! fJson.exists()) {
@@ -257,11 +315,14 @@ public class FSControl {
 					fileConfigPath = null;
 				    t.printStackTrace(); 
 				} finally {
-					if(rd2 != null) rd2.close();
-					if(rd1 != null) rd1.close();
-				    if(propIn != null) propIn.close();
+					if(rd2     != null) rd2.close();
+					if(rd1     != null) rd1.close();
+				    if(propIn  != null) propIn.close();
 				    if(fileOut != null) fileOut.close();
-				    if(conf == null) conf = new JSONObject();
+				    if(rs      != null) rs.close();
+					if(pstmt   != null) pstmt.close();
+					if(conn    != null) conn.close();
+				    if(conf    == null) conf = new JSONObject();
 				}
 				propIn = null;
 			}
@@ -315,7 +376,17 @@ public class FSControl {
 				if(sessionMap != null) request.getSession().removeAttribute("fssession");
 			}
 			
-			FSConsole.init(rootPath);
+			List<String> cmdList = new ArrayList<String>();
+			if(conf.get("CommandClass") != null) {
+				JSONArray arr = null;
+				if(conf.get("CommandClass") instanceof JSONArray) arr = (JSONArray) conf.get("CommandClass");
+				else arr = (JSONArray) new JSONParser().parse(conf.get("CommandClass").toString().trim());
+				for(Object a : arr) {
+					cmdList.add(a.toString().trim());
+				}
+			}
+			
+			FSConsole.init(rootPath, cmdList);
 		} catch(Throwable thx) {
 			thx.printStackTrace();
 			throw new RuntimeException(thx.getMessage(), thx);
@@ -329,6 +400,10 @@ public class FSControl {
 			Properties   propTest = new Properties();
 		    InputStream  propIn   = null;
 			OutputStream fileOut  = null;
+			
+			Connection conn = null;
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
 			try {
 				String passwords = request.getParameter("pw");
 				if(passwords == null) {
@@ -371,6 +446,8 @@ public class FSControl {
 		        	throw new FileNotFoundException(rex);
 		        }
 		        
+		        // Get Title, Root Dir
+		        
 		        String titles = request.getParameter("title");
 		        if(titles == null) titles = "File Storage";
 		        titles = titles.trim();
@@ -381,6 +458,7 @@ public class FSControl {
 					throw new RuntimeException("Please input the Root Directory !");
 				}
 				
+				// Check Installation Password
 				if(! passwords.equals(tx3.trim())) {
 					MessageDigest digest = MessageDigest.getInstance("SHA-256");
 					byte[] pwbytes = digest.digest(passwords.getBytes("UTF-8"));
@@ -388,6 +466,81 @@ public class FSControl {
 						throw new RuntimeException("Wrong installation password !");
 					}
 				}
+				
+				// Check JDBC
+				if(useJDBC) {
+					Class.forName(jdbcClass);
+					conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+					
+		        	// Check FS_CONFIG
+		        	try {
+		        		// Check FS_CONFIG exist
+		        		pstmt = conn.prepareStatement("SELECT COUNT(*) AS CNT FROM FS_CONFIG");
+			        	rs = pstmt.executeQuery();
+			        	
+			        	int count = 0;
+			        	while(rs.next()) {
+			        		count = rs.getInt("CNT");
+			        	}
+			        	
+			        	rs.close(); rs = null;
+			        	pstmt.close(); pstmt = null;
+			        	
+			        	if(count >= 2) {
+			        		pstmt = conn.prepareStatement("DELETE FROM FS_CONFIG");
+			        		pstmt.execute();
+			        		conn.commit();
+			        		pstmt.close(); pstmt = null;
+			        		count = 0;
+			        	}
+			        	if(count <= 0) {
+			        		pstmt = conn.prepareStatement("INSERT INTO FS_CONFIG (JSONCONFIG) VALUES ('{}')");
+			        		pstmt.execute();
+			        		conn.commit();
+			        		pstmt.close(); pstmt = null;
+			        	}
+		        	} catch(SQLException e) {
+		        		if(dbType.equals("oracle")) pstmt = conn.prepareStatement("CREATE TABLE FS_CONFIG ( JSONCONFIG VARCHAR2(4000) )");
+		        		else                        pstmt = conn.prepareStatement("CREATE TABLE FS_CONFIG ( JSONCONFIG VARCHAR(4000) )");
+		        		pstmt.execute();
+		        		conn.commit();
+		        		pstmt.close(); pstmt = null;
+		        		
+		        		pstmt = conn.prepareStatement("INSERT INTO FS_CONFIG (JSONCONFIG) VALUES ('{}')");
+		        		pstmt.execute();
+		        		conn.commit();
+		        		pstmt.close(); pstmt = null;
+		        	}
+		        	
+		        	// Check FS_USER
+		        	
+		        	try {
+		        		// Check FS_USER exist
+		        		pstmt = conn.prepareStatement("SELECT COUNT(*) AS CNT FROM FS_USER");
+			        	rs = pstmt.executeQuery();
+			        	
+			        	while(rs.next()) {
+			        		rs.getInt("CNT");
+			        	}
+			        	
+			        	rs.close(); rs = null;
+			        	pstmt.close(); pstmt = null;
+			        	
+			        	pstmt = conn.prepareStatement("SELECT USERID, USERPW, USERNICK, USERTYPE, FAILCNT, FAILTIME, PRIVILEGES AS CNT FROM FS_USER");
+			        	rs = pstmt.executeQuery();
+			        	
+			        	rs.close(); rs = null;
+			        	pstmt.close(); pstmt = null;
+		        	} catch(SQLException e) {
+		        		if(dbType.equals("oracle")) pstmt = conn.prepareStatement("CREATE TABLE FS_USER ( USERID VARCHAR2(40) PRIMARY KEY, USERPW VARCHAR2(512), USERNICK VARCHAR2(40), USERTYPE VARCHAR2(5), FAILCNT NUMBER(10) , FAILTIME NUMBER(20) , PRIVGROUP VARCHAR2(4000), PRIVILEGES VARCHAR2(4000) )");
+		        		else                        pstmt = conn.prepareStatement("CREATE TABLE FS_USER ( USERID VARCHAR(40)  PRIMARY KEY, USERPW VARCHAR(512) , USERNICK VARCHAR(40) , USERTYPE VARCHAR(5) , FAILCNT NUMERIC(10), FAILTIME NUMERIC(20), PRIVGROUP VARCHAR(4000) , PRIVILEGES VARCHAR(4000)  )");
+		        		pstmt.execute();
+		        		conn.commit();
+		        		pstmt.close(); pstmt = null;
+		        	}
+		        }
+				
+				// Check Others
 				
 				rootPath = new File(roots);
 				if(! rootPath.exists()) rootPath.mkdirs();
@@ -468,14 +621,31 @@ public class FSControl {
 						byte[] res = digest.digest((s1 + adminPw + s2 + salt + adminId + s3).getBytes(cs));
 						adminAc.put("pw", Base64.encodeBase64String(res));
 						
-						File faJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts");
-				        if(! faJson.exists()) faJson.mkdirs();
-				        
-				        File fileAcc = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts" + File.separator + adminId + ".json");
-				        fileAcc.getCanonicalPath(); // Check valid
-				        fileOut = new FileOutputStream(fileAcc);
-				        fileOut.write(adminAc.toJSONString().getBytes(cs));
-				        fileOut.close(); fileOut = null;
+						if(useJDBC) {
+							pstmt = conn.prepareStatement("INSERT INTO FS_USER (USERID, USERPW, USERNICK, USERTYPE, FAILCNT , FAILTIME, PRIVGROUP, PRIVILEGES) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+							pstmt.setString(1, adminId);
+							pstmt.setString(2, adminAc.get("pw").toString());
+							pstmt.setString(3, adminNick);
+							pstmt.setString(4, "A");
+							pstmt.setInt(5, 0);
+							pstmt.setInt(6, 0);
+							pstmt.setString(7, "[\"user\", \"admin\"]");
+							pstmt.setString(8, "[]");
+							
+							pstmt.executeUpdate();
+							conn.commit();
+							
+							pstmt.close(); pstmt = null;
+						} else {
+							File faJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts");
+					        if(! faJson.exists()) faJson.mkdirs();
+					        
+					        File fileAcc = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts" + File.separator + adminId + ".json");
+					        fileAcc.getCanonicalPath(); // Check valid
+					        fileOut = new FileOutputStream(fileAcc);
+					        fileOut.write(adminAc.toJSONString().getBytes(cs));
+					        fileOut.close(); fileOut = null;
+						}
 					}
 				} else {
 					noLogin = true;
@@ -510,10 +680,18 @@ public class FSControl {
 		        conf.put("Salt", salt);
 		        conf.put("Installed", new Boolean(true));
 				
-				File fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "config.json");
-				fileOut = new FileOutputStream(fJson);
-				fileOut.write(conf.toJSONString().getBytes(cs));
-				fileOut.close(); fileOut = null;
+		        if(useJDBC) {
+		        	pstmt = conn.prepareStatement("UPDATE FS_CONFIG SET JSONCONFIG = ?");
+		        	pstmt.setString(1, conf.toJSONString());
+		        	pstmt.executeUpdate();
+		        	conn.commit();
+		        	pstmt.close(); pstmt = null;
+		        } else {
+		        	File fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "config.json");
+					fileOut = new FileOutputStream(fJson);
+					fileOut.write(conf.toJSONString().getBytes(cs));
+					fileOut.close(); fileOut = null;
+		        }
 				
 				installed = true;
 				json.put("success", new Boolean(true));
@@ -528,6 +706,9 @@ public class FSControl {
 			} finally {
 				if(fileOut != null) fileOut.close();
 				if(propIn  != null) propIn.close();
+				if(rs      != null) rs.close();
+				if(pstmt   != null) pstmt.close();
+				if(conn    != null) conn.close();
 			}
 		}
 		return json;
@@ -542,6 +723,10 @@ public class FSControl {
 	    InputStream  propIn   = null;
 		OutputStream fileOut  = null;
 		Reader rd1 = null, rd2 = null;
+		
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 		
 		JSONObject sessionMap = null;
 		String lang = "en";
@@ -692,9 +877,20 @@ public class FSControl {
 				conf.put("UseConsole", new Boolean(useConsole));
 				conf.put("Installed", new Boolean(true));
 				
-				fileOut = new FileOutputStream(fJson);
-				fileOut.write(conf.toJSONString().getBytes(cs));
-				fileOut.close(); fileOut = null;
+				if(useJDBC) {
+					Class.forName(jdbcClass);
+					conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+					pstmt = conn.prepareStatement("UPDATE FS_CONFIG SET JSONCONFIG = ?");
+		        	pstmt.setString(1, conf.toJSONString());
+		        	pstmt.executeUpdate();
+		        	conn.commit();
+		        	pstmt.close(); pstmt = null;
+		        	conn.close(); conn = null;
+				} else {
+					fileOut = new FileOutputStream(fJson);
+					fileOut.write(conf.toJSONString().getBytes(cs));
+					fileOut.close(); fileOut = null;
+				}
 				
 				System.out.println("Configuration Updated by " + sessionMap.get("id") + " when " + System.currentTimeMillis());
 				jsonConfig.clear();
@@ -747,6 +943,21 @@ public class FSControl {
 					}
 				}
 				
+				if(useJDBC) {
+					Class.forName(jdbcClass);
+					conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+					pstmt = conn.prepareStatement("DROP TABLE FS_CONFIG");
+		        	pstmt.executeUpdate();
+		        	conn.commit();
+		        	pstmt.close(); pstmt = null;
+		        	
+		        	pstmt = conn.prepareStatement("DROP TABLE FS_USER");
+		        	pstmt.executeUpdate();
+		        	conn.commit();
+		        	pstmt.close(); pstmt = null;
+		        	conn.close(); conn = null;
+				}
+				
 				System.out.println("Reset completed.");
 				json.put("reset", new Boolean(true));
 				json.put("message", "Reset Success !");
@@ -774,6 +985,9 @@ public class FSControl {
 		} finally {
 			if(fileOut != null) fileOut.close();
 			if(propIn  != null) propIn.close();
+			if(rs      != null) rs.close();
+			if(pstmt   != null) pstmt.close();
+			if(conn    != null) conn.close();
 		}
 		
 		return json;
@@ -840,6 +1054,14 @@ public class FSControl {
 			json.put("path"   , rs.getPath());
 			json.put("display", rs.getDisplay());
 			json.put("displaynull", new Boolean(rs.isNulll()));
+			
+			if(rs.getDownloadAccepted() != null) {
+				json.put("downloadaccept", new Boolean(true));
+				json.put("downloadfile"  , rs.getDownloadAccepted());
+				request.getSession().setAttribute("fsd_captcha_code", "SKIP");
+			} else {
+				json.put("downloadaccept", new Boolean(false));
+			}
 			
 		} catch(Throwable t) {
 			json.put("success", new Boolean(false));
@@ -1367,6 +1589,11 @@ public class FSControl {
 		byte[] buffers = new byte[bufferSize];
 		try {
 			if(captchaDownload) {
+				if(code.equals("SKIP")) {
+					capt = code;
+					time = new Long(now);
+				}
+				
 				if(! code.equals(capt)) {
 					throw new RuntimeException("Wrong captcha code !");
 			    }
@@ -1378,6 +1605,11 @@ public class FSControl {
 				
 			    if(code.equals("REFRESH")) {
 			    	throw new RuntimeException("Too old captcha code !");
+			    }
+			    
+			    if(code.equals("SKIP")) {
+			    	code = "REFRESH";
+				    request.getSession().setAttribute("fsd_captcha_code", code);
 			    }
 			}
 			

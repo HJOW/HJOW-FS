@@ -43,6 +43,36 @@ public class FSConsoleNow implements FSConsoleCommand {
 
 	@Override
 	public String getHelp(String lang, boolean detail) {
-		return "";
+		StringBuilder res = new StringBuilder("");
+		if(detail) {
+			if(lang.equals("ko")) {
+				res = res.append(" * now").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append("    오늘 날짜와 시간을 출력합니다.                                      ").append("\n");
+				res = res.append("    매개변수가 필요하지 않습니다.                                       ").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append(" * 예").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append("    now                                                                 ").append("\n");
+				res = res.append("                                                                        ").append("\n");
+			} else {
+				res = res.append(" * now").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append("    Show now date and time.                                             ").append("\n");
+				res = res.append("    No parameter needs.                                                 ").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append(" * example").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append("    now                                                                 ").append("\n");
+				res = res.append("                                                                        ").append("\n");
+			}
+		} else {
+			if(lang.equals("ko")) {
+				res = res.append("오늘 날짜와 시간을 출력합니다.").append("\n");
+			} else {
+				res = res.append("Show now date and time.").append("\n");
+			}
+		}
+		return res.toString().trim();
 	}
 }

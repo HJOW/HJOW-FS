@@ -22,7 +22,7 @@ import com.hjow.fs.FSControl;
 import com.hjow.fs.console.FSConsole;
 
 public class FSConsoleFirst implements FSConsoleCommand {
-	private static final long serialVersionUID = -6945486701686523984L;
+	private static final long serialVersionUID = 3062038114191457928L;
 
 	@Override
 	public String getName() {
@@ -44,6 +44,7 @@ public class FSConsoleFirst implements FSConsoleCommand {
 
 	@Override
 	public String getHelp(String lang, boolean detail) {
-		return "";
+		if(lang.equals("ko")) return "콘솔을 처음 열었을 때 출력되는 메시지를 다시 볼 수 있습니다.";
+		else return "Re-print messages you saw first when you opened a console.";
 	}
 }

@@ -78,6 +78,36 @@ public class FSConsoleLs implements FSConsoleCommand {
 
 	@Override
 	public String getHelp(String lang, boolean detail) {
-		return "";
+		StringBuilder res = new StringBuilder("");
+		if(detail) {
+			if(lang.equals("ko")) {
+				res = res.append(" * ls").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append("    현재 디렉토리의 파일과 디렉토리 목록을 출력합니다.                  ").append("\n");
+				res = res.append("    매개변수가 필요 없습니다.                                           ").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append(" * 예").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append("    ls                                                                  ").append("\n");
+				res = res.append("                                                                        ").append("\n");
+			} else {
+				res = res.append(" * ls").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append("    Print all of files and directories in this directory.               ").append("\n");
+				res = res.append("    No parameter needs.                                                 ").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append(" * example").append("\n");
+				res = res.append("                                                                        ").append("\n");
+				res = res.append("    ls                                                                  ").append("\n");
+				res = res.append("                                                                        ").append("\n");
+			}
+		} else {
+			if(lang.equals("ko")) {
+				res = res.append("현재 디렉토리 내 파일과 디렉토리 목록을 볼 수 있습니다.").append("\n");
+			} else {
+				res = res.append("Print all of files and directories in this directory.").append("\n");
+			}
+		}
+		return res.toString().trim();
 	}
 }
