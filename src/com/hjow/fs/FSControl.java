@@ -70,7 +70,7 @@ import com.oreilly.servlet.MultipartRequest;
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 
 public class FSControl {
-	public static final int[] VERSION = {0, 1, 1, 8};
+	public static final int[] VERSION = {0, 1, 2, 9};
 	
 	private static FSControl instance = null;
 	
@@ -2353,4 +2353,308 @@ public class FSControl {
     	if(lang == null) lang = "en";
     	return lang;
     }
+
+	public JSONObject getConfig() {
+		return conf;
+	}
+
+	public void setConfig(JSONObject conf) {
+		this.conf = conf;
+	}
+
+	public long getConfigReadDate() {
+		return confReads;
+	}
+
+	public void setConfigReadDate(long confReads) {
+		this.confReads = confReads;
+	}
+
+	public boolean isConfigChanging() {
+		return confChanging;
+	}
+
+	public void setConfigChanging(boolean confChanging) {
+		this.confChanging = confChanging;
+	}
+
+	public boolean isAccountChanging() {
+		return accChanging;
+	}
+
+	public void setAccountChanging(boolean accChanging) {
+		this.accChanging = accChanging;
+	}
+
+	public boolean isInstalled() {
+		return installed;
+	}
+
+	public void setInstalled(boolean installed) {
+		this.installed = installed;
+	}
+
+	public String getCharset() {
+		return cs;
+	}
+
+	public void setCharset(String cs) {
+		this.cs = cs;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public File getFileConfigPath() {
+		return fileConfigPath;
+	}
+
+	public void setFileConfigPath(File fileConfigPath) {
+		this.fileConfigPath = fileConfigPath;
+	}
+
+	public String getStorePath() {
+		return storPath;
+	}
+
+	public void setStorePath(String storPath) {
+		this.storPath = storPath;
+	}
+
+	public long getRefreshConfigGap() {
+		return refreshConfGap;
+	}
+
+	public void setRefreshConfigGap(long refreshConfGap) {
+		this.refreshConfGap = refreshConfGap;
+	}
+
+	public boolean isReadFileIconOn() {
+		return readFileIcon;
+	}
+
+	public void setReadFileIconUsage(boolean readFileIcon) {
+		this.readFileIcon = readFileIcon;
+	}
+
+	public long getLimitSize() {
+		return limitSize;
+	}
+
+	public void setLimitSize(long limitSize) {
+		this.limitSize = limitSize;
+	}
+
+	public int getLimitCount() {
+		return limitCount;
+	}
+
+	public void setLimitCount(int limitCount) {
+		this.limitCount = limitCount;
+	}
+
+	public int getBufferSize() {
+		return bufferSize;
+	}
+
+	public void setBufferSize(int bufferSize) {
+		this.bufferSize = bufferSize;
+	}
+
+	public long getSleepGap() {
+		return sleepGap;
+	}
+
+	public void setSleepGap(long sleepGap) {
+		this.sleepGap = sleepGap;
+	}
+
+	public int getSleepRoutine() {
+		return sleepRoutine;
+	}
+
+	public void setSleepRoutine(int sleepRoutine) {
+		this.sleepRoutine = sleepRoutine;
+	}
+
+	public boolean isCaptchaDownloadOn() {
+		return captchaDownload;
+	}
+
+	public void setCaptchaDownloadUsage(boolean captchaDownload) {
+		this.captchaDownload = captchaDownload;
+	}
+
+	public boolean isCaptchaLoginOn() {
+		return captchaLogin;
+	}
+
+	public void setCaptchaLoginUsage(boolean captchaLogin) {
+		this.captchaLogin = captchaLogin;
+	}
+
+	public int getCaptchaWidth() {
+		return captchaWidth;
+	}
+
+	public void setCaptchaWidth(int captchaWidth) {
+		this.captchaWidth = captchaWidth;
+	}
+
+	public int getCaptchaHeight() {
+		return captchaHeight;
+	}
+
+	public void setCaptchaHeight(int captchaHeight) {
+		this.captchaHeight = captchaHeight;
+	}
+
+	public int getCaptchaFontSize() {
+		return captchaFontSize;
+	}
+
+	public void setCaptchaFontSize(int captchaFontSize) {
+		this.captchaFontSize = captchaFontSize;
+	}
+
+	public int getCaptchaNoises() {
+		return captchaNoises;
+	}
+
+	public void setCaptchaNoises(int captchaNoises) {
+		this.captchaNoises = captchaNoises;
+	}
+
+	public long getCaptchaLimitTime() {
+		return captchaLimitTime;
+	}
+
+	public void setCaptchaLimitTime(long captchaLimitTime) {
+		this.captchaLimitTime = captchaLimitTime;
+	}
+
+	public boolean isNoLoginMode() {
+		return noLogin;
+	}
+
+	public void setNoLoginMode(boolean noLogin) {
+		this.noLogin = noLogin;
+	}
+
+	public int getLoginFailCountLimit() {
+		return loginFailCountLimit;
+	}
+
+	public void setLoginFailCountLimit(int loginFailCountLimit) {
+		this.loginFailCountLimit = loginFailCountLimit;
+	}
+
+	public int getLoginFailOverMinute() {
+		return loginFailOverMinute;
+	}
+
+	public void setLoginFailOverMinute(int loginFailOverMinute) {
+		this.loginFailOverMinute = loginFailOverMinute;
+	}
+
+	public boolean isNoTerminalMode() {
+		return noTerminal;
+	}
+
+	public void setNoTerminalMode(boolean noTerminal) {
+		this.noTerminal = noTerminal;
+	}
+
+	public String getSalt() {
+		return salt;
+	}
+
+	public void setSalt(String salt) {
+		this.salt = salt;
+	}
+
+	public File getRootPath() {
+		return rootPath;
+	}
+
+	public void setRootPath(File rootPath) {
+		this.rootPath = rootPath;
+	}
+
+	public File getGarbage() {
+		return garbage;
+	}
+
+	public void setGarbage(File garbage) {
+		this.garbage = garbage;
+	}
+
+	public File getUploadd() {
+		return uploadd;
+	}
+
+	public void setUploadd(File uploadd) {
+		this.uploadd = uploadd;
+	}
+
+	public String getContextPath() {
+		return ctxPath;
+	}
+
+	public void setContextPath(String ctxPath) {
+		this.ctxPath = ctxPath;
+	}
+
+	public boolean isUseJDBC() {
+		return useJDBC;
+	}
+
+	public void setUseJDBC(boolean useJDBC) {
+		this.useJDBC = useJDBC;
+	}
+
+	public String getDbType() {
+		return dbType;
+	}
+
+	public void setDbType(String dbType) {
+		this.dbType = dbType;
+	}
+
+	public String getJdbcClass() {
+		return jdbcClass;
+	}
+
+	public void setJdbcClass(String jdbcClass) {
+		this.jdbcClass = jdbcClass;
+	}
+
+	public String getJdbcUrl() {
+		return jdbcUrl;
+	}
+
+	public void setJdbcUrl(String jdbcUrl) {
+		this.jdbcUrl = jdbcUrl;
+	}
+
+	public String getJdbcId() {
+		return jdbcId;
+	}
+
+	public void setJdbcId(String jdbcId) {
+		this.jdbcId = jdbcId;
+	}
+
+	public String getJdbcPw() {
+		return jdbcPw;
+	}
+
+	public void setJdbcPw(String jdbcPw) {
+		this.jdbcPw = jdbcPw;
+	}
 }
