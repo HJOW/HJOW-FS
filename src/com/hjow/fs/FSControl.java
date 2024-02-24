@@ -35,7 +35,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -58,7 +57,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.swing.Icon;
 import javax.swing.filechooser.FileSystemView;
 
-import org.apache.commons.codec.binary.Base64;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -69,69 +67,71 @@ import com.hjow.fs.console.FSConsoleResult;
 import com.oreilly.servlet.MultipartRequest;
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 
+import hjow.common.util.SecurityUtil;
+
 public class FSControl {
 	public static final int[] VERSION = {0, 1, 2, 9};
 	
 	private static FSControl instance = null;
 	
-	public JSONObject conf = new JSONObject();
-	public volatile long    confReads    = 0L;
-	public volatile boolean confChanging = false;
-	public volatile boolean accChanging  = false;
-	public boolean installed = false;
+	protected JSONObject conf = new JSONObject();
+	protected volatile long    confReads    = 0L;
+	protected volatile boolean confChanging = false;
+	protected volatile boolean accChanging  = false;
+	protected boolean installed = false;
 	
-	public String cs = "UTF-8";
+	protected String cs = "UTF-8";
 
 	// Title
-	public String title = "File Storage";
+	protected String title = "File Storage";
 
 	// Installation Status
-	public File fileConfigPath = null;
+	protected File fileConfigPath = null;
 
 	// Storage Root Directory
-	public String storPath  = "/fsdir/storage/";
+	protected String storPath  = "/fsdir/storage/";
 
 	// Reading configuration file time gap (milliseconds)
-	public long   refreshConfGap = 4000L;
+	protected long   refreshConfGap = 4000L;
 	
 	// Read and display file icon
-	public boolean readFileIcon = true;
+	protected boolean readFileIcon = true;
 
 	// Download limit size (KB)
-	public long   limitSize = 10 * 1024 * 1024;
+	protected long   limitSize = 10 * 1024 * 1024;
 	
 	// Display limit count on one page
-	public int    limitCount = 1000;
+	protected int    limitCount = 1000;
 
 	// Perform downloading buffer size (bytes)
-	public int  bufferSize   = 1024 * 10;
+	protected int  bufferSize   = 1024 * 10;
 
 	// Perform downloading thread's sleeping gap (milliseconds) - Downloading speed faster when this value is become lower.
-	public long sleepGap     = 100;
+	protected long sleepGap     = 100;
 
 	// Perform downloading thread's sleeping cycle (times) - Downloading speed faster when this value is become lower.
-	public int  sleepRoutine = 100;
+	protected int  sleepRoutine = 100;
 
 	// Captcha
-	public boolean captchaDownload = true, captchaLogin = true;
-	public int  captchaWidth     = 250;
-	public int  captchaHeight    = 40;
-	public int  captchaFontSize  = 30;
-	public int  captchaNoises    = 20;
-	public long captchaLimitTime = 1000 * 60 * 5;
+	protected boolean captchaDownload = true, captchaLogin = true;
+	protected int  captchaWidth     = 250;
+	protected int  captchaHeight    = 40;
+	protected int  captchaFontSize  = 30;
+	protected int  captchaNoises    = 20;
+	protected long captchaLimitTime = 1000 * 60 * 5;
 	
 	// Login Policy
-	public boolean noLogin = false;
-	public int loginFailCountLimit = 10;
-	public int loginFailOverMinute = 10;
+	protected boolean noLogin = false;
+	protected int loginFailCountLimit = 10;
+	protected int loginFailOverMinute = 10;
 	
-	public boolean noTerminal = true;
+	protected boolean noTerminal = true;
 	
-	public String salt = "fs";
-	public File rootPath  = null;
-	public File garbage   = null;
-	public File uploadd   = null;
-	public String ctxPath = "";
+	protected String salt = "fs";
+	protected File rootPath  = null;
+	protected File garbage   = null;
+	protected File uploadd   = null;
+	protected String ctxPath = "";
 	
 	protected boolean useJDBC = false;
 	protected String dbType = null, jdbcClass = null, jdbcUrl = null, jdbcId = null, jdbcPw = null;
@@ -460,9 +460,7 @@ public class FSControl {
 				
 				// Check Installation Password
 				if(! passwords.equals(tx3.trim())) {
-					MessageDigest digest = MessageDigest.getInstance("SHA-256");
-					byte[] pwbytes = digest.digest(passwords.getBytes("UTF-8"));
-					if(! Base64.encodeBase64String(pwbytes).equals(tx3.trim())) {
+					if(! SecurityUtil.hash(passwords, "SHA-256").equals(tx3.trim())) {
 						throw new RuntimeException("Wrong installation password !");
 					}
 				}
@@ -616,10 +614,7 @@ public class FSControl {
 						prvgroup.add("user");
 						prvgroup.add("admin");
 						adminAc.put("privgroup", prvgroup);
-						
-						MessageDigest digest = MessageDigest.getInstance("SHA-256");
-						byte[] res = digest.digest((s1 + adminPw + s2 + salt + adminId + s3).getBytes(cs));
-						adminAc.put("pw", Base64.encodeBase64String(res));
+						adminAc.put("pw", SecurityUtil.hash(s1 + adminPw + s2 + salt + adminId + s3, "SHA-256"));
 						
 						if(useJDBC) {
 							pstmt = conn.prepareStatement("INSERT INTO FS_USER (USERID, USERPW, USERNICK, USERTYPE, FAILCNT , FAILTIME, PRIVGROUP, PRIVILEGES) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
@@ -907,9 +902,7 @@ public class FSControl {
 				passwords = passwords.trim();
 				
 				if(! passwords.equals(tx3.trim())) {
-					MessageDigest digest = MessageDigest.getInstance("SHA-256");
-					byte[] pwbytes = digest.digest(passwords.getBytes("UTF-8"));
-					if(! Base64.encodeBase64String(pwbytes).equals(tx3.trim())) {
+					if(! SecurityUtil.hash(passwords, "SHA-256").equals(tx3.trim())) {
 						String rex = "Wrong installation password !";
 						if(lang.equals("ko")) rex = "비밀번호를 올바르게 입력해 주세요.";
 						throw new RuntimeException(rex);
@@ -1347,7 +1340,7 @@ public class FSControl {
 				ImageIO.write(img, "png", collector);
 				img = null;
 				
-				String binary = Base64.encodeBase64String(collector.toByteArray());
+				String binary = SecurityUtil.base64String(collector.toByteArray());
 				collector = null;
 				
 				iconMap.put(f, "data:image/png;base64, " + binary);
@@ -1436,7 +1429,7 @@ public class FSControl {
 			image    = null;
 			graphics = null;
 
-			String bs64str = Base64.encodeBase64String(binary.toByteArray());
+			String bs64str = SecurityUtil.base64String(binary.toByteArray());
 			binary = null;
 			return bs64str;
 		} catch(Throwable t) {
@@ -2215,10 +2208,7 @@ public class FSControl {
 			            s1 = conf.get("S1").toString();
 			            s2 = conf.get("S2").toString();
 			            s3 = conf.get("S3").toString();
-			            
-			            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-			            byte[] res = digest.digest((s1 + pw + s2 + salt + id + s3).getBytes(cs));
-			            String pwInput = Base64.encodeBase64String(res);
+			            String pwInput = SecurityUtil.hash(s1 + pw + s2 + salt + id + s3, "SHA-256");
 			            
 			            if(! accountOne.get("pw").equals(pwInput)) {
 			                if(! accountOne.get("pw").equals(pw)) {

@@ -24,7 +24,7 @@ limitations under the License.
     <div class='fs_root container show-grid full'>
         <script type='text/javascript'>
         $(function() {
-        	var ctxPath = "<%=fsc.ctxPath%>";
+        	var ctxPath = "<%=fsc.getContextPath()%>";
             var formObj = $('.form_util_sha_str');
             var inpRes  = formObj.find('.inp_util_sha_str_res');
 

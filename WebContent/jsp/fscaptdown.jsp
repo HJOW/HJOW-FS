@@ -42,7 +42,7 @@ request.getSession().setAttribute("fsd_captcha_time", new Long(now));
 <html>
 <head>
 <meta charset="UTF-8"/>
-<title><%= fsc.title %></title>
+<title><%= fsc.getTitle() %></title>
 <jsp:include page="./common.header.jsp"></jsp:include>
 <script type='text/javascript'>
 $(function() {
@@ -77,7 +77,7 @@ $(function() {
     $('.p_filename').text(fileName);
     $('.p_filename').attr('title', fileName);
     
-    <% if(fsc.captchaDownload) { %>
+    <% if(fsc.isCaptchaDownloadOn()) { %>
     $('.inp_captcha_d').focus();
     <% } else { %>
     $('.div_captcha_download').addClass('invisible');
@@ -101,7 +101,7 @@ $(function() {
         </div>
         <div class='row div_captcha_download'>
             <div class='col-sm-12 align_center'>
-                <iframe style='width: <%=fsc.captchaWidth + 10%>px; height: <%=fsc.captchaHeight + 10%>px;' src='fscaptin.jsp?key=fsd&theme=<%=theme%>'></iframe>
+                <iframe style='width: <%=fsc.getCaptchaWidth() + 10%>px; height: <%=fsc.getCaptchaHeight() + 10%>px;' src='fscaptin.jsp?key=fsd&theme=<%=theme%>'></iframe>
             </div>
         </div>
         <form action='fsdown.jsp' method='POST' class='form' target='_self'>

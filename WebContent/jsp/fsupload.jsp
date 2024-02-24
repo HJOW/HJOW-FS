@@ -25,11 +25,11 @@ if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
 <html>
 <head>
 <meta charset="UTF-8"/>
-<title><%= fsc.title %></title>
+<title><%= fsc.getTitle() %></title>
 <jsp:include page="./common.header.jsp"></jsp:include>
 <script type="text/javascript">
 $(function() {
-	var ctxPath = "<%=fsc.ctxPath%>";
+	var ctxPath = "<%=fsc.getContextPath()%>";
 	var path    = "<%=pathParam%>";
 
 	$('.hidden_path').val(path);
@@ -38,7 +38,7 @@ $(function() {
 </script>
 </head>
 <body class='popup'>
-    <form action="<%=fsc.ctxPath%>/jsp/fsuploadin.jsp" method="post" enctype="multipart/form-data">
+    <form action="<%=fsc.getContextPath()%>/jsp/fsuploadin.jsp" method="post" enctype="multipart/form-data">
     <input type='hidden' name='path' class='hidden_path'/>
     <div class='container show-grid full'>
         <div class='row'>

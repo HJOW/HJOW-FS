@@ -14,15 +14,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-if(! fsc.installed) {
+if(! fsc.isInstalled()) {
 	%><div class='fs_accbar container show-grid full invisible'>Not installed</div><%
-} else if(! fsc.noLogin) {
+} else if(! fsc.isNoLoginMode()) {
 	String sessionJson = (String) request.getSession().getAttribute("fssession");
 %>
 <div class='fs_accbar container valign_middle full'>
 	<script type='text/javascript'>
 	$(function() {
-		var ctxPath = "<%=fsc.ctxPath%>";
+		var ctxPath = "<%=fsc.getContextPath()%>";
 	    var formObj = $('.form_fs_login');
 	    var inpReq  = formObj.find('.inp_req');
 	    var btnLogout = formObj.find('.btn_logout');
@@ -95,7 +95,7 @@ if(! fsc.installed) {
 	        });
 		});
 	    
-	    <% if(! fsc.captchaLogin) { %>
+	    <% if(! fsc.isCaptchaLoginOn()) { %>
 	    $('.div_captcha_login').addClass('invisible');
 	    <% } %>
 	});
@@ -115,11 +115,11 @@ if(! fsc.installed) {
 	             </div>
 	         </div>
 	     </div>
-	     <div class='div_captcha_login d_inline_block valign_middle' style='width: <%=(fsc.captchaWidth + 10)%>px;  height: 60px;'>
-	         <iframe style='width: <%=(fsc.captchaWidth + 5)%>px; height: <%=(fsc.captchaHeight + 5)%>px; border:0;' class='if_captcha_l valign_middle' src='<%=fsc.ctxPath%>/jsp/fscaptin.jsp?key=fsl&scale=1&theme='></iframe>
+	     <div class='div_captcha_login d_inline_block valign_middle' style='width: <%=(fsc.getCaptchaWidth() + 10)%>px;  height: 60px;'>
+	         <iframe style='width: <%=(fsc.getCaptchaWidth() + 5)%>px; height: <%=(fsc.getCaptchaHeight() + 5)%>px; border:0;' class='if_captcha_l valign_middle' src='<%=fsc.getContextPath()%>/jsp/fscaptin.jsp?key=fsl&scale=1&theme='></iframe>
 	     </div>
-	     <div class='div_captcha_login d_inline_block valign_middle padding_top_10' style='margin-left: 10px; width: <%=((fsc.captchaWidth / 2) + 10)%>px;  height: 60px; text-align: left;'>
-	         <input  style='width: <%=((fsc.captchaWidth / 2) + 5)%>px; height: <%=((fsc.captchaHeight / 2) + 5)%>px;' type='text' class='inp_captcha_l inp_login_element lang_attr_element valign_middle' name='captcha' placeholder='옆의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code left'/>
+	     <div class='div_captcha_login d_inline_block valign_middle padding_top_10' style='margin-left: 10px; width: <%=((fsc.getCaptchaWidth() / 2) + 10)%>px;  height: 60px; text-align: left;'>
+	         <input  style='width: <%=((fsc.getCaptchaWidth() / 2) + 5)%>px; height: <%=((fsc.getCaptchaHeight() / 2) + 5)%>px;' type='text' class='inp_captcha_l inp_login_element lang_attr_element valign_middle' name='captcha' placeholder='옆의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code left'/>
 	     </div>
 	     <div class='d_inline_block valign_middle' style='width:100px;  height: 60px;'>
 	         <input type='submit' value='로그인' class='lang_attr_element' data-lang-target='value' data-lang-en='LOGIN' style='height: 50px;'/>

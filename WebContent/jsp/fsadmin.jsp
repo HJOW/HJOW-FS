@@ -29,7 +29,7 @@ limitations under the License.
         	var bodys = $('body');
             if(bodys.is('.popup')) bodys.removeClass('dark');
             
-        	var ctxPath = "<%=fsc.ctxPath%>";
+        	var ctxPath = "<%=fsc.getContextPath()%>";
             var form    = $('.form_fs_admin');
             var chkAc   = form.find('.chk_account');
             chkAc.on('change', function() {

@@ -14,14 +14,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-if(! fsc.installed) {
+if(! fsc.isInstalled()) {
 	%>
 	<script type="text/javascript">
 	$(function() {
-		location.href = "<%=fsc.ctxPath%>/jsp/fsinstall.jsp";
+		location.href = "<%=fsc.getContextPath()%>/jsp/fsinstall.jsp";
 	});
 	</script>
-	<a href="<%=fsc.ctxPath%>/jsp/fsinstall.jsp" class='lang_element' data-lang-en='[Install]'>[설치]</a>
+	<a href="<%=fsc.getContextPath()%>/jsp/fsinstall.jsp" class='lang_element' data-lang-en='[Install]'>[설치]</a>
 	<%
 } else {
 String pathParam = request.getParameter("path");
@@ -34,15 +34,15 @@ pathParam = FSUtils.removeSpecials(pathParam, false, true, true, false, true).re
 
 if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
 
-boolean useConsole = (! fsc.noTerminal);
+boolean useConsole = (! fsc.isNoTerminalMode());
 %>
 <script type='text/javascript'>
 $(function() {
-    var ctxPath = "<%=fsc.ctxPath%>";
-    var useIcon        = <%=fsc.readFileIcon    ? "true" : "false"%>;
-    var useCaptchaDown = <%=fsc.captchaDownload ? "true" : "false"%>;
-    var captchaWidth  = parseInt("<%=fsc.captchaWidth  + 100%>");
-    var captchaHeight = parseInt("<%=fsc.captchaHeight + 180%>");
+    var ctxPath = "<%=fsc.getContextPath()%>";
+    var useIcon        = <%=fsc.isReadFileIconOn()    ? "true" : "false"%>;
+    var useCaptchaDown = <%=fsc.isCaptchaDownloadOn() ? "true" : "false"%>;
+    var captchaWidth  = parseInt("<%=fsc.getCaptchaWidth()  + 100%>");
+    var captchaHeight = parseInt("<%=fsc.getCaptchaHeight() + 180%>");
     
     var form     = $('.form_fs');
     var tables   = $('.fs_table_list');
@@ -501,7 +501,7 @@ $(function() {
 	    <input type='hidden' name='excepts' class='hidden_excepts' value=''/>
 	    <div class='row fs_title'>
 	        <div class='col-sm-12'>
-	            <h2><%= fsc.title %></h2>
+	            <h2><%= fsc.getTitle() %></h2>
 	        </div>
 	    </div>
 	    <div class='row fs_directory'>

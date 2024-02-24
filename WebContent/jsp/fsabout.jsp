@@ -17,11 +17,11 @@ limitations under the License.
 <html>
 <head>
 <meta charset="UTF-8"/>
-<title><%= fsc.title %></title>
+<title><%= fsc.getTitle() %></title>
 <jsp:include page="./common.header.jsp"></jsp:include>
 <script type="text/javascript">
 $(function() {
-    var ctxPath = "<%=fsc.ctxPath%>";
+    var ctxPath = "<%=fsc.getContextPath()%>";
     var taAbout = $('.ta_about');
 
     $('.btn_close').on('click', function() {

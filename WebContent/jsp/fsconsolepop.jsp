@@ -19,7 +19,7 @@ limitations under the License.
 <html>
 <head>
 <meta charset="UTF-8"/>
-<title><%= fsc.title %></title>
+<title><%= fsc.getTitle() %></title>
 <jsp:include page="./common.header.jsp"></jsp:include>
 <script type='text/javascript'>
 $(function() {

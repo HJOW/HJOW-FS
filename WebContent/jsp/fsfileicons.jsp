@@ -33,9 +33,9 @@ JSONObject json = new JSONObject();
 json.put("success", new Boolean(false));
 json.put("message", "");
 
-if(fsc.readFileIcon) {
+if(fsc.isReadFileIconOn()) {
 	try {
-	    File dir = new File(fsc.rootPath.getAbsolutePath() + File.separator + pathParam);
+	    File dir = new File(fsc.getRootPath().getAbsolutePath() + File.separator + pathParam);
 	    List<File> files = new ArrayList<File>();
 
 	    StringTokenizer commaTokenizer = new StringTokenizer(targets, ",");

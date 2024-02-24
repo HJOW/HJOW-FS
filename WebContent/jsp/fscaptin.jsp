@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, java.util.*, java.io.*, java.awt.*, java.awt.image.*, javax.imageio.*,org.apache.commons.codec.binary.Base64" %><%@ include file="common.pront.jsp"%><%
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, java.util.*, java.io.*, java.awt.*, java.awt.image.*, javax.imageio.*" %><%@ include file="common.pront.jsp"%><%
 /*
 Copyright 2024 HJOW (Heo Jin Won)
 
@@ -55,7 +55,7 @@ if(theme != null) {
     	location.reload();
     }
     $(function() {
-        setTimeout(function() { location.reload(); }, <%= fsc.captchaLimitTime %>);
+        setTimeout(function() { location.reload(); }, <%= fsc.getCaptchaLimitTime() %>);
         if(<%=captDarkMode%>) { $('body').css('background-color', 'black'); }
     });
     </script>

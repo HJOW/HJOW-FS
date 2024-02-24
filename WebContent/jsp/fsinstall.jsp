@@ -30,7 +30,7 @@ theme = FSUtils.removeSpecials(theme);
 <title>FS Installation</title>
 <jsp:include page="./common.header.libs.jsp"></jsp:include>
 </head><%
-if(! fsc.installed) {
+if(! fsc.isInstalled()) {
 	%>
 <body>
     <div class='fs_root container show-grid full fs_install'>
@@ -39,7 +39,7 @@ if(! fsc.installed) {
         	var bodys = $('body');
             if(bodys.is('.popup')) bodys.removeClass('dark');
             
-        	var ctxPath = "<%=fsc.ctxPath%>";
+        	var ctxPath = "<%=fsc.getContextPath()%>";
             var form    = $('.form_fs_ins');
             var chkAc   = form.find('.chk_account');
             
@@ -161,10 +161,10 @@ if(! fsc.installed) {
 <body>
     <script type="text/javascript">
     $(function() {
-        location.href = "<%=fsc.ctxPath%>/index.jsp";
+        location.href = "<%=fsc.getContextPath()%>/index.jsp";
     });
     </script>
-    <a href="<%=fsc.ctxPath%>/index.jsp" class='lang_element' data-lang-en='[Home]'>[홈]</a>
+    <a href="<%=fsc.getContextPath()%>/index.jsp" class='lang_element' data-lang-en='[Home]'>[홈]</a>
 </body>
 </html>
 	<%

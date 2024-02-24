@@ -1,4 +1,5 @@
-<%@ page language="java" contentType="plain/text; charset=UTF-8" pageEncoding="UTF-8" import="java.io.*, java.util.*, java.security.*, org.apache.commons.codec.binary.Base64"%><%
+<%@page import="hjow.common.util.SecurityUtil"%>
+<%@ page language="java" contentType="plain/text; charset=UTF-8" pageEncoding="UTF-8" import="java.io.*, java.util.*, java.security.*"%><%
 /*
 Copyright 2024 HJOW (Heo Jin Won)
 
@@ -22,4 +23,4 @@ if(content == null) content = "";
 
 MessageDigest digest = MessageDigest.getInstance("SHA-" + alg);
 byte[] res = digest.digest(content.getBytes("UTF-8"));
-%><%= Base64.encodeBase64String(res) %>
+%><%= SecurityUtil.base64String(res) %>
