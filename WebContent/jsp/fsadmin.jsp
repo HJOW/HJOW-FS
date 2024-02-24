@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, java.io.*, java.util.*, org.json.simple.*, org.json.simple.parser.* "%><%@ include file="common.pront.jsp"%><%
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, java.io.*, java.util.*, hjow.common.json.* "%><%@ include file="common.pront.jsp"%><%
 /*
 Copyright 2024 HJOW (Heo Jin Won)
 
@@ -213,7 +213,7 @@ limitations under the License.
                         <div class='row'>
                             <div class='col-sm-12'>
                                 <div><h4 class='lang_element' data-lang-en='Hidden Folders'>숨김 폴더</h4></div>
-                                <div><textarea name='hiddendirs' class='full'>[]</textarea></div>
+                                <div><textarea name='hiddendirs' class='full' style='min-height: 300px;'>[]</textarea></div>
                             </div>
                         </div>
                         <div class='row'>

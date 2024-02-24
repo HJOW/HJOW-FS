@@ -1,4 +1,4 @@
-<%@ page language="java" pageEncoding="UTF-8" import="com.hjow.fs.*, java.io.*, java.util.*, java.security.*, org.json.simple.*"%><%@ include file="common.pront.jsp"%><%
+<%@ page language="java" pageEncoding="UTF-8" import="com.hjow.fs.*, java.io.*, java.util.*, java.security.*, hjow.common.json.*"%><%@ include file="common.pront.jsp"%><%
 /*
 Copyright 2024 HJOW (Heo Jin Won)
 
@@ -14,9 +14,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-JSONObject json = fsc.admin(request);
+JsonObject json = fsc.admin(request);
 
 response.reset();
 response.setContentType("application/json");
 response.setCharacterEncoding("UTF-8");
-%><%=json.toJSONString()%>
+%><%=json.toJSON()%>

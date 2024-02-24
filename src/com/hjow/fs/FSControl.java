@@ -57,16 +57,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.swing.Icon;
 import javax.swing.filechooser.FileSystemView;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
 import com.hjow.fs.console.FSConsole;
 import com.hjow.fs.console.FSConsoleResult;
 import com.oreilly.servlet.MultipartRequest;
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 
+import hjow.common.json.JsonArray;
+import hjow.common.json.JsonObject;
 import hjow.common.util.SecurityUtil;
 
 public class FSControl {
@@ -74,7 +71,7 @@ public class FSControl {
 	
 	private static FSControl instance = null;
 	
-	protected JSONObject conf = new JSONObject();
+	protected JsonObject conf = new JsonObject();
 	protected volatile long    confReads    = 0L;
 	protected volatile boolean confChanging = false;
 	protected volatile boolean accChanging  = false;
@@ -152,7 +149,6 @@ public class FSControl {
 		instance.initialize(request);
 	}
 	
-	@SuppressWarnings("unchecked")
 	protected synchronized void initialize(HttpServletRequest request) {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -261,8 +257,7 @@ public class FSControl {
 							pstmt.close(); pstmt = null;
 							conn.close(); conn = null;
 							
-							JSONParser parser = new JSONParser();
-				            conf = (JSONObject) parser.parse(confJson);
+							conf = (JsonObject) JsonObject.parseJson(confJson);
 				            conf.put("S1", s1);
 				            conf.put("S2", s2);
 				            conf.put("S3", s3);
@@ -293,8 +288,7 @@ public class FSControl {
 				            rd1.close(); rd1 = null;
 				            propIn.close(); propIn = null;
 				            
-				            JSONParser parser = new JSONParser();
-				            conf = (JSONObject) parser.parse(lineCollection.toString().trim());
+				            conf = (JsonObject) JsonObject.parseJson(lineCollection.toString().trim());
 				            conf.put("S1", s1);
 				            conf.put("S2", s2);
 				            conf.put("S3", s3);
@@ -322,11 +316,11 @@ public class FSControl {
 				    if(rs      != null) rs.close();
 					if(pstmt   != null) pstmt.close();
 					if(conn    != null) conn.close();
-				    if(conf    == null) conf = new JSONObject();
+				    if(conf    == null) conf = new JsonObject();
 				}
 				propIn = null;
 			}
-
+			
 			// Applying Configs
 			if(conf.get("Installed") != null) {
 				installed = Boolean.parseBoolean(conf.get("Installed").toString().trim());
@@ -378,9 +372,9 @@ public class FSControl {
 			
 			List<String> cmdList = new ArrayList<String>();
 			if(conf.get("CommandClass") != null) {
-				JSONArray arr = null;
-				if(conf.get("CommandClass") instanceof JSONArray) arr = (JSONArray) conf.get("CommandClass");
-				else arr = (JSONArray) new JSONParser().parse(conf.get("CommandClass").toString().trim());
+				JsonArray arr = null;
+				if(conf.get("CommandClass") instanceof JsonArray) arr = (JsonArray) conf.get("CommandClass");
+				else arr = (JsonArray) JsonObject.parseJson(conf.get("CommandClass").toString().trim());
 				for(Object a : arr) {
 					cmdList.add(a.toString().trim());
 				}
@@ -393,9 +387,8 @@ public class FSControl {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	public JSONObject install(HttpServletRequest request) throws Exception {
-		JSONObject json = new JSONObject();
+	public JsonObject install(HttpServletRequest request) throws Exception {
+		JsonObject json = new JsonObject();
 		if(! installed) {
 			Properties   propTest = new Properties();
 		    InputStream  propIn   = null;
@@ -603,14 +596,14 @@ public class FSControl {
 						if(adminNick == null) adminNick = "Admin";
 						adminNick = adminNick.trim();
 						
-						JSONObject adminAc = new JSONObject();
+						JsonObject adminAc = new JsonObject();
 						adminAc.put("id"    , adminId);
 						adminAc.put("idtype", "A");
 						adminAc.put("nick"  , adminNick);
 						adminAc.put("fail_cnt", "0");
 						adminAc.put("fail_time", "0");
 						
-						JSONArray prvgroup = new JSONArray();
+						JsonArray prvgroup = new JsonArray();
 						prvgroup.add("user");
 						prvgroup.add("admin");
 						adminAc.put("privgroup", prvgroup);
@@ -638,7 +631,7 @@ public class FSControl {
 					        File fileAcc = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts" + File.separator + adminId + ".json");
 					        fileAcc.getCanonicalPath(); // Check valid
 					        fileOut = new FileOutputStream(fileAcc);
-					        fileOut.write(adminAc.toJSONString().getBytes(cs));
+					        fileOut.write(adminAc.toJSON().getBytes(cs));
 					        fileOut.close(); fileOut = null;
 						}
 					}
@@ -661,7 +654,7 @@ public class FSControl {
 				
 				conf.put("Title", titles);
 				conf.put("sHiddenDirs", sHiddenDir);
-				conf.put("HiddenDirs", new JSONArray());
+				conf.put("HiddenDirs", new JsonArray());
 				conf.put("Path", rootPath.getCanonicalPath());
 				conf.put("UseAccount", new Boolean(! noLogin));
 				conf.put("UseCaptchaDown" , new Boolean(useCaptchaDown));
@@ -677,14 +670,14 @@ public class FSControl {
 				
 		        if(useJDBC) {
 		        	pstmt = conn.prepareStatement("UPDATE FS_CONFIG SET JSONCONFIG = ?");
-		        	pstmt.setString(1, conf.toJSONString());
+		        	pstmt.setString(1, conf.toJSON());
 		        	pstmt.executeUpdate();
 		        	conn.commit();
 		        	pstmt.close(); pstmt = null;
 		        } else {
 		        	File fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "config.json");
 					fileOut = new FileOutputStream(fJson);
-					fileOut.write(conf.toJSONString().getBytes(cs));
+					fileOut.write(conf.toJSON().getBytes(cs));
 					fileOut.close(); fileOut = null;
 		        }
 				
@@ -709,10 +702,9 @@ public class FSControl {
 		return json;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public JSONObject admin(HttpServletRequest request) throws Exception {
-		JSONObject json       = new JSONObject();
-		JSONObject jsonConfig = new JSONObject();
+	public JsonObject admin(HttpServletRequest request) throws Exception {
+		JsonObject json       = new JsonObject();
+		JsonObject jsonConfig = new JsonObject();
 		
 		Properties   propTest = new Properties();
 	    InputStream  propIn   = null;
@@ -723,7 +715,7 @@ public class FSControl {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		
-		JSONObject sessionMap = null;
+		JsonObject sessionMap = null;
 		String lang = "en";
 		
 		try {
@@ -815,8 +807,7 @@ public class FSControl {
             rd1.close(); rd1 = null;
             propIn.close(); propIn = null;
             
-            JSONParser parser = new JSONParser();
-            jsonConfig = (JSONObject) parser.parse(lineCollection.toString().trim());
+            jsonConfig = (JsonObject) JsonObject.parseJson(lineCollection.toString().trim());
             
             json.put("message", "");
 			
@@ -835,8 +826,8 @@ public class FSControl {
 				if(sHiddenDirs == null) sHiddenDirs = "[]";
 				sHiddenDirs = sHiddenDirs.trim();
 				if(sHiddenDirs.equals("")) sHiddenDirs = "[]";
-				Object hiddenDirs = parser.parse(FSUtils.removeLineComments(sHiddenDirs, '#').trim()); // Checking valid JSON
-				if(! (hiddenDirs instanceof JSONArray)) throw new RuntimeException("'Hidden Folders' Should be a JSON array.");
+				Object hiddenDirs = JsonObject.parseJson(FSUtils.removeLineComments(sHiddenDirs, '#').trim()); // Checking valid JSON
+				if(! (hiddenDirs instanceof JsonArray)) throw new RuntimeException("'Hidden Folders' Should be a JSON array.");
 				
 				String sMaxSize = request.getParameter("limitsize");
 				if(sMaxSize == null) sMaxSize = "" + (1024 * 1024);
@@ -876,20 +867,20 @@ public class FSControl {
 					Class.forName(jdbcClass);
 					conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
 					pstmt = conn.prepareStatement("UPDATE FS_CONFIG SET JSONCONFIG = ?");
-		        	pstmt.setString(1, conf.toJSONString());
+		        	pstmt.setString(1, conf.toJSON());
 		        	pstmt.executeUpdate();
 		        	conn.commit();
 		        	pstmt.close(); pstmt = null;
 		        	conn.close(); conn = null;
 				} else {
 					fileOut = new FileOutputStream(fJson);
-					fileOut.write(conf.toJSONString().getBytes(cs));
+					fileOut.write(conf.toJSON().getBytes(cs));
 					fileOut.close(); fileOut = null;
 				}
 				
 				System.out.println("Configuration Updated by " + sessionMap.get("id") + " when " + System.currentTimeMillis());
 				jsonConfig.clear();
-				jsonConfig.putAll(conf);
+				jsonConfig = (JsonObject) conf.cloneObject();
 				
 				json.put("message", "Update Success !");
 			} else if(req.equals("reset")) {
@@ -986,11 +977,10 @@ public class FSControl {
 		return json;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public JSONObject console(HttpServletRequest request) throws Exception {
-		JSONObject json       = new JSONObject();
+	public JsonObject console(HttpServletRequest request) throws Exception {
+		JsonObject json       = new JsonObject();
 				
-		JSONObject sessionMap = null;
+		JsonObject sessionMap = null;
 		String lang = "en";
 		
 		try {
@@ -1068,11 +1058,10 @@ public class FSControl {
 		return json;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public JSONObject list(HttpServletRequest request, String pPath, String pKeyword, String pExcept) {
+	public JsonObject list(HttpServletRequest request, String pPath, String pKeyword, String pExcept) {
 		initialize(request);
 		
-		JSONObject json = new JSONObject();
+		JsonObject json = new JsonObject();
 		
 		String pathParam = pPath;
 		if(pathParam == null) pathParam = "";
@@ -1097,8 +1086,7 @@ public class FSControl {
 		}
 		pExcept = null;
 		
-		JSONObject jsonSess = new JSONObject();
-		JSONParser parser   = new JSONParser();
+		JsonObject jsonSess = new JsonObject();
 		
 		try {
 		    File dir = new File(instance.rootPath.getCanonicalPath() + File.separator + pathParam);
@@ -1170,7 +1158,7 @@ public class FSControl {
 		    json.put("dpath"  , pathDisp);
 
 			jsonSess = getSessionObject(request);
-			JSONArray dirPrv = null;
+			JsonArray dirPrv = null;
 			String idtype = "U";
 			if(jsonSess != null) {
 				if(jsonSess.get("idtype") != null) {
@@ -1179,16 +1167,16 @@ public class FSControl {
 						Object oDirPrv = (Object) jsonSess.get("privileges");
 					    if(oDirPrv != null) {
 					    	dirPrv = null;
-				            if(oDirPrv instanceof JSONArray) {
-				                dirPrv = (JSONArray) oDirPrv;
+				            if(oDirPrv instanceof JsonArray) {
+				                dirPrv = (JsonArray) oDirPrv;
 				            } else {
-				            	dirPrv = (JSONArray) parser.parse(oDirPrv.toString().trim());
+				            	dirPrv = (JsonArray) JsonObject.parseJson(oDirPrv.toString().trim());
 				            }
 				            
 				            for(Object row : dirPrv) {
-				            	JSONObject dirOne = null;
-				            	if(row instanceof JSONObject) dirOne = (JSONObject) row;
-				            	else                          dirOne = (JSONObject) parser.parse(row.toString().trim());
+				            	JsonObject dirOne = null;
+				            	if(row instanceof JsonObject) dirOne = (JsonObject) row;
+				            	else                          dirOne = (JsonObject) JsonObject.parseJson(row.toString().trim());
 				            	
 				            	try {
 				            		String dPath = dirOne.get("path"     ).toString();
@@ -1210,15 +1198,15 @@ public class FSControl {
 					}
 				}
 			}
-			if(dirPrv == null) dirPrv = new JSONArray();
+			if(dirPrv == null) dirPrv = new JsonArray();
 			
 			Object oHiddenDir = conf.get("HiddenDirs");
 			List<String> hiddenDirList = new ArrayList<String>();
 			
 			if(oHiddenDir != null) {
-				JSONArray hiddenDir = null;
-				if(oHiddenDir instanceof JSONArray) hiddenDir = (JSONArray) oHiddenDir;
-				else                                hiddenDir = (JSONArray) new JSONParser().parse(oHiddenDir.toString().trim());
+				JsonArray hiddenDir = null;
+				if(oHiddenDir instanceof JsonArray) hiddenDir = (JsonArray) oHiddenDir;
+				else                                hiddenDir = (JsonArray) JsonObject.parseJson(oHiddenDir.toString().trim());
 				oHiddenDir = null;
 				
 				if(idtype.equals("A")) {
@@ -1226,14 +1214,15 @@ public class FSControl {
 				} else {
 					if(hiddenDir != null) {
 						for(Object obj : hiddenDir) {
+							if(obj == null) continue;
 							hiddenDirList.add(obj.toString().trim());
 						}
 					}
 					
 					for(Object row : dirPrv) {
-		            	JSONObject dirOne = null;
-		            	if(row instanceof JSONObject) dirOne = (JSONObject) row;
-		            	else                          dirOne = (JSONObject) parser.parse(row.toString().trim());
+		            	JsonObject dirOne = null;
+		            	if(row instanceof JsonObject) dirOne = (JsonObject) row;
+		            	else                          dirOne = (JsonObject) JsonObject.parseJson(row.toString().trim());
 		            	
 		            	try {
 		            		String dPath = dirOne.get("path"     ).toString();
@@ -1257,7 +1246,7 @@ public class FSControl {
 				}
 			}
 
-			JSONArray dirs = new JSONArray();
+			JsonArray dirs = new JsonArray();
 			for(File f : chDirs) {
 				String name = f.getName();
 			    if(! keyword.equals("")) { if(! name.contains(keyword)) continue; }
@@ -1273,7 +1262,7 @@ public class FSControl {
 			    	if(("/" + linkDisp).startsWith(h)) continue;
 			    }
 			    
-			    JSONObject child = new JSONObject();
+			    JsonObject child = new JsonObject();
 			    child.put("type", "dir");
 			    child.put("name", name);
 			    child.put("value", linkDisp);
@@ -1283,14 +1272,14 @@ public class FSControl {
 			json.put("directories", dirs);
 			dirs = null;
 
-			JSONArray files = new JSONArray();
+			JsonArray files = new JsonArray();
 			for(File f : chFiles) {
 				String name     = f.getName();
 			    if(! keyword.equals("")) { if(! name.toLowerCase().contains(keyword.toLowerCase())) continue; }
 			    
 			    String linkDisp = name.replace("\"", "'");
 			    
-			    JSONObject fileOne = new JSONObject();
+			    JsonObject fileOne = new JsonObject();
 			    
 			    fileOne.put("type", "file");
 			    fileOne.put("name", linkDisp);
@@ -1442,9 +1431,9 @@ public class FSControl {
 		initialize(request);
 		
 		String uIdType = "", msg = "";
-		JSONArray dirPrv = null;
+		JsonArray dirPrv = null;
 		try {
-			JSONObject sessionMap = getSessionObject(request);
+			JsonObject sessionMap = getSessionObject(request);
 			
 		    if(sessionMap != null) {
 	            // uId     = sessionMap.get("id"    ).toString();
@@ -1452,10 +1441,10 @@ public class FSControl {
 	            
 	            Object oDirPrv = (Object) sessionMap.get("privileges");
 	            if(oDirPrv != null) {
-	                if(oDirPrv instanceof JSONArray) {
-	                    dirPrv = (JSONArray) oDirPrv;
+	                if(oDirPrv instanceof JsonArray) {
+	                    dirPrv = (JsonArray) oDirPrv;
 	                } else {
-	                    dirPrv = (JSONArray) new JSONParser().parse(oDirPrv.toString().trim());
+	                    dirPrv = (JsonArray) JsonObject.parseJson(oDirPrv.toString().trim());
 	                }
 	            }
 	        }
@@ -1474,11 +1463,10 @@ public class FSControl {
 		    	if(dirPrv == null) throw new RuntimeException("No privilege");
 		    	
 		    	boolean hasPriv = false;
-		    	JSONParser parser = new JSONParser();
 		    	for(Object row : dirPrv) {
-		    		JSONObject dirOne = null;
-		            if(row instanceof JSONObject) dirOne = (JSONObject) row;
-		            else                          dirOne = (JSONObject) parser.parse(row.toString().trim());
+		    		JsonObject dirOne = null;
+		            if(row instanceof JsonObject) dirOne = (JsonObject) row;
+		            else                          dirOne = (JsonObject) JsonObject.parseJson(row.toString().trim());
 		            
 		            try {
 		                String dPath = dirOne.get("path"     ).toString();
@@ -1610,30 +1598,29 @@ public class FSControl {
 			List<String> hiddenDirList = new ArrayList<String>();
 			
 			if(oHiddenDir != null) {
-				JSONObject jsonSess = getSessionObject(request);
+				JsonObject jsonSess = getSessionObject(request);
 				String idtype = "U";
 				if(jsonSess != null) {
-					JSONArray dirPrv = null;
-					JSONParser parser = new JSONParser();
+					JsonArray dirPrv = null;
 					if(jsonSess.get("idtype") != null) {
 						idtype = jsonSess.get("idtype").toString();
 						if(! idtype.equals("A")) {
 							Object oDirPrv = (Object) jsonSess.get("privileges");
 						    if(oDirPrv != null) {
 						    	dirPrv = null;
-					            if(oDirPrv instanceof JSONArray) {
-					                dirPrv = (JSONArray) oDirPrv;
+					            if(oDirPrv instanceof JsonArray) {
+					                dirPrv = (JsonArray) oDirPrv;
 					            } else {
-					            	dirPrv = (JSONArray) parser.parse(oDirPrv.toString().trim());
+					            	dirPrv = (JsonArray) JsonObject.parseJson(oDirPrv.toString().trim());
 					            }
 						    }
 						}
 					}
-					if(dirPrv == null) dirPrv = new JSONArray();
+					if(dirPrv == null) dirPrv = new JsonArray();
 					
-					JSONArray hiddenDir = null;
-					if(oHiddenDir instanceof JSONArray) hiddenDir = (JSONArray) oHiddenDir;
-					else                                hiddenDir = (JSONArray) new JSONParser().parse(oHiddenDir.toString().trim());
+					JsonArray hiddenDir = null;
+					if(oHiddenDir instanceof JsonArray) hiddenDir = (JsonArray) oHiddenDir;
+					else                                hiddenDir = (JsonArray) JsonObject.parseJson(oHiddenDir.toString().trim());
 					oHiddenDir = null;
 					
 					if(idtype.equals("A")) {
@@ -1646,9 +1633,9 @@ public class FSControl {
 						}
 						
 						for(Object row : dirPrv) {
-			            	JSONObject dirOne = null;
-			            	if(row instanceof JSONObject) dirOne = (JSONObject) row;
-			            	else                          dirOne = (JSONObject) parser.parse(row.toString().trim());
+			            	JsonObject dirOne = null;
+			            	if(row instanceof JsonObject) dirOne = (JsonObject) row;
+			            	else                          dirOne = (JsonObject) JsonObject.parseJson(row.toString().trim());
 			            	
 			            	try {
 			            		String dPath = dirOne.get("path"     ).toString();
@@ -1798,13 +1785,12 @@ public class FSControl {
 		return results.toString();
 	}
 	
-	@SuppressWarnings("unchecked")
-	public JSONObject mkdir(HttpServletRequest request) {
-		JSONObject json = new JSONObject();
+	public JsonObject mkdir(HttpServletRequest request) {
+		JsonObject json = new JsonObject();
 		String uIdType = "";
-		JSONArray dirPrv = null;
+		JsonArray dirPrv = null;
 		try {
-			JSONObject sessionMap = getSessionObject(request);
+			JsonObject sessionMap = getSessionObject(request);
 			
 		    if(sessionMap != null) {
 	        	// uId     = sessionMap.get("id"    ).toString();
@@ -1812,10 +1798,10 @@ public class FSControl {
 	        	
 	        	Object oDirPrv = (Object) sessionMap.get("privileges");
 	            if(oDirPrv != null) {
-	                if(oDirPrv instanceof JSONArray) {
-	                    dirPrv = (JSONArray) oDirPrv;
+	                if(oDirPrv instanceof JsonArray) {
+	                    dirPrv = (JsonArray) oDirPrv;
 	                } else {
-	                    dirPrv = (JSONArray) new JSONParser().parse(oDirPrv.toString().trim());
+	                    dirPrv = (JsonArray) JsonObject.parseJson(oDirPrv.toString().trim());
 	                }
 	            }
 	        }
@@ -1838,11 +1824,10 @@ public class FSControl {
 			if(uIdType.equals("A")) hasPriv = true;
 			
 			if(! hasPriv) {
-		        JSONParser parser = new JSONParser();
 		        for(Object row : dirPrv) {
-		            JSONObject dirOne = null;
-		            if(row instanceof JSONObject) dirOne = (JSONObject) row;
-		            else                          dirOne = (JSONObject) parser.parse(row.toString().trim());
+		            JsonObject dirOne = null;
+		            if(row instanceof JsonObject) dirOne = (JsonObject) row;
+		            else                          dirOne = (JsonObject) JsonObject.parseJson(row.toString().trim());
 		            
 		            try {
 		                String dPath = dirOne.get("path"     ).toString();
@@ -1880,13 +1865,12 @@ public class FSControl {
 		return json;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public JSONObject remove(HttpServletRequest request) {
-		JSONObject json = new JSONObject();
+	public JsonObject remove(HttpServletRequest request) {
+		JsonObject json = new JsonObject();
 		String uIdType = "";
-		JSONArray dirPrv = null;
+		JsonArray dirPrv = null;
 		try {
-			JSONObject sessionMap = getSessionObject(request);
+			JsonObject sessionMap = getSessionObject(request);
 			
 		    if(sessionMap != null) {
 	        	// uId     = sessionMap.get("id"    ).toString();
@@ -1894,10 +1878,10 @@ public class FSControl {
 	        	
 	        	Object oDirPrv = (Object) sessionMap.get("privileges");
 	            if(oDirPrv != null) {
-	                if(oDirPrv instanceof JSONArray) {
-	                    dirPrv = (JSONArray) oDirPrv;
+	                if(oDirPrv instanceof JsonArray) {
+	                    dirPrv = (JsonArray) oDirPrv;
 	                } else {
-	                    dirPrv = (JSONArray) new JSONParser().parse(oDirPrv.toString().trim());
+	                    dirPrv = (JsonArray) JsonObject.parseJson(oDirPrv.toString().trim());
 	                }
 	            }
 	        }
@@ -1923,11 +1907,10 @@ public class FSControl {
 			if(uIdType.equals("A")) hasPriv = true;
 			
 			if(! hasPriv) {
-		        JSONParser parser = new JSONParser();
 		        for(Object row : dirPrv) {
-		            JSONObject dirOne = null;
-		            if(row instanceof JSONObject) dirOne = (JSONObject) row;
-		            else                          dirOne = (JSONObject) parser.parse(row.toString().trim());
+		            JsonObject dirOne = null;
+		            if(row instanceof JsonObject) dirOne = (JsonObject) row;
+		            else                          dirOne = (JsonObject) JsonObject.parseJson(row.toString().trim());
 		            
 		            try {
 		                String dPath = dirOne.get("path"     ).toString();
@@ -1993,17 +1976,15 @@ public class FSControl {
 		return json;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public JSONObject account(HttpServletRequest request) throws IOException {
-		JSONObject sessionMap = null;
-		JSONObject accountOne = null;
+	public JsonObject account(HttpServletRequest request) throws IOException {
+		JsonObject sessionMap = null;
+		JsonObject accountOne = null;
 		boolean needInvalidate = false;
 		try {
 			String sessionJson = (String) request.getSession().getAttribute("fssession");
 		    
 		    if(sessionJson != null) {
-		    	JSONParser parser = new JSONParser();
-		    	sessionMap = (JSONObject) parser.parse(sessionJson.trim());
+		    	sessionMap = (JsonObject) JsonObject.parseJson(sessionJson.trim());
 		    	
 		    	if(sessionMap != null) { if(sessionMap.get("id"    ) == null) sessionMap = null;         }
 		        if(sessionMap != null) { if(sessionMap.get("idtype") == null) sessionMap = null;         }
@@ -2020,7 +2001,7 @@ public class FSControl {
 		if(req == null) req = "status";
 		req = req.trim().toLowerCase();
 
-		JSONObject json = new JSONObject();
+		JsonObject json = new JsonObject();
 		json.put("success", new Boolean(false));
 		json.put("message", "");
 		
@@ -2161,7 +2142,7 @@ public class FSControl {
 				        r1.close(); r1 = null;
 				        fIn.close(); fIn = null;
 				        
-				        accountOne = (JSONObject) new JSONParser().parse(lineCollector.toString().trim());
+				        accountOne = (JsonObject) JsonObject.parseJson(lineCollector.toString().trim());
 				        lineCollector.setLength(0);
 				        lineCollector = null;
 				    }
@@ -2234,7 +2215,7 @@ public class FSControl {
 			                    				
 			                    File fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".json");
 			                    fOut = new FileOutputStream(fileAcc);
-			                    fOut.write(accountOne.toJSONString().getBytes(cs));
+			                    fOut.write(accountOne.toJSON().getBytes(cs));
 			                    fOut.close(); fOut = null;
 			                    
 			                    accChanging = false;
@@ -2264,18 +2245,17 @@ public class FSControl {
 		                    
 		                    File fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".json");
 		                    fOut = new FileOutputStream(fileAcc);
-		                    fOut.write(accountOne.toJSONString().getBytes(cs));
+		                    fOut.write(accountOne.toJSON().getBytes(cs));
 		                    fOut.close(); fOut = null;
 		                    
 		                    accChanging = false;
 			        	}
 			        	
-			        	JSONObject accountJsonNew = new JSONObject();
-			        	accountJsonNew.putAll(accountOne);
+			        	JsonObject accountJsonNew = (JsonObject) accountOne.cloneObject();
 			        	accountJsonNew.remove("pw");
 			        	
 			        	sessionMap = accountOne;
-			        	request.getSession().setAttribute("fssession", accountJsonNew.toJSONString());
+			        	request.getSession().setAttribute("fssession", accountJsonNew.toJSON());
 			            System.out.println("Login Accept : " + id + " at " + now);
 			            needInvalidate = false;
 			            json.put("success", new Boolean(true));
@@ -2314,22 +2294,21 @@ public class FSControl {
 		}
 		return json;
 	}
-	@SuppressWarnings("unchecked")
-	public JSONObject getSessionObject(HttpServletRequest request) throws ParseException {
+	
+	public JsonObject getSessionObject(HttpServletRequest request) {
 		String sessionJson = (String) request.getSession().getAttribute("fssession");
 		if(sessionJson != null) {
 			sessionJson = sessionJson.trim();
 			if(! sessionJson.equals("")) {
-				JSONObject obj = (JSONObject) new JSONParser().parse(sessionJson);
+				JsonObject obj = (JsonObject) JsonObject.parseJson(sessionJson);
 				if(obj != null) { if(obj.get("id"    ) == null) obj = null;         }
 			    if(obj != null) { if(obj.get("idtype") == null) obj = null;         }
 			    if(obj != null) { if(obj.get("nick"  ) == null) obj = null;         }
 			    if(obj != null) {
-			    	JSONObject jsonSess = new JSONObject();
-			    	jsonSess.putAll(obj);
+			    	JsonObject jsonSess = (JsonObject) obj.cloneObject();
 			    	jsonSess.remove("pw");
 			    	
-			    	if(jsonSess.get("privgroup") == null) jsonSess.put("privgroup", new JSONArray());
+			    	if(jsonSess.get("privgroup") == null) jsonSess.put("privgroup", new JsonArray());
 			    	
 			    	return jsonSess;
 			    }
@@ -2344,11 +2323,11 @@ public class FSControl {
     	return lang;
     }
 
-	public JSONObject getConfig() {
+	public JsonObject getConfig() {
 		return conf;
 	}
 
-	public void setConfig(JSONObject conf) {
+	public void setConfig(JsonObject conf) {
 		this.conf = conf;
 	}
 

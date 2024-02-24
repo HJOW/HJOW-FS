@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="application/json; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, java.io.*, java.util.*, java.awt.Color, org.json.simple.*, org.json.simple.parser.*" session="true" %><%@ include file="common.pront.jsp"%><%
+<%@ page language="java" contentType="application/json; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, java.io.*, java.util.*, java.awt.Color, hjow.common.json.*" session="true" %><%@ include file="common.pront.jsp"%><%
 /*
 Copyright 2024 HJOW (Heo Jin Won)
 
@@ -29,7 +29,7 @@ String br = request.getParameter("br");
 String bg = request.getParameter("bg");
 String bb = request.getParameter("bb");
 
-JSONObject json = new JSONObject();
+JsonObject json = new JsonObject();
 json.put("success", new Boolean(false));
 json.put("message", "");
 
@@ -56,7 +56,7 @@ if(fsc.isReadFileIconOn()) {
 	    targets = null;
 	    commaTokenizer = null;
 	    
-	    JSONObject jsonResults = new JSONObject();
+	    JsonObject jsonResults = new JsonObject();
 	    
 	    Color background = new Color(59, 59, 59);
 	    if(br != null && bg != null && bb != null) {
@@ -87,7 +87,7 @@ if(fsc.isReadFileIconOn()) {
 	    json.put("message", "Error : " + t.getMessage());
 	}
 } else {
-	json.put("data", new JSONObject());
+	json.put("data", new JsonObject());
     json.put("success", new Boolean(true));
     json.put("message", "Icon service does not supported.");
 }
@@ -95,4 +95,4 @@ if(fsc.isReadFileIconOn()) {
 response.reset();
 response.setContentType("application/json");
 response.setCharacterEncoding("UTF-8");
-%><%=json.toJSONString().trim()%>
+%><%=json.toJSON().trim()%>
