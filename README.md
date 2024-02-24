@@ -6,11 +6,22 @@ No JSTL, No Spring !
 Work on JDK 6 & Tomcat 7 or above !
 (Servlet 3.0, Java Server Page 2.2 as least)
 
+Sometimes using BASE64 converting in this program.
+Until JDK 8, there are JAXB as a basic library.
+Over JDK 9, JAXB not working anymore, so Apache Commons Codec is needed.
+
+(Developing modern version will be started soon...)
+
+
 JSP 기반 파일 저장소 프로젝트입니다.
 이걸로 웹 기반 자료실을 구축할 수 있습니다.
 JDK 6, 톰캣 7 이상 버전에서 동작하며, 스프링과 JSTL 의존성이 없어 다른 프로젝트와 혼용이 수월합니다.
 
-(Developing modern version will be started soon...)
+이 프로그램에서는 BASE64 컨버팅을 사용합니다.
+JDK 8 이전 버전에서는 JAXB 라이브러리가 기본 제공되어 써드파티 없이 BASE64가 가능했으나,
+JDK 9 부터는 Apache Commons Codec 라이브러리를 WEB-INF 밑 lib 폴더에 넣어 주어야 동작합니다.
+다시말해, JDK 8 이전 버전을 사용한다면 Apache Commons Codec 라이브러리를 제거해도 됩니다.
+(버전 0.1.2 부터 적용되며, 0.1.1 이하에서는 Apache Commons Codec 라이브러리를 제거하면 안 됩니다.)
 
 # Releases
 
