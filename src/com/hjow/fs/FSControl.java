@@ -122,7 +122,7 @@ public class FSControl {
 	protected int loginFailCountLimit = 10;
 	protected int loginFailOverMinute = 10;
 	
-	protected boolean noTerminal = true;
+	protected boolean noConsole = true;
 	
 	protected String salt = "fs";
 	protected File rootPath  = null;
@@ -339,7 +339,7 @@ public class FSControl {
 					noLogin = (! Boolean.parseBoolean(conf.get("UseAccount").toString().trim()));
 				}
 				if(conf.get("UseConsole") != null) {
-					noTerminal = (! Boolean.parseBoolean(conf.get("UseConsole").toString().trim()));
+					noConsole = (! Boolean.parseBoolean(conf.get("UseConsole").toString().trim()));
 				}
 				if(conf.get("UseCaptchaDown") != null) {
 					captchaDownload = Boolean.parseBoolean(conf.get("UseCaptchaDown").toString().trim());
@@ -2532,11 +2532,11 @@ public class FSControl {
 	}
 
 	public boolean isNoTerminalMode() {
-		return noTerminal;
+		return noConsole;
 	}
 
-	public void setNoTerminalMode(boolean noTerminal) {
-		this.noTerminal = noTerminal;
+	public void setNoTerminalMode(boolean noConsole) {
+		this.noConsole = noConsole;
 	}
 
 	public String getSalt() {
