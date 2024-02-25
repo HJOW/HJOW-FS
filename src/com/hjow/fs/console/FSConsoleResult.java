@@ -18,9 +18,10 @@ limitations under the License.
 import java.io.Serializable;
 
 public class FSConsoleResult implements Serializable {
-	private static final long serialVersionUID = -1262690600967631874L;
+	private static final long serialVersionUID = 256793532787714176L;
 	protected boolean success = false;
 	protected boolean nulll   = false;
+	protected boolean logout  = false;
     protected String  display = "";
     protected String  path    = null;
     protected String downloadAccepted = null;
@@ -53,5 +54,11 @@ public class FSConsoleResult implements Serializable {
 	}
 	public void setDownloadAccepted(String downloadAccepted) {
 		this.downloadAccepted = downloadAccepted;
+	}
+	public boolean isLogout() {
+		return logout;
+	}
+	public void setLogout(boolean logout) {
+		this.logout = logout;
 	}
 }

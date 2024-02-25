@@ -1019,6 +1019,7 @@ public class FSControl {
             
             console.setPath(path);
             
+            // Session infos for console
             Map<String, Object> sessionNewMap = new HashMap<String, Object>();
             if(sessionMap == null) {
             	sessionNewMap.put("id"        , "guest");
@@ -1036,12 +1037,85 @@ public class FSControl {
             
             sessionNewMap.put("lang", lang);
             
+            // Getting hidden directories
+            Object oHiddenDir = conf.get("HiddenDirs");
+			List<String> hiddenDirList = new ArrayList<String>();
+			
+			String idtype = sessionNewMap.get("idtype").toString();
+			
+			if(oHiddenDir != null) {
+				JsonArray hiddenDir = null;
+				if(oHiddenDir instanceof JsonArray) hiddenDir = (JsonArray) oHiddenDir;
+				else                                hiddenDir = (JsonArray) JsonObject.parseJson(oHiddenDir.toString().trim());
+				oHiddenDir = null;
+				
+				if(idtype.equals("A")) {
+					hiddenDirList.clear();
+				} else {
+					if(hiddenDir != null) {
+						for(Object obj : hiddenDir) {
+							if(obj == null) continue;
+							hiddenDirList.add(obj.toString().trim());
+						}
+					}
+					
+					JsonArray dirPrv = null;
+					Object oDirPrv = (Object) sessionNewMap.get("privileges");
+				    if(oDirPrv != null) {
+				    	dirPrv = null;
+			            if(oDirPrv instanceof JsonArray) {
+			                dirPrv = (JsonArray) oDirPrv;
+			            } else {
+			            	dirPrv = (JsonArray) JsonObject.parseJson(oDirPrv.toString().trim());
+			            }
+				    }
+					
+				    if(dirPrv != null) {
+				    	for(Object row : dirPrv) {
+			            	JsonObject dirOne = null;
+			            	if(row instanceof JsonObject) dirOne = (JsonObject) row;
+			            	else                          dirOne = (JsonObject) JsonObject.parseJson(row.toString().trim());
+			            	
+			            	try {
+			            		String dPath = dirOne.get("path"     ).toString();
+			            		String dPrv  = dirOne.get("privilege").toString();
+			            		
+			            		int hdx=0;
+			            		while(hdx < hiddenDirList.size()) {
+			            			String hiddenDirOne = hiddenDirList.get(hdx);
+			            			if(hiddenDirOne.startsWith(dPath) || ("/" + hiddenDirOne).startsWith(dPath)) {
+				            			if(dPrv.equals("view") || dPrv.equals("edit")) {
+				            				hiddenDirList.remove(hdx);
+				            				continue;
+				            			}
+				            		}
+			            			hdx++;
+			            		}
+			            	} catch(Throwable t) {
+			            		System.out.println("Wrong account configuration - " + t.getMessage());
+			            	}
+			            }
+				    }
+				}
+			}
+			
+			sessionNewMap.put("hiddendirs", hiddenDirList);
+            
+			// RUN
             FSConsoleResult rs = console.run(sessionNewMap, command);
             
+            // If result marked as a logout, clean session.
+            if(rs.isLogout()) request.getSession().removeAttribute("fssession");
+            
+            String rsPath = rs.getPath();
+            if(rsPath != null) rsPath = rsPath.replace("\\", "/");
+            
+            // Make result JSON
 			json.put("success", new Boolean(true));
-			json.put("path"   , rs.getPath());
+			json.put("path"   , rsPath);
 			json.put("display", rs.getDisplay());
 			json.put("displaynull", new Boolean(rs.isNulll()));
+			json.put("logout", new Boolean(rs.isLogout()));
 			
 			if(rs.getDownloadAccepted() != null) {
 				json.put("downloadaccept", new Boolean(true));
@@ -1059,9 +1133,6 @@ public class FSControl {
 				json.put("message", "Error : " + t.getMessage());
 			}
 		}
-		
-		System.out.println("CONSOLE");
-		System.out.println(json.toJSON());
 		return json;
 	}
 	
@@ -1163,6 +1234,7 @@ public class FSControl {
 		    String pathDisp = pathParam; // 화면 출력용
 		    if(pathDisp.startsWith("//")) pathDisp = pathDisp.substring(1);
 		    if(! pathDisp.startsWith("/")) pathDisp = "/" + pathDisp;
+		    pathParam = pathParam.replace("\\", "/");
 		    
 		    json.put("type", "list");
 		    json.put("keyword", keyword);
@@ -1261,7 +1333,7 @@ public class FSControl {
 			JsonArray dirs = new JsonArray();
 			for(File f : chDirs) {
 				String name = f.getName();
-			    if(! keyword.equals("")) { if(! name.contains(keyword)) continue; }
+			    if(! keyword.equals("")) { if(! name.toLowerCase().contains(keyword.toLowerCase())) continue; }
 			    if(name.equals(".garbage")) continue;
 			    if(name.equals(".upload" )) continue;
 			    

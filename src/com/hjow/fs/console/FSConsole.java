@@ -28,11 +28,13 @@ import com.hjow.fs.console.cmd.FSConsoleCat;
 import com.hjow.fs.console.cmd.FSConsoleCd;
 import com.hjow.fs.console.cmd.FSConsoleCommand;
 import com.hjow.fs.console.cmd.FSConsoleDown;
+import com.hjow.fs.console.cmd.FSConsoleFind;
 import com.hjow.fs.console.cmd.FSConsoleFirst;
 import com.hjow.fs.console.cmd.FSConsoleHelp;
 import com.hjow.fs.console.cmd.FSConsoleLs;
 import com.hjow.fs.console.cmd.FSConsoleNow;
 import com.hjow.fs.console.cmd.FSConsolePwd;
+import com.hjow.fs.console.cmd.FSConsoleWho;
 
 public class FSConsole implements Serializable {
 	private static final long serialVersionUID = 7995402708882449267L;
@@ -44,16 +46,20 @@ public class FSConsole implements Serializable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static void init(File rootPath, List<String> commandClasses) {
-		FSConsole.rootPath = rootPath;
-		commands.add(FSConsoleCat.class);
-		commands.add(FSConsoleCd.class);
-		commands.add(FSConsoleDown.class);
-		commands.add(FSConsoleFirst.class);
-		commands.add(FSConsoleHelp.class);
-		commands.add(FSConsoleLs.class);
-		commands.add(FSConsoleNow.class);
-		commands.add(FSConsolePwd.class);
+	public static synchronized void init(File rootPath, List<String> commandClasses) {
+		if(! (FSConsole.rootPath != null && FSConsole.rootPath.equals(rootPath))) {
+			FSConsole.rootPath = rootPath;
+			if(! commands.contains(FSConsoleCat.class  )) commands.add(FSConsoleCat.class  );
+			if(! commands.contains(FSConsoleCd.class   )) commands.add(FSConsoleCd.class   );
+			if(! commands.contains(FSConsoleDown.class )) commands.add(FSConsoleDown.class );
+			if(! commands.contains(FSConsoleFirst.class)) commands.add(FSConsoleFirst.class);
+			if(! commands.contains(FSConsoleHelp.class )) commands.add(FSConsoleHelp.class );
+			if(! commands.contains(FSConsoleLs.class   )) commands.add(FSConsoleLs.class   );
+			if(! commands.contains(FSConsoleNow.class  )) commands.add(FSConsoleNow.class  );
+			if(! commands.contains(FSConsolePwd.class  )) commands.add(FSConsolePwd.class  );
+			if(! commands.contains(FSConsoleWho.class  )) commands.add(FSConsoleWho.class  );
+			if(! commands.contains(FSConsoleFind.class )) commands.add(FSConsoleFind.class );
+		}
 		
 		if(commandClasses != null) {
 			for(String c : commandClasses) {

@@ -16,6 +16,10 @@ limitations under the License.
  */
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.StringTokenizer;
 
 public class FSUtils {
@@ -123,5 +127,51 @@ public class FSUtils {
     		res = res.append(" ");
     	}
     	return res.toString();
+    }
+    
+    public static List<String> find(File rootPath, String pPath, String pKeyword, long limitSize) throws IOException {
+    	String pathParam = pPath;
+		if(pathParam == null) pathParam = "";
+		pathParam = pathParam.trim();
+		if(pathParam.equals("/")) pathParam = "";
+		pathParam = FSUtils.removeSpecials(pathParam, false, true, true, false, true).replace("\\", "/").trim();
+		if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
+		
+		String keyword = pKeyword;
+		if(keyword == null) keyword = "";
+		keyword = keyword.replace("'", "").replace("\"", "").replace("<", "").replace(">", "").trim();
+		
+		File dir = new File(rootPath.getCanonicalPath() + File.separator + pathParam);
+		
+		List<String> res = find(rootPath, dir, keyword, limitSize, 0);
+		Collections.sort(res);
+		return res;
+    }
+    
+    private static List<String> find(File rootPath, File dir, String keyword, long limitSize, int recursiveDepth) throws IOException {
+    	if(recursiveDepth >= 20) return new ArrayList<String>();
+    	List<String> res = new ArrayList<String>();
+    	
+    	File[] lists = dir.listFiles();
+    	for(File f : lists) {
+    		String nm = f.getName();
+    		if(nm.indexOf("." ) == 0) continue;
+            if(nm.indexOf("/" ) >= 0) continue;
+            if(nm.indexOf("\\") >= 0) continue;
+            if(nm.indexOf("<" ) >= 0) continue;
+            if(nm.indexOf(">" ) >= 0) continue;
+            if(nm.indexOf("..") >= 0) continue;
+            
+            if(f.isDirectory()) {
+            	res.addAll(find(rootPath, f, keyword, limitSize, recursiveDepth + 1));
+            } else {
+            	if(f.length() / 1024 >= limitSize) continue;
+            }
+            
+            if(! keyword.equals("")) { if(! nm.toLowerCase().contains(keyword.toLowerCase())) continue; }
+            res.add(f.getCanonicalPath().replace(rootPath.getCanonicalPath(), ""));
+    	}
+    	
+    	return res;
     }
 }
