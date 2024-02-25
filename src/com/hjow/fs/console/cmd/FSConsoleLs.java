@@ -44,8 +44,8 @@ public class FSConsoleLs implements FSConsoleCommand {
 		File   fileCalc = new File(pathCalc);
 		
 		StringBuilder res = new StringBuilder("");
-		res = res.append("-TYPE-\t-SIZE-\t\t-NAME-").append("\n");
-		
+		res = res.append("-TYPE-").append(FSUtils.leftSpaces("-TYPE-", 6)).append(" ").append("-SIZE-").append(FSUtils.leftSpaces("-SIZE-", 10)).append("  ").append("-NAME-").append(FSUtils.leftSpaces("-NAME-", 30)).append("\n");
+
 		List<File> listTwo = new ArrayList<File>();
 		File[] listOne = fileCalc.listFiles();
 		for(File f : listOne) {
@@ -67,9 +67,10 @@ public class FSConsoleLs implements FSConsoleCommand {
 			if(name.startsWith(".")) continue;
 			
 			if(f.isDirectory()) {
-				res = res.append("DIR").append("\t\t\t").append(name).append("").append("\n");
+				res = res.append("DIR").append(FSUtils.leftSpaces("DIR", 6)).append(" ").append(FSUtils.leftSpaces("", 10)).append("  ").append(name).append(FSUtils.leftSpaces(name, 30)).append("\n");
 			} else {
-				res = res.append("FILE").append("\t").append(FSUtils.getFileSize(f)).append("\t\t").append(name).append("\n");
+				String sizes = FSUtils.getFileSize(f);
+				res = res.append("FILE").append(FSUtils.leftSpaces("FILE", 6)).append(" ").append(FSUtils.leftSpaces(sizes, 10)).append(sizes).append("  ").append(name).append(FSUtils.leftSpaces(name, 30)).append("\n");
 			}
 		}
 		

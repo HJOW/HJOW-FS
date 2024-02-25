@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+import com.hjow.fs.FSUtils;
 import com.hjow.fs.console.FSConsole;
 
 public class FSConsoleHelp implements FSConsoleCommand {
@@ -39,7 +40,7 @@ public class FSConsoleHelp implements FSConsoleCommand {
 				res = res.append("                                                                      ").append("\n");
 				List<FSConsoleCommand> commands = console.getCommands();
 				for(FSConsoleCommand c : commands) {
-					res = res.append(c.getName()).append("\t: ").append(c.getHelp(lang, false)).append("\n");
+					res = res.append(c.getName()).append(FSUtils.leftSpaces(c.getName(), 10)).append(" : ").append(c.getHelp(lang, false)).append("\n");
 				}
 			} else {
 				res = res.append(" * Basic Usage of FS Console").append("\n");
@@ -52,7 +53,7 @@ public class FSConsoleHelp implements FSConsoleCommand {
 				res = res.append("                                                                      ").append("\n");
 				List<FSConsoleCommand> commands = console.getCommands();
 				for(FSConsoleCommand c : commands) {
-					res = res.append(c.getName()).append("\t: ").append(c.getHelp(lang, false)).append("\n");
+					res = res.append(c.getName()).append(FSUtils.leftSpaces(c.getName(), 10)).append(" : ").append(c.getHelp(lang, false)).append("\n");
 				}
 			}
 		} else {

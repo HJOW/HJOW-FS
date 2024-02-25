@@ -115,4 +115,13 @@ public class FSUtils {
 	    
 	    return comp;
 	}
+    
+    public static String leftSpaces(String filled, int targettedDigit) {
+    	if(filled.length() >= targettedDigit) return "";
+    	StringBuilder res = new StringBuilder("");
+    	for(int idx=filled.length(); idx<targettedDigit; idx++) {
+    		res = res.append(" ");
+    	}
+    	return res.toString();
+    }
 }

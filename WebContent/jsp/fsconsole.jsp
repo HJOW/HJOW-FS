@@ -24,6 +24,8 @@ $(function() {
                 }
             }, error : function(jqXHR, textStatus, errorThrown) {
                 taTermDisp.val(taTermDisp.val() + '\n' + 'Error ! ' + textStatus + '\n    ' + errorThrown);
+                FSUtil.log('Error ! ' + textStatus);
+                FSUtil.log(errorThrown);
             }, complete : function() {
                 taTermDisp.scrollTop(taTermDisp[0].scrollHeight);
                 inpTermCons.prop('readonly', false);

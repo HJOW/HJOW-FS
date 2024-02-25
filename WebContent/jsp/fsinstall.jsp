@@ -140,8 +140,11 @@ if(! fsc.isInstalled()) {
                     <div class='row'>
                         <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='ETC'>기타</div>
                         <div class='col-sm-10'>
-                            <span>
+                            <span class='etcspan'>
                                 <label><input type='checkbox' name='readfileicon'  class='chk_read_icon'  value="true"/><span class='lang_element' data-lang-en="Read file's icon">파일 아이콘 읽기</span></label>
+                            </span>
+                            <span class='etcspan'>
+                                <label><input type='checkbox' name='useconsole'   class='chk_use_console'  value="true"/><span class='lang_element' data-lang-en="Use Console">콘솔 사용 (관리자 전용)</span></label>
                             </span>
                         </div>
                     </div>

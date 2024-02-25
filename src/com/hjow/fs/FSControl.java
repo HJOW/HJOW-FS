@@ -550,13 +550,17 @@ public class FSControl {
 				String sUseCaptchaDown  = request.getParameter("usecaptchadown");
 				String sUseCaptchaLogin = request.getParameter("usecaptchalogin");
 				String sReadFileIcon    = request.getParameter("readfileicon");
+				String sUseConsole      = request.getParameter("useconsole");
 				
 				boolean useCaptchaDown  = false;
 				boolean useCaptchaLogin = false;
 				boolean useReadFileIcon = false;
+				boolean useConsole      = false;
 				
-				if(sUseCaptchaDown != null) useCaptchaDown  = Boolean.parseBoolean(sUseCaptchaDown.trim());
-				if(sReadFileIcon   != null) useReadFileIcon = Boolean.parseBoolean(sReadFileIcon.trim());
+				if(sUseCaptchaDown  != null) useCaptchaDown  = Boolean.parseBoolean(sUseCaptchaDown.trim());
+				if(sUseCaptchaLogin != null) useCaptchaLogin = Boolean.parseBoolean(sUseCaptchaLogin.trim());
+				if(sReadFileIcon    != null) useReadFileIcon = Boolean.parseBoolean(sReadFileIcon.trim());
+				if(sUseConsole      != null) useConsole      = Boolean.parseBoolean(sUseConsole.trim());
 				
 				String sUseAccounts = request.getParameter("useaccount");
 				if(sUseAccounts != null) {
@@ -588,6 +592,11 @@ public class FSControl {
 		                    noLogin = true;
 		                    throw new RuntimeException("Please input the administration user's account information !");
 		                }
+						
+						if(adminId.equalsIgnoreCase("guest")) {
+							noLogin = true;
+		                    throw new RuntimeException("ID cannot be 'guest' !");
+						}
 						
 						if(adminId.contains("'") || adminId.contains("\"") || adminId.contains("/") || adminId.contains("\\") || adminId.contains(File.separator) || adminId.contains(".") || adminId.contains(" ") || adminId.contains("\n") || adminId.contains("\t")) 
 							throw new RuntimeException("ID can only contains alphabets and numbers !");
@@ -659,6 +668,7 @@ public class FSControl {
 				conf.put("UseAccount", new Boolean(! noLogin));
 				conf.put("UseCaptchaDown" , new Boolean(useCaptchaDown));
 				conf.put("UseCaptchaLogin", new Boolean(useCaptchaLogin));
+				conf.put("UseConsole", new Boolean(useConsole));
 				conf.put("LimitUploadSize", sMaxSize);
 				conf.put("LimitFilesSinglePage", sMaxCount);
 				conf.put("ReadFileIcon", new Boolean(useReadFileIcon));
@@ -984,28 +994,13 @@ public class FSControl {
 		String lang = "en";
 		
 		try {
-			if(noLogin) {
-				if(lang.equals("ko")) throw new RuntimeException("이 작업을 수행할 권한이 없습니다.");
-				else                  throw new RuntimeException("No privilege");
+			if(noConsole) {
+				if(lang.equals("ko")) throw new RuntimeException("콘솔 기능이 비활성화되어 있습니다.");
+				else                  throw new RuntimeException("The console feature is disabled.");
 			}
 			
 			sessionMap = getSessionObject(request);
 			lang       = getLanguage(request);
-			
-			if(sessionMap == null) {
-				if(lang.equals("ko")) throw new RuntimeException("이 작업을 수행할 권한이 없습니다.");
-				else                  throw new RuntimeException("No privilege");
-			}
-			
-			Object idtype = sessionMap.get("idtype");
-			if(idtype == null) {
-				if(lang.equals("ko")) throw new RuntimeException("이 작업을 수행할 권한이 없습니다.");
-				else                  throw new RuntimeException("No privilege");
-			}
-			if(! idtype.toString().equals("A")) {
-				if(lang.equals("ko")) throw new RuntimeException("이 작업을 수행할 권한이 없습니다.");
-				else                  throw new RuntimeException("No privilege");
-			}
 			
             json.put("message", "");
 			
@@ -1025,11 +1020,21 @@ public class FSControl {
             console.setPath(path);
             
             Map<String, Object> sessionNewMap = new HashMap<String, Object>();
-            sessionNewMap.put("id"        , sessionMap.get("id"));
-            sessionNewMap.put("idtype"    , sessionMap.get("idtype"));
-            sessionNewMap.put("privileges", sessionMap.get("privileges"));
-            sessionNewMap.put("privgroup" , sessionMap.get("privgroup"));
-            sessionNewMap.put("lang"      , lang);
+            if(sessionMap == null) {
+            	sessionNewMap.put("id"        , "guest");
+            	sessionNewMap.put("nick"      , "GUEST");
+                sessionNewMap.put("idtype"    , "G");
+                sessionNewMap.put("privileges", new JsonArray());
+                sessionNewMap.put("privgroup" , new JsonArray());
+            } else {
+            	sessionNewMap.put("id"        , sessionMap.get("id"));
+                sessionNewMap.put("idtype"    , sessionMap.get("idtype"));
+                sessionNewMap.put("nick"      , sessionMap.get("nick"));
+                sessionNewMap.put("privileges", sessionMap.get("privileges"));
+                sessionNewMap.put("privgroup" , sessionMap.get("privgroup"));
+            }
+            
+            sessionNewMap.put("lang", lang);
             
             FSConsoleResult rs = console.run(sessionNewMap, command);
             
@@ -1055,6 +1060,8 @@ public class FSControl {
 			}
 		}
 		
+		System.out.println("CONSOLE");
+		System.out.println(json.toJSON());
 		return json;
 	}
 	
@@ -1127,8 +1134,13 @@ public class FSControl {
 		    		skipped++;
 		    		continue;
 		    	}
+		    	if(nm.indexOf("." ) == 0) continue;
+	            if(nm.indexOf("/" ) >= 0) continue;
+	            if(nm.indexOf("\\") >= 0) continue;
+	            if(nm.indexOf("<" ) >= 0) continue;
+	            if(nm.indexOf(">" ) >= 0) continue;
+	            if(nm.indexOf("..") >= 0) continue;
 		        if(f.isDirectory()) {
-		            if(nm.indexOf(".") >= 0) continue;
 		            chDirs.add(f);
 		        } else {
 		            if(f.length() / 1024 >= instance.limitSize) continue;
@@ -2087,6 +2099,11 @@ public class FSControl {
 				if(id.equals("")) {
 					if(lang.equals("ko")) msg = "ID를 입력해 주세요.";
 					else                  msg = "Please input ID !";
+				}
+				
+				if(id.equalsIgnoreCase("guest")) {
+					if(lang.equals("ko")) msg = "ID는 guest 일 수 없습니다.";
+					else                  msg = "ID cannot be 'guest' !";
 				}
 				
 				if(id.contains("'") || id.contains("\"") || id.contains("/") || id.contains("\\") || id.contains(File.separator) || id.contains(".") || id.contains(" ") || id.contains("\n") || id.contains("\t")) throw new RuntimeException("ID can only contains alphabets and numbers !");

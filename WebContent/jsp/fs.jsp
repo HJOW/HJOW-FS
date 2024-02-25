@@ -513,7 +513,7 @@ $(function() {
                 <input type='button' class='btn_mkdir   privilege_element invisible lang_attr_element' value='새 폴더' data-lang-target='value' data-lang-en='New Folder'/>
                 <input type='button' class='btn_config  privilege_element only_admin invisible lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config'/>
                 <% if(useConsole) { %>
-                <input type='button' class='btn_console privilege_element only_admin invisible lang_attr_element' value='콘솔' data-lang-target='value' data-lang-en='Console'/>
+                <input type='button' class='btn_console lang_attr_element' value='콘솔' data-lang-target='value' data-lang-en='Console'/>
                 <% } %>
             </div>
 	    </div>
