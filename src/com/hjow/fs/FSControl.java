@@ -2531,11 +2531,11 @@ public class FSControl {
 		this.loginFailOverMinute = loginFailOverMinute;
 	}
 
-	public boolean isNoTerminalMode() {
+	public boolean isNoConsoleMode() {
 		return noConsole;
 	}
 
-	public void setNoTerminalMode(boolean noConsole) {
+	public void setNoConsoleMode(boolean noConsole) {
 		this.noConsole = noConsole;
 	}
 

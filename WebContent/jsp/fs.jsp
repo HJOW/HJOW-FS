@@ -34,7 +34,7 @@ pathParam = FSUtils.removeSpecials(pathParam, false, true, true, false, true).re
 
 if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
 
-boolean useConsole = (! fsc.isNoTerminalMode());
+boolean useConsole = (! fsc.isNoConsoleMode());
 %>
 <script type='text/javascript'>
 $(function() {
