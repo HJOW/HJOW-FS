@@ -14,15 +14,20 @@ if(!String.prototype.trim) {
 }
 $(function() {
 	$('#btn').on('click', function() {
-		var inpVal = $('#input').val();
-		inpVal = String(inpVal).trim();
-		console.log('Input is...');
-		console.log(inpVal);
-		
-		var parsed = JSON.parse(inpVal);
-		console.log('Parsed object is...');
-		console.log(parsed);
-		$('#result').val(JSON.stringify(parsed));
+		try {
+			var inpVal = $('#input').val();
+	        inpVal = String(inpVal).trim();
+	        console.log('Input is...');
+	        console.log(inpVal);
+	        
+	        var parsed = JSON.parse(inpVal);
+	        console.log('Parsed object is...');
+	        console.log(parsed);
+	        $('#result').val(JSON.stringify(parsed));
+		} catch(e) {
+			console.log(e);
+			$('#result').val('Error : ' + e);
+		}
 	});
 });
 </script>

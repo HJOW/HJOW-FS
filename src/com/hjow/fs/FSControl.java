@@ -67,7 +67,7 @@ import hjow.common.json.JsonObject;
 import hjow.common.util.SecurityUtil;
 
 public class FSControl {
-	public static final int[] VERSION = {0, 1, 2, 9};
+	public static final int[] VERSION = {0, 1, 3, 10};
 	
 	private static FSControl instance = null;
 	
@@ -958,7 +958,7 @@ public class FSControl {
 			}
 			
 			json.put("success", new Boolean(true));
-			
+			json.put("message", "Apply Success");
 		} catch(Throwable t) {
 			json.put("success", new Boolean(false));
 			if(t instanceof RuntimeException) {

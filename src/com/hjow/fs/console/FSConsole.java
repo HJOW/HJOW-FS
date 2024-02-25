@@ -95,7 +95,7 @@ public class FSConsole implements Serializable {
 		return cmds;
 	}
 	public FSConsoleResult run(Map<String, Object> sessionMap, String command) {
-		System.out.println("Console called by " + sessionMap.get("id") + " - " + command);
+		System.out.println("Console called by " + sessionMap.get("id") + " - " + command + " at " + System.currentTimeMillis());
 		
 		FSConsoleResult res = null;
 		
@@ -120,12 +120,13 @@ public class FSConsole implements Serializable {
 				while(spaceTokenizer.hasMoreTokens()) {
 					parameter = parameter.append(spaceTokenizer.nextToken()).append(" ");
 				}
-				lineOne = null;
-				spaceTokenizer = null;
 				
 				System.out.println("LINE : " + lineOne);
 				System.out.println("CMD : " + commandName);
 				System.out.println("PARAM : " + parameter.toString());
+				
+				lineOne = null;
+				spaceTokenizer = null;
 				
 				FSConsoleCommand commandOne = null;
 				for(FSConsoleCommand c : cmds) {

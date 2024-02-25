@@ -65,8 +65,8 @@ function FSUtilClass() {
     this.version = [];
     this.version.push(0);
     this.version.push(1);
-    this.version.push(2);
-    this.version.push(9);
+    this.version.push(3);
+    this.version.push(10);
 
 	this.log = function(logContent) {
     	try {
