@@ -67,7 +67,7 @@ import hjow.common.json.JsonObject;
 import hjow.common.util.SecurityUtil;
 
 public class FSControl {
-	public static final int[] VERSION = {0, 1, 3, 10};
+	public static final int[] VERSION = {0, 1, 4, 11};
 	
 	private static FSControl instance = null;
 	
