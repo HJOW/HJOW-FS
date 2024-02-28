@@ -41,8 +41,10 @@ $(function() {
     var ctxPath = "<%=fsc.getContextPath()%>";
     var useIcon        = <%=fsc.isReadFileIconOn()    ? "true" : "false"%>;
     var useCaptchaDown = <%=fsc.isCaptchaDownloadOn() ? "true" : "false"%>;
-    var captchaWidth  = parseInt("<%=fsc.getCaptchaWidth()  + 100%>");
-    var captchaHeight = parseInt("<%=fsc.getCaptchaHeight() + 180%>");
+    var captchaWidth   = parseInt("<%=fsc.getCaptchaWidth()  + 100%>");
+    var captchaHeight  = parseInt("<%=fsc.getCaptchaHeight() + 180%>");
+    var noAnonymous    = <%=fsc.isNoAnonymous() ? "true" : "false"%>;
+    var loginedFirst   = <%= (fsc.getSessionUserId(request) != null) ? "true" : "false" %>
     
     var form     = $('.form_fs');
     var tables   = $('.fs_table_list');
@@ -415,7 +417,7 @@ $(function() {
     });
     
     btnConfig.on('click', function() {
-        var popOpt = 'width=750,height=550,scrollbars=yes,status=no,location=no,toolbar=no';
+        var popOpt = 'width=780,height=550,scrollbars=yes,status=no,location=no,toolbar=no';
         var theme = '';
         if($('body').is('.dark')) theme='dark';
         window.open(ctxPath + '/jsp/fsadmin.jsp?theme=' + theme, 'config', popOpt);
@@ -482,65 +484,84 @@ $(function() {
             }
         });
     });
+
+    var fsFileList = $('.fs_filelist');
+    if(noAnonymous) {
+    	if(loginedFirst) {
+    		fsFileList.addClass('invisible');
+            $('.fs_filelist_view').removeClass('invisible');
+    	} else {
+    		fsFileList.addClass('invisible');
+            $('.fs_filelist_anonymous').removeClass('invisible');
+    	}
+    } else {
+    	fsFileList.addClass('invisible');
+        $('.fs_filelist_view').removeClass('invisible');
+    }
     
     <% if(useConsole) { %>
     var btnConsole = form.find('.btn_console');
     btnConsole.on('click', function() {
-    	var theme = '';
+        var theme = '';
         if($('body').is('.dark')) theme='dark';
-    	window.open(ctxPath + '/jsp/fsconsolepop.jsp?theme=' + theme, 'console', 'width=750,height=450,scrollbars=yes,status=no,location=no,toolbar=no');
+        window.open(ctxPath + '/jsp/fsconsolepop.jsp?theme=' + theme, 'console', 'width=780,height=450,scrollbars=yes,status=no,location=no,toolbar=no');
     });
     <% } %>
-
+    
     fReload(true);
 });
 </script>
-<div class='fs_root container show-grid full'>
-	<form class='form_fs' onsubmit='return false;'>
-	    <input type='hidden' name='path'    class='hidden_path'    value='<%= pathParam %>'/>
-	    <input type='hidden' name='excepts' class='hidden_excepts' value=''/>
-	    <div class='row fs_title'>
-	        <div class='col-sm-12'>
-	            <h2><%= fsc.getTitle() %></h2>
-	        </div>
-	    </div>
-	    <div class='row fs_directory'>
-	        <div class='col-sm-10'>
-                <h4 class='path_title'><span class='lang_element' data-lang-en='Current Directory : '>현재 디렉토리 : </span><span class='path'></span></h4>
-            </div>
-            <div class='col-sm-2'>
-                <input type='button' class='btn_upload  privilege_element invisible lang_attr_element' value='업로드' data-lang-target='value' data-lang-en='Upload'/>
-                <input type='button' class='btn_mkdir   privilege_element invisible lang_attr_element' value='새 폴더' data-lang-target='value' data-lang-en='New Folder'/>
-                <input type='button' class='btn_config  privilege_element only_admin invisible lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config'/>
-                <% if(useConsole) { %>
-                <input type='button' class='btn_console lang_attr_element' value='콘솔' data-lang-target='value' data-lang-en='Console'/>
-                <% } %>
-            </div>
-	    </div>
-	    <div class='row fs_search'>
-	        <div class='col-sm-10'>
-	            <input type='text'   class='inp_search full lang_attr_element' name='keyword' placeholder="디렉토리 내 검색" data-lang-target='placeholder' data-lang-en='Search in current directory'/>
-	        </div>
-	        <div class='col-sm-2'>
-	            <input type='submit' class='btn_search full lang_attr_element' value='검색' data-lang-target='value' data-lang-en='Search'/>
-	        </div>
-	    </div>
-	    <div class='row fs_root'>
-	        <div class='col-sm-12'>
-		        <table class="table table-hover full fs_table_list">
-		            <colgroup>
-		                <col style='width:50px;'/>
-		                <col/>
-		                <col style='width:100px;'/>
-		                <col style='width:10px;' class='col_controls'/>
-		            </colgroup>
-		            <tbody class='fs_list'>
-		            
-		            </tbody>
-		        </table>
-	        </div>
-	    </div>
-	</form>
+<div class='fs_root'>
+    <div class='fs_filelist fs_filelist_view container show-grid full'>
+    	<form class='form_fs' onsubmit='return false;'>
+    	    <input type='hidden' name='path'    class='hidden_path'    value='<%= pathParam %>'/>
+    	    <input type='hidden' name='excepts' class='hidden_excepts' value=''/>
+    	    <div class='row fs_title'>
+    	        <div class='col-sm-12'>
+    	            <h2><%= fsc.getTitle() %></h2>
+    	        </div>
+    	    </div>
+    	    <div class='row fs_directory'>
+    	        <div class='col-sm-10'>
+                    <h4 class='path_title'><span class='lang_element' data-lang-en='Current Directory : '>현재 디렉토리 : </span><span class='path'></span></h4>
+                </div>
+                <div class='col-sm-2'>
+                    <input type='button' class='btn_upload  privilege_element invisible lang_attr_element' value='업로드' data-lang-target='value' data-lang-en='Upload'/>
+                    <input type='button' class='btn_mkdir   privilege_element invisible lang_attr_element' value='새 폴더' data-lang-target='value' data-lang-en='New Folder'/>
+                    <input type='button' class='btn_config  privilege_element only_admin invisible lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config'/>
+                    <% if(useConsole) { %>
+                    <input type='button' class='btn_console lang_attr_element' value='콘솔' data-lang-target='value' data-lang-en='Console'/>
+                    <% } %>
+                </div>
+    	    </div>
+    	    <div class='row fs_search'>
+    	        <div class='col-sm-10'>
+    	            <input type='text'   class='inp_search full lang_attr_element' name='keyword' placeholder="디렉토리 내 검색" data-lang-target='placeholder' data-lang-en='Search in current directory'/>
+    	        </div>
+    	        <div class='col-sm-2'>
+    	            <input type='submit' class='btn_search full lang_attr_element' value='검색' data-lang-target='value' data-lang-en='Search'/>
+    	        </div>
+    	    </div>
+    	    <div class='row fs_root'>
+    	        <div class='col-sm-12'>
+    		        <table class="table table-hover full fs_table_list">
+    		            <colgroup>
+    		                <col style='width:50px;'/>
+    		                <col/>
+    		                <col style='width:100px;'/>
+    		                <col style='width:10px;' class='col_controls'/>
+    		            </colgroup>
+    		            <tbody class='fs_list'>
+    		            
+    		            </tbody>
+    		        </table>
+    	        </div>
+    	    </div>
+    	</form>
+    </div>
+    <div class='fs_filelist fs_filelist_anonymous full invisible'>
+        <jsp:include page="fsanonymousblock.jsp"></jsp:include>
+    </div>
 </div>
 <jsp:include page="common.footer.jsp"></jsp:include>
 <%

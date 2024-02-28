@@ -26,6 +26,8 @@ limitations under the License.
     <div class='fs_root full fs_admin'>
         <script type="text/javascript">
         $(function() {
+        	var selfId = "<%=fsc.getSessionUserId(request)%>";
+        	
         	var bodys = $('body');
             if(bodys.is('.popup')) bodys.removeClass('dark');
             
@@ -81,10 +83,6 @@ limitations under the License.
                         		form.find("[name='useaccount']").prop('disabled', true);
                         		form.find('.onlyaccount').addClass('invisible');
                         		form.find("[name='usecaptchalogin']").prop('checked', false);
-                        	}
-                        	if(conf['UseConsole']) { } else {
-                        		$(".admintab[data-target='terminal']").remove();
-                        		$(".adminelement_terminal ").remove();
                         	}
                         	form.find("[name='rootdir']").val('...');
                         	form.find("[name='rootdir']").prop('disabled', true);
@@ -156,7 +154,90 @@ limitations under the License.
             		$('.adminelement').addClass('invisible');
             		$('.adminelement_' + $(this).attr('data-target')).removeClass('invisible');
             	});
-            })
+            });
+            
+            var formUserSrch = $('.form_fs_user_search');
+            var tbodyUsers   = $('.tbody_users');
+            
+            formUserSrch.on('submit', function() {
+            	tbodyUsers.find('.binded_click').off('click');
+            	tbodyUsers.empty();
+            	tbodyUsers.append("<tr><td colspan='5'>...</td></tr>");
+            	
+            	$.ajax({
+                    url    : ctxPath + "/jsp/fsadminin.jsp",
+                    data   : formUserSrch.serialize(),
+                    method : "POST",
+                    dataType : "json",
+                    success : function(data) {
+                    	tbodyUsers.empty();
+                    	if(! data.success) {
+                            tbodyUsers.append("<tr><td colspan='5' class='td_empty'></td></tr>");
+                            tbodyUsers.find('.td_empty').text(data.message);
+                            return;
+                    	}
+                    	
+                    	for(var idx=0; idx<data.userlist.length; idx++) {
+                    		var rowOne = data.userlist[idx];
+                    		tbodyUsers.append("<tr class='tr_user tr_user_" + idx + "'><td class='td_no'></td><td class='td_id'></td><td class='td_nick'></td><td class='td_type'></td><td class='td_etc'></td></tr>");
+                    		
+                    		var tr = tbodyUsers.find('.tr_user_' + idx);
+                    		tr.find('.td_no').text(String(idx));
+                    		tr.find('.td_id').text(rowOne['id']);
+                    		tr.find('.td_nick').text(rowOne['nick']);
+                    		tr.find('.td_type').text(rowOne['idtype']);
+                    		
+                    		if(rowOne['id'] != selfId) {
+                    			tr.find('.td_etc').append("<input type='button' value='X' class='btn_delete' data-id=''/>");
+                                
+                                var btnDel = tr.find('.btn_delete');
+                                btnDel.attr('data-id', rowOne['id']);
+                                btnDel.on('click', function() {
+                                    var dId = $(this).attr('data-id');
+                                    $.ajax({
+                                        url    : ctxPath + "/jsp/fsadminin.jsp",
+                                        data   : {
+                                            req : 'userdel', 
+                                            id  : dId
+                                        },
+                                        method : "POST",
+                                        dataType : "json",
+                                        success : function(data) {
+                                            if(! data.success) {
+                                            	alert(data.message);
+                                            } else {
+                                            	alert('Success !');
+                                            	formUserSrch.trigger('submit');
+                                            }
+                                        }
+                                    });
+                                });
+                                btnDel.addClass('binded_click');
+                    		}
+                    		
+                    		FSUtil.applyLanguage();
+                    	}
+                    }
+                });
+            });
+            
+            var formUserCr = $('.form_fs_user_new');
+            formUserCr.on('submit', function() {
+            	$.ajax({
+                    url    : ctxPath + "/jsp/fsadminin.jsp",
+                    data   : formUserCr.serialize(),
+                    method : "POST",
+                    dataType : "json",
+                    success : function(data) {
+                    	if(! data.success) {
+                            alert(data.message);
+                        } else {
+                            alert('Success !');
+                            formUserSrch.trigger('submit');
+                        }
+                    }
+                });
+            });
         });
         </script>
         <div class='container show-grid full'>
@@ -166,7 +247,7 @@ limitations under the License.
             <div class='row'>
                 <div class='col-sm-12 flatbuttons'>
                     <a href='#' class='flatbutton admintab lang_element thick' data-lang-en='Config'   data-target='config'   style='margin-left: -5px; border-top: 0; border-left: 0;'>설정</a>
-                    <a href='#' class='flatbutton admintab lang_element'       data-lang-en='Terminal' data-target='terminal' style='margin-left: -5px; border-top: 0; border-left: 0;'>터미널</a>
+                    <a href='#' class='flatbutton admintab lang_element'       data-lang-en='Users'    data-target='users'    style='margin-left: -5px; border-top: 0; border-left: 0;'>사용자관리</a>
                     <a href='#' class='flatbutton admintab lang_element'       data-lang-en='Reset'    data-target='reset'    style='margin-left: -5px; border-top: 0; border-left: 0;'>초기화</a>
                 </div>
             </div>
@@ -236,8 +317,80 @@ limitations under the License.
                 </div>
             </form>
         </div>
-        <div class='container show-grid adminelement adminelement_terminal invisible full'>
-            <jsp:include page="fsconsole.jsp"></jsp:include>
+        <div class='container show-grid adminelement adminelement_users invisible full'>
+            <div class='row'>
+                <div class='col-sm-12'>
+                    <div><h4>Users</h4></div>
+                    <form class='form_fs_user_search' onsubmit='return false;'>
+                        <input type='hidden' name='req' value='userlist' class='hidden_req'/>
+                        <input type='text' name='keyword'/>
+                        <input type='submit' value='검색' class='lang_attr_element' data-lang-target='value' data-lang-en='Search'/>
+                    </form>
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-sm-12'>
+                    <table class='table table-hover full fs_table_list'>
+                        <colgroup>
+                            <col style='width:30px'/>
+                            <col style='width:120px'/>
+                            <col/>
+                            <col style='width:50px'/>
+                            <col style='width:120px'/>
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>ID</th>
+                                <th>Nick</th>
+                                <th>Type</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody class='tbody_users'>
+                            <tr>
+                                <td colspan='5' class='lang_element' data-lang-en='Please search first !'>검색 버튼을 클릭해 주세요.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-sm-12'><hr/></div>
+            </div>
+            <div class='row'>
+                <div class='col-sm-12'>
+                    <div><h4>Creating User</h4></div>
+                    <form class='form_fs_user_new' onsubmit='return false;'>
+                        <input type='hidden' name='req' value='usercreate' class='hidden_req'/>
+                        <div class='container show-grid'>
+                            <div class='row'>
+                                <div class='col-sm-1'>ID</div>
+                                <div class='col-sm-5'><input type='text' name='id'/></div>
+                                <div class='col-sm-1'>PW</div>
+                                <div class='col-sm-5'><input type='password' name='pw'/></div>
+                            </div>
+                            <div class='row'>
+                                <div class='col-sm-1'>Nick</div>
+                                <div class='col-sm-5'><input type='text' name='nick'/></div>
+                                <div class='col-sm-1'>Type</div>
+                                <div class='col-sm-5'>
+                                    <select name='idtype'>
+                                        <option value='A'>Admin</option>
+                                        <option value='U' selected>User</option>
+                                        <option value='B'>Blocked</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class='row'>
+                                <div class='col-sm-12 align_right'>
+                                    <input type='submit' value='등록' class='lang_attr_element' data-lang-target='value' data-lang-en='Create'/>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
         <div class='container show-grid adminelement adminelement_reset invisible full'>
             <form class='form_fs_reset' onsubmit='return false;'>

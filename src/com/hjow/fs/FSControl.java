@@ -63,6 +63,7 @@ import com.oreilly.servlet.MultipartRequest;
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 
 import hjow.common.json.JsonArray;
+import hjow.common.json.JsonCompatibleUtil;
 import hjow.common.json.JsonObject;
 import hjow.common.util.SecurityUtil;
 
@@ -118,6 +119,7 @@ public class FSControl {
 	protected long captchaLimitTime = 1000 * 60 * 5;
 	
 	// Login Policy
+	protected boolean noAnonymous = false;
 	protected boolean noLogin = false;
 	protected int loginFailCountLimit = 10;
 	protected int loginFailOverMinute = 10;
@@ -243,7 +245,10 @@ public class FSControl {
 				        
 			            // Read configs
 				        if(useJDBC) {
-				        	conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+				        	if(conn == null) {
+				        		Class.forName(jdbcClass);
+				        		conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);				        		
+				        	}
 				        	
 				        	pstmt = conn.prepareStatement("SELECT JSONCONFIG FROM FS_CONFIG");
 							rs    = pstmt.executeQuery();
@@ -257,7 +262,7 @@ public class FSControl {
 							pstmt.close(); pstmt = null;
 							conn.close(); conn = null;
 							
-							conf = (JsonObject) JsonObject.parseJson(confJson);
+							conf = (JsonObject) JsonCompatibleUtil.parseJson(confJson);
 				            conf.put("S1", s1);
 				            conf.put("S2", s2);
 				            conf.put("S3", s3);
@@ -288,7 +293,7 @@ public class FSControl {
 				            rd1.close(); rd1 = null;
 				            propIn.close(); propIn = null;
 				            
-				            conf = (JsonObject) JsonObject.parseJson(lineCollection.toString().trim());
+				            conf = (JsonObject) JsonCompatibleUtil.parseJson(lineCollection.toString().trim());
 				            conf.put("S1", s1);
 				            conf.put("S2", s2);
 				            conf.put("S3", s3);
@@ -309,14 +314,14 @@ public class FSControl {
 					fileConfigPath = null;
 				    t.printStackTrace(); 
 				} finally {
-					if(rd2     != null) rd2.close();
-					if(rd1     != null) rd1.close();
-				    if(propIn  != null) propIn.close();
-				    if(fileOut != null) fileOut.close();
-				    if(rs      != null) rs.close();
-					if(pstmt   != null) pstmt.close();
-					if(conn    != null) conn.close();
-				    if(conf    == null) conf = new JsonObject();
+					if(rd2     != null) { try { rd2.close();             } catch(Throwable txc) {} }
+					if(rd1     != null) { try { rd1.close();             } catch(Throwable txc) {} }
+				    if(propIn  != null) { try { propIn.close();          } catch(Throwable txc) {} }
+				    if(fileOut != null) { try { fileOut.close();         } catch(Throwable txc) {} }
+				    if(rs      != null) { try { rs.close();              } catch(Throwable txc) {} }
+					if(pstmt   != null) { try { pstmt.close();           } catch(Throwable txc) {} }
+					if(conn    != null) { try { conn.close();            } catch(Throwable txc) {} }
+				    if(conf    == null) { try { conf = new JsonObject(); } catch(Throwable txc) {} }
 				}
 				propIn = null;
 			}
@@ -335,6 +340,9 @@ public class FSControl {
 			    if(! garbage.exists()) garbage.mkdirs();
 			    uploadd = new File(rootPath.getCanonicalPath() + File.separator + ".upload");
 			    if(! uploadd.exists()) uploadd.mkdirs();
+			    if(conf.get("NoAnonymous") != null) {
+					noAnonymous = Boolean.parseBoolean(conf.get("NoAnonymous").toString().trim());
+				}
 				if(conf.get("UseAccount") != null) {
 					noLogin = (! Boolean.parseBoolean(conf.get("UseAccount").toString().trim()));
 				}
@@ -374,7 +382,7 @@ public class FSControl {
 			if(conf.get("CommandClass") != null) {
 				JsonArray arr = null;
 				if(conf.get("CommandClass") instanceof JsonArray) arr = (JsonArray) conf.get("CommandClass");
-				else arr = (JsonArray) JsonObject.parseJson(conf.get("CommandClass").toString().trim());
+				else arr = (JsonArray) JsonCompatibleUtil.parseJson(conf.get("CommandClass").toString().trim());
 				for(Object a : arr) {
 					cmdList.add(a.toString().trim());
 				}
@@ -460,8 +468,10 @@ public class FSControl {
 				
 				// Check JDBC
 				if(useJDBC) {
-					Class.forName(jdbcClass);
-					conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+					if(conn == null) {
+						Class.forName(jdbcClass);
+						conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+					}
 					
 		        	// Check FS_CONFIG
 		        	try {
@@ -517,7 +527,7 @@ public class FSControl {
 			        	rs.close(); rs = null;
 			        	pstmt.close(); pstmt = null;
 			        	
-			        	pstmt = conn.prepareStatement("SELECT USERID, USERPW, USERNICK, USERTYPE, FAILCNT, FAILTIME, PRIVILEGES AS CNT FROM FS_USER");
+			        	pstmt = conn.prepareStatement("SELECT USERID, USERPW, USERNICK, USERTYPE, FAILCNT, FAILTIME, PRIVILEGES FROM FS_USER");
 			        	rs = pstmt.executeQuery();
 			        	
 			        	rs.close(); rs = null;
@@ -702,11 +712,11 @@ public class FSControl {
 					json.put("message", "Error : " + t.getMessage());
 				}
 			} finally {
-				if(fileOut != null) fileOut.close();
-				if(propIn  != null) propIn.close();
-				if(rs      != null) rs.close();
-				if(pstmt   != null) pstmt.close();
-				if(conn    != null) conn.close();
+				if(fileOut != null) { try { fileOut.close(); } catch(Throwable txc) {} }
+				if(propIn  != null) { try { propIn.close();  } catch(Throwable txc) {} }
+				if(rs      != null) { try { rs.close();      } catch(Throwable txc) {} }
+				if(pstmt   != null) { try { pstmt.close();   } catch(Throwable txc) {} }
+				if(conn    != null) { try { conn.close();    } catch(Throwable txc) {} }
 			}
 		}
 		return json;
@@ -817,11 +827,11 @@ public class FSControl {
             rd1.close(); rd1 = null;
             propIn.close(); propIn = null;
             
-            jsonConfig = (JsonObject) JsonObject.parseJson(lineCollection.toString().trim());
+            jsonConfig = (JsonObject) JsonCompatibleUtil.parseJson(lineCollection.toString().trim());
             
             json.put("message", "");
 			
-			if(req.equals("update")) {
+			if(req.equalsIgnoreCase("update")) {
 				String titles = request.getParameter("title");
 		        if(titles == null) titles = "File Storage";
 		        titles = titles.trim();
@@ -836,7 +846,7 @@ public class FSControl {
 				if(sHiddenDirs == null) sHiddenDirs = "[]";
 				sHiddenDirs = sHiddenDirs.trim();
 				if(sHiddenDirs.equals("")) sHiddenDirs = "[]";
-				Object hiddenDirs = JsonObject.parseJson(FSUtils.removeLineComments(sHiddenDirs, '#').trim()); // Checking valid JSON
+				Object hiddenDirs = JsonCompatibleUtil.parseJson(FSUtils.removeLineComments(sHiddenDirs, '#').trim()); // Checking valid JSON
 				if(! (hiddenDirs instanceof JsonArray)) throw new RuntimeException("'Hidden Folders' Should be a JSON array.");
 				
 				String sMaxSize = request.getParameter("limitsize");
@@ -874,8 +884,11 @@ public class FSControl {
 				conf.put("Installed", new Boolean(true));
 				
 				if(useJDBC) {
-					Class.forName(jdbcClass);
-					conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+					if(conn == null) {
+						Class.forName(jdbcClass);
+						conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+					}
+					
 					pstmt = conn.prepareStatement("UPDATE FS_CONFIG SET JSONCONFIG = ?");
 		        	pstmt.setString(1, conf.toJSON());
 		        	pstmt.executeUpdate();
@@ -893,7 +906,7 @@ public class FSControl {
 				jsonConfig = (JsonObject) conf.cloneObject();
 				
 				json.put("message", "Update Success !");
-			} else if(req.equals("reset")) {
+			} else if(req.equalsIgnoreCase("reset")) {
 				String passwords = request.getParameter("pw");
 				if(passwords == null) {
 					String rex = "Please input Password !";
@@ -938,8 +951,11 @@ public class FSControl {
 				}
 				
 				if(useJDBC) {
-					Class.forName(jdbcClass);
-					conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+					if(conn == null) {
+						Class.forName(jdbcClass);
+						conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+					}
+					
 					pstmt = conn.prepareStatement("DROP TABLE FS_CONFIG");
 		        	pstmt.executeUpdate();
 		        	conn.commit();
@@ -956,9 +972,309 @@ public class FSControl {
 				json.put("reset", new Boolean(true));
 				json.put("message", "Reset Success !");
 				request.getSession().invalidate();
+			} else if(req.equalsIgnoreCase("userlist")) {
+				String keyword = request.getParameter("keyword");
+				if(keyword == null) keyword = "";
+				keyword = keyword.trim();
+				
+				JsonArray arr = new JsonArray();
+				
+				if(useJDBC) {
+					if(conn == null) {
+						Class.forName(jdbcClass);
+						conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+					}
+					
+					String sql = "SELECT USERID, USERPW, USERNICK, USERTYPE, FAILCNT, FAILTIME, PRIVILEGES FROM FS_USER";
+					if(! keyword.equals("")) sql += " WHERE USERID LIKE ? OR USERNICK LIKE ?";
+					sql += " ORDER BY USERID";
+					
+					pstmt = conn.prepareStatement(sql);
+					if(! keyword.equals("")) {
+						keyword = "%" + keyword + "%";
+						pstmt.setString(1, keyword);
+						pstmt.setString(2, keyword);
+					}
+					
+					rs = pstmt.executeQuery();
+					
+					while(rs.next()) {
+						JsonObject accountOneTmp = new JsonObject();
+						accountOneTmp.put("id"       , rs.getString("USERID"));
+						accountOneTmp.put("idtype"   , rs.getString("USERTYPE"));
+						accountOneTmp.put("nick"     , rs.getString("USERNICK"));
+						accountOneTmp.put("fail_cnt" , rs.getLong("FAILCNT"));
+						accountOneTmp.put("fail_time", rs.getLong("FAILTIME"));
+						arr.add(accountOneTmp);
+					}
+					
+					rs.close(); rs = null;
+					pstmt.close(); pstmt = null;
+				} else {
+					File faJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts");
+					if(! faJson.exists()) faJson.mkdirs();
+					
+					File fileAcc = new File(faJson.getCanonicalPath());
+					File[] files = fileAcc.listFiles();
+					for(File f : files) {
+						if(f.exists()) {
+							JsonObject accountOneTmp = new JsonObject();
+					        StringBuilder lineCollector = new StringBuilder("");
+					        String lx;
+					        
+					        FileInputStream fIn = null;
+					        InputStreamReader r1 = null;
+					        BufferedReader r2 = null;
+					        try {
+					        	fIn = new FileInputStream(f);
+						        r1 = new InputStreamReader(fIn, cs);
+						        r2 = new BufferedReader(r1);
+						        while(true) {
+						        	lx = ((BufferedReader) r2).readLine();
+						            if(lx == null) break;
+						            lineCollector = lineCollector.append("\n").append(lx);
+						        }
+						        r2.close(); r2 = null;
+						        r1.close(); r1 = null;
+						        fIn.close(); fIn = null;
+						        
+						        accountOneTmp = (JsonObject) JsonCompatibleUtil.parseJson(lineCollector.toString().trim());
+						        lineCollector.setLength(0);
+						        lineCollector = null;
+						        
+						        String id   = accountOneTmp.get("id").toString();
+						        String nick = accountOneTmp.get("nick").toString();
+						        
+						        if(! (id.contains(keyword) || nick.contains(keyword))) continue;
+						        
+						        accountOneTmp.remove("pw");
+								arr.add(accountOneTmp);
+					        } catch(Throwable t) {
+					        	t.printStackTrace();
+					        } finally {
+					        	if(r2  != null) { try { r2.close();  } catch(Throwable txc) {} }
+					        	if(r1  != null) { try { r1.close();  } catch(Throwable txc) {} }
+					        	if(fIn != null) { try { fIn.close(); } catch(Throwable txc) {} }
+					        }
+					    }
+					}
+				}
+				
+				json.put("userlist" , arr);
+			} else if(req.equalsIgnoreCase("usercreate")) {
+				String cid     = request.getParameter("id");
+				String cpw     = request.getParameter("pw");
+				String cnick   = request.getParameter("nick");
+				String cidtype = request.getParameter("idtype");
+				
+				if(cid     == null) cid = "";
+				if(cpw     == null) cpw = "";
+				if(cnick   == null) cnick = "";
+				if(cidtype == null) cidtype = "";
+				
+				cid     = cid.trim();
+				cpw     = cpw.trim();
+				cnick   = cnick.trim();
+				cidtype = cidtype.trim();
+				
+				if(lang.equals("ko")) {
+					if(cid.equals("")    ) throw new RuntimeException("ID 를 입력해 주세요.");
+					if(cpw.equals("")    ) throw new RuntimeException("PW 를 입력해 주세요.");
+					if(cnick.equals("")  ) throw new RuntimeException("Nick 을 입력해 주세요.");
+					if(cidtype.equals("")) throw new RuntimeException("Type 을 선택해 주세요.");
+				} else {
+					if(cid.equals("")    ) throw new RuntimeException("Please input ID !");
+					if(cpw.equals("")    ) throw new RuntimeException("Please input PW !");
+					if(cnick.equals("")  ) throw new RuntimeException("Please input Nick !");
+					if(cidtype.equals("")) throw new RuntimeException("Please select Type !");
+				}
+				
+				File faJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts");
+				
+				// Check ID Duplication
+				if(useJDBC) {
+					if(conn == null) {
+						Class.forName(jdbcClass);
+						conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+					}
+					pstmt = conn.prepareStatement("SELECT COUNT(*) AS CNT FROM FS_USER WHERE USERID = ?");
+					pstmt.setString(1, cid);
+					int counts = 0;
+					
+					rs = pstmt.executeQuery();
+					while(rs.next()) {
+						counts = rs.getInt("CNT");
+					}
+					
+					rs.close(); rs = null;
+					pstmt.close(); pstmt = null;
+					
+					if(counts >= 1) {
+						if(lang.equals("ko")) throw new RuntimeException("이 ID를 사용할 수 없습니다.");
+						else                  throw new RuntimeException("Cannot use these ID.");
+					}
+				} else {
+					if(! faJson.exists()) faJson.mkdirs();
+					
+					File fileAcc = new File(faJson.getCanonicalPath());
+					File[] files = fileAcc.listFiles();
+					for(File f : files) {
+						if(f.exists()) {
+							if(f.getName().equals(cid + ".json") || f.getName().equals(cid + ".JSON")) {
+								if(lang.equals("ko")) throw new RuntimeException("이 ID를 사용할 수 없습니다.");
+								else                  throw new RuntimeException("Cannot use these ID.");
+							}
+							
+							JsonObject accountOneTmp = new JsonObject();
+					        StringBuilder lineCollector = new StringBuilder("");
+					        String lx;
+					        
+					        FileInputStream fIn = null;
+					        InputStreamReader r1 = null;
+					        BufferedReader r2 = null;
+					        try {
+					        	fIn = new FileInputStream(f);
+						        r1 = new InputStreamReader(fIn, cs);
+						        r2 = new BufferedReader(r1);
+						        while(true) {
+						        	lx = ((BufferedReader) r2).readLine();
+						            if(lx == null) break;
+						            lineCollector = lineCollector.append("\n").append(lx);
+						        }
+						        r2.close();  r2  = null;
+						        r1.close();  r1  = null;
+						        fIn.close(); fIn = null;
+						        
+						        accountOneTmp = (JsonObject) JsonCompatibleUtil.parseJson(lineCollector.toString().trim());
+						        lineCollector.setLength(0);
+						        lineCollector = null;
+						        
+						        String fid   = accountOneTmp.get("id").toString();
+						        if(fid.equals(cid)) {
+						        	if(lang.equals("ko")) throw new RuntimeException("이 ID를 사용할 수 없습니다.");
+									else                  throw new RuntimeException("Cannot use these ID.");
+						        }
+					        } catch(Throwable t) {
+					        	t.printStackTrace();
+					        } finally {
+					        	if(r2  != null) { try { r2.close();  } catch(Throwable txc) {} }
+					        	if(r1  != null) { try { r1.close();  } catch(Throwable txc) {} }
+					        	if(fIn != null) { try { fIn.close(); } catch(Throwable txc) {} }
+					        }
+					    }
+					}
+				}
+				
+				if(cid.equalsIgnoreCase("guest")) {
+					if(lang.equals("ko")) throw new RuntimeException("이 ID를 사용할 수 없습니다.");
+					else                  throw new RuntimeException("Cannot use these ID.");
+				}
+				
+				if(cid.contains("'") || cid.contains("\"") || cid.contains("/") || cid.contains("\\") || cid.contains(File.separator) || cid.contains(".") || cid.contains(" ") || cid.contains("\n") || cid.contains("\t")) {
+					if(lang.equals("ko")) throw new RuntimeException("ID 로는 알파벳과 숫자만 사용할 수 있습니다.");
+					else throw new RuntimeException("ID can only contains alphabets and numbers !");
+			    }
+				
+				JsonObject newAcc = new JsonObject();
+				newAcc.put("id"    , cid);
+				newAcc.put("idtype", cidtype.toUpperCase());
+				newAcc.put("nick"  , cnick);
+				newAcc.put("fail_cnt", "0");
+				newAcc.put("fail_time", "0");
+				
+				JsonArray prvgroup = new JsonArray();
+				prvgroup.add("user");
+				if(cidtype.equalsIgnoreCase("A")) prvgroup.add("admin");
+				newAcc.put("privgroup", prvgroup);
+				newAcc.put("pw", SecurityUtil.hash(s1 + cpw + s2 + salt + cid + s3, "SHA-256"));
+				
+				// Register
+				if(useJDBC) {
+					if(conn == null) {
+						Class.forName(jdbcClass);
+						conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+					}
+					
+					pstmt = conn.prepareStatement("INSERT INTO FS_USER (USERID, USERPW, USERNICK, USERTYPE, FAILCNT , FAILTIME, PRIVGROUP, PRIVILEGES) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+					pstmt.setString(1, cid);
+					pstmt.setString(2, newAcc.get("pw").toString());
+					pstmt.setString(3, cnick);
+					pstmt.setString(4, newAcc.get("idtype").toString());
+					pstmt.setInt(5, 0);
+					pstmt.setInt(6, 0);
+					if(cidtype.equalsIgnoreCase("A")) pstmt.setString(7, "[\"user\", \"admin\"]");
+					else                              pstmt.setString(7, "[\"user\"]");
+					pstmt.setString(8, "[]");
+					
+					pstmt.executeUpdate();
+					conn.commit();
+					
+					pstmt.close(); pstmt = null;
+				} else {
+			        if(! faJson.exists()) faJson.mkdirs();
+			        
+			        File fileAcc = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts" + File.separator + cid + ".json");
+			        fileAcc.getCanonicalPath(); // Check valid
+			        fileOut = new FileOutputStream(fileAcc);
+			        fileOut.write(newAcc.toJSON().getBytes(cs));
+			        fileOut.close(); fileOut = null;
+				}
+			} else if(req.equalsIgnoreCase("userdel")) {
+				String dId = request.getParameter("id");
+				
+				if(dId == null) dId = "";
+				if(dId.equals("")) {
+					throw new RuntimeException("Invalid parameter. Please refresh the page !");
+				}
+				
+				if(dId.contains("'") || dId.contains("\"") || dId.contains("/") || dId.contains("\\") || dId.contains(File.separator) || dId.contains(".") || dId.contains(" ") || dId.contains("\n") || dId.contains("\t")) {
+					if(lang.equals("ko")) throw new RuntimeException("ID 로는 알파벳과 숫자만 사용할 수 있습니다.");
+					else throw new RuntimeException("ID can only contains alphabets and numbers !");
+			    }
+				
+				File faJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts");
+				
+				if(useJDBC) {
+					if(conn == null) {
+						Class.forName(jdbcClass);
+						conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+					}
+					
+					pstmt = conn.prepareStatement("SELECT COUNT(*) AS CNT FROM FS_USER WHERE USERID = ?");
+					pstmt.setString(1, dId);
+					
+					rs = pstmt.executeQuery();
+					
+					int counts = 0;
+					while(rs.next()) {
+						counts = rs.getInt("CNT");
+					}
+					
+					rs.close(); rs = null;
+					pstmt.close(); pstmt = null;
+					
+					if(counts <= 0) {
+						if(lang.equals("ko")) throw new RuntimeException("해당 ID의 사용자가 없습니다. 다시 검색 후 이용해 주세요.");
+						else                  throw new RuntimeException("There are no user using that ID. Please re-search.");
+					}
+					
+					pstmt = conn.prepareStatement("DELETE FROM FS_USER WHERE USERID = ?");
+					pstmt.setString(1, dId);
+					pstmt.executeUpdate();
+					
+					conn.commit();
+					pstmt.close(); pstmt = null;
+				} else {
+					File fTarget = new File(faJson.getCanonicalPath() + File.separator + dId + ".json");
+					if(! fTarget.exists()) {
+						if(lang.equals("ko")) throw new RuntimeException("해당 ID의 사용자가 없습니다. 다시 검색 후 이용해 주세요.");
+						else                  throw new RuntimeException("There are no user using that ID. Please re-search.");
+					}
+					fTarget.delete();
+				}
 			}
 			
-			if(! req.equals("reset")) {
+			if(! req.equalsIgnoreCase("reset")) {
 				jsonConfig.remove("Path");
 				jsonConfig.remove("S1");
 				jsonConfig.remove("S2");
@@ -977,11 +1293,11 @@ public class FSControl {
 				json.put("message", "Error : " + t.getMessage());
 			}
 		} finally {
-			if(fileOut != null) fileOut.close();
-			if(propIn  != null) propIn.close();
-			if(rs      != null) rs.close();
-			if(pstmt   != null) pstmt.close();
-			if(conn    != null) conn.close();
+			if(rs      != null) { try { rs.close();       } catch(Throwable tx) {} }
+			if(pstmt   != null) { try { pstmt.close();    } catch(Throwable tx) {} }
+			if(conn    != null) { try { conn.close();     } catch(Throwable tx) {} }
+			if(fileOut != null) { try { fileOut.close();  } catch(Throwable tx) {} }
+			if(propIn  != null) { try { propIn.close();   } catch(Throwable tx) {} }
 		}
 		
 		return json;
@@ -1046,10 +1362,10 @@ public class FSControl {
 			if(oHiddenDir != null) {
 				JsonArray hiddenDir = null;
 				if(oHiddenDir instanceof JsonArray) hiddenDir = (JsonArray) oHiddenDir;
-				else                                hiddenDir = (JsonArray) JsonObject.parseJson(oHiddenDir.toString().trim());
+				else                                hiddenDir = (JsonArray) JsonCompatibleUtil.parseJson(oHiddenDir.toString().trim());
 				oHiddenDir = null;
 				
-				if(idtype.equals("A")) {
+				if(idtype.equalsIgnoreCase("A")) {
 					hiddenDirList.clear();
 				} else {
 					if(hiddenDir != null) {
@@ -1066,7 +1382,7 @@ public class FSControl {
 			            if(oDirPrv instanceof JsonArray) {
 			                dirPrv = (JsonArray) oDirPrv;
 			            } else {
-			            	dirPrv = (JsonArray) JsonObject.parseJson(oDirPrv.toString().trim());
+			            	dirPrv = (JsonArray) JsonCompatibleUtil.parseJson(oDirPrv.toString().trim());
 			            }
 				    }
 					
@@ -1074,7 +1390,7 @@ public class FSControl {
 				    	for(Object row : dirPrv) {
 			            	JsonObject dirOne = null;
 			            	if(row instanceof JsonObject) dirOne = (JsonObject) row;
-			            	else                          dirOne = (JsonObject) JsonObject.parseJson(row.toString().trim());
+			            	else                          dirOne = (JsonObject) JsonCompatibleUtil.parseJson(row.toString().trim());
 			            	
 			            	try {
 			            		String dPath = dirOne.get("path"     ).toString();
@@ -1242,25 +1558,27 @@ public class FSControl {
 		    json.put("dpath"  , pathDisp);
 
 			jsonSess = getSessionObject(request);
+			
 			JsonArray dirPrv = null;
 			String idtype = "U";
+			
 			if(jsonSess != null) {
 				if(jsonSess.get("idtype") != null) {
 					idtype = jsonSess.get("idtype").toString();
-					if(! idtype.equals("A")) {
+					if(! idtype.equalsIgnoreCase("A")) {
 						Object oDirPrv = (Object) jsonSess.get("privileges");
 					    if(oDirPrv != null) {
 					    	dirPrv = null;
 				            if(oDirPrv instanceof JsonArray) {
 				                dirPrv = (JsonArray) oDirPrv;
 				            } else {
-				            	dirPrv = (JsonArray) JsonObject.parseJson(oDirPrv.toString().trim());
+				            	dirPrv = (JsonArray) JsonCompatibleUtil.parseJson(oDirPrv.toString().trim());
 				            }
 				            
 				            for(Object row : dirPrv) {
 				            	JsonObject dirOne = null;
 				            	if(row instanceof JsonObject) dirOne = (JsonObject) row;
-				            	else                          dirOne = (JsonObject) JsonObject.parseJson(row.toString().trim());
+				            	else                          dirOne = (JsonObject) JsonCompatibleUtil.parseJson(row.toString().trim());
 				            	
 				            	try {
 				            		String dPath = dirOne.get("path"     ).toString();
@@ -1280,7 +1598,15 @@ public class FSControl {
 					} else {
 						json.put("privilege", "edit");
 					}
+					
+					if(idtype.equalsIgnoreCase("B")) {
+						if(noAnonymous) throw new RuntimeException("No privilege");
+					}
+				} else {
+					if(noAnonymous) throw new RuntimeException("No privilege");
 				}
+			} else {
+				if(noAnonymous) throw new RuntimeException("No privilege");
 			}
 			if(dirPrv == null) dirPrv = new JsonArray();
 			
@@ -1290,10 +1616,10 @@ public class FSControl {
 			if(oHiddenDir != null) {
 				JsonArray hiddenDir = null;
 				if(oHiddenDir instanceof JsonArray) hiddenDir = (JsonArray) oHiddenDir;
-				else                                hiddenDir = (JsonArray) JsonObject.parseJson(oHiddenDir.toString().trim());
+				else                                hiddenDir = (JsonArray) JsonCompatibleUtil.parseJson(oHiddenDir.toString().trim());
 				oHiddenDir = null;
 				
-				if(idtype.equals("A")) {
+				if(idtype.equalsIgnoreCase("A")) {
 					hiddenDirList.clear();
 				} else {
 					if(hiddenDir != null) {
@@ -1306,7 +1632,7 @@ public class FSControl {
 					for(Object row : dirPrv) {
 		            	JsonObject dirOne = null;
 		            	if(row instanceof JsonObject) dirOne = (JsonObject) row;
-		            	else                          dirOne = (JsonObject) JsonObject.parseJson(row.toString().trim());
+		            	else                          dirOne = (JsonObject) JsonCompatibleUtil.parseJson(row.toString().trim());
 		            	
 		            	try {
 		            		String dPath = dirOne.get("path"     ).toString();
@@ -1528,7 +1854,7 @@ public class FSControl {
 	                if(oDirPrv instanceof JsonArray) {
 	                    dirPrv = (JsonArray) oDirPrv;
 	                } else {
-	                    dirPrv = (JsonArray) JsonObject.parseJson(oDirPrv.toString().trim());
+	                    dirPrv = (JsonArray) JsonCompatibleUtil.parseJson(oDirPrv.toString().trim());
 	                }
 	            }
 	        }
@@ -1550,7 +1876,7 @@ public class FSControl {
 		    	for(Object row : dirPrv) {
 		    		JsonObject dirOne = null;
 		            if(row instanceof JsonObject) dirOne = (JsonObject) row;
-		            else                          dirOne = (JsonObject) JsonObject.parseJson(row.toString().trim());
+		            else                          dirOne = (JsonObject) JsonCompatibleUtil.parseJson(row.toString().trim());
 		            
 		            try {
 		                String dPath = dirOne.get("path"     ).toString();
@@ -1688,14 +2014,14 @@ public class FSControl {
 					JsonArray dirPrv = null;
 					if(jsonSess.get("idtype") != null) {
 						idtype = jsonSess.get("idtype").toString();
-						if(! idtype.equals("A")) {
+						if(! idtype.equalsIgnoreCase("A")) {
 							Object oDirPrv = (Object) jsonSess.get("privileges");
 						    if(oDirPrv != null) {
 						    	dirPrv = null;
 					            if(oDirPrv instanceof JsonArray) {
 					                dirPrv = (JsonArray) oDirPrv;
 					            } else {
-					            	dirPrv = (JsonArray) JsonObject.parseJson(oDirPrv.toString().trim());
+					            	dirPrv = (JsonArray) JsonCompatibleUtil.parseJson(oDirPrv.toString().trim());
 					            }
 						    }
 						}
@@ -1704,10 +2030,10 @@ public class FSControl {
 					
 					JsonArray hiddenDir = null;
 					if(oHiddenDir instanceof JsonArray) hiddenDir = (JsonArray) oHiddenDir;
-					else                                hiddenDir = (JsonArray) JsonObject.parseJson(oHiddenDir.toString().trim());
+					else                                hiddenDir = (JsonArray) JsonCompatibleUtil.parseJson(oHiddenDir.toString().trim());
 					oHiddenDir = null;
 					
-					if(idtype.equals("A")) {
+					if(idtype.equalsIgnoreCase("A")) {
 						hiddenDirList.clear();
 					} else {
 						if(hiddenDir != null) {
@@ -1719,7 +2045,7 @@ public class FSControl {
 						for(Object row : dirPrv) {
 			            	JsonObject dirOne = null;
 			            	if(row instanceof JsonObject) dirOne = (JsonObject) row;
-			            	else                          dirOne = (JsonObject) JsonObject.parseJson(row.toString().trim());
+			            	else                          dirOne = (JsonObject) JsonCompatibleUtil.parseJson(row.toString().trim());
 			            	
 			            	try {
 			            		String dPath = dirOne.get("path"     ).toString();
@@ -1885,7 +2211,7 @@ public class FSControl {
 	                if(oDirPrv instanceof JsonArray) {
 	                    dirPrv = (JsonArray) oDirPrv;
 	                } else {
-	                    dirPrv = (JsonArray) JsonObject.parseJson(oDirPrv.toString().trim());
+	                    dirPrv = (JsonArray) JsonCompatibleUtil.parseJson(oDirPrv.toString().trim());
 	                }
 	            }
 	        }
@@ -1911,7 +2237,7 @@ public class FSControl {
 		        for(Object row : dirPrv) {
 		            JsonObject dirOne = null;
 		            if(row instanceof JsonObject) dirOne = (JsonObject) row;
-		            else                          dirOne = (JsonObject) JsonObject.parseJson(row.toString().trim());
+		            else                          dirOne = (JsonObject) JsonCompatibleUtil.parseJson(row.toString().trim());
 		            
 		            try {
 		                String dPath = dirOne.get("path"     ).toString();
@@ -1965,7 +2291,7 @@ public class FSControl {
 	                if(oDirPrv instanceof JsonArray) {
 	                    dirPrv = (JsonArray) oDirPrv;
 	                } else {
-	                    dirPrv = (JsonArray) JsonObject.parseJson(oDirPrv.toString().trim());
+	                    dirPrv = (JsonArray) JsonCompatibleUtil.parseJson(oDirPrv.toString().trim());
 	                }
 	            }
 	        }
@@ -1994,7 +2320,7 @@ public class FSControl {
 		        for(Object row : dirPrv) {
 		            JsonObject dirOne = null;
 		            if(row instanceof JsonObject) dirOne = (JsonObject) row;
-		            else                          dirOne = (JsonObject) JsonObject.parseJson(row.toString().trim());
+		            else                          dirOne = (JsonObject) JsonCompatibleUtil.parseJson(row.toString().trim());
 		            
 		            try {
 		                String dPath = dirOne.get("path"     ).toString();
@@ -2068,7 +2394,7 @@ public class FSControl {
 			String sessionJson = (String) request.getSession().getAttribute("fssession");
 		    
 		    if(sessionJson != null) {
-		    	sessionMap = (JsonObject) JsonObject.parseJson(sessionJson.trim());
+		    	sessionMap = (JsonObject) JsonCompatibleUtil.parseJson(sessionJson.trim());
 		    	
 		    	if(sessionMap != null) { if(sessionMap.get("id"    ) == null) sessionMap = null;         }
 		        if(sessionMap != null) { if(sessionMap.get("idtype") == null) sessionMap = null;         }
@@ -2094,6 +2420,9 @@ public class FSControl {
 		FileInputStream fIn = null;
 		Reader r1 = null, r2 = null;
 		FileOutputStream fOut = null;
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
 		try {
 			String msg = "";
 			
@@ -2110,11 +2439,11 @@ public class FSControl {
 			File faJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts");
 			if(! faJson.exists()) faJson.mkdirs();
 			
-			if(req.equals("status")) {
+			if(req.equalsIgnoreCase("status")) {
 				json.put("success", new Boolean(true));
 			}
 			
-			if(req.equals("language")) {
+			if(req.equalsIgnoreCase("language")) {
 				String tlng = request.getParameter("language");
 				String frce = request.getParameter("force");
 				if(tlng == null) tlng = "";
@@ -2142,7 +2471,7 @@ public class FSControl {
 				json.put("success", new Boolean(true));
 			}
 			
-			if(req.equals("logout")) {
+			if(req.equalsIgnoreCase("logout")) {
 			    sessionMap = null;
 			    needInvalidate = true;
 			    if(lang.equals("ko")) msg = "로그아웃 되었습니다."; 
@@ -2151,7 +2480,7 @@ public class FSControl {
 			    json.put("success", new Boolean(true));
 			}
 			
-			if(req.equals("login")) {
+			if(req.equalsIgnoreCase("login")) {
 				if(sessionMap != null) needInvalidate = true;
 				sessionMap = null;
 				
@@ -2213,28 +2542,54 @@ public class FSControl {
 				System.out.println("Login requested ! " + id + " at " + now + " from " + request.getRemoteAddr());
 				
 				if(msg.equals("")) {
-					File fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".json");
-					fileAcc.getCanonicalPath(); // Check valid
-				    if(fileAcc.exists()) {
-				        StringBuilder lineCollector = new StringBuilder("");
-				        String line;
-				        
-				        fIn = new FileInputStream(fileAcc);
-				        r1 = new InputStreamReader(fIn, cs);
-				        r2 = new BufferedReader(r1);
-				        while(true) {
-				            line = ((BufferedReader) r2).readLine();
-				            if(line == null) break;
-				            lineCollector = lineCollector.append("\n").append(line);
-				        }
-				        r2.close(); r2 = null;
-				        r1.close(); r1 = null;
-				        fIn.close(); fIn = null;
-				        
-				        accountOne = (JsonObject) JsonObject.parseJson(lineCollector.toString().trim());
-				        lineCollector.setLength(0);
-				        lineCollector = null;
-				    }
+					if(useJDBC) {
+						if(conn == null) {
+							Class.forName(jdbcClass);
+							conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+						}
+						
+						pstmt = conn.prepareStatement("SELECT USERID, USERPW, USERNICK, USERTYPE, FAILCNT, FAILTIME, PRIVILEGES FROM FS_USER WHERE USERID = ?");
+						pstmt.setString(1, id);
+						
+						rs = pstmt.executeQuery();
+						JsonObject accountOneTmp = new JsonObject();
+						
+						while(rs.next()) {
+							accountOneTmp.put("id"       , rs.getString("USERID"));
+							accountOneTmp.put("idtype"   , rs.getString("USERTYPE"));
+							accountOneTmp.put("nick"     , rs.getString("USERNICK"));
+							accountOneTmp.put("fail_cnt" , rs.getLong("FAILCNT"));
+							accountOneTmp.put("fail_time", rs.getLong("FAILTIME"));
+						}
+						
+						rs.close(); rs = null;
+						pstmt.close(); pstmt = null;
+						
+						accountOne = accountOneTmp;
+					} else {
+						File fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".json");
+						fileAcc.getCanonicalPath(); // Check valid
+					    if(fileAcc.exists()) {
+					        StringBuilder lineCollector = new StringBuilder("");
+					        String line;
+					        
+					        fIn = new FileInputStream(fileAcc);
+					        r1 = new InputStreamReader(fIn, cs);
+					        r2 = new BufferedReader(r1);
+					        while(true) {
+					            line = ((BufferedReader) r2).readLine();
+					            if(line == null) break;
+					            lineCollector = lineCollector.append("\n").append(line);
+					        }
+					        r2.close(); r2 = null;
+					        r1.close(); r1 = null;
+					        fIn.close(); fIn = null;
+					        
+					        accountOne = (JsonObject) JsonCompatibleUtil.parseJson(lineCollector.toString().trim());
+					        lineCollector.setLength(0);
+					        lineCollector = null;
+					    }
+					}
 					
 					if(accountOne == null) {
 						msg = "No account found !";
@@ -2302,10 +2657,21 @@ public class FSControl {
 			                    
 			                    accChanging = true;
 			                    				
-			                    File fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".json");
-			                    fOut = new FileOutputStream(fileAcc);
-			                    fOut.write(accountOne.toJSON().getBytes(cs));
-			                    fOut.close(); fOut = null;
+			                    if(useJDBC) {
+									pstmt = conn.prepareStatement("UPDATE FS_USER SET FAILCNT = ?, FAILTIME = ? WHERE USERID = ?");
+									pstmt.setLong(1, failCnt);
+									pstmt.setLong(2, failTime);
+									pstmt.setString(3, id);
+									
+									pstmt.executeUpdate();
+									conn.commit();
+									pstmt.close();
+			                    } else {
+			                    	File fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".json");
+				                    fOut = new FileOutputStream(fileAcc);
+				                    fOut.write(accountOne.toJSON().getBytes(cs));
+				                    fOut.close(); fOut = null;
+			                    }
 			                    
 			                    accChanging = false;
 			                    msg = "Wrong password !";
@@ -2315,6 +2681,7 @@ public class FSControl {
 			        
 			        if(msg.equals("")) {
 			        	if(failCnt >= 1) {
+			        		failCnt = 0;
 			        		accountOne.put("fail_cnt", "0");
 			        		
 			        		if(accChanging) {
@@ -2332,11 +2699,21 @@ public class FSControl {
 			        		
 			        		accChanging = true;
 		                    
-		                    File fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".json");
-		                    fOut = new FileOutputStream(fileAcc);
-		                    fOut.write(accountOne.toJSON().getBytes(cs));
-		                    fOut.close(); fOut = null;
-		                    
+			        		if(useJDBC) {
+			        			pstmt = conn.prepareStatement("UPDATE FS_USER SET FAILCNT = ?, FAILTIME = ? WHERE USERID = ?");
+								pstmt.setLong(1, failCnt);
+								pstmt.setLong(2, failTime);
+								pstmt.setString(3, id);
+								
+								pstmt.executeUpdate();
+								conn.commit();
+								pstmt.close();
+			        		} else {
+			        			File fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".json");
+			                    fOut = new FileOutputStream(fileAcc);
+			                    fOut.write(accountOne.toJSON().getBytes(cs));
+			                    fOut.close(); fOut = null;
+			        		}
 		                    accChanging = false;
 			        	}
 			        	
@@ -2353,6 +2730,12 @@ public class FSControl {
 			}
 			
 			json.put("type", "sessionstatus");
+			
+			if(req.equalsIgnoreCase("logout")) {
+				sessionMap = null;
+				needInvalidate = true;
+			}
+			
 			json.put("logined", new Boolean((sessionMap != null)));
 			
 			if(sessionMap != null) {
@@ -2363,6 +2746,7 @@ public class FSControl {
 			
 			if(request.getSession().getAttribute("fslanguage") != null) json.put("language", request.getSession().getAttribute("fslanguage"));
 			
+			json.put("noanonymous", new Boolean(noAnonymous));
 			json.put("message", msg);
 		} catch(Throwable t) {
 			json.put("success", new Boolean(false));
@@ -2374,10 +2758,13 @@ public class FSControl {
 				System.out.println("Session Invalidated");
 				json.put("invalidated", new Boolean(true));
 			}
-			if(r2 != null) r2.close();
-			if(r1 != null) r1.close();
-			if(fIn  != null) fIn.close();
-			if(fOut != null) fOut.close();
+			if(rs    != null) { try { rs.close();     } catch(Throwable tx) {}}
+			if(pstmt != null) { try { pstmt.close();  } catch(Throwable tx) {}}
+			if(conn  != null) { try { conn.close();   } catch(Throwable tx) {}}
+			if(r2    != null) { try { r2.close();     } catch(Throwable tx) {}}
+			if(r1    != null) { try { r1.close();     } catch(Throwable tx) {}}
+			if(fIn   != null) { try { fIn.close();    } catch(Throwable tx) {}}
+			if(fOut  != null) { try { fOut.close();   } catch(Throwable tx) {}}
 			fOut = null;
 			accChanging = false;
 		}
@@ -2389,7 +2776,7 @@ public class FSControl {
 		if(sessionJson != null) {
 			sessionJson = sessionJson.trim();
 			if(! sessionJson.equals("")) {
-				JsonObject obj = (JsonObject) JsonObject.parseJson(sessionJson);
+				JsonObject obj = (JsonObject) JsonCompatibleUtil.parseJson(sessionJson);
 				if(obj != null) { if(obj.get("id"    ) == null) obj = null;         }
 			    if(obj != null) { if(obj.get("idtype") == null) obj = null;         }
 			    if(obj != null) { if(obj.get("nick"  ) == null) obj = null;         }
@@ -2404,6 +2791,24 @@ public class FSControl {
 			}
 		}
 		return null;
+	}
+	
+	public String getSessionUserId(HttpServletRequest request) {
+		JsonObject sess = getSessionObject(request);
+		if(sess == null) return null;
+		return sess.get("id").toString();
+	}
+	
+	public String getSessionUserNick(HttpServletRequest request) {
+		JsonObject sess = getSessionObject(request);
+		if(sess == null) return null;
+		return sess.get("nick").toString();
+	}
+	
+	public String getSessionUserType(HttpServletRequest request) {
+		JsonObject sess = getSessionObject(request);
+		if(sess == null) return null;
+		return sess.get("idtype").toString().toUpperCase();
 	}
 	
 	public String getLanguage(HttpServletRequest request) {
@@ -2526,6 +2931,14 @@ public class FSControl {
 
 	public long getSleepGap() {
 		return sleepGap;
+	}
+
+	public boolean isNoAnonymous() {
+		return noAnonymous;
+	}
+
+	public void setNoAnonymous(boolean noAnonymous) {
+		this.noAnonymous = noAnonymous;
 	}
 
 	public void setSleepGap(long sleepGap) {

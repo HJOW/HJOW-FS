@@ -87,9 +87,9 @@ public class FSConsoleCd implements FSConsoleCommand {
 			}
 		} else {
 			if(lang.equals("ko")) {
-				res = res.append("현재 디렉토리 내 파일과 디렉토리 목록을 볼 수 있습니다.").append("\n");
+				res = res.append("작업할 디렉토리를 변경합니다.").append("\n");
 			} else {
-				res = res.append("Print all of files and directories in this directory.").append("\n");
+				res = res.append("Go to another directory as a work target.").append("\n");
 			}
 		}
 		return res.toString().trim();

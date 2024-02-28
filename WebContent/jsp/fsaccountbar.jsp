@@ -57,16 +57,35 @@ if(! fsc.isInstalled()) {
                 $('.login_element.not_logined').removeClass('invisible');
             }
 			inpReq.val('status');
-
-			var formFList = $('.form_fs');
-			if(formFList.length >= 1) formFList.trigger('submit');
 			
 			var captLogin = $('.if_captcha_l');
-		    if(captLogin != null && typeof(captLogin) != 'undefined' && captLogin.length >= 1) {
-		    	captLogin.attr('src', captLogin.attr('src') + '&not=' + Math.round(Math.random() * 100));
-		    }
-		    
-		    formObj.find('.inp_login_element').val('');
+            if(captLogin != null && typeof(captLogin) != 'undefined' && captLogin.length >= 1) {
+                captLogin.attr('src', captLogin.attr('src') + '&not=' + Math.round(Math.random() * 100));
+            }
+            
+            formObj.find('.inp_login_element').val('');
+            
+            var fsFileList = $('.fs_filelist');
+            if(fsFileList != null && typeof(fsFileList) != 'undefined' && fsFileList.length >= 1) {
+            	if(data.noanonymous) {
+            		if(data.logined) {
+                        fsFileList.addClass('invisible');
+                        $('.fs_filelist_view').removeClass('invisible');
+                    } else {
+                        fsFileList.addClass('invisible');
+                        $('.fs_filelist_anonymous').removeClass('invisible');
+                    }
+            	} else {
+            		fsFileList.addClass('invisible');
+                    $('.fs_filelist_view').removeClass('invisible');
+            	}
+            }
+
+			var formFList = $('.form_fs');
+			if(formFList.length >= 1) {
+				if(data.noanonymous && (! data.logined)) return;
+				formFList.trigger('submit');
+			}
 	    }
 
 		formObj.on('submit', fLogin);
