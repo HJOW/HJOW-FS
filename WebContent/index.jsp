@@ -4,10 +4,10 @@
 <head>
 <meta charset="UTF-8"/>
 <title>File Storage</title>
-<jsp:include page="./jsp/common.header.jsp"></jsp:include>
+<jsp:include page="./jsp/fs/common.header.jsp"></jsp:include>
 </head>
 <body>
-    <jsp:include page="./jsp/fsaccountbar.jsp"></jsp:include>
-    <jsp:include page="./jsp/fs.jsp"></jsp:include>
+    <jsp:include page="./jsp/fs/fsaccountbar.jsp"></jsp:include>
+    <jsp:include page="./jsp/fs/fs.jsp"></jsp:include>
 </body>
 </html>

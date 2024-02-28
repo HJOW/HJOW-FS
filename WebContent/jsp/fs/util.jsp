@@ -31,7 +31,7 @@ limitations under the License.
             formObj.on('submit', function() {
             	inpRes.val('');
             	$.ajax({
-                	url : ctxPath + "/jsp/util/sha_str_in.jsp",
+                	url : ctxPath + "/jsp/fs/util/sha_str_in.jsp",
                 	data   : formObj.serialize(),
                     method : "POST",
                     dataType : "text",

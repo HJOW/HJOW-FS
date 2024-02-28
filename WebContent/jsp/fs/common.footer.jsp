@@ -20,7 +20,7 @@ $(function(){
 	aLink.on('click', function() {
 		var theme = $('body').attr('data-theme');
 		if(theme == null || typeof(theme) == 'undefined') theme = '';
-		window.open("<%=request.getContextPath()%>/jsp/fsabout.jsp?theme=" + theme, "pop_about", "width=750,height=600,scrollbars=no,status=no,location=no,toolbar=no");
+		window.open("<%=request.getContextPath()%>/jsp/fs/fsabout.jsp?theme=" + theme, "pop_about", "width=750,height=600,scrollbars=no,status=no,location=no,toolbar=no");
 	});
 	var spanJs = footer.find('.span_js_version');
 	spanJs.text(FSUtil.version[0] + '.' + FSUtil.version[1] + '.' + FSUtil.version[2]);

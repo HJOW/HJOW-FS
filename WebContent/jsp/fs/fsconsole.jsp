@@ -11,7 +11,7 @@ $(function() {
     	inpTermCons.prop('readonly', true);
         if(displayInput) taTermDisp.val(taTermDisp.val() + '\n' + '>> ' + inpTermCons.val());
         $.ajax({
-            url    : ctxPathIn + "/jsp/fsconsolein.jsp",
+            url    : ctxPathIn + "/jsp/fs/fsconsolein.jsp",
             data   : formTerminal.serialize(),
             method : "POST",
             dataType : "json",
@@ -20,7 +20,7 @@ $(function() {
                 if(! data.displaynull) taTermDisp.val(taTermDisp.val() + '\n' + data.display);
                 
                 if(data.downloadaccept) {
-                	window.open(ctxPathIn + '/jsp/' + 'fsdown.jsp?path=' + encodeURIComponent(data.path) + "&filename=" + encodeURIComponent(data.downloadfile), 'cdownload', 'width=300,height=200,toolbar=no,status=no,location=no');
+                	window.open(ctxPathIn + '/jsp/fs/' + 'fsdown.jsp?path=' + encodeURIComponent(data.path) + "&filename=" + encodeURIComponent(data.downloadfile), 'cdownload', 'width=300,height=200,toolbar=no,status=no,location=no');
                 }
             }, error : function(jqXHR, textStatus, errorThrown) {
                 taTermDisp.val(taTermDisp.val() + '\n' + 'Error ! ' + textStatus + '\n    ' + errorThrown);

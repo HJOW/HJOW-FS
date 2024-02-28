@@ -394,7 +394,7 @@ function FSUtilClass() {
                 
                 hiddenPlace.empty();
                 
-                var hiddFormHtml = "<form class='form_fs_dnd' action='" + ctxPath + "/jsp/fsuploadin.jsp" + "' method='POST' enctype='multipart/form-data'>";
+                var hiddFormHtml = "<form class='form_fs_dnd' action='" + ctxPath + "/jsp/fs/fsuploadin.jsp" + "' method='POST' enctype='multipart/form-data'>";
                 hiddFormHtml += "</form>";
                 hiddenPlace.append(hiddFormHtml);
                 
@@ -409,7 +409,7 @@ function FSUtilClass() {
                 }
                 
                 $.ajax({
-                    url : ctxPath + '/jsp/fsuploadin.jsp',
+                    url : ctxPath + '/jsp/fs/fsuploadin.jsp',
                     data : formData,
                     method : 'POST',
                     enctype : 'multipart/form-data',

@@ -52,11 +52,11 @@ $(function() {
     
     var captLogin = $('.if_captcha_l');
     if(captLogin != null && typeof(captLogin) != 'undefined' && captLogin.length >= 1) {
-    	captLogin.attr('src', "<%=request.getContextPath()%>/jsp/fscaptin.jsp?key=fsl&randomize=true&scale=1&theme=" + theme);
+    	captLogin.attr('src', "<%=request.getContextPath()%>/jsp/fs/fscaptin.jsp?key=fsl&randomize=true&scale=1&theme=" + theme);
     }
     
     $.ajax({
-        url    : "<%=request.getContextPath()%>/jsp/fslogin.jsp",
+        url    : "<%=request.getContextPath()%>/jsp/fs/fslogin.jsp",
         data   : { req : 'language', language : lang, force : 'false' },
         method : "POST",
         dataType : "json",

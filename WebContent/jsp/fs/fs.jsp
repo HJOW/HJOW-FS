@@ -18,10 +18,10 @@ if(! fsc.isInstalled()) {
 	%>
 	<script type="text/javascript">
 	$(function() {
-		location.href = "<%=fsc.getContextPath()%>/jsp/fsinstall.jsp";
+		location.href = "<%=fsc.getContextPath()%>/jsp/fs/fsinstall.jsp";
 	});
 	</script>
-	<a href="<%=fsc.getContextPath()%>/jsp/fsinstall.jsp" class='lang_element' data-lang-en='[Install]'>[설치]</a>
+	<a href="<%=fsc.getContextPath()%>/jsp/fs/fsinstall.jsp" class='lang_element' data-lang-en='[Install]'>[설치]</a>
 	<%
 } else {
 String pathParam = request.getParameter("path");
@@ -118,7 +118,7 @@ $(function() {
             	var workingArray = iconizeArray;
             	iconizeArray = [];
                 $.ajax({
-                	url  : ctxPath + "/jsp/fsfileicons.jsp",
+                	url  : ctxPath + "/jsp/fs/fsfileicons.jsp",
                 	data : { path : inpPath.val(), files : filelist, br : bkColor.r, bg : bkColor.g, bb : bkColor.b },
                 	method : 'POST',
                 	dataType : 'json',
@@ -167,7 +167,7 @@ $(function() {
     	var expVal = inpExcep.val();
         
     	$.ajax({
-            url    : ctxPath + "/jsp/fslist.jsp",
+            url    : ctxPath + "/jsp/fs/fslist.jsp",
             data   : form.serialize(),
             method : "POST",
             dataType : "json",
@@ -239,7 +239,7 @@ $(function() {
                                     
                                     if(confirm(confirmMsg)) {
                                         $.ajax({
-                                            url  : ctxPath + '/jsp/fsremove.jsp',
+                                            url  : ctxPath + '/jsp/fs/fsremove.jsp',
                                             data : {
                                                 path : delpath,
                                                 dels : 'dir'
@@ -297,7 +297,7 @@ $(function() {
                             
                             if(confirm(confirmMsg)) {
                                 $.ajax({
-                                    url  : ctxPath + '/jsp/fsremove.jsp',
+                                    url  : ctxPath + '/jsp/fs/fsremove.jsp',
                                     data : {
                                         path : delpath,
                                         name : delname,
@@ -357,9 +357,9 @@ $(function() {
                         var theme = '';
                         if($('body').is('.dark')) theme='dark';
                         if(useCaptchaDown) {
-                        	window.open(ctxPath + '/jsp/' + 'fscaptdown.jsp?theme=' + theme + '&path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')), 'download', popOpt);
+                        	window.open(ctxPath + '/jsp/fs/' + 'fscaptdown.jsp?theme=' + theme + '&path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')), 'download', popOpt);
                         } else {
-                        	location.href = ctxPath + '/jsp/' + 'fsdown.jsp?path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name'));
+                        	location.href = ctxPath + '/jsp/fs/' + 'fsdown.jsp?path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name'));
                         }
                     });
                     aLink.addClass('binded-click');
@@ -413,14 +413,14 @@ $(function() {
         var popOpt = 'width=300,height=200,scrollbars=no,status=no,location=no,toolbar=no';
         var theme = '';
         if($('body').is('.dark')) theme='dark';
-        window.open(ctxPath + '/jsp/fsupload.jsp?theme=' + theme + '&path=' + encodeURIComponent(paths), 'upload', popOpt);
+        window.open(ctxPath + '/jsp/fs/fsupload.jsp?theme=' + theme + '&path=' + encodeURIComponent(paths), 'upload', popOpt);
     });
     
     btnConfig.on('click', function() {
         var popOpt = 'width=780,height=550,scrollbars=yes,status=no,location=no,toolbar=no';
         var theme = '';
         if($('body').is('.dark')) theme='dark';
-        window.open(ctxPath + '/jsp/fsadmin.jsp?theme=' + theme, 'config', popOpt);
+        window.open(ctxPath + '/jsp/fs/fsadmin.jsp?theme=' + theme, 'config', popOpt);
     });
     
     btnMkdir.on('click', function() {
@@ -471,7 +471,7 @@ $(function() {
         }
     	
     	$.ajax({
-            url  : ctxPath + '/jsp/fsmkdir.jsp',
+            url  : ctxPath + '/jsp/fs/fsmkdir.jsp',
             data : {
                 path : inpPath.val(),
                 name : dirName
@@ -504,7 +504,7 @@ $(function() {
     btnConsole.on('click', function() {
         var theme = '';
         if($('body').is('.dark')) theme='dark';
-        window.open(ctxPath + '/jsp/fsconsolepop.jsp?theme=' + theme, 'console', 'width=780,height=450,scrollbars=yes,status=no,location=no,toolbar=no');
+        window.open(ctxPath + '/jsp/fs/fsconsolepop.jsp?theme=' + theme, 'console', 'width=780,height=450,scrollbars=yes,status=no,location=no,toolbar=no');
     });
     <% } %>
     

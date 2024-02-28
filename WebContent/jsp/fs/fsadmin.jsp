@@ -44,7 +44,7 @@ limitations under the License.
             var beforeAccountFeatEnabled = false;
             
             $.ajax({
-                url    : ctxPath + "/jsp/fslogin.jsp",
+                url    : ctxPath + "/jsp/fs/fslogin.jsp",
                 data   : { req : 'status' },
                 method : "POST",
                 dataType : "json",
@@ -53,7 +53,7 @@ limitations under the License.
                 	if(acc.idtype != 'A') location.href = '/';
                 	
                 	$.ajax({
-                		url    : ctxPath + "/jsp/fsadminin.jsp",
+                		url    : ctxPath + "/jsp/fs/fsadminin.jsp",
                         data   : { req : 'read' },
                         method : "POST",
                         dataType : "json",
@@ -116,7 +116,7 @@ limitations under the License.
                         	form.find('.hidden_req').val('update');
                         	form.on('submit', function() {
                                 $.ajax({
-                                    url    : ctxPath + "/jsp/fsadminin.jsp",
+                                    url    : ctxPath + "/jsp/fs/fsadminin.jsp",
                                     data   : form.serialize(),
                                     method : "POST",
                                     dataType : "json",
@@ -129,7 +129,7 @@ limitations under the License.
                         	var formReset = $('.form_fs_reset');
                         	formReset.on('submit', function() {
                                 $.ajax({
-                                    url    : ctxPath + "/jsp/fsadminin.jsp",
+                                    url    : ctxPath + "/jsp/fs/fsadminin.jsp",
                                     data   : formReset.serialize(),
                                     method : "POST",
                                     dataType : "json",
@@ -165,7 +165,7 @@ limitations under the License.
             	tbodyUsers.append("<tr><td colspan='5'>...</td></tr>");
             	
             	$.ajax({
-                    url    : ctxPath + "/jsp/fsadminin.jsp",
+                    url    : ctxPath + "/jsp/fs/fsadminin.jsp",
                     data   : formUserSrch.serialize(),
                     method : "POST",
                     dataType : "json",
@@ -195,7 +195,7 @@ limitations under the License.
                                 btnDel.on('click', function() {
                                     var dId = $(this).attr('data-id');
                                     $.ajax({
-                                        url    : ctxPath + "/jsp/fsadminin.jsp",
+                                        url    : ctxPath + "/jsp/fs/fsadminin.jsp",
                                         data   : {
                                             req : 'userdel', 
                                             id  : dId
@@ -224,7 +224,7 @@ limitations under the License.
             var formUserCr = $('.form_fs_user_new');
             formUserCr.on('submit', function() {
             	$.ajax({
-                    url    : ctxPath + "/jsp/fsadminin.jsp",
+                    url    : ctxPath + "/jsp/fs/fsadminin.jsp",
                     data   : formUserCr.serialize(),
                     method : "POST",
                     dataType : "json",

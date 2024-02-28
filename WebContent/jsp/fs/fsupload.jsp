@@ -38,7 +38,7 @@ $(function() {
 </script>
 </head>
 <body class='popup'>
-    <form action="<%=fsc.getContextPath()%>/jsp/fsuploadin.jsp" method="post" enctype="multipart/form-data">
+    <form action="<%=fsc.getContextPath()%>/jsp/fs/fsuploadin.jsp" method="post" enctype="multipart/form-data">
     <input type='hidden' name='path' class='hidden_path'/>
     <div class='container show-grid full'>
         <div class='row'>
