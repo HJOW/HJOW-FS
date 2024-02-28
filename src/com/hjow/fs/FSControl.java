@@ -24,6 +24,7 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
@@ -44,6 +46,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -65,6 +68,7 @@ import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 import hjow.common.json.JsonArray;
 import hjow.common.json.JsonCompatibleUtil;
 import hjow.common.json.JsonObject;
+import hjow.common.util.DataUtil;
 import hjow.common.util.SecurityUtil;
 
 public class FSControl {
@@ -72,12 +76,7 @@ public class FSControl {
 	
 	private static FSControl instance = null;
 	
-	protected JsonObject conf = new JsonObject();
-	protected volatile long    confReads    = 0L;
-	protected volatile boolean confChanging = false;
-	protected volatile boolean accChanging  = false;
-	protected boolean installed = false;
-	
+	// Charset
 	protected String cs = "UTF-8";
 
 	// Title
@@ -124,28 +123,47 @@ public class FSControl {
 	protected int loginFailCountLimit = 10;
 	protected int loginFailOverMinute = 10;
 	
+	// Console Usage
 	protected boolean noConsole = true;
 	
+	// JDBC
+	protected boolean useJDBC = false;
+	protected String dbType = null, jdbcClass = null, jdbcUrl = null, jdbcId = null, jdbcPw = null;
+	
+	// Logging
+	protected String  logFileNm = "fs_[date]_[n].log";
+	protected boolean logOnFile = false;
+	protected boolean logOnJdbc = false;
+	protected boolean logOnStd  = true;
+	protected int     logLen    = 0;
+	protected int     logLimit  = 4000;
+	protected long    logLastDt = 0;
+	protected Connection     logConn   = null;
+	protected BufferedWriter logFileWr = null;
+	
+	// Other Temporary Fields
+	protected JsonObject conf = new JsonObject();
+	protected volatile long    confReads    = 0L;
+	protected volatile boolean confChanging = false;
+	protected volatile boolean accChanging  = false;
+	protected boolean installed = false;
 	protected String salt = "fs";
 	protected File rootPath  = null;
 	protected File garbage   = null;
 	protected File uploadd   = null;
+	protected File logd      = null;
 	protected String ctxPath = "";
 	
-	protected boolean useJDBC = false;
-	protected String dbType = null, jdbcClass = null, jdbcUrl = null, jdbcId = null, jdbcPw = null;
-	
-	private FSControl() {
-		
-	}
-	
+	private FSControl() {}
 	public static FSControl getInstance() { return instance; }
+	
 	public static void init(HttpServletRequest request) {
 		init(request, false);
 	}
+	
 	public static void init(HttpServletRequest request, boolean forceInit) {
 		if(instance == null || forceInit) {
-			if(instance != null) instance.conf.clear();
+			if(instance != null) instance.dispose();
 			instance = new FSControl();
 		}
 		instance.initialize(request);
@@ -187,7 +205,7 @@ public class FSControl {
 				        s3 = propTest.getProperty("S3");
 				        if(t1 != null && t2 != null && t3 != null && s1 != null && s2 != null && s3 != null) {
 				            if(t1.trim().equals("FileStorage") && t2.trim().equals("SetConfigPathBelow")) {
-				                System.out.println("Configuration Found !");
+				                logIn("Configuration Found !");
 				                
 				                // Set CS
 				                cs = propTest.getProperty("CS");
@@ -231,7 +249,7 @@ public class FSControl {
 					        		jdbcId    = jdbcId.trim();
 					        		jdbcPw    = jdbcPw.trim();
 					        		
-					        		try { Class.forName(jdbcClass); } catch(ClassNotFoundException e) { System.out.println("No jdbc driver found - " + jdbcClass); useJDBC = false; } 
+					        		try { Class.forName(jdbcClass); } catch(ClassNotFoundException e) { logIn("No jdbc driver found - " + jdbcClass); useJDBC = false; } 
 				        		}
 				        	}
 				        }
@@ -308,7 +326,7 @@ public class FSControl {
 			                }
 				        }
 				    } else {
-				        System.out.println("No fs.properties !");
+				        logIn("No fs.properties !");
 				    }
 				} catch(Throwable t) {
 					fileConfigPath = null;
@@ -340,6 +358,8 @@ public class FSControl {
 			    if(! garbage.exists()) garbage.mkdirs();
 			    uploadd = new File(rootPath.getCanonicalPath() + File.separator + ".upload");
 			    if(! uploadd.exists()) uploadd.mkdirs();
+			    logd = new File(fileConfigPath.getCanonicalPath() + File.separator + ".logs");
+			    if(! logd.exists()) logd.mkdirs();
 			    if(conf.get("NoAnonymous") != null) {
 					noAnonymous = Boolean.parseBoolean(conf.get("NoAnonymous").toString().trim());
 				}
@@ -371,7 +391,22 @@ public class FSControl {
 					String tx = conf.get("Title").toString().trim();
 					if(! tx.equals("")) title = tx;
 				}
-			}
+				if(conf.get("Log") != null) {
+					JsonObject confLog = null;
+					if(conf.get("Log") instanceof JsonObject) confLog = (JsonObject) conf.get("Log");
+					else confLog = (JsonObject) JsonObject.parseJson(conf.get("Log").toString());
+					
+                    if(confLog.get("OnFile") != null) {
+                    	logOnFile = Boolean.parseBoolean(confLog.get("OnFile").toString().trim());
+                    }
+                    if(confLog.get("OnJdbc") != null) {
+                    	logOnJdbc = Boolean.parseBoolean(confLog.get("OnJdbc").toString().trim());
+                    }
+                    if(confLog.get("OnStdOut") != null) {
+                    	logOnStd = Boolean.parseBoolean(confLog.get("OnStdOut").toString().trim());
+                    }
+				}
+ 			}
 
 			if(noLogin) {
 				Object sessionMap = request.getSession().getAttribute("fssession");
@@ -539,6 +574,33 @@ public class FSControl {
 		        		conn.commit();
 		        		pstmt.close(); pstmt = null;
 		        	}
+		        	
+		        	// Check FS_LOG
+		        	
+		        	try {
+		        		// Check FS_LOG exist
+		        		pstmt = conn.prepareStatement("SELECT COUNT(*) AS CNT FROM FS_LOG");
+			        	rs = pstmt.executeQuery();
+			        	
+			        	while(rs.next()) {
+			        		rs.getInt("CNT");
+			        	}
+			        	
+			        	rs.close(); rs = null;
+			        	pstmt.close(); pstmt = null;
+			        	
+			        	pstmt = conn.prepareStatement("SELECT LOGNO, LOGCONTENT, LOGCLASS, LOGDATE FROM FS_LOG");
+			        	rs = pstmt.executeQuery();
+			        	
+			        	rs.close(); rs = null;
+			        	pstmt.close(); pstmt = null;
+		        	} catch(SQLException e) {
+		        		if(dbType.equals("oracle")) pstmt = conn.prepareStatement("CREATE TABLE FS_LOG ( LOGNO NUMBER(10)  PRIMARY KEY, LOGCONTENT VARCHAR2(4000), LOGCLASS VARCHAR2(100), LOGDATE NUMBER(20) )");
+		        		else                        pstmt = conn.prepareStatement("CREATE TABLE FS_LOG ( LOGNO NUMERIC(10) PRIMARY KEY, LOGCONTENT VARCHAR(4000) , LOGCLASS VARCHAR(100) , LOGDATE NUMERIC(20) )");
+		        		pstmt.execute();
+		        		conn.commit();
+		        		pstmt.close(); pstmt = null;
+		        	}
 		        }
 				
 				// Check Others
@@ -548,6 +610,12 @@ public class FSControl {
 				
 				garbage = new File(rootPath.getCanonicalPath() + File.separator + ".garbage");
 				if(! garbage.exists()) garbage.mkdirs();
+				
+				uploadd = new File(rootPath.getCanonicalPath() + File.separator + ".upload");
+			    if(! uploadd.exists()) uploadd.mkdirs();
+			    
+			    logd = new File(fileConfigPath.getCanonicalPath() + File.separator + ".logs");
+			    if(! logd.exists()) logd.mkdirs();
 				
 				String sMaxSize = request.getParameter("limitsize");
 				if(sMaxSize == null) sMaxSize = "" + (1024 * 1024);
@@ -901,7 +969,7 @@ public class FSControl {
 					fileOut.close(); fileOut = null;
 				}
 				
-				System.out.println("Configuration Updated by " + sessionMap.get("id") + " when " + System.currentTimeMillis());
+				logIn("Configuration Updated by " + sessionMap.get("id") + " when " + System.currentTimeMillis());
 				jsonConfig.clear();
 				jsonConfig = (JsonObject) conf.cloneObject();
 				
@@ -923,7 +991,7 @@ public class FSControl {
 					}
 				}
 				
-				System.out.println("Reset requested by " + sessionMap.get("id") + " when " + System.currentTimeMillis());
+				logIn("Reset requested by " + sessionMap.get("id") + " when " + System.currentTimeMillis());
 				
 				installed = false;
 				conf.clear();
@@ -968,7 +1036,7 @@ public class FSControl {
 		        	conn.close(); conn = null;
 				}
 				
-				System.out.println("Reset completed.");
+				logIn("Reset completed.");
 				json.put("reset", new Boolean(true));
 				json.put("message", "Reset Success !");
 				request.getSession().invalidate();
@@ -1408,7 +1476,7 @@ public class FSControl {
 			            			hdx++;
 			            		}
 			            	} catch(Throwable t) {
-			            		System.out.println("Wrong account configuration - " + t.getMessage());
+			            		logIn("Wrong account configuration - " + t.getMessage());
 			            	}
 			            }
 				    }
@@ -1591,7 +1659,7 @@ public class FSControl {
 				            			}
 				            		}
 				            	} catch(Throwable t) {
-				            		System.out.println("Wrong account configuration - " + t.getMessage());
+				            		logIn("Wrong account configuration - " + t.getMessage());
 				            	}
 				            }
 					    }
@@ -1650,7 +1718,7 @@ public class FSControl {
 		            			hdx++;
 		            		}
 		            	} catch(Throwable t) {
-		            		System.out.println("Wrong account configuration - " + t.getMessage());
+		            		logIn("Wrong account configuration - " + t.getMessage());
 		            	}
 		            }
 				}
@@ -1889,7 +1957,7 @@ public class FSControl {
 		                    }
 		                }
 		            } catch(Throwable t) {
-		                System.out.println("Wrong account configuration - " + t.getMessage());
+		                logIn("Wrong account configuration - " + t.getMessage());
 		            }
 		    	}
 		    	dirPrv.clear();
@@ -1918,11 +1986,11 @@ public class FSControl {
 		    	if(fileOne.exists()) {
 		    		fileOne.renameTo(destFil);
 		    	} else {
-		    		System.out.println("Upload complete but cannot move the file from temp directory to destination !");
-		    		System.out.println("File : " + fileOne.getCanonicalPath());
-		    		System.out.println("Dest : " + destFil.getCanonicalPath());
-		    		System.out.println("COS File System Name : " + fileName);
-		    		System.out.println("COS Original Name : " + fileOrig);
+		    		logIn("Upload complete but cannot move the file from temp directory to destination !");
+		    		logIn("File : " + fileOne.getCanonicalPath());
+		    		logIn("Dest : " + destFil.getCanonicalPath());
+		    		logIn("COS File System Name : " + fileName);
+		    		logIn("COS Original Name : " + fileOrig);
 		    	}
 		    }
 		    msg = "Success !";
@@ -2063,7 +2131,7 @@ public class FSControl {
 			            			hdx++;
 			            		}
 			            	} catch(Throwable t) {
-			            		System.out.println("Wrong account configuration - " + t.getMessage());
+			            		logIn("Wrong account configuration - " + t.getMessage());
 			            	}
 			            }
 					}
@@ -2082,7 +2150,7 @@ public class FSControl {
 
 		    file = new File(rootPath.getCanonicalPath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileName);
 		    if(! file.exists()) {
-		    	System.out.println("No File ! " + file.getCanonicalPath() + " <-- " + rootPath.getCanonicalPath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileName);
+		    	logIn("No File ! " + file.getCanonicalPath() + " <-- " + rootPath.getCanonicalPath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileName);
 		        throw new FileNotFoundException("There is no file !");
 		    }
 		    if(file.isDirectory()) {
@@ -2171,11 +2239,11 @@ public class FSControl {
 		    try { outputs.close();   } catch(Throwable te) {}
 		    return null;
 		} catch(Throwable tx) {
-			System.out.println("Exception message while sending file : " + tx.getMessage());
+			logIn("Exception message while sending file : " + tx.getMessage());
 			if((tx instanceof java.net.SocketException) && tx.getMessage().indexOf("socket write error") >= 0) {
 				// NOTHING
 			} else {
-				System.out.println("Exception message while sending file : " + tx.getMessage());
+				logIn("Exception message while sending file : " + tx.getMessage());
 				response.reset();
 				response.setContentType("text/html;charset=UTF-8");
 				
@@ -2250,7 +2318,7 @@ public class FSControl {
 		                    }
 		                }
 		            } catch(Throwable t) {
-		                System.out.println("Wrong account configuration - " + t.getMessage());
+		                logIn("Wrong account configuration - " + t.getMessage());
 		            }
 		        }
 			}
@@ -2333,7 +2401,7 @@ public class FSControl {
 		                    }
 		                }
 		            } catch(Throwable t) {
-		                System.out.println("Wrong account configuration - " + t.getMessage());
+		                logIn("Wrong account configuration - " + t.getMessage());
 		            }
 		        }
 			}
@@ -2347,7 +2415,7 @@ public class FSControl {
 			    else                      file = new File(rootPath.getCanonicalPath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileName);
 			    
 			    if(! file.exists()) {
-			    	System.out.println("There is no file ! " + file.getCanonicalPath());
+			    	logIn("There is no file ! " + file.getCanonicalPath());
 			        throw new FileNotFoundException("There is no file !");
 			    }
 			    
@@ -2476,7 +2544,7 @@ public class FSControl {
 			    needInvalidate = true;
 			    if(lang.equals("ko")) msg = "로그아웃 되었습니다."; 
 			    else                  msg = "Log out complete";
-			    System.out.println("Session log out from " + request.getRemoteAddr());
+			    logIn("Session log out from " + request.getRemoteAddr());
 			    json.put("success", new Boolean(true));
 			}
 			
@@ -2539,7 +2607,7 @@ public class FSControl {
 				    }
 				}
 				
-				System.out.println("Login requested ! " + id + " at " + now + " from " + request.getRemoteAddr());
+				logIn("Login requested ! " + id + " at " + now + " from " + request.getRemoteAddr());
 				
 				if(msg.equals("")) {
 					if(useJDBC) {
@@ -2722,7 +2790,7 @@ public class FSControl {
 			        	
 			        	sessionMap = accountOne;
 			        	request.getSession().setAttribute("fssession", accountJsonNew.toJSON());
-			            System.out.println("Login Accept : " + id + " at " + now);
+			            logIn("Login Accept : " + id + " at " + now);
 			            needInvalidate = false;
 			            json.put("success", new Boolean(true));
 			        }
@@ -2755,7 +2823,7 @@ public class FSControl {
 		} finally {
 			if(needInvalidate) {
 				request.getSession().invalidate();
-				System.out.println("Session Invalidated");
+				logIn("Session Invalidated");
 				json.put("invalidated", new Boolean(true));
 			}
 			if(rs    != null) { try { rs.close();     } catch(Throwable tx) {}}
@@ -3127,5 +3195,119 @@ public class FSControl {
 
 	public void setJdbcPw(String jdbcPw) {
 		this.jdbcPw = jdbcPw;
+	}
+	
+	public synchronized void logIn(Object logContent) {
+		logIn(logContent, FSControl.class);
+	}
+	
+	public synchronized void logIn(Object logContent, Class<?> froms) {
+		if(logOnStd) System.out.println(logContent);
+		
+		PreparedStatement pstmt = null;
+		long now = System.currentTimeMillis();
+		try {
+			String classNm = "UNKNOWN";
+			if(froms != null) classNm = froms.getClass().getSimpleName();
+			
+			if(logContent instanceof Throwable) logContent = DataUtil.stackTrace((Throwable) logContent);
+			
+			String strContent = "[" + classNm + "][" + now + "]" + String.valueOf(logContent);
+			logContent = null;
+			int sizes = strContent.getBytes("UTF-8").length;
+			
+			if(sizes > logLimit) {
+				String prints = FSUtils.cutStringSizeByte(strContent, cs, logLimit); 
+				String left   = strContent.substring(prints.length());
+				
+				logIn(prints, froms);
+				logIn(left, froms);
+				return;
+			}
+			
+			if(logOnFile) {
+				if(logFileWr != null) {
+					if(now - logLastDt >= 1000L * 60 * 60 || logLen + sizes >= logLimit) {
+						logFileWr.close();
+						logFileWr = null;
+						logLen = 0;
+					}
+				}
+				
+				if(logFileWr == null) {
+					logd = new File(rootPath.getCanonicalPath() + File.separator + ".logs");
+				    if(! logd.exists()) logd.mkdirs();
+				    
+				    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+				    int fileIndex = 0;
+				    String fileDate = dateFormat.format(new Date(now));
+				    
+				    String lFileNm = logFileNm;
+				    lFileNm = lFileNm.replace("[date]", fileDate);
+				    lFileNm = lFileNm.replace("[n]", "" + fileIndex);
+				    
+					File file = new File(logd.getCanonicalPath() + File.separator + lFileNm);
+					while(file.exists()) {
+						fileIndex++;
+						
+						lFileNm = logFileNm;
+						lFileNm = lFileNm.replace("[date]", fileDate);
+					    lFileNm = lFileNm.replace("[n]", "" + fileIndex);
+					    
+					    file = new File(logd.getCanonicalPath() + File.separator + lFileNm);
+					}
+					
+					logFileWr = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), cs));
+				}
+				
+				logFileWr.write(strContent);
+				logFileWr.newLine();
+				logLen += sizes;
+			}
+			if(logOnJdbc) {
+				if(now - logLastDt >= 1000L * 60 * 60) {
+					logConn.close();
+					logConn = null;
+				}
+				
+				if(logConn == null) {
+					Class.forName(jdbcClass);
+					logConn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+				}
+				
+				if(dbType.equals("oracle")) pstmt = logConn.prepareStatement("INSERT INTO FS_LOG (LOGNO, LOGCONTENT, LOGCLASS, LOGDATE) VALUES ( COALESCE(( SELECT MAX(LOGNO) FROM FS_LOG ), 0) + 1, ?, ?, ?  )");
+				else                        pstmt = logConn.prepareStatement("INSERT INTO FS_LOG (LOGNO, LOGCONTENT, LOGCLASS, LOGDATE) VALUES ( COALESCE(( SELECT MAX(LOGNO) FROM FS_LOG ), 0) + 1, ?, ?, ?  )");
+				
+				pstmt.setString(1, strContent);
+				pstmt.setString(2, classNm);
+				pstmt.setLong(3, now);
+				
+				pstmt.executeQuery();
+				logConn.commit();
+				
+				pstmt.close(); pstmt = null;
+			}
+		} catch(Throwable t) {
+			t.printStackTrace();
+			if(pstmt   != null) { try { pstmt.close();   } catch(Throwable tx) {} }
+			if(logConn != null) { try { logConn.close(); } catch(Throwable tx) {} }
+			pstmt   = null;
+			logConn = null;
+		} finally {
+			if(pstmt != null) { try { pstmt.close(); } catch(Throwable tx) {} }
+			logLastDt = now;
+		}
+	}
+	
+	public synchronized void dispose() {
+		if(logFileWr != null) {
+			try { logFileWr.close(); } catch(Throwable tx) {}
+			logFileWr = null;
+		}
+		conf.clear();
+	}
+	
+	public static void log(Object logContent, Class<?> froms) {
+		getInstance().logIn(logContent, froms);
 	}
 }

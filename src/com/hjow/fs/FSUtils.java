@@ -17,6 +17,7 @@ limitations under the License.
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -173,5 +174,23 @@ public class FSUtils {
     	}
     	
     	return res;
+    }
+    
+    public static String cutStringSizeByte(String original, String charset, long sizes) {
+    	try {
+    		StringBuilder res = new StringBuilder("");
+    		int  len = original.length();
+    		long nowSizes = 0;
+    		String charOne;
+    		for(int idx=0; idx<len; idx++) {
+    			charOne = String.valueOf(original.charAt(idx));
+    			nowSizes += charOne.getBytes(charset).length;
+    			if(nowSizes > sizes) break;
+    			res = res.append(charOne);
+    		}
+    		return res.toString();
+    	} catch(UnsupportedEncodingException e) {
+    		throw new RuntimeException(e.getMessage(), e);
+    	}
     }
 }

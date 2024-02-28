@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import com.hjow.fs.FSControl;
 import com.hjow.fs.console.cmd.FSConsoleCat;
 import com.hjow.fs.console.cmd.FSConsoleCd;
 import com.hjow.fs.console.cmd.FSConsoleCommand;
@@ -67,7 +68,7 @@ public class FSConsole implements Serializable {
 					Class<? extends FSConsoleCommand> classObj = (Class<? extends FSConsoleCommand>) Class.forName(c);
 					commands.add(classObj);
 				} catch(ClassNotFoundException e) {
-					System.out.println("Cannot found " + c + " - " + e.getMessage());
+					FSControl.log("Cannot found " + c + " - " + e.getMessage(), FSConsole.class);
 				}
 			}
 		}
@@ -82,7 +83,7 @@ public class FSConsole implements Serializable {
     
     private FSConsole() {
     	for(Class<? extends FSConsoleCommand> c : commands) {
-			try { cmds.add(c.newInstance()); } catch(Throwable t) { System.out.println("Fail to initialize console command " + c + " - Error : " + t.getMessage()); }
+			try { cmds.add(c.newInstance()); } catch(Throwable t) { FSControl.log("Fail to initialize console command " + c + " - Error : " + t.getMessage(), FSControl.class); }
 		}
     	Collections.sort(cmds, new Comparator<FSConsoleCommand>() {
 			@Override
@@ -101,7 +102,7 @@ public class FSConsole implements Serializable {
 		return cmds;
 	}
 	public FSConsoleResult run(Map<String, Object> sessionMap, String command) {
-		System.out.println("Console called by " + sessionMap.get("id") + " - " + command + " at " + System.currentTimeMillis());
+		FSControl.log("Console called by " + sessionMap.get("id") + " - " + command + " at " + System.currentTimeMillis(), this.getClass());
 		
 		FSConsoleResult res = null;
 		
@@ -127,9 +128,9 @@ public class FSConsole implements Serializable {
 					parameter = parameter.append(spaceTokenizer.nextToken()).append(" ");
 				}
 				
-				System.out.println("LINE : " + lineOne);
-				System.out.println("CMD : " + commandName);
-				System.out.println("PARAM : " + parameter.toString());
+				FSControl.log("LINE : " + lineOne, this.getClass());
+				FSControl.log("CMD : " + commandName, this.getClass());
+				FSControl.log("PARAM : " + parameter.toString(), this.getClass());
 				
 				lineOne = null;
 				spaceTokenizer = null;
