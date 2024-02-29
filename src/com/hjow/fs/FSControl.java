@@ -154,22 +154,79 @@ public class FSControl {
 	protected File logd      = null;
 	protected String ctxPath = "";
 	
-	private FSControl() {}
+	protected FSControl() {}
 	public static FSControl getInstance() { return instance; }
 	
-	public static void init(HttpServletRequest request) {
-		init(request, false);
+	public static void init(String contextPath) {
+		init(contextPath, false);
 	}
 	
-	public static void init(HttpServletRequest request, boolean forceInit) {
+	public static void init(HttpServletRequest request) {
+		init(request.getContextPath());
+	}
+	
+	public static synchronized void init(HttpServletRequest request, boolean forceInit) {
+		init(request.getContextPath(), forceInit);
+	}
+	
+	public static synchronized void init(String contextPath, boolean forceInit) {
 		if(instance == null || forceInit) {
 			if(instance != null) instance.dispose();
-			instance = new FSControl();
+			
+			Class<? extends FSControl> ctrlClass = getControlClass();
+			try { instance = ctrlClass.newInstance(); } catch(Throwable t) { throw new RuntimeException("Cannot create fs control instance - (" + t.getClass().getSimpleName() + ") " + t.getMessage()); }
 		}
-		instance.initialize(request);
+		instance.initialize(contextPath);
 	}
 	
-	protected synchronized void initialize(HttpServletRequest request) {
+	@SuppressWarnings("unchecked")
+	protected static Class<? extends FSControl> getControlClass() {
+		InputStream propIn = null;
+		try {
+			Properties propTest = new Properties();
+			
+		    propIn = FSControl.class.getResourceAsStream("/fs.properties");
+		    if(propIn != null) {
+		        propTest.load(propIn);
+		        propIn.close(); propIn = null;
+		    } else {
+		    	propIn = FSControl.class.getResourceAsStream("/fs.xml");
+		        if(propIn != null) {
+		        	propTest.loadFromXML(propIn);
+			        propIn.close(); propIn = null;
+		        } else {
+		        	propTest = null;
+		        }
+		    }
+		    
+		    if(propTest != null) {
+		    	String ctrlClass = propTest.getProperty("CL");
+		    	if(ctrlClass != null) {
+		    		ctrlClass = ctrlClass.trim().toUpperCase();
+		    		if((! (ctrlClass.equals("DEFAULT") || ctrlClass.equals("")))) {
+		    			return (Class<? extends FSControl>) Class.forName(ctrlClass);
+		    		}
+		    	}
+		    }
+		} catch(Throwable t) {
+			System.out.println("Cannot find or load fs control class - (" + t.getClass().getSimpleName() + ") " + t.getMessage());
+		} finally {
+			if(propIn != null) { try { propIn.close(); } catch(Throwable t) {} }
+		}
+		return FSControl.class;
+	}
+	
+	public static void log(Object logContent, Class<?> froms) {
+		getInstance().logIn(logContent, froms);
+	}
+	
+	public static synchronized void disposeInstance() {
+		FSControl c = instance;
+		instance = null;
+		if(c != null) c.dispose();
+	}
+	
+	protected synchronized void initialize(String contextPath) {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -177,7 +234,7 @@ public class FSControl {
 			long now = System.currentTimeMillis();
 			
 			// Set Global Variables
-			ctxPath = request.getContextPath();
+			ctxPath = contextPath;
 			
 			if(fileConfigPath == null || Math.abs(now - confReads) >= refreshConfGap) {
 				confReads = now;
@@ -192,11 +249,26 @@ public class FSControl {
 					String s2 = "";
 					String s3 = "";
 					
+					Properties propTest = new Properties();
+					
 				    propIn = FSControl.class.getResourceAsStream("/fs.properties");
 				    if(propIn != null) {
-				    	Properties propTest = new Properties();
 				        propTest.load(propIn);
-				        // Check fs.properties
+				        propIn.close(); propIn = null;
+				    } else {
+				    	logIn("No fs.properties ! Trying to find fs.xml...");
+				    	propIn = FSControl.class.getResourceAsStream("/fs.xml");
+				        if(propIn != null) {
+				        	propTest.loadFromXML(propIn);
+					        propIn.close(); propIn = null;
+				        } else {
+				        	logIn("No fs.xml !");
+				        	propTest = null;
+				        }
+				    }
+				    
+				    if(propTest != null) {
+				    	// Check fs.properties
 				        String t1 = propTest.getProperty("FS");
 				        String t2 = propTest.getProperty("RD");
 				        String t3 = propTest.getProperty("PW");
@@ -256,9 +328,6 @@ public class FSControl {
 				        
 				        propTest.clear();
 				        propTest = null;
-				        
-				        // Close fs.properties
-			            propIn.close();
 			            propIn = null;
 				        
 			            // Read configs
@@ -325,9 +394,8 @@ public class FSControl {
 			                    faJson.mkdirs();
 			                }
 				        }
-				    } else {
-				        logIn("No fs.properties !");
 				    }
+				    
 				} catch(Throwable t) {
 					fileConfigPath = null;
 				    t.printStackTrace(); 
@@ -408,11 +476,6 @@ public class FSControl {
 				}
  			}
 
-			if(noLogin) {
-				Object sessionMap = request.getSession().getAttribute("fssession");
-				if(sessionMap != null) request.getSession().removeAttribute("fssession");
-			}
-			
 			List<String> cmdList = new ArrayList<String>();
 			if(conf.get("CommandClass") != null) {
 				JsonArray arr = null;
@@ -1521,7 +1584,7 @@ public class FSControl {
 	}
 	
 	public JsonObject list(HttpServletRequest request, String pPath, String pKeyword, String pExcept) {
-		initialize(request);
+		initialize(request.getContextPath());
 		
 		JsonObject json = new JsonObject();
 		
@@ -1823,7 +1886,7 @@ public class FSControl {
 	}
 	
 	public String createCaptchaBase64(HttpServletRequest request, String key, String code, long time, double scale, String theme) {
-		initialize(request);
+		initialize(request.getContextPath());
 		
 		try {
 			boolean captDarkMode  = false;
@@ -1906,7 +1969,7 @@ public class FSControl {
 	}
 	
 	public String upload(HttpServletRequest request) {
-		initialize(request);
+		initialize(request.getContextPath());
 		
 		String uIdType = "", msg = "";
 		JsonArray dirPrv = null;
@@ -3300,14 +3363,8 @@ public class FSControl {
 	}
 	
 	public synchronized void dispose() {
-		if(logFileWr != null) {
-			try { logFileWr.close(); } catch(Throwable tx) {}
-			logFileWr = null;
-		}
+		if(logFileWr != null) { try {  logFileWr.close(); logFileWr = null; } catch(Throwable t) {} }
+		if(logConn   != null) { try {  logConn.close();   logConn   = null; } catch(Throwable t) {} }
 		conf.clear();
-	}
-	
-	public static void log(Object logContent, Class<?> froms) {
-		getInstance().logIn(logContent, froms);
 	}
 }

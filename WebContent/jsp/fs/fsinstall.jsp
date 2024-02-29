@@ -16,7 +16,7 @@ limitations under the License.
 */
 FSControl fsc = FSControl.getInstance();
 long now = System.currentTimeMillis();
-FSControl.init(request);
+FSControl.init(request.getContextPath());
 fsc = FSControl.getInstance();
 
 String theme      = request.getParameter("theme");
