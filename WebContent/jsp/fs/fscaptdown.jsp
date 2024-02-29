@@ -73,6 +73,18 @@ $(function() {
         selMn.append("<option value='DOWNLOAD' class='lang_element' data-lang-en='DOWNLOAD'>다운로드</option>");
     }
     selMn.val('DOWNLOAD');
+    
+    selMn.on('change', function() {
+    	var currVal = $(this).val();
+    	var target = '';
+    	if(currVal == 'VIEW') {
+    		target = '_target';
+    	} else {
+    		target = '_self';
+    	}
+    	form.attr('target', target);
+    });
+    selMn.addClass('binded_change');
 
     $('.p_filename').text(fileName);
     $('.p_filename').attr('title', fileName);

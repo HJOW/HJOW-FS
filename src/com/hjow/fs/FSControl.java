@@ -62,6 +62,7 @@ import javax.swing.filechooser.FileSystemView;
 
 import com.hjow.fs.console.FSConsole;
 import com.hjow.fs.console.FSConsoleResult;
+import com.hjow.fs.pack.FSPack;
 import com.oreilly.servlet.MultipartRequest;
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 
@@ -153,6 +154,7 @@ public class FSControl {
 	protected File uploadd   = null;
 	protected File logd      = null;
 	protected String ctxPath = "";
+	protected List<FSPack> packs = new ArrayList<FSPack>();
 	
 	protected FSControl() {}
 	public static FSControl getInstance() { return instance; }
@@ -438,27 +440,43 @@ public class FSControl {
 			    if(! logd.exists()) logd.mkdirs();
 			    if(conf.get("NoAnonymous") != null) {
 					noAnonymous = Boolean.parseBoolean(conf.get("NoAnonymous").toString().trim());
+				} else {
+					conf.put("NoAnonymous", new Boolean(noAnonymous));
 				}
 				if(conf.get("UseAccount") != null) {
 					noLogin = (! Boolean.parseBoolean(conf.get("UseAccount").toString().trim()));
+				} else {
+					conf.put("UseAccount", new Boolean(! noLogin));
 				}
 				if(conf.get("UseConsole") != null) {
 					noConsole = (! Boolean.parseBoolean(conf.get("UseConsole").toString().trim()));
+				} else {
+					conf.put("UseConsole", new Boolean(! noConsole));
 				}
 				if(conf.get("UseCaptchaDown") != null) {
 					captchaDownload = Boolean.parseBoolean(conf.get("UseCaptchaDown").toString().trim());
+				} else {
+					conf.put("UseCaptchaDown", new Boolean(captchaDownload));
 				}
 				if(conf.get("UseCaptchaLogin") != null) {
 					captchaLogin = Boolean.parseBoolean(conf.get("UseCaptchaLogin").toString().trim());
+				} else {
+					conf.put("UseCaptchaLogin", new Boolean(captchaLogin));
 				}
 				if(conf.get("LimitUploadSize") != null) {
 					limitSize = Long.parseLong(conf.get("LimitUploadSize").toString().trim());
+				} else {
+					conf.put("LimitUploadSize", limitSize + "");
 				}
 				if(conf.get("LimitFilesSinglePage") != null) {
 					limitCount = Integer.parseInt(conf.get("LimitFilesSinglePage").toString().trim());
+				} else {
+					conf.put("LimitFilesSinglePage", new Integer(limitCount));
 				}
 				if(conf.get("ReadFileIcon") != null) {
 					readFileIcon = Boolean.parseBoolean(conf.get("ReadFileIcon").toString().trim());
+				} else {
+					conf.put("ReadFileIcon", new Boolean(readFileIcon));
 				}
 				if(conf.get("Salt") != null) {
 					salt = conf.get("Salt").toString().trim();
@@ -466,6 +484,8 @@ public class FSControl {
 				if(conf.get("Title") != null) {
 					String tx = conf.get("Title").toString().trim();
 					if(! tx.equals("")) title = tx;
+				} else {
+					conf.put("Title", title);
 				}
 				if(conf.get("Log") != null) {
 					JsonObject confLog = null;
@@ -481,16 +501,49 @@ public class FSControl {
                     if(confLog.get("OnStdOut") != null) {
                     	logOnStd = Boolean.parseBoolean(confLog.get("OnStdOut").toString().trim());
                     }
+				} else {
+					JsonObject jsonSample = new JsonObject();
+					jsonSample.put("OnStdOut", new Boolean(logOnStd));
+					jsonSample.put("OnFile"  , new Boolean(logOnFile));
+					conf.put("Log", jsonSample);
 				}
  			}
-
-			List<String> cmdList = new ArrayList<String>();
-			if(conf.get("CommandClass") != null) {
+			
+			// Searching FSPack declared from config (This config value is array filled with FSPack class names)
+			List<String> packList = new ArrayList<String>();
+			if(conf.get("Packs") != null) {
 				JsonArray arr = null;
-				if(conf.get("CommandClass") instanceof JsonArray) arr = (JsonArray) conf.get("CommandClass");
-				else arr = (JsonArray) JsonCompatibleUtil.parseJson(conf.get("CommandClass").toString().trim());
+				if(conf.get("Packs") instanceof JsonArray) arr = (JsonArray) conf.get("Packs");
+				else arr = (JsonArray) JsonCompatibleUtil.parseJson(conf.get("Packs").toString().trim());
 				for(Object a : arr) {
-					cmdList.add(a.toString().trim());
+					String packClass = a.toString().trim();
+					if(! packList.contains(packClass)) packList.add(packClass);
+				}
+			} else {
+				conf.put("Packs", new JsonArray());
+			}
+			
+			// Trying to create FSPack instances
+			for(String packClass : packList) {
+				try {
+					Class<?> pc = Class.forName(packClass);
+					FSPack pack = (FSPack) pc.newInstance();
+					if(packs.contains(pack)) continue;
+					pack.init(this);
+					packs.add(pack);
+				} catch(Throwable tc) {
+				    logIn("Exception when loading Pack " + packClass + " - (" + tc.getClass().getName() + ") " + tc.getMessage());
+				}
+			}
+			packList.clear();
+			packList = null;
+			
+			// Load commands from FSPack
+			List<String> cmdList = new ArrayList<String>();
+			for(FSPack p : packs) {
+				List<String> l = p.getCommandClasses();
+				for(String c : l) {
+					if(! cmdList.contains(c)) cmdList.add(c);
 				}
 			}
 			
