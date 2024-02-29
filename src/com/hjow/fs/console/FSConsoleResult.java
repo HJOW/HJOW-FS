@@ -22,6 +22,7 @@ public class FSConsoleResult implements Serializable {
 	protected boolean success = false;
 	protected boolean nulll   = false;
 	protected boolean logout  = false;
+	protected boolean closepopup = false;
     protected String  display = "";
     protected String  path    = null;
     protected String downloadAccepted = null;
@@ -60,5 +61,11 @@ public class FSConsoleResult implements Serializable {
 	}
 	public void setLogout(boolean logout) {
 		this.logout = logout;
+	}
+	public boolean isClosepopup() {
+		return closepopup;
+	}
+	public void setClosepopup(boolean closepopup) {
+		this.closepopup = closepopup;
 	}
 }

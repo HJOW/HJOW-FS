@@ -22,6 +22,9 @@ $(function() {
                 if(data.downloadaccept) {
                 	window.open(ctxPathIn + '/jsp/fs/' + 'fsdown.jsp?path=' + encodeURIComponent(data.path) + "&filename=" + encodeURIComponent(data.downloadfile), 'cdownload', 'width=300,height=200,toolbar=no,status=no,location=no');
                 }
+                if(data.closepopup) {
+                	window.close();
+                }
             }, error : function(jqXHR, textStatus, errorThrown) {
                 taTermDisp.val(taTermDisp.val() + '\n' + 'Error ! ' + textStatus + '\n    ' + errorThrown);
                 FSUtil.log('Error ! ' + textStatus);

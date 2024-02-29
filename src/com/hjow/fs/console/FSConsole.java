@@ -27,6 +27,7 @@ import java.util.StringTokenizer;
 import com.hjow.fs.FSControl;
 import com.hjow.fs.console.cmd.FSConsoleCat;
 import com.hjow.fs.console.cmd.FSConsoleCd;
+import com.hjow.fs.console.cmd.FSConsoleClose;
 import com.hjow.fs.console.cmd.FSConsoleCommand;
 import com.hjow.fs.console.cmd.FSConsoleDown;
 import com.hjow.fs.console.cmd.FSConsoleFind;
@@ -60,6 +61,7 @@ public class FSConsole implements Serializable {
 			if(! commands.contains(FSConsolePwd.class  )) commands.add(FSConsolePwd.class  );
 			if(! commands.contains(FSConsoleWho.class  )) commands.add(FSConsoleWho.class  );
 			if(! commands.contains(FSConsoleFind.class )) commands.add(FSConsoleFind.class );
+			if(! commands.contains(FSConsoleClose.class)) commands.add(FSConsoleClose.class);
 		}
 		
 		if(commandClasses != null) {

@@ -1563,6 +1563,7 @@ public class FSControl {
 			json.put("display", rs.getDisplay());
 			json.put("displaynull", new Boolean(rs.isNulll()));
 			json.put("logout", new Boolean(rs.isLogout()));
+			json.put("closepopup", new Boolean(rs.isClosepopup()));
 			
 			if(rs.getDownloadAccepted() != null) {
 				json.put("downloadaccept", new Boolean(true));
