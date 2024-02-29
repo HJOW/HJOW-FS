@@ -3434,6 +3434,10 @@ public class FSControl {
 	}
 	
 	public synchronized void dispose() {
+		for(FSPack p : packs) {
+			p.dispose(this);
+		}
+		packs.clear();
 		if(logFileWr != null) { try {  logFileWr.close(); logFileWr = null; } catch(Throwable t) {} }
 		if(logConn   != null) { try {  logConn.close();   logConn   = null; } catch(Throwable t) {} }
 		conf.clear();
