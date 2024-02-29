@@ -21,7 +21,7 @@ import java.util.Map;
 import com.hjow.fs.FSControl;
 import com.hjow.fs.console.FSConsole;
 
-public class FSConsoleFirst implements FSConsoleCommand {
+public class FSConsoleFirst implements FSBundledConsoleCommand {
 	private static final long serialVersionUID = 3062038114191457928L;
 
 	@Override
@@ -35,7 +35,7 @@ public class FSConsoleFirst implements FSConsoleCommand {
 	}
 
 	@Override
-	public Object run(FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable {
+	public Object run(FSControl ctrl, FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable {
 		StringBuilder res = new StringBuilder("");
 		res = res.append("FS Console");
 		res = res.append("Version ").append(FSControl.VERSION[0] + "." + FSControl.VERSION[1] + "." + FSControl.VERSION[2]).append(" (Build ").append(FSControl.VERSION[3] + ")");

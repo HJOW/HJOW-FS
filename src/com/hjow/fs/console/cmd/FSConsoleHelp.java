@@ -4,10 +4,11 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+import com.hjow.fs.FSControl;
 import com.hjow.fs.FSUtils;
 import com.hjow.fs.console.FSConsole;
 
-public class FSConsoleHelp implements FSConsoleCommand {
+public class FSConsoleHelp implements FSBundledConsoleCommand {
 	private static final long serialVersionUID = 1631964078215746471L;
 
 	@Override
@@ -21,7 +22,7 @@ public class FSConsoleHelp implements FSConsoleCommand {
 	}
 
 	@Override
-	public Object run(FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable {
+	public Object run(FSControl ctrl, FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable {
 		StringBuilder res = new StringBuilder("");
 		
 		String lang = String.valueOf(sessionMap.get("lang"));

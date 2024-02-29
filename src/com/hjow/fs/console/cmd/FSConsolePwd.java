@@ -18,9 +18,10 @@ package com.hjow.fs.console.cmd;
 import java.io.File;
 import java.util.Map;
 
+import com.hjow.fs.FSControl;
 import com.hjow.fs.console.FSConsole;
 
-public class FSConsolePwd implements FSConsoleCommand {
+public class FSConsolePwd implements FSBundledConsoleCommand {
 	private static final long serialVersionUID = 8206351811941412312L;
 
 	@Override
@@ -34,7 +35,7 @@ public class FSConsolePwd implements FSConsoleCommand {
 	}
 
 	@Override
-	public Object run(FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable {
+	public Object run(FSControl ctrl, FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable {
 		return console.getPath();
 	}
 

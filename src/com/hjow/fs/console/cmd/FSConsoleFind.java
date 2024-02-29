@@ -24,7 +24,7 @@ import com.hjow.fs.FSControl;
 import com.hjow.fs.FSUtils;
 import com.hjow.fs.console.FSConsole;
 
-public class FSConsoleFind implements FSConsoleCommand {
+public class FSConsoleFind implements FSBundledConsoleCommand {
 	private static final long serialVersionUID = 1139052487161349847L;
 
 	@Override
@@ -39,7 +39,7 @@ public class FSConsoleFind implements FSConsoleCommand {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Object run(FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable {
+	public Object run(FSControl ctrl, FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable {
 		List<String> list = FSUtils.find(root, console.getPath(), parameter, FSControl.getInstance().getLimitSize());
 		StringBuilder res = new StringBuilder("");
 		

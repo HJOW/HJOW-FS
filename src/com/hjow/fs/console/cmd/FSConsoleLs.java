@@ -22,10 +22,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import com.hjow.fs.FSControl;
 import com.hjow.fs.FSUtils;
 import com.hjow.fs.console.FSConsole;
 
-public class FSConsoleLs implements FSConsoleCommand {
+public class FSConsoleLs implements FSBundledConsoleCommand {
 	private static final long serialVersionUID = 2838576926510433810L;
 
 	@Override
@@ -39,7 +40,7 @@ public class FSConsoleLs implements FSConsoleCommand {
 	}
 
 	@Override
-	public Object run(FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable {
+	public Object run(FSControl ctrl, FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable {
 		String pathCalc = root.getCanonicalPath() + File.separator + console.getPath();
 		File   fileCalc = new File(pathCalc);
 		

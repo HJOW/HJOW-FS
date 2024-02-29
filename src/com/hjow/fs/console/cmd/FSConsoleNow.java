@@ -20,9 +20,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import com.hjow.fs.FSControl;
 import com.hjow.fs.console.FSConsole;
 
-public class FSConsoleNow implements FSConsoleCommand {
+public class FSConsoleNow implements FSBundledConsoleCommand {
 	private static final long serialVersionUID = 5419787181379926840L;
 	public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm");
 
@@ -37,7 +38,7 @@ public class FSConsoleNow implements FSConsoleCommand {
 	}
 
 	@Override
-	public Object run(FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable {
+	public Object run(FSControl ctrl, FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable {
 		return dateFormat.format(new Date(System.currentTimeMillis()));
 	}
 

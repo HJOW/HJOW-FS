@@ -103,7 +103,7 @@ public class FSConsole implements Serializable {
 	public List<FSConsoleCommand> getCommands() {
 		return cmds;
 	}
-	public FSConsoleResult run(Map<String, Object> sessionMap, String command) {
+	public FSConsoleResult run(FSControl ctrl, Map<String, Object> sessionMap, String command) {
 		FSControl.log("Console called by " + sessionMap.get("id") + " - " + command + " at " + System.currentTimeMillis(), this.getClass());
 		
 		FSConsoleResult res = null;
@@ -156,7 +156,7 @@ public class FSConsole implements Serializable {
 				
 				if(commandOne == null) throw new NullPointerException("Cannot found correct command.");
 				
-				Object result = commandOne.run(this, sessionMap, rootPath, parameter.toString().trim());
+				Object result = commandOne.run(ctrl, this, sessionMap, rootPath, parameter.toString().trim());
 				if(result instanceof FSConsoleResult) {
 					res = (FSConsoleResult) result;
 				} else {

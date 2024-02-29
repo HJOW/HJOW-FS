@@ -1562,7 +1562,7 @@ public class FSControl {
 			sessionNewMap.put("hiddendirs", hiddenDirList);
             
 			// RUN
-            FSConsoleResult rs = console.run(sessionNewMap, command);
+            FSConsoleResult rs = console.run(this, sessionNewMap, command);
             
             // If result marked as a logout, clean session.
             if(rs.isLogout()) request.getSession().removeAttribute("fssession");

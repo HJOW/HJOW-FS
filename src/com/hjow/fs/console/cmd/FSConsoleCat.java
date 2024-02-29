@@ -21,9 +21,10 @@ import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.util.Map;
 
+import com.hjow.fs.FSControl;
 import com.hjow.fs.console.FSConsole;
 
-public class FSConsoleCat implements FSConsoleCommand {
+public class FSConsoleCat implements FSBundledConsoleCommand {
 	private static final long serialVersionUID = -167214053198674139L;
 
 	@Override
@@ -37,7 +38,7 @@ public class FSConsoleCat implements FSConsoleCommand {
 	}
 
 	@Override
-	public Object run(FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable {
+	public Object run(FSControl ctrl, FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable {
 		String pathCalc = root.getCanonicalPath() + File.separator + console.getPath() + File.separator + parameter;
 		File   fileCalc = new File(pathCalc);
 		

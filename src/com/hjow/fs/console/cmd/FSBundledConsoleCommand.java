@@ -15,16 +15,6 @@ limitations under the License.
  */
 package com.hjow.fs.console.cmd;
 
-import java.io.File;
-import java.io.Serializable;
-import java.util.Map;
+public interface FSBundledConsoleCommand extends FSConsoleCommand {
 
-import com.hjow.fs.FSControl;
-import com.hjow.fs.console.FSConsole;
-
-public interface FSConsoleCommand extends Serializable {
-	public String getName();
-	public String getShortName();
-	public String getHelp(String lang, boolean detail);
-	public Object run(FSControl ctrl, FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable;
 }
