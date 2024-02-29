@@ -18,6 +18,7 @@ package com.hjow.fs;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+/** Declare actions on server starts or server shutdown. */
 public class FSServletContextListener implements ServletContextListener {
 	public FSServletContextListener() { }
 

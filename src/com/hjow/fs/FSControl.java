@@ -157,18 +157,22 @@ public class FSControl {
 	protected FSControl() {}
 	public static FSControl getInstance() { return instance; }
 	
+	/** Initialize instances */
 	public static void init(String contextPath) {
 		init(contextPath, false);
 	}
 	
+	/** Initialize instances */
 	public static void init(HttpServletRequest request) {
 		init(request.getContextPath());
 	}
 	
+	/** Initialize instances */
 	public static synchronized void init(HttpServletRequest request, boolean forceInit) {
 		init(request.getContextPath(), forceInit);
 	}
 	
+	/** Initialize instances */
 	public static synchronized void init(String contextPath, boolean forceInit) {
 		if(instance == null || forceInit) {
 			if(instance != null) instance.dispose();
@@ -179,6 +183,7 @@ public class FSControl {
 		instance.initialize(contextPath);
 	}
 	
+	/** Get FSControl class or alternatives (read CL property on fs.properties) */
 	@SuppressWarnings("unchecked")
 	protected static Class<? extends FSControl> getControlClass() {
 		InputStream propIn = null;
@@ -216,16 +221,19 @@ public class FSControl {
 		return FSControl.class;
 	}
 	
+	/** logging */
 	public static void log(Object logContent, Class<?> froms) {
 		getInstance().logIn(logContent, froms);
 	}
 	
+	/** Clean FSControl instance */
 	public static synchronized void disposeInstance() {
 		FSControl c = instance;
 		instance = null;
 		if(c != null) c.dispose();
 	}
 	
+	/** Load properties, configs, and DB tables when using JDBC */
 	protected synchronized void initialize(String contextPath) {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -493,6 +501,7 @@ public class FSControl {
 		}
 	}
 	
+	/** Called from fsinstallin.jsp, which is called by installation page by ajax. */
 	public JsonObject install(HttpServletRequest request) throws Exception {
 		JsonObject json = new JsonObject();
 		if(! installed) {
@@ -855,6 +864,7 @@ public class FSControl {
 		return json;
 	}
 	
+	/** Called from fsadminin.jsp, which is called by administration page by ajax. */
 	public JsonObject admin(HttpServletRequest request) throws Exception {
 		JsonObject json       = new JsonObject();
 		JsonObject jsonConfig = new JsonObject();
@@ -1436,6 +1446,7 @@ public class FSControl {
 		return json;
 	}
 	
+	/** Called from fsconsole.jsp, which is called by console page by ajax. */
 	public JsonObject console(HttpServletRequest request) throws Exception {
 		JsonObject json       = new JsonObject();
 				
@@ -1586,6 +1597,7 @@ public class FSControl {
 		return json;
 	}
 	
+	/** Called from fs.jsp, which is called by file list page by ajax. */
 	public JsonObject list(HttpServletRequest request, String pPath, String pKeyword, String pExcept) {
 		initialize(request.getContextPath());
 		
@@ -1842,6 +1854,7 @@ public class FSControl {
 		return json;
 	}
 	
+	/** Called from fs.jsp, which is called by file list page by ajax. */
 	public Map<File, String> getIcons(List<File> files, Color background) {
 		Map<File, String> iconMap = new HashMap<File, String>();
 		
@@ -1888,6 +1901,7 @@ public class FSControl {
 		return iconMap;
 	}
 	
+	/** Called from fscaptin.jsp, which is called by captcha page by iframe. */
 	public String createCaptchaBase64(HttpServletRequest request, String key, String code, long time, double scale, String theme) {
 		initialize(request.getContextPath());
 		
@@ -1971,6 +1985,7 @@ public class FSControl {
 		}
 	}
 	
+	/** Called from fsupload.jsp, which is called by uploading popup. */
 	public String upload(HttpServletRequest request) {
 		initialize(request.getContextPath());
 		
