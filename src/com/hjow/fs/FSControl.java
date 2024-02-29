@@ -557,6 +557,8 @@ public class FSControl {
 					throw new RuntimeException("Please input the Root Directory !");
 				}
 				
+				roots = roots.replace("\\", "/");
+				
 				// Check Installation Password
 				if(! passwords.equals(tx3.trim())) {
 					if(! SecurityUtil.hash(passwords, "SHA-256").equals(tx3.trim())) {
