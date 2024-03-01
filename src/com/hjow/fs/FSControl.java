@@ -1703,7 +1703,7 @@ public class FSControl {
 		try {
 		    File dir = new File(instance.rootPath.getCanonicalPath() + File.separator + pathParam);
             
-		    FSFileListingResult flist = lister.list(this, dir, excepts);
+		    FSFileListingResult flist = lister.list(this, dir, keyword, excepts);
 		    excepts.clear();
 		    excepts = null;
 		    
@@ -1825,7 +1825,7 @@ public class FSControl {
 			JsonArray dirs = new JsonArray();
 			for(File f : flist.getDirs()) {
 				String name = f.getName();
-			    if(! keyword.equals("")) { if(! name.toLowerCase().contains(keyword.toLowerCase())) continue; }
+			    // if(! keyword.equals("")) { if(! name.toLowerCase().contains(keyword.toLowerCase())) continue; }
 			    if(name.equals(".garbage")) continue;
 			    if(name.equals(".upload" )) continue;
 			    

@@ -13,13 +13,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-package com.hjow.fs.lister;
+package com.hjow.fs.etc;
+import java.io.Serializable;
 
-import java.io.File;
-import java.util.List;
-
-import com.hjow.fs.FSControl;
-
-public interface FSFileLister {
-    public FSFileListingResult list(FSControl ctrl, File targetDir, String keyword, List<String> excepts);
+public class Counter implements Serializable {
+	private static final long serialVersionUID = -8351283205016681277L;
+	protected int count = 0;
+    public Counter() {}
+	public int getCount() {
+		return count;
+	}
+	public void setCount(int count) {
+		this.count = count;
+	}
+    public void increase() {
+    	count++;
+    }
 }
