@@ -65,6 +65,7 @@ import com.hjow.fs.lister.FSDefaultLister;
 import com.hjow.fs.lister.FSFileLister;
 import com.hjow.fs.lister.FSFileListingResult;
 import com.hjow.fs.pack.FSPack;
+import com.hjow.fs.pack.FSRequestHandler;
 import com.oreilly.servlet.MultipartRequest;
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 
@@ -576,7 +577,10 @@ public class FSControl {
 	
 	/** Called from fsinstallin.jsp, which is called by installation page by ajax. */
 	public JsonObject install(HttpServletRequest request) throws Exception {
-		JsonObject json = new JsonObject();
+		JsonObject json = processHandler("install", request);
+		if(json != null) return json;
+		json = new JsonObject();
+		
 		if(! installed) {
 			Properties   propTest = new Properties();
 		    InputStream  propIn   = null;
@@ -939,7 +943,10 @@ public class FSControl {
 	
 	/** Called from fsadminin.jsp, which is called by administration page by ajax. */
 	public JsonObject admin(HttpServletRequest request) throws Exception {
-		JsonObject json       = new JsonObject();
+		JsonObject json = processHandler("admin", request);
+		if(json != null) return json;
+		json = new JsonObject();
+		
 		JsonObject jsonConfig = new JsonObject();
 		
 		Properties   propTest = new Properties();
@@ -1521,7 +1528,9 @@ public class FSControl {
 	
 	/** Called from fsconsole.jsp, which is called by console page by ajax. */
 	public JsonObject console(HttpServletRequest request) throws Exception {
-		JsonObject json       = new JsonObject();
+		JsonObject json = processHandler("console", request);
+		if(json != null) return json;
+		json = new JsonObject();
 				
 		JsonObject sessionMap = null;
 		String lang = "en";
@@ -1672,9 +1681,11 @@ public class FSControl {
 	
 	/** Called from fs.jsp, which is called by file list page by ajax. */
 	public JsonObject list(HttpServletRequest request, String pPath, String pKeyword, String pExcept) {
-		initialize(request.getContextPath());
+		// initialize(request.getContextPath());
 		
-		JsonObject json = new JsonObject();
+		JsonObject json = processHandler("list", request);
+		if(json != null) return json;
+		json = new JsonObject();
 		
 		String pathParam = pPath;
 		if(pathParam == null) pathParam = "";
@@ -1924,7 +1935,7 @@ public class FSControl {
 	
 	/** Called from fscaptin.jsp, which is called by captcha page by iframe. */
 	public String createCaptchaBase64(HttpServletRequest request, String key, String code, long time, double scale, String theme) {
-		initialize(request.getContextPath());
+		// initialize(request.getContextPath());
 		
 		try {
 			boolean captDarkMode  = false;
@@ -2008,7 +2019,7 @@ public class FSControl {
 	
 	/** Called from fsupload.jsp, which is called by uploading popup. */
 	public String upload(HttpServletRequest request) {
-		initialize(request.getContextPath());
+		// initialize(request.getContextPath());
 		
 		String uIdType = "", msg = "";
 		JsonArray dirPrv = null;
@@ -2366,7 +2377,10 @@ public class FSControl {
 	}
 	
 	public JsonObject mkdir(HttpServletRequest request) {
-		JsonObject json = new JsonObject();
+		JsonObject json = processHandler("mkdir", request);
+		if(json != null) return json;
+		json = new JsonObject();
+		
 		String uIdType = "";
 		JsonArray dirPrv = null;
 		try {
@@ -2446,7 +2460,10 @@ public class FSControl {
 	}
 	
 	public JsonObject remove(HttpServletRequest request) {
-		JsonObject json = new JsonObject();
+		JsonObject json = processHandler("remove", request);
+		if(json != null) return json;
+		json = new JsonObject();
+		
 		String uIdType = "";
 		JsonArray dirPrv = null;
 		try {
@@ -2557,6 +2574,10 @@ public class FSControl {
 	}
 	
 	public JsonObject account(HttpServletRequest request) throws IOException {
+		JsonObject json = processHandler("account", request);
+		if(json != null) return json;
+		json = new JsonObject();
+		
 		JsonObject sessionMap = null;
 		JsonObject accountOne = null;
 		boolean needInvalidate = false;
@@ -2581,7 +2602,6 @@ public class FSControl {
 		if(req == null) req = "status";
 		req = req.trim().toLowerCase();
 
-		JsonObject json = new JsonObject();
 		json.put("success", new Boolean(false));
 		json.put("message", "");
 		
@@ -3399,6 +3419,22 @@ public class FSControl {
 			if(pstmt != null) { try { pstmt.close(); } catch(Throwable tx) {} }
 			logLastDt = now;
 		}
+	}
+	
+	public JsonObject processHandler(String method, HttpServletRequest req) {
+		for(FSPack p : packs) {
+			FSRequestHandler h = p.getHandler(method);
+			if(h != null) {
+				Map<String, String> params = new HashMap<String, String>();
+				Enumeration<String> enums = req.getParameterNames();
+				while(enums.hasMoreElements()) {
+					String pr = enums.nextElement();
+					params.put(pr, req.getParameter(pr));
+				}
+				return h.handle(this, params, getSessionObject(req));
+			}
+		}
+		return null;
 	}
 	
 	public synchronized void dispose() {

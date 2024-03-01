@@ -33,6 +33,10 @@ public abstract class FSPack implements Serializable {
 		return true;
 	}
 	
+	public FSRequestHandler getHandler(String method) {
+		return null;
+	}
+	
 	@Override
 	public boolean equals(Object others) {
 		if(others == null) return false;
