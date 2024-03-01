@@ -45,7 +45,6 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -62,6 +61,9 @@ import javax.swing.filechooser.FileSystemView;
 
 import com.hjow.fs.console.FSConsole;
 import com.hjow.fs.console.FSConsoleResult;
+import com.hjow.fs.lister.FSDefaultLister;
+import com.hjow.fs.lister.FSFileLister;
+import com.hjow.fs.lister.FSFileListingResult;
 import com.hjow.fs.pack.FSPack;
 import com.oreilly.servlet.MultipartRequest;
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
@@ -132,29 +134,30 @@ public class FSControl {
 	protected String dbType = null, jdbcClass = null, jdbcUrl = null, jdbcId = null, jdbcPw = null;
 	
 	// Logging
-	protected String  logFileNm = "fs_[date]_[n].log";
-	protected boolean logOnFile = false;
-	protected boolean logOnJdbc = false;
-	protected boolean logOnStd  = true;
-	protected int     logLen    = 0;
-	protected int     logLimit  = 4000;
-	protected long    logLastDt = 0;
-	protected Connection     logConn   = null;
-	protected BufferedWriter logFileWr = null;
+	protected transient String  logFileNm = "fs_[date]_[n].log";
+	protected transient boolean logOnFile = false;
+	protected transient boolean logOnJdbc = false;
+	protected transient boolean logOnStd  = true;
+	protected transient int     logLen    = 0;
+	protected transient int     logLimit  = 4000;
+	protected transient long    logLastDt = 0;
+	protected transient Connection     logConn   = null;
+	protected transient BufferedWriter logFileWr = null;
 	
 	// Other Temporary Fields
-	protected JsonObject conf = new JsonObject();
-	protected volatile long    confReads    = 0L;
-	protected volatile boolean confChanging = false;
-	protected volatile boolean accChanging  = false;
-	protected boolean installed = false;
-	protected String salt = "fs";
-	protected File rootPath  = null;
-	protected File garbage   = null;
-	protected File uploadd   = null;
-	protected File logd      = null;
-	protected String ctxPath = "";
-	protected List<FSPack> packs = new ArrayList<FSPack>();
+	protected transient JsonObject conf = new JsonObject();
+	protected transient volatile long    confReads    = 0L;
+	protected transient volatile boolean confChanging = false;
+	protected transient volatile boolean accChanging  = false;
+	protected transient boolean installed = false;
+	protected transient String salt = "fs";
+	protected transient File rootPath  = null;
+	protected transient File garbage   = null;
+	protected transient File uploadd   = null;
+	protected transient File logd      = null;
+	protected transient String ctxPath = "";
+	protected transient FSFileLister lister = new FSDefaultLister();
+	protected transient List<FSPack> packs = new ArrayList<FSPack>();
 	
 	protected FSControl() {}
 	public static FSControl getInstance() { return instance; }
@@ -545,6 +548,8 @@ public class FSControl {
 					if(packs.contains(pack)) continue;
 					pack.init(this);
 					packs.add(pack);
+					
+					if(pack instanceof FSFileLister) this.lister = (FSFileLister) pack;
 				} catch(Throwable tc) {
 				    logIn("Exception when loading Pack " + packClass + " - (" + tc.getClass().getName() + ") " + tc.getMessage());
 				}
@@ -1698,67 +1703,15 @@ public class FSControl {
 		try {
 		    File dir = new File(instance.rootPath.getCanonicalPath() + File.separator + pathParam);
             
-		    File[] list = dir.listFiles();
-		    List<File> fileList = new ArrayList<File>();
-		    if(list == null) list = new File[0];
-		    
-		    int excepted  = 0;
-		    
-		    for(File f : list) {
-		    	String nm = f.getName();
-		    	if(excepts.contains(nm)) {
-		    		excepted++;
-		    		continue;
-		    	}
-		    	fileList.add(f);
-		    }
-		    list = null;
-		    
-		    Collections.sort(fileList, new Comparator<File>() {
-		    	@Override
-		    	public int compare(File o1, File o2) {
-		    		if(o1.isDirectory() && (! o2.isDirectory())) return -1;
-		    		if((! o1.isDirectory()) && o2.isDirectory()) return 1;
-		    		return (o1.getName().compareTo(o2.getName()));
-		    	}
-		    });
-		    
-		    List<File> chDirs  = new ArrayList<File>();
-		    List<File> chFiles = new ArrayList<File>();
-		    
-		    int fileIndex = 0;
-		    int skipped   = 0;
-		    for(File f : fileList) {
-		    	String nm = f.getName();
-		    	if(limitCount >= 0 && fileIndex >= limitCount) {
-		    		skipped++;
-		    		continue;
-		    	}
-		    	if(nm.indexOf("." ) == 0) continue;
-	            if(nm.indexOf("/" ) >= 0) continue;
-	            if(nm.indexOf("\\") >= 0) continue;
-	            if(nm.indexOf("<" ) >= 0) continue;
-	            if(nm.indexOf(">" ) >= 0) continue;
-	            if(nm.indexOf("..") >= 0) continue;
-		        if(f.isDirectory()) {
-		            chDirs.add(f);
-		        } else {
-		            if(f.length() / 1024 >= instance.limitSize) continue;
-		            chFiles.add(f);
-		        }
-		        fileIndex++;
-		    }
-            
-		    fileList.clear();
-		    fileList = null;
+		    FSFileListingResult flist = lister.list(this, dir, excepts);
 		    excepts.clear();
 		    excepts = null;
 		    
-		    json.put("skipped" , new Integer(skipped ));
-		    json.put("excepted", new Integer(excepted));
+		    json.put("skipped" , new Integer(flist.getSkippedCount()));
+		    json.put("excepted", new Integer(flist.getExceptsCount()));
             
-		    Collections.sort(chDirs);
-		    Collections.sort(chFiles);
+		    Collections.sort(flist.getDirs());
+		    Collections.sort(flist.getFiles());
             
 		    String pathDisp = pathParam; // 화면 출력용
 		    if(pathDisp.startsWith("//")) pathDisp = pathDisp.substring(1);
@@ -1870,7 +1823,7 @@ public class FSControl {
 			}
 
 			JsonArray dirs = new JsonArray();
-			for(File f : chDirs) {
+			for(File f : flist.getDirs()) {
 				String name = f.getName();
 			    if(! keyword.equals("")) { if(! name.toLowerCase().contains(keyword.toLowerCase())) continue; }
 			    if(name.equals(".garbage")) continue;
@@ -1896,7 +1849,7 @@ public class FSControl {
 			dirs = null;
 
 			JsonArray files = new JsonArray();
-			for(File f : chFiles) {
+			for(File f : flist.getFiles()) {
 				String name     = f.getName();
 			    if(! keyword.equals("")) { if(! name.toLowerCase().contains(keyword.toLowerCase())) continue; }
 			    
