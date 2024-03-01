@@ -29,6 +29,10 @@ public abstract class FSPack implements Serializable {
 	public abstract void init(FSControl ctrl);
 	public abstract void dispose(FSControl ctrl);
 	
+	public boolean isAvail(int[] version) {
+		return true;
+	}
+	
 	@Override
 	public boolean equals(Object others) {
 		if(others == null) return false;

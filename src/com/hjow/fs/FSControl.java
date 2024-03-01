@@ -545,6 +545,7 @@ public class FSControl {
 				try {
 					Class<?> pc = Class.forName(packClass);
 					FSPack pack = (FSPack) pc.newInstance();
+					if(! pack.isAvail(VERSION)) continue;
 					if(packs.contains(pack)) continue;
 					pack.init(this);
 					packs.add(pack);
