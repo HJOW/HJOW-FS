@@ -73,7 +73,7 @@ import hjow.common.util.DataUtil;
 import hjow.common.util.SecurityUtil;
 
 public class FSControl {
-	public static final int[] VERSION = {0, 1, 5, 12};
+	public static final int[] VERSION = {0, 1, 6, 13};
 	
 	private static FSControl instance = null;
 	
@@ -242,6 +242,7 @@ public class FSControl {
 		ResultSet rs = null;
 		try {
 			long now = System.currentTimeMillis();
+			String pPacks = "";
 			
 			// Set Global Variables
 			ctxPath = contextPath;
@@ -335,6 +336,10 @@ public class FSControl {
 				        		}
 				        	}
 				        }
+				        
+				        pPacks = propTest.getProperty("PK");
+				        if(pPacks == null) pPacks = "";
+				        pPacks = pPacks.trim();
 				        
 				        propTest.clear();
 				        propTest = null;
@@ -521,6 +526,15 @@ public class FSControl {
 				}
 			} else {
 				conf.put("Packs", new JsonArray());
+			}
+			
+			// Searching FSPack declared from fs.properties (This prop value is array filled with FSPack class names)
+			if(! pPacks.equals("")) {
+				StringTokenizer colonTokenizer = new StringTokenizer(pPacks, ",");
+				while(colonTokenizer.hasMoreTokens()) {
+					String packClass = colonTokenizer.nextToken().trim();
+					if(! packList.contains(packClass)) packList.add(packClass);
+				}
 			}
 			
 			// Trying to create FSPack instances
