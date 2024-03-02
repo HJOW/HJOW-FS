@@ -270,6 +270,7 @@ $(function() {
                 
                 for(idx = 0; idx < arFiles.length; idx++) {
                 	var fileOne = arFiles[idx];
+                	
                     var lname   = String(fileOne.name);
                     var lsize   = String(fileOne.size);
                     var cttype  = String(fileOne.contentType);
@@ -298,6 +299,7 @@ $(function() {
                     
                     a.attr('data-path', inpPath.val());
                     a.attr('data-name', lname);
+                    if(fileOne['over_down']) a.addClass('disabled');
                     a.text(lname);
                     a.addClass('ellipsis');
                     tr.attr('data-idx', '' + idx);
@@ -312,44 +314,51 @@ $(function() {
                     var divPrev = tr.find('.div_td_file_preview');
                     var btnPreview = tdBtns.find('.btn_preview');
                     if(prvtype >= 0) {
-                    	btnPreview.attr('data-path', a.attr('data-path'));
-                        btnPreview.attr('data-name', a.attr('data-name'));
-                        btnPreview.attr('data-idx', '' + idx);
-                        btnPreview.attr('data-prv', '' + prvtype);
-                        
-                        btnPreview.on('click', function() {
-                            var idxIn = $(this).attr('data-idx');
-                            var trIn  = listRoot.find('.tr_file_' + idxIn);
-                            var divPrvIn = trIn.find('.div_td_file_preview');
-                            var prvIn    = $(this).attr('data-prv');
+                    	if(fileOne['over_prev']) {
+                    		btnPreview.addClass('disabled');
+                    		btnPreview.prop('disabled', true);
+                    		btnPreview.attr('title', 'This file is too big. Cannot preview.');
+                    	} else {
+                    		btnPreview.attr('data-path', a.attr('data-path'));
+                            btnPreview.attr('data-name', a.attr('data-name'));
+                            btnPreview.attr('data-idx', '' + idx);
+                            btnPreview.attr('data-prv', '' + prvtype);
                             
-                            if($(this).is('.not_opened')) {
-                                $(this).removeClass('not_opened');
-                                $(this).attr('value', '△');
+                            btnPreview.on('click', function() {
+                                var idxIn = $(this).attr('data-idx');
+                                var trIn  = listRoot.find('.tr_file_' + idxIn);
+                                var divPrvIn = trIn.find('.div_td_file_preview');
+                                var prvIn    = $(this).attr('data-prv');
                                 
-                                divPrvIn.empty();
-                                // browserInfo.nm == 'ie' && browserInfo.ver < 9
-                                if(prvIn == '1') divPrvIn.append("<img class='img_preview preview_element'/>");
-                                if(prvIn == '2') divPrvIn.append("<video class='video_preview preview_element'/>");
-                                if(prvIn == '3') divPrvIn.append("<audio class='audio_preview preview_element'/>");
-                                if(prvIn == '4') divPrvIn.append("<iframe class='iframe_preview preview_element'></iframe>");
+                                if($(this).is('.not_opened')) {
+                                    $(this).removeClass('not_opened');
+                                    $(this).attr('value', '△');
+                                    
+                                    divPrvIn.empty();
+                                    
+                                    // browserInfo.nm == 'ie' && browserInfo.ver < 9
+                                    if(prvIn == '1') divPrvIn.append("<img class='img_preview preview_element'/>");
+                                    if(prvIn == '2') divPrvIn.append("<video class='video_preview preview_element'/>");
+                                    if(prvIn == '3') divPrvIn.append("<audio class='audio_preview preview_element'/>");
+                                    if(prvIn == '4') divPrvIn.append("<iframe class='iframe_preview preview_element'></iframe>");
+                                    
+                                    var srcs = ctxPath + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent($(this).attr('data-path')) + "&filename=" + encodeURIComponent($(this).attr('data-name')) + "&mode=VIEW";
+                                    var elem = divPrvIn.find('.preview_element');
+                                    
+                                    elem.css('height', 400);
+                                    elem.attr('src', srcs);
+                                    divPrvIn.removeClass('invisible');
+                                } else {
+                                    divPrvIn.addClass('invisible');
+                                    $(this).addClass('not_opened');
+                                    $(this).attr('value', '▼');
+                                    divPrvIn.empty();
+                                }
                                 
-                                var srcs = ctxPath + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent($(this).attr('data-path')) + "&filename=" + encodeURIComponent($(this).attr('data-name')) + "&mode=VIEW";
-                                var elem = divPrvIn.find('.preview_element');
-                                
-                                elem.css('height', 400);
-                                elem.attr('src', srcs);
-                                divPrvIn.removeClass('invisible');
-                            } else {
-                            	divPrvIn.addClass('invisible');
-                                $(this).addClass('not_opened');
-                                $(this).attr('value', '▼');
-                                divPrvIn.empty();
-                            }
-                            
-                        });
-                        btnPreview.addClass('binded_click');
-                        btnPreview.removeClass('invisible');
+                            });
+                            btnPreview.addClass('binded_click');
+                    	}
+                    	btnPreview.removeClass('invisible');
                     }
                     
                     if(idType == 'A') {
@@ -423,6 +432,7 @@ $(function() {
                 $('.link_file').each(function() {
                     var aLink = $(this);
                     aLink.on('click', function() {
+                    	if($(this).is('.disabled')) return;
                         var popOpt = 'width=' + (captchaWidth + 50) + "," + "height=" + (captchaHeight + 50);
                         popOpt += ',scrollbars=no,status=no,location=no,toolbar=no';
                         var theme = '';

@@ -1842,9 +1842,13 @@ public class FSControl {
 			    
 			    JsonObject fileOne = new JsonObject();
 			    
+			    long fSize = f.length();
+			    
 			    fileOne.put("type", "file");
 			    fileOne.put("name", linkDisp);
-			    fileOne.put("size", FSUtils.getFileSize(f));
+			    fileOne.put("size", FSUtils.getFileSize(fSize));
+			    fileOne.put("over_down", new Boolean(fSize / 1024 > limitSize));
+			    fileOne.put("over_prev", new Boolean(fSize / 1024 > limitPrev));
 			    
 			    if(limitPrev > 0) {
 			    	// Get Extension of file
@@ -2132,7 +2136,6 @@ public class FSControl {
 
 		String pathParam = request.getParameter("path");
 		String fileName  = request.getParameter("filename");
-		String speed     = request.getParameter("speed");
 		String mode      = request.getParameter("mode");
 
 		String capt      = request.getParameter("captcha");
@@ -2149,16 +2152,35 @@ public class FSControl {
 		if(pathParam.equals("/")) pathParam = "";
 		pathParam = FSUtils.removeSpecials(pathParam, false, true, true, false, true).replace("\\", "/").trim();
 		if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
+		
+		JsonObject sessions = getSessionObject(request);
+		String speed = null;
+		String lang  = getLanguage(request);
+		
+		if(lang == null) lang = "en";
+		
+		if(sessions != null) {
+			String idtype = String.valueOf(sessions.get("idtype"));
+			if(idtype.equalsIgnoreCase("A")) speed = "fast";
+			if(sessions.get("speed") != null) speed = sessions.get("speed").toString();
+		}
 
+		int sleepRoutine = this.sleepRoutine;
 		if(speed != null) {
-			speed = speed.trim();
-			if(speed.equalsIgnoreCase("andante")) {
+			speed = speed.trim().toLowerCase();
+			if(speed.equals("andante")) {
 				sleepRoutine = sleepRoutine / 10;
-			} else if(speed.equalsIgnoreCase("slow")) {
+			} else if(speed.equals("slow")) {
 		    	sleepRoutine = sleepRoutine / 5;
-		    } else if(speed.equalsIgnoreCase("")) {
+		    } else if(speed.equals("")) {
 		        sleepRoutine = sleepRoutine / 2;
+		    } else if(speed.equals("fast")) {
+		    	// DO NOTHING
+		    } else if(speed.equals("presto")) {
+		    	sleepRoutine = sleepRoutine * 2;
 		    }
+		} else {
+			sleepRoutine = sleepRoutine / 2;
 		}
 		
 		boolean captchaSkipped = false;
@@ -2330,7 +2352,7 @@ public class FSControl {
 				if(contentType.equals("application/octet-stream")) {
 					throw new RuntimeException("Cannot view this file without download. Unavailable content type. Try download this.");
 				}
-				if(captchaSkipped && dataLength / 1024 >= limitPrev) {
+				if(captchaSkipped && (dataLength / 1024 >= limitPrev)) {
 					throw new RuntimeException("Cannot view this file without download. Too big. Try download this.");
 				}
 			}
@@ -3009,8 +3031,17 @@ public class FSControl {
 	}
 	
 	public String getLanguage(HttpServletRequest request) {
-    	String lang = (String) request.getSession().getAttribute("fslanguage");
-    	if(lang == null) lang = "en";
+		String lang = (String) request.getSession().getAttribute("fslanguage");
+				
+		JsonObject sess = getSessionObject(request);
+		if(sess != null) {
+			if(sess.get("lang"    ) != null) lang = sess.get("lang"    ).toString();
+			if(sess.get("language") != null) lang = sess.get("language").toString();
+		}
+		
+		if(lang == null) lang = "en";
+		lang = lang.trim().toLowerCase();
+		if(lang.length() > 2) lang = lang.substring(0, 2);
     	return lang;
     }
 

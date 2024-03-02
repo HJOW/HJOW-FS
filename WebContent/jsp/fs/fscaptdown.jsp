@@ -19,17 +19,14 @@ String clients = request.getHeader("User-Agent");
 
 String pathParam = request.getParameter("path");
 String fileName  = request.getParameter("filename");
-String speed     = request.getParameter("speed");
 String theme     = request.getParameter("theme");
 
 if(pathParam == null) pathParam = "";
 if(fileName  == null) fileName  = "";
-if(speed     == null) speed     = "";
 if(theme     == null) theme     = "";
 
 pathParam = FSUtils.removeSpecials(pathParam, false, true, true, false, true).replace("\\", "/").trim();
 fileName  = FSUtils.removeSpecials(fileName, false, true, true, true, false).replace("..", "").replace("?", "").replace("&", "").trim();
-speed     = FSUtils.removeSpecials(speed   ).replace("?", "").replace("&", "").trim();
 theme     = FSUtils.removeSpecials(theme   ).replace("?", "").replace("&", "").trim();
 
 int randomNo  = (int) Math.round(1000000 + Math.random() * 1000000 + Math.random() * 10000 + Math.random() * 100);
@@ -119,7 +116,6 @@ $(function() {
         <form action='fsdown.jsp' method='POST' class='form' target='_self'>
             <input type='hidden' name='path'     class='hid_path' value='<%=pathParam%>'/>
             <input type='hidden' name='filename' class='hid_name' value='<%=fileName%>'/>
-            <input type='hidden' name='speed'    class='hid_sped' value='<%=speed%>'/>
             <div class='row div_captcha_download'>
                 <div class='col-sm-6 align_center'>
 	                <input type='text'   class='inp_captcha_d lang_attr_element' name='captcha' placeholder='위의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code above'/>

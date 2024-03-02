@@ -24,9 +24,12 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 public class FSUtils {
+	/** Remove special characters */
 	public static String removeSpecials(String originals) {
 		return removeSpecials(originals, true, true, true, true, true);
 	}
+	
+	/** Remove special characters */
     public static String removeSpecials(String originals, boolean noSpace, boolean noQuote, boolean noTagBlace, boolean noSlice, boolean noDot) {
     	if(originals == null) return null;
     	String res = originals.replace("\n", "").replace("\t", "");
@@ -37,6 +40,8 @@ public class FSUtils {
     	if(noDot     ) res = res.replace(".", "");
     	return res.trim();
     }
+    
+    /** Remove comment string with custom comment symbol (Only support single line comment) */
     public static String removeLineComments(String original, char commentStartChar) {
     	boolean firstline = true;
     	StringBuilder result = new StringBuilder("");
@@ -84,8 +89,13 @@ public class FSUtils {
     	return result.toString();
     }
     
+    /** Get file's size to display */
     public static String getFileSize(File f) {
-	    long   lSize = f.length();
+    	return getFileSize(f.length());
+    }
+    
+    /** Get file's size to display */
+    public static String getFileSize(long lSize) {
 	    String sUnit = "byte";
 	    String comp  = "" + lSize + " " + sUnit;
 	    
@@ -121,6 +131,7 @@ public class FSUtils {
 	    return comp;
 	}
     
+    /** Make spaces to fill digits of string */
     public static String leftSpaces(String filled, int targettedDigit) {
     	if(filled.length() >= targettedDigit) return "";
     	StringBuilder res = new StringBuilder("");
@@ -130,6 +141,7 @@ public class FSUtils {
     	return res.toString();
     }
     
+    /** Find files in root directory with search keyword and maximum sizes. */
     public static List<String> find(File rootPath, String pPath, String pKeyword, long limitSize) throws IOException {
     	String pathParam = pPath;
 		if(pathParam == null) pathParam = "";
@@ -149,6 +161,7 @@ public class FSUtils {
 		return res;
     }
     
+    /** Find files in root directory with search keyword and maximum sizes. */
     private static List<String> find(File rootPath, File dir, String keyword, long limitSize, int recursiveDepth) throws IOException {
     	if(recursiveDepth >= 20) return new ArrayList<String>();
     	List<String> res = new ArrayList<String>();
@@ -176,6 +189,7 @@ public class FSUtils {
     	return res;
     }
     
+    /** Cut string with byte length */
     public static String cutStringSizeByte(String original, String charset, long sizes) {
     	try {
     		StringBuilder res = new StringBuilder("");
@@ -192,5 +206,50 @@ public class FSUtils {
     	} catch(UnsupportedEncodingException e) {
     		throw new RuntimeException(e.getMessage(), e);
     	}
+    }
+    
+    /** Receive whole parameter string to separated blocks. */
+    public static List<String> delimiterSpace(String parameterString) {
+    	if(parameterString == null) return new ArrayList<String>();
+    	List<String> res = new ArrayList<String>();
+    	StringBuilder blockOne = new StringBuilder("");
+    	int len = parameterString.length();
+    	char quotes = ' ';
+    	for(int idx=0; idx<len; idx++) {
+    		char charOne = parameterString.charAt(idx);
+    		
+    		if(quotes == '\'') {
+    			if(charOne == '\'') {
+    				res.add(blockOne.toString());
+    				blockOne.setLength(0);
+    				quotes = ' ';
+    			} else {
+    				blockOne = blockOne.append(String.valueOf(charOne));
+    			}
+    		} else if(quotes == '"') {
+    			if(charOne == '"') {
+    				res.add(blockOne.toString());
+    				blockOne.setLength(0);
+    				quotes = ' ';
+    			} else {
+    				blockOne = blockOne.append(String.valueOf(charOne));
+    			}
+    		} else {
+    			if(charOne == ' ') {
+    				if(blockOne.length() >= 1) res.add(blockOne.toString());
+    				blockOne.setLength(0);
+    			} else if(charOne == '\'') {
+    				quotes = '\'';
+    				blockOne.setLength(0);
+    			} else if(charOne == '"') {
+    				quotes = '"';
+    				blockOne.setLength(0);
+    			} else {
+    				blockOne = blockOne.append(String.valueOf(charOne));
+    			}
+    		}
+    	}
+    	if(blockOne.length() >= 1) res.add(blockOne.toString());
+    	return res;
     }
 }
