@@ -447,81 +447,7 @@ public class FSControl {
 				    if(! uploadd.exists()) uploadd.mkdirs();
 				    logd = new File(fileConfigPath.getCanonicalPath() + File.separator + ".logs");
 				    if(! logd.exists()) logd.mkdirs();
-				    if(conf.get("NoAnonymous") != null) {
-						noAnonymous = Boolean.parseBoolean(conf.get("NoAnonymous").toString().trim());
-					} else {
-						conf.put("NoAnonymous", new Boolean(noAnonymous));
-					}
-					if(conf.get("UseAccount") != null) {
-						noLogin = (! Boolean.parseBoolean(conf.get("UseAccount").toString().trim()));
-					} else {
-						conf.put("UseAccount", new Boolean(! noLogin));
-					}
-					if(conf.get("UseConsole") != null) {
-						noConsole = (! Boolean.parseBoolean(conf.get("UseConsole").toString().trim()));
-					} else {
-						conf.put("UseConsole", new Boolean(! noConsole));
-					}
-					if(conf.get("UseCaptchaDown") != null) {
-						captchaDownload = Boolean.parseBoolean(conf.get("UseCaptchaDown").toString().trim());
-					} else {
-						conf.put("UseCaptchaDown", new Boolean(captchaDownload));
-					}
-					if(conf.get("UseCaptchaLogin") != null) {
-						captchaLogin = Boolean.parseBoolean(conf.get("UseCaptchaLogin").toString().trim());
-					} else {
-						conf.put("UseCaptchaLogin", new Boolean(captchaLogin));
-					}
-					if(conf.get("LimitDownloadSize") != null) {
-						limitSize = Long.parseLong(conf.get("LimitDownloadSize").toString().trim());
-						limitPrev = limitSize / 10;
-					} else {
-						conf.put("LimitDownloadSize", limitSize + "");
-					}
-					if(conf.get("LimitPreviewSize") != null) {
-						limitPrev = Long.parseLong(conf.get("LimitPreviewSize").toString().trim());
-					} else {
-						conf.put("LimitPreviewSize", limitPrev + "");
-					}
-					if(conf.get("LimitFilesSinglePage") != null) {
-						limitCount = Integer.parseInt(conf.get("LimitFilesSinglePage").toString().trim());
-					} else {
-						conf.put("LimitFilesSinglePage", new Integer(limitCount));
-					}
-					if(conf.get("ReadFileIcon") != null) {
-						readFileIcon = Boolean.parseBoolean(conf.get("ReadFileIcon").toString().trim());
-					} else {
-						conf.put("ReadFileIcon", new Boolean(readFileIcon));
-					}
-					if(conf.get("Salt") != null) {
-						salt = conf.get("Salt").toString().trim();
-					}
-					if(conf.get("Title") != null) {
-						String tx = conf.get("Title").toString().trim();
-						if(! tx.equals("")) title = tx;
-					} else {
-						conf.put("Title", title);
-					}
-					if(conf.get("Log") != null) {
-						JsonObject confLog = null;
-						if(conf.get("Log") instanceof JsonObject) confLog = (JsonObject) conf.get("Log");
-						else confLog = (JsonObject) JsonObject.parseJson(conf.get("Log").toString());
-						
-	                    if(confLog.get("OnFile") != null) {
-	                    	logOnFile = Boolean.parseBoolean(confLog.get("OnFile").toString().trim());
-	                    }
-	                    if(confLog.get("OnJdbc") != null) {
-	                    	logOnJdbc = Boolean.parseBoolean(confLog.get("OnJdbc").toString().trim());
-	                    }
-	                    if(confLog.get("OnStdOut") != null) {
-	                    	logOnStd = Boolean.parseBoolean(confLog.get("OnStdOut").toString().trim());
-	                    }
-					} else {
-						JsonObject jsonSample = new JsonObject();
-						jsonSample.put("OnStdOut", new Boolean(logOnStd));
-						jsonSample.put("OnFile"  , new Boolean(logOnFile));
-						conf.put("Log", jsonSample);
-					}
+				    applyConfigs();
 	 			}
 				
 				// Searching FSPack declared from config (This config value is array filled with FSPack class names)
@@ -1163,11 +1089,15 @@ public class FSControl {
 				conf.put("UseConsole", new Boolean(useConsole));
 				conf.put("Installed", new Boolean(true));
 				
-				applyModifiedConfig(sessionMap.get("id").toString());
-				
-				logIn("Configuration Updated by " + sessionMap.get("id") + " when " + System.currentTimeMillis());
 				jsonConfig.clear();
 				jsonConfig = (JsonObject) conf.cloneObject();
+				
+				logIn("Configuration Updating requested by " + sessionMap.get("id") + " when " + System.currentTimeMillis());
+				
+				applyModifiedConfig(sessionMap.get("id").toString());
+				applyConfigs();
+				
+				logIn("Configuration Updated by " + sessionMap.get("id") + " when " + System.currentTimeMillis());
 				
 				json.put("message", "Update Success !");
 			} else if(req.equalsIgnoreCase("reset")) {
@@ -3542,6 +3472,92 @@ public class FSControl {
 			if(fileOut  != null) { try { fileOut.close();  } catch(Throwable tx) {} }
 		}
 		if(caught != null) throw new RuntimeException(caught.getMessage(), caught);
+	}
+	
+	public synchronized void applyConfigs() {
+		if(conf.get("NoAnonymous") != null) {
+			noAnonymous = Boolean.parseBoolean(conf.get("NoAnonymous").toString().trim());
+		} else {
+			conf.put("NoAnonymous", new Boolean(noAnonymous));
+		}
+		if(conf.get("UseAccount") != null) {
+			noLogin = (! Boolean.parseBoolean(conf.get("UseAccount").toString().trim()));
+		} else {
+			conf.put("UseAccount", new Boolean(! noLogin));
+		}
+		if(conf.get("UseConsole") != null) {
+			noConsole = (! Boolean.parseBoolean(conf.get("UseConsole").toString().trim()));
+		} else {
+			conf.put("UseConsole", new Boolean(! noConsole));
+		}
+		if(conf.get("UseCaptchaDown") != null) {
+			captchaDownload = Boolean.parseBoolean(conf.get("UseCaptchaDown").toString().trim());
+		} else {
+			conf.put("UseCaptchaDown", new Boolean(captchaDownload));
+		}
+		if(conf.get("UseCaptchaLogin") != null) {
+			captchaLogin = Boolean.parseBoolean(conf.get("UseCaptchaLogin").toString().trim());
+		} else {
+			conf.put("UseCaptchaLogin", new Boolean(captchaLogin));
+		}
+		if(conf.get("LimitDownloadSize") != null) {
+			limitSize = Long.parseLong(conf.get("LimitDownloadSize").toString().trim());
+			limitPrev = limitSize / 10;
+		} else {
+			conf.put("LimitDownloadSize", limitSize + "");
+		}
+		if(conf.get("LimitPreviewSize") != null) {
+			limitPrev = Long.parseLong(conf.get("LimitPreviewSize").toString().trim());
+		} else {
+			conf.put("LimitPreviewSize", limitPrev + "");
+		}
+		if(conf.get("LimitFilesSinglePage") != null) {
+			limitCount = Integer.parseInt(conf.get("LimitFilesSinglePage").toString().trim());
+		} else {
+			conf.put("LimitFilesSinglePage", new Integer(limitCount));
+		}
+		if(conf.get("ReadFileIcon") != null) {
+			readFileIcon = Boolean.parseBoolean(conf.get("ReadFileIcon").toString().trim());
+		} else {
+			conf.put("ReadFileIcon", new Boolean(readFileIcon));
+		}
+		if(conf.get("Salt") != null) {
+			salt = conf.get("Salt").toString().trim();
+		}
+		if(conf.get("Title") != null) {
+			String tx = conf.get("Title").toString().trim();
+			if(! tx.equals("")) title = tx;
+		} else {
+			conf.put("Title", title);
+		}
+		if(conf.get("Log") != null) {
+			JsonObject confLog = null;
+			if(conf.get("Log") instanceof JsonObject) confLog = (JsonObject) conf.get("Log");
+			else confLog = (JsonObject) JsonObject.parseJson(conf.get("Log").toString());
+			
+            if(confLog.get("OnFile") != null) {
+            	logOnFile = Boolean.parseBoolean(confLog.get("OnFile").toString().trim());
+            }
+            if(confLog.get("OnJdbc") != null) {
+            	logOnJdbc = Boolean.parseBoolean(confLog.get("OnJdbc").toString().trim());
+            }
+            if(confLog.get("OnStdOut") != null) {
+            	logOnStd = Boolean.parseBoolean(confLog.get("OnStdOut").toString().trim());
+            }
+		} else {
+			JsonObject jsonSample = new JsonObject();
+			jsonSample.put("OnStdOut", new Boolean(logOnStd));
+			jsonSample.put("OnFile"  , new Boolean(logOnFile));
+			conf.put("Log", jsonSample);
+		}
+		if(logFileWr != null) {
+			try { logFileWr.close(); } catch(Throwable txc) {}
+			logFileWr = null;
+		}
+		if(logConn != null) {
+			try { logConn.close(); } catch(Throwable txc) {}
+			logConn = null;
+		}
 	}
 	
 	/** Call action for FSPack alternative works for FSControl */

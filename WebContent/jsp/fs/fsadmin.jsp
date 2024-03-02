@@ -92,7 +92,8 @@ limitations under the License.
                         	if(typeof(conf['sHiddenDirs']) != 'undefined') hddirs = conf['sHiddenDirs'];
                         	form.find("[name='hiddendirs']").val(hddirs);
                         	
-                        	form.find("[name='limitsize']").val(conf['LimitUploadSize']);
+                        	form.find("[name='limitsize']").val(conf['LimitDownloadSize']);
+                        	form.find("[name='limitprev']").val(conf['LimitPreviewSize']);
                         	
                         	if(conf['UseCaptchaDown']) {
                         		form.find("[name='usecaptchadown']").prop('checked', true);
