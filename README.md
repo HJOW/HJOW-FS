@@ -32,6 +32,7 @@ Visit https://github.com/HJOW/HJOW-FS/releases
 + jQuery (https://jquery.com/)
 + jQuery UI (https://jquery.com/)
 + bootstrap (https://getbootstrap.com/)
++ video.js (http://videojs.com/) Copyright Brightcove, Inc.
 + Apache Common Codec (https://commons.apache.org/proper/commons-codec/)
 + json-simple (https://github.com/fangyidong/json-simple) - Removed on version 0.1.2
 + favicon, 'folder' icon from freepik.com (https://kr.freepik.com/icon/files_220980#fromView=search&term=Folder&track=ais&page=1&position=30)

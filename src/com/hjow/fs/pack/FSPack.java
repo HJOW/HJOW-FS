@@ -16,9 +16,11 @@ limitations under the License.
 package com.hjow.fs.pack;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.hjow.fs.FSControl;
+import com.hjow.fs.cttype.FSContentType;
 
 public abstract class FSPack implements Serializable {
 	private static final long serialVersionUID = 8739449348309321444L;
@@ -35,6 +37,10 @@ public abstract class FSPack implements Serializable {
 	
 	public FSRequestHandler getHandler(String method) {
 		return null;
+	}
+	
+	public List<FSContentType> getContentTypes() {
+		return new ArrayList<FSContentType>();
 	}
 	
 	@Override

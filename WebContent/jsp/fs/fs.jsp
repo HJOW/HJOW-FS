@@ -1,4 +1,7 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, java.io.*, java.util.* " session="true"%><%@ include file="common.pront.jsp"%><%
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8" import="com.hjow.fs.*, java.io.*, java.util.* "
+	session="true"%><%@ include file="common.pront.jsp"%>
+<%
 /*
 Copyright 2024 HJOW (Heo Jin Won)
 
@@ -14,37 +17,41 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-if(! fsc.isInstalled()) {
-	%>
-	<script type="text/javascript">
+if (!fsc.isInstalled()) {
+%>
+<script type="text/javascript">
 	$(function() {
 		location.href = "<%=fsc.getContextPath()%>/jsp/fs/fsinstall.jsp";
 	});
 	</script>
-	<a href="<%=fsc.getContextPath()%>/jsp/fs/fsinstall.jsp" class='lang_element' data-lang-en='[Install]'>[설치]</a>
-	<%
+<a href="<%=fsc.getContextPath()%>/jsp/fs/fsinstall.jsp"
+	class='lang_element' data-lang-en='[Install]'>[설치]</a>
+<%
 } else {
 String pathParam = request.getParameter("path");
-if(pathParam == null) pathParam = "";
+if (pathParam == null)
+	pathParam = "";
 
 // 상대경로 방지를 위해 . 기호  및 따옴표 문자는 반드시 제거 !
 pathParam = pathParam.trim();
-if(pathParam.equals("/")) pathParam = "";
+if (pathParam.equals("/"))
+	pathParam = "";
 pathParam = FSUtils.removeSpecials(pathParam, false, true, true, false, true).replace("\\", "/").trim();
 
-if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
+if (pathParam.startsWith("/"))
+	pathParam = pathParam.substring(1);
 
-boolean useConsole = (! fsc.isNoConsoleMode());
+boolean useConsole = (!fsc.isNoConsoleMode());
 %>
 <script type='text/javascript'>
 $(function() {
     var ctxPath = "<%=fsc.getContextPath()%>";
-    var useIcon        = <%=fsc.isReadFileIconOn()    ? "true" : "false"%>;
+    var useIcon        = <%=fsc.isReadFileIconOn() ? "true" : "false"%>;
     var useCaptchaDown = <%=fsc.isCaptchaDownloadOn() ? "true" : "false"%>;
-    var captchaWidth   = parseInt("<%=fsc.getCaptchaWidth()  + 100%>");
+    var captchaWidth   = parseInt("<%=fsc.getCaptchaWidth() + 100%>");
     var captchaHeight  = parseInt("<%=fsc.getCaptchaHeight() + 180%>");
     var noAnonymous    = <%=fsc.isNoAnonymous() ? "true" : "false"%>;
-    var loginedFirst   = <%= (fsc.getSessionUserId(request) != null) ? "true" : "false" %>
+    var loginedFirst   = <%=(fsc.getSessionUserId(request) != null) ? "true" : "false"%>
     
     var form     = $('.form_fs');
     var tables   = $('.fs_table_list');
@@ -62,6 +69,8 @@ $(function() {
     
     var arDirs  = [];
     var arFiles = [];
+    
+    var browserInfo = FSUtil.detectBrowser();
 
     listRoot.empty();
     pathDisp.text('');
@@ -154,7 +163,7 @@ $(function() {
 
     function fReload(firsts) {
     	if(firsts) {
-    		tables.find('.col_controls').css('width', '10px');
+    		tables.find('.col_controls').css('width', '50px');
             listRoot.find('binded-click').each(function() { $(this).off('click'); });
             
             listRoot.empty();
@@ -260,13 +269,29 @@ $(function() {
                 }
                 
                 for(idx = 0; idx < arFiles.length; idx++) {
-                    var lname  = String(arFiles[idx].name);
-                    var lsize  = String(arFiles[idx].size);
+                	var fileOne = arFiles[idx];
+                    var lname   = String(fileOne.name);
+                    var lsize   = String(fileOne.size);
+                    var cttype  = String(fileOne.contentType);
+                    var prvtype = String(fileOne.previewType);
                     
                     if(expVal != '') expVal += ',';
                     expVal += lname;
                     
-                    listRoot.append("<tr class='element tr_file tr_file_" + idx + "'><td class='td_mark_file filednd'>[FILE]</td><td class='filednd'><a href='#' class='link_file' data-path='' data-name=''></a></td><td class='td_file_size filednd'></td><td class='td_buttons'></td></tr>");
+                    var trHtml = "<tr class='element tr_file tr_file_" + idx + "'>";
+                    trHtml += "<td class='td_mark_file filednd'>[FILE]</td>";
+                    trHtml += "<td class='filednd'>";
+                    trHtml += "<div class='div_td_file_a'>";
+                    trHtml += "<a href='#' class='link_file' data-path='' data-name=''></a>";
+                    trHtml += "</div>";
+                    trHtml += "<div class='div_td_file_preview full invisible'>";
+                    trHtml += "</div>";
+                    trHtml += "</td>";
+                    trHtml += "<td class='td_file_size filednd'></td>";
+                    trHtml += "<td class='td_buttons'></td>";
+                    trHtml += "</tr>";
+                    
+                    listRoot.append(trHtml);
                     
                     var tr = listRoot.find('.tr_file_' + idx);
                     var a  = tr.find('.link_file');
@@ -275,13 +300,59 @@ $(function() {
                     a.attr('data-name', lname);
                     a.text(lname);
                     a.addClass('ellipsis');
+                    tr.attr('data-idx', '' + idx);
                     tr.addClass('no_icon');
                     tr.find('.td_file_size').text(lsize);
                     tr.find('.td_file_size').css('text-align', 'right');
 
+                    var tdBtns = tr.find('.td_buttons');
+                    tdBtns.css('text-align', 'right');
+                    tdBtns.append("<input type='button' class='btn_preview not_opened invisible' value='▼'/>");
+                    
+                    var divPrev = tr.find('.div_td_file_preview');
+                    var btnPreview = tdBtns.find('.btn_preview');
+                    if(prvtype >= 0) {
+                    	btnPreview.attr('data-path', a.attr('data-path'));
+                        btnPreview.attr('data-name', a.attr('data-name'));
+                        btnPreview.attr('data-idx', '' + idx);
+                        btnPreview.attr('data-prv', '' + prvtype);
+                        
+                        btnPreview.on('click', function() {
+                            var idxIn = $(this).attr('data-idx');
+                            var trIn  = listRoot.find('.tr_file_' + idxIn);
+                            var divPrvIn = trIn.find('.div_td_file_preview');
+                            var prvIn    = $(this).attr('data-prv');
+                            
+                            if($(this).is('.not_opened')) {
+                                $(this).removeClass('not_opened');
+                                $(this).attr('value', '△');
+                                
+                                divPrvIn.empty();
+                                // browserInfo.nm == 'ie' && browserInfo.ver < 9
+                                if(prvIn == '1') divPrvIn.append("<img class='img_preview preview_element'/>");
+                                if(prvIn == '2') divPrvIn.append("<video class='video_preview preview_element'/>");
+                                if(prvIn == '3') divPrvIn.append("<audio class='audio_preview preview_element'/>");
+                                if(prvIn == '4') divPrvIn.append("<iframe class='iframe_preview preview_element'></iframe>");
+                                
+                                var srcs = ctxPath + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent($(this).attr('data-path')) + "&filename=" + encodeURIComponent($(this).attr('data-name')) + "&mode=VIEW";
+                                var elem = divPrvIn.find('.preview_element');
+                                
+                                elem.css('height', 400);
+                                elem.attr('src', srcs);
+                                divPrvIn.removeClass('invisible');
+                            } else {
+                            	divPrvIn.addClass('invisible');
+                                $(this).addClass('not_opened');
+                                $(this).attr('value', '▼');
+                                divPrvIn.empty();
+                            }
+                            
+                        });
+                        btnPreview.addClass('binded_click');
+                        btnPreview.removeClass('invisible');
+                    }
+                    
                     if(idType == 'A') {
-                        var tdBtns = tr.find('.td_buttons');
-                        tdBtns.css('text-align', 'right');
                         tdBtns.append("<input type='button' class='btn_delete' value='X'/>");
 
                         var btnDel = tdBtns.find('.btn_delete');
@@ -499,69 +570,89 @@ $(function() {
         $('.fs_filelist_view').removeClass('invisible');
     }
     
-    <% if(useConsole) { %>
+    <%if (useConsole) {%>
     var btnConsole = form.find('.btn_console');
     btnConsole.on('click', function() {
         var theme = '';
         if($('body').is('.dark')) theme='dark';
         window.open(ctxPath + '/jsp/fs/fsconsolepop.jsp?theme=' + theme, 'console', 'width=780,height=450,scrollbars=yes,status=no,location=no,toolbar=no');
     });
-    <% } %>
+    <%}%>
     
     fReload(true);
 });
 </script>
 <div class='fs_root'>
-    <div class='fs_filelist fs_filelist_view container show-grid full'>
-    	<form class='form_fs' onsubmit='return false;'>
-    	    <input type='hidden' name='path'    class='hidden_path'    value='<%= pathParam %>'/>
-    	    <input type='hidden' name='excepts' class='hidden_excepts' value=''/>
-    	    <div class='row fs_title'>
-    	        <div class='col-sm-12'>
-    	            <h2><%= fsc.getTitle() %></h2>
-    	        </div>
-    	    </div>
-    	    <div class='row fs_directory'>
-    	        <div class='col-sm-10'>
-                    <h4 class='path_title'><span class='lang_element' data-lang-en='Current Directory : '>현재 디렉토리 : </span><span class='path'></span></h4>
-                </div>
-                <div class='col-sm-2'>
-                    <input type='button' class='btn_upload  privilege_element invisible lang_attr_element' value='업로드' data-lang-target='value' data-lang-en='Upload'/>
-                    <input type='button' class='btn_mkdir   privilege_element invisible lang_attr_element' value='새 폴더' data-lang-target='value' data-lang-en='New Folder'/>
-                    <input type='button' class='btn_config  privilege_element only_admin invisible lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config'/>
-                    <% if(useConsole) { %>
-                    <input type='button' class='btn_console lang_attr_element' value='콘솔' data-lang-target='value' data-lang-en='Console' accesskey="t"/>
-                    <% } %>
-                </div>
-    	    </div>
-    	    <div class='row fs_search'>
-    	        <div class='col-sm-10'>
-    	            <input type='text'   class='inp_search full lang_attr_element' name='keyword' placeholder="디렉토리 내 검색" data-lang-target='placeholder' data-lang-en='Search in current directory'/>
-    	        </div>
-    	        <div class='col-sm-2'>
-    	            <input type='submit' class='btn_search full lang_attr_element' value='검색' data-lang-target='value' data-lang-en='Search'/>
-    	        </div>
-    	    </div>
-    	    <div class='row fs_root'>
-    	        <div class='col-sm-12'>
-    		        <table class="table table-hover full fs_table_list">
-    		            <colgroup>
-    		                <col style='width:50px;'/>
-    		                <col/>
-    		                <col style='width:100px;'/>
-    		                <col style='width:10px;' class='col_controls'/>
-    		            </colgroup>
-    		            <tbody class='fs_list'>
-    		            
-    		            </tbody>
-    		        </table>
-    	        </div>
-    	    </div>
-    	</form>
-    </div>
-    <div class='fs_filelist fs_filelist_anonymous full invisible'>
-        <jsp:include page="fsanonymousblock.jsp"></jsp:include>
-    </div>
+	<div class='fs_filelist fs_filelist_view container show-grid full'>
+		<form class='form_fs' onsubmit='return false;'>
+			<input type='hidden' name='path' class='hidden_path'
+				value='<%=pathParam%>' /> <input type='hidden' name='excepts'
+				class='hidden_excepts' value='' />
+			<div class='row fs_title'>
+				<div class='col-sm-12'>
+					<h2><%=fsc.getTitle()%></h2>
+				</div>
+			</div>
+			<div class='row fs_directory'>
+				<div class='col-sm-10'>
+					<h4 class='path_title'>
+						<span class='lang_element' data-lang-en='Current Directory : '>현재
+							디렉토리 : </span><span class='path'></span>
+					</h4>
+				</div>
+				<div class='col-sm-2'>
+					<input type='button'
+						class='btn_upload  privilege_element invisible lang_attr_element'
+						value='업로드' data-lang-target='value' data-lang-en='Upload' /> <input
+						type='button'
+						class='btn_mkdir   privilege_element invisible lang_attr_element'
+						value='새 폴더' data-lang-target='value' data-lang-en='New Folder' />
+					<input type='button'
+						class='btn_config  privilege_element only_admin invisible lang_attr_element'
+						value='설정' data-lang-target='value' data-lang-en='Config' />
+					<%
+					if (useConsole) {
+					%>
+					<input type='button' class='btn_console lang_attr_element'
+						value='콘솔' data-lang-target='value' data-lang-en='Console'
+						accesskey="t" />
+					<%
+					}
+					%>
+				</div>
+			</div>
+			<div class='row fs_search'>
+				<div class='col-sm-10'>
+					<input type='text' class='inp_search full lang_attr_element'
+						name='keyword' placeholder="디렉토리 내 검색"
+						data-lang-target='placeholder'
+						data-lang-en='Search in current directory' />
+				</div>
+				<div class='col-sm-2'>
+					<input type='submit' class='btn_search full lang_attr_element'
+						value='검색' data-lang-target='value' data-lang-en='Search' />
+				</div>
+			</div>
+			<div class='row fs_root'>
+				<div class='col-sm-12'>
+					<table class="table table-hover full fs_table_list">
+						<colgroup>
+							<col style='width: 50px;' />
+							<col />
+							<col style='width: 100px;' />
+							<col style='width: 50px;' class='col_controls' />
+						</colgroup>
+						<tbody class='fs_list'>
+
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</form>
+	</div>
+	<div class='fs_filelist fs_filelist_anonymous full invisible'>
+		<jsp:include page="fsanonymousblock.jsp"></jsp:include>
+	</div>
 </div>
 <jsp:include page="common.footer.jsp"></jsp:include>
 <%

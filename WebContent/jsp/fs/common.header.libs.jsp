@@ -23,10 +23,13 @@ String ctxPathCmm = request.getContextPath();
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/bootstrap.css"/>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/bootstrap-theme.css"/>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/fonts.css"/>
+<link rel="stylesheet" href="<%= ctxPathCmm %>/css/video-js.css"/>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/fs.css"/>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/fsdark.css"/>
+<script type='text/javascript' src='<%= ctxPathCmm %>/js/video.js'></script>
 <!--[if lt IE 9]>
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/html5shiv-printshiv.min.js'></script>
+<script type='text/javascript' src='<%= ctxPathCmm %>/js/videojs-ie8.min.js'></script>
 <![endif]-->
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/jquery-1.12.4.js'></script>
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/jquery-ui.js'></script>

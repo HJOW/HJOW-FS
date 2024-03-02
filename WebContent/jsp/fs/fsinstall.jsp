@@ -99,9 +99,13 @@ if(! fsc.isInstalled()) {
 		                <div class='col-sm-10'><input type='password' name='pw' class='full lang_attr_element' placeholder="fs.properties 에 있는 암호" data-lang-target='placeholder' data-lang-en='Password in fs.properties'/></div>
 		            </div>
 		            <div class='row'>
-		                <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Limit Size (KB)'>용량 제한 (KB)</div>
-                        <div class='col-sm-10'><input type='number' name='limitsize' class='full lang_attr_element' placeholder="한 번에 업로드할 수 있는 최대 용량 (KB)" data-lang-target='placeholder' data-lang-en='Maximum size for upload at once (KB)' title='Maximum size for upload at once (KB)' value='10485760' step='1' min="1"/></div>
+		                <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Download Max Size (KB)'>다운로드 MAX (KB)</div>
+                        <div class='col-sm-10'><input type='number' name='limitsize' class='full lang_attr_element' placeholder="한 번에 다운로드할 수 있는 최대 용량 (KB)" data-lang-target='placeholder' data-lang-en='Maximum size for download at once (KB)' title='Maximum size for download at once (KB)' value='10485760' step='1' min="1"/></div>
 		            </div>
+		            <div class='row'>
+                        <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Preview Max Size (KB)'>미리보기 MAX (KB)</div>
+                        <div class='col-sm-10'><input type='number' name='limitprev' class='full lang_attr_element' placeholder="미리보기 가능한 파일 최대 용량 (KB)" data-lang-target='placeholder' data-lang-en='Maximum size for preview at once (KB)' title='Maximum size for preview at once (KB)' value='1048576' step='1' min="1"/></div>
+                    </div>
 		            <div class='row'>
                         <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Output Count'>출력 최대 갯수</div>
                         <div class='col-sm-10'><input type='number' name='limitcount' class='full lang_attr_element' placeholder="파일 목록 한번 불러올 때 가져올 최대 갯수" data-lang-target='placeholder' data-lang-en='Maximum count of files on single networking' title='Maximum count of files on single networking' value='1000'/></div>

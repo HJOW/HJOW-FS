@@ -61,6 +61,7 @@ import javax.swing.filechooser.FileSystemView;
 
 import com.hjow.fs.console.FSConsole;
 import com.hjow.fs.console.FSConsoleResult;
+import com.hjow.fs.cttype.FSContentType;
 import com.hjow.fs.lister.FSDefaultLister;
 import com.hjow.fs.lister.FSFileLister;
 import com.hjow.fs.lister.FSFileListingResult;
@@ -76,7 +77,7 @@ import hjow.common.util.DataUtil;
 import hjow.common.util.SecurityUtil;
 
 public class FSControl {
-	public static final int[] VERSION = {0, 1, 6, 13};
+	public static final int[] VERSION = {0, 1, 7, 14};
 	
 	private static FSControl instance = null;
 	
@@ -100,6 +101,8 @@ public class FSControl {
 
 	// Download limit size (KB)
 	protected long   limitSize = 10 * 1024 * 1024;
+	// Previewing limit size (KB)
+	protected long   limitPrev = 1  * 1024 * 1024;
 	
 	// Display limit count on one page
 	protected int    limitCount = 1000;
@@ -159,8 +162,12 @@ public class FSControl {
 	protected transient String ctxPath = "";
 	protected transient FSFileLister lister = new FSDefaultLister();
 	protected transient List<FSPack> packs = new ArrayList<FSPack>();
+	protected transient List<FSContentType> ftypes = new ArrayList<FSContentType>();
 	
-	protected FSControl() {}
+	protected FSControl() {
+		ftypes.addAll(FSContentType.getDefaults());
+	}
+	
 	public static FSControl getInstance() { return instance; }
 	
 	/** Initialize instances */
@@ -465,10 +472,16 @@ public class FSControl {
 					} else {
 						conf.put("UseCaptchaLogin", new Boolean(captchaLogin));
 					}
-					if(conf.get("LimitUploadSize") != null) {
-						limitSize = Long.parseLong(conf.get("LimitUploadSize").toString().trim());
+					if(conf.get("LimitDownloadSize") != null) {
+						limitSize = Long.parseLong(conf.get("LimitDownloadSize").toString().trim());
+						limitPrev = limitSize / 10;
 					} else {
-						conf.put("LimitUploadSize", limitSize + "");
+						conf.put("LimitDownloadSize", limitSize + "");
+					}
+					if(conf.get("LimitPreviewSize") != null) {
+						limitPrev = Long.parseLong(conf.get("LimitPreviewSize").toString().trim());
+					} else {
+						conf.put("LimitPreviewSize", limitPrev + "");
 					}
 					if(conf.get("LimitFilesSinglePage") != null) {
 						limitCount = Integer.parseInt(conf.get("LimitFilesSinglePage").toString().trim());
@@ -545,6 +558,13 @@ public class FSControl {
 						packs.add(pack);
 						
 						if(pack instanceof FSFileLister) this.lister = (FSFileLister) pack;
+						
+						List<FSContentType> typesBundled = pack.getContentTypes();
+						if(typesBundled != null) {
+							for(FSContentType t : typesBundled) {
+								if(! ftypes.contains(t)) ftypes.add(t);
+							}
+						}
 					} catch(Throwable tc) {
 					    logIn("Exception when loading Pack " + packClass + " - (" + tc.getClass().getName() + ") " + tc.getMessage());
 					}
@@ -778,6 +798,10 @@ public class FSControl {
 				if(sMaxSize == null) sMaxSize = "" + (1024 * 1024);
 				Long.parseLong(sMaxSize); // Checking valid number
 				
+				String sMaxPrev = request.getParameter("limitprev");
+				if(sMaxPrev == null) sMaxPrev = "" + (1024 * 1024);
+				Long.parseLong(sMaxPrev); // Checking valid number
+				
 				String sMaxCount = request.getParameter("limitcount");
 				if(sMaxCount == null) sMaxCount = "1000";
 				Integer.parseInt(sMaxCount); // Checking valid number
@@ -904,7 +928,8 @@ public class FSControl {
 				conf.put("UseCaptchaDown" , new Boolean(useCaptchaDown));
 				conf.put("UseCaptchaLogin", new Boolean(useCaptchaLogin));
 				conf.put("UseConsole", new Boolean(useConsole));
-				conf.put("LimitUploadSize", sMaxSize);
+				conf.put("LimitDownloadSize", sMaxSize);
+				conf.put("LimitPreviewSize", sMaxPrev);
 				conf.put("LimitFilesSinglePage", sMaxCount);
 				conf.put("ReadFileIcon", new Boolean(useReadFileIcon));
 				conf.put("S1", s1);
@@ -1103,6 +1128,10 @@ public class FSControl {
 				if(sMaxSize == null) sMaxSize = "" + (1024 * 1024);
 				Long.parseLong(sMaxSize); // Checking valid number
 				
+				String sMaxPrev = request.getParameter("limitprev");
+				if(sMaxPrev == null) sMaxPrev = "" + (1024 * 1024);
+				Long.parseLong(sMaxPrev); // Checking valid number
+				
 				String sMaxCount = request.getParameter("limitcount");
 				if(sMaxCount == null) sMaxCount = "1000";
 				Integer.parseInt(sMaxCount); // Checking valid number
@@ -1127,7 +1156,8 @@ public class FSControl {
 				conf.put("HiddenDirs", hiddenDirs);
 				conf.put("UseCaptchaDown" , new Boolean(useCaptchaDown));
 				if(! noLogin) conf.put("UseCaptchaLogin", new Boolean(useCaptchaLogin));
-				conf.put("LimitUploadSize", sMaxSize);
+				conf.put("LimitDownloadSize", sMaxSize);
+				conf.put("LimitPreviewSize", sMaxPrev);
 				conf.put("LimitFilesSinglePage", sMaxCount);
 				conf.put("ReadFileIcon", new Boolean(useReadFileIcon));
 				conf.put("UseConsole", new Boolean(useConsole));
@@ -1865,6 +1895,7 @@ public class FSControl {
 			    child.put("type", "dir");
 			    child.put("name", name);
 			    child.put("value", linkDisp);
+			    
 			    try { child.put("elements", f.list().length); } catch(Exception ignores) { }
 			    dirs.add(child);
 			}
@@ -1872,8 +1903,9 @@ public class FSControl {
 			dirs = null;
 
 			JsonArray files = new JsonArray();
+			StringTokenizer dotTokenizer = null;
 			for(File f : flist.getFiles()) {
-				String name     = f.getName();
+				String name = f.getName();
 			    if(! keyword.equals("")) { if(! name.toLowerCase().contains(keyword.toLowerCase())) continue; }
 			    
 			    String linkDisp = name.replace("\"", "'");
@@ -1883,6 +1915,39 @@ public class FSControl {
 			    fileOne.put("type", "file");
 			    fileOne.put("name", linkDisp);
 			    fileOne.put("size", FSUtils.getFileSize(f));
+			    
+			    if(limitPrev > 0) {
+			    	// Get Extension of file
+					dotTokenizer = new StringTokenizer(name, ".");
+					String ext = "";
+					if(dotTokenizer.countTokens() >= 2) {
+						while(dotTokenizer.hasMoreTokens()) {
+							ext = dotTokenizer.nextToken();
+						}
+					}
+					ext = ext.trim().toLowerCase();
+					dotTokenizer = null;
+					
+					// Get Content Types
+					FSContentType thisType = null;
+					for(FSContentType ty : ftypes) {
+						if(ty.getExtension().equals(ext)) {
+							thisType = ty;
+							break;
+						}
+					}
+					ext = null;
+					if(thisType == null) {
+						fileOne.put("contentType", "application/octet-stream");
+						fileOne.put("previewType", FSContentType.PREVIEW_TYPE_NONE);
+					} else {
+						fileOne.put("contentType", thisType.getContentType());
+						fileOne.put("previewType", new Integer(thisType.getPreviewType()));
+					}
+			    } else {
+			    	fileOne.put("contentType", "application/octet-stream");
+					fileOne.put("previewType", FSContentType.PREVIEW_TYPE_NONE);
+			    }
 			    
 			    files.add(fileOne);
 			}
@@ -2165,35 +2230,43 @@ public class FSControl {
 		        sleepRoutine = sleepRoutine / 2;
 		    }
 		}
+		
+		boolean captchaSkipped = false;
+		boolean viewMode = (mode.equals("VIEWER") || mode.equals("VIEW"));
 
 		FileInputStream fIn = null;
 		OutputStream outputs = null;
 		File file = null;
 		byte[] buffers = new byte[bufferSize];
+		
 		try {
 			if(captchaDownload) {
-				if(code.equals("SKIP")) {
-					capt = code;
-					time = new Long(now);
+				if(! viewMode) {
+					if(code.equals("SKIP")) {
+						capt = code;
+						time = new Long(now);
+					}
+					
+					if(! code.equals(capt)) {
+						throw new RuntimeException("Wrong captcha code !");
+				    }
+					
+					if(now - time.longValue() >= captchaLimitTime) {
+					    code = "REFRESH";
+					    request.getSession().setAttribute("fsd_captcha_code", code);
+					}
+					
+				    if(code.equals("REFRESH")) {
+				    	throw new RuntimeException("Too old captcha code !");
+				    }
+				    
+				    if(code.equals("SKIP")) {
+				    	code = "REFRESH";
+					    request.getSession().setAttribute("fsd_captcha_code", code);
+				    }
+				} else {
+					captchaSkipped = true;
 				}
-				
-				if(! code.equals(capt)) {
-					throw new RuntimeException("Wrong captcha code !");
-			    }
-				
-				if(now - time.longValue() >= captchaLimitTime) {
-				    code = "REFRESH";
-				    request.getSession().setAttribute("fsd_captcha_code", code);
-				}
-				
-			    if(code.equals("REFRESH")) {
-			    	throw new RuntimeException("Too old captcha code !");
-			    }
-			    
-			    if(code.equals("SKIP")) {
-			    	code = "REFRESH";
-				    request.getSession().setAttribute("fsd_captcha_code", code);
-			    }
 			}
 			
 			Object oHiddenDir = conf.get("HiddenDirs");
@@ -2292,7 +2365,7 @@ public class FSControl {
 			if(mode.equals("DOWNLOAD")) {
 				contentDisp = "attachment";
 				contentType = "application/octet-stream";
-			} else if(mode.equals("VIEWER") || mode.equals("VIEW")) {
+			} else if(viewMode) {
 				// Get Extension of file
 				StringTokenizer dotTokenizer = new StringTokenizer(fileName, ".");
 				String ext = "";
@@ -2303,33 +2376,33 @@ public class FSControl {
 				}
 				ext = ext.trim().toLowerCase();
 				
-				contentType = "application/octet-stream";
+				FSContentType cttype = null;
+				for(FSContentType ty : ftypes) {
+					if(ty.getExtension().equals(ext)) {
+						cttype = ty;
+						break;
+					}
+				}
 				
-				if(ext.equals("jpg") || ext.equals("jpeg")) contentType = "image/jpeg";
-				if(ext.equals("png"))  contentType = "image/png";
-				if(ext.equals("gif"))  contentType = "image/gif";
-				if(ext.equals("pdf"))  contentType = "application/pdf";
-				if(ext.equals("rtf"))  contentType = "application/rtf";
-				if(ext.equals("ppt"))  contentType = "application/vnd.ms-powerpoint";
-				if(ext.equals("xls"))  contentType = "application/vnd.ms-excel";
-				if(ext.equals("doc"))  contentType = "application/msword";
-				if(ext.equals("pptx")) contentType = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
-				if(ext.equals("xlsx")) contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-				if(ext.equals("docx")) contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-				if(ext.equals("odt"))  contentType = "application/vnd.oasis.opendocument.text";
-				if(ext.equals("ods"))  contentType = "application/vnd.oasis.opendocument.spreadsheet";
-				if(ext.equals("odp"))  contentType = "application/vnd.oasis.opendocument.presentation";
-				if(ext.equals("epub")) contentType = "application/epub+zip";
-				if(ext.equals("wav"))  contentType = "audio/wav";
-				if(ext.equals("mp3"))  contentType = "audio/mpeg";
-				if(ext.equals("mp4"))  contentType = "video/mp4";
-				if(ext.equals("mpeg")) contentType = "video/mpeg";
-				if(ext.equals("avi"))  contentType = "video/x-msvideo";
+				if(cttype == null) {
+					contentType = "application/octet-stream";
+				} else {
+					contentType = cttype.getContentType();
+				}
 				
 				if(! contentType.equals("application/octet-stream")) contentDisp = "inline";
 			} else {
 				contentDisp = "attachment";
 				contentType = "application/octet-stream";
+			}
+			
+			if(viewMode) {
+				if(contentType.equals("application/octet-stream")) {
+					throw new RuntimeException("Cannot view this file without download. Unavailable content type. Try download this.");
+				}
+				if(captchaSkipped && dataLength / 1024 >= limitPrev) {
+					throw new RuntimeException("Cannot view this file without download. Too big. Try download this.");
+				}
 			}
 			
 			response.setContentType(contentType);
@@ -2373,13 +2446,6 @@ public class FSControl {
 				
 				results = results.append("<pre>").append("Error : ").append(tx.getMessage()).append("</pre>");
 			}
-			
-			/*
-			StackTraceElement[] elements = tx.getStackTrace();
-			for(StackTraceElement e : elements) {
-				out.println(" at " + e);
-			}
-			*/
 		} finally {
 			if(fIn     != null) { try { fIn.close();       } catch(Throwable te) {}}
 			if(outputs != null) { try { outputs.close();   } catch(Throwable te) {}}
@@ -3112,6 +3178,14 @@ public class FSControl {
 
 	public void setLimitSize(long limitSize) {
 		this.limitSize = limitSize;
+	}
+	
+	public long getLimitPreview() {
+		return limitPrev;
+	}
+
+	public void setLimitPreview(long limitPrev) {
+		this.limitPrev = limitPrev;
 	}
 
 	public int getLimitCount() {
