@@ -107,13 +107,13 @@ public class FSControl {
 	// Display limit count on one page
 	protected int    limitCount = 1000;
 
-	// Perform downloading buffer size (bytes)
-	protected int  bufferSize   = 1024 * 10;
+	// Perform downloading buffer size (KB) - Downloading speed faster when this value is become higher.
+	protected int  bufferSize   = 10;
 
 	// Perform downloading thread's sleeping gap (milliseconds) - Downloading speed faster when this value is become lower.
 	protected long sleepGap     = 100;
 
-	// Perform downloading thread's sleeping cycle (times) - Downloading speed faster when this value is become lower.
+	// Perform downloading thread's sleeping cycle (times) - Downloading speed faster when this value is become higher.
 	protected int  sleepRoutine = 100;
 
 	// Captcha
@@ -2154,34 +2154,13 @@ public class FSControl {
 		if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
 		
 		JsonObject sessions = getSessionObject(request);
-		String speed = null;
+		int speed = getSessionUserSpeedConst(sessions);
 		String lang  = getLanguage(request);
 		
 		if(lang == null) lang = "en";
 		
-		if(sessions != null) {
-			String idtype = String.valueOf(sessions.get("idtype"));
-			if(idtype.equalsIgnoreCase("A")) speed = "fast";
-			if(sessions.get("speed") != null) speed = sessions.get("speed").toString();
-		}
-
 		int sleepRoutine = this.sleepRoutine;
-		if(speed != null) {
-			speed = speed.trim().toLowerCase();
-			if(speed.equals("andante")) {
-				sleepRoutine = sleepRoutine / 10;
-			} else if(speed.equals("slow")) {
-		    	sleepRoutine = sleepRoutine / 5;
-		    } else if(speed.equals("")) {
-		        sleepRoutine = sleepRoutine / 2;
-		    } else if(speed.equals("fast")) {
-		    	// DO NOTHING
-		    } else if(speed.equals("presto")) {
-		    	sleepRoutine = sleepRoutine * 2;
-		    }
-		} else {
-			sleepRoutine = sleepRoutine / 2;
-		}
+		sleepRoutine = (int) Math.round(sleepRoutine * speed);
 		
 		boolean captchaSkipped = false;
 		boolean viewMode = (mode.equals("VIEWER") || mode.equals("VIEW"));
@@ -2189,7 +2168,8 @@ public class FSControl {
 		FileInputStream fIn = null;
 		OutputStream outputs = null;
 		File file = null;
-		byte[] buffers = new byte[bufferSize];
+		int dBufferSize = this.bufferSize * 1024;
+		byte[] buffers = new byte[dBufferSize];
 		
 		try {
 			if(captchaDownload) {
@@ -2373,7 +2353,7 @@ public class FSControl {
 			int sleepCnt = sleepRoutine;
 		    fIn = new FileInputStream(file);
 			while(true) {
-				int readLengths = fIn.read(buffers, 0, bufferSize);
+				int readLengths = fIn.read(buffers, 0, dBufferSize);
 				if(readLengths < 0) break;
 				outputs.write(buffers, 0, readLengths);
 				
@@ -2964,7 +2944,7 @@ public class FSControl {
 			}
 			
 			if(request.getSession().getAttribute("fslanguage") != null) json.put("language", request.getSession().getAttribute("fslanguage"));
-			
+			json.put("spd", new Double(calculateSpeed(getSessionUserSpeedConst(sessionMap))));
 			json.put("noanonymous", new Boolean(noAnonymous));
 			json.put("message", msg);
 		} catch(Throwable t) {
@@ -3015,25 +2995,67 @@ public class FSControl {
 	public String getSessionUserId(HttpServletRequest request) {
 		JsonObject sess = getSessionObject(request);
 		if(sess == null) return null;
+		return getSessionUserId(sess);
+	}
+	
+	public String getSessionUserId(JsonObject sess) {
 		return sess.get("id").toString();
 	}
 	
 	public String getSessionUserNick(HttpServletRequest request) {
 		JsonObject sess = getSessionObject(request);
 		if(sess == null) return null;
+		return getSessionUserNick(sess);
+	}
+	
+	public String getSessionUserNick(JsonObject sess) {
 		return sess.get("nick").toString();
 	}
 	
 	public String getSessionUserType(HttpServletRequest request) {
 		JsonObject sess = getSessionObject(request);
 		if(sess == null) return null;
+		return getSessionUserType(sess);
+	}
+	
+	public String getSessionUserType(JsonObject sess) {
+		if(sess == null) return "G";
+		if(sess.get("idtype") == null) return "G";
 		return sess.get("idtype").toString().toUpperCase();
+	}
+	
+	public int getSessionUserSpeedConst(HttpServletRequest request) {
+		JsonObject sess = getSessionObject(request);
+		if(sess == null) return 2;
+		return getSessionUserSpeedConst(sess);
+	}
+	
+	public int getSessionUserSpeedConst(JsonObject sess) {
+		String sSpeed = null;
+		if(sess == null) return 2;
+		if(sess.get("speed") == null) {
+			if(getSessionUserType(sess).equals("A")) sSpeed = "5";
+			else sSpeed = "2";
+		} else {
+			sSpeed = sess.get("speed").toString().trim();
+		}
+		try { return Integer.parseInt(sSpeed); } catch(NumberFormatException e) { return 2; }
+	}
+	
+	public double calculateSpeed(int speedConst) {
+		double res = (double) bufferSize;
+		if(sleepGap != 0) res = res * (1000.0 / sleepGap);
+		else return -1;
+		return res = res * speedConst;
 	}
 	
 	public String getLanguage(HttpServletRequest request) {
 		String lang = (String) request.getSession().getAttribute("fslanguage");
-				
-		JsonObject sess = getSessionObject(request);
+    	return getLanguage(lang, getSessionObject(request));
+    }
+	
+	public String getLanguage(String fslang, JsonObject sess) {
+		String lang = fslang;
 		if(sess != null) {
 			if(sess.get("lang"    ) != null) lang = sess.get("lang"    ).toString();
 			if(sess.get("language") != null) lang = sess.get("language").toString();
@@ -3043,7 +3065,7 @@ public class FSControl {
 		lang = lang.trim().toLowerCase();
 		if(lang.length() > 2) lang = lang.substring(0, 2);
     	return lang;
-    }
+	}
 
 	public JsonObject getConfig() {
 		return conf;
@@ -3546,6 +3568,20 @@ public class FSControl {
 			limitCount = Integer.parseInt(conf.get("LimitFilesSinglePage").toString().trim());
 		} else {
 			conf.put("LimitFilesSinglePage", new Integer(limitCount));
+		}
+		if(conf.get("BufferSize") != null) {
+			bufferSize = Integer.parseInt(conf.get("BufferSize").toString().trim());
+			if(bufferSize <= 1) bufferSize = 1;
+		} else {
+			conf.put("BufferSize", new Integer(bufferSize));
+		}
+		if(conf.get("SleepGap") != null) {
+			sleepGap = Integer.parseInt(conf.get("SleepGap").toString().trim());
+			if(sleepGap < 20) sleepGap = 20;
+		}
+		if(conf.get("SleepRoutine") != null) {
+			sleepRoutine = Integer.parseInt(conf.get("SleepRoutine").toString().trim());
+			if(sleepRoutine <= 1) sleepRoutine = 1;
 		}
 		if(conf.get("ReadFileIcon") != null) {
 			readFileIcon = Boolean.parseBoolean(conf.get("ReadFileIcon").toString().trim());
