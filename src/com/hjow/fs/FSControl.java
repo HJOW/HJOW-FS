@@ -2376,6 +2376,7 @@ public class FSControl {
 		    try { outputs.close();   } catch(Throwable te) {}
 		    fIn     = null;
 		    outputs = null;
+		    logIn("Download end, " + file.getName() + " at " + System.currentTimeMillis() + " from " + request.getRemoteAddr() + ", serial : " + downloadSerial);
 		    return;
 		} catch(Throwable tx) {
 			try {

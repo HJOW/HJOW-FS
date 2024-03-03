@@ -122,7 +122,7 @@ $(function() {
 	                <input type='button' class='btn_re lang_attr_element' value='새로고침' data-lang-target='value' data-lang-en='Refresh'/>
                 </div>
             </div>
-            <div class='row'>
+            <div class='row padding_top_10 padding_bottom_10'>
                 <div class='col-sm-12 align_right'>
                     <select name='mode' class='sel_mode'>
                         <option value='DOWNLOAD' class='lang_element' data-lang-en='DOWNLOAD' selected>다운로드</option>
@@ -131,7 +131,7 @@ $(function() {
                 </div>
             </div>
         </form>
-        <div class='row'>
+        <div class='row margin_bottom_20'>
             <div class='col-sm-12'>
             </div>
         </div>

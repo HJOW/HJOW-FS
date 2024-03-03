@@ -23,6 +23,16 @@ try {
 			try { FSControl.log(excMsg, this.getClass()); } catch(Throwable ig) { System.out.println(excMsg); }
 			return;
 		}
+		
+		if(exception.getCause() != null) {
+			Throwable causes = exception.getCause();
+			excMsg = exception.getMessage();
+			if(causes instanceof SocketException) {
+	            excMsg = "On error.jsp, " + excMsg;
+	            try { FSControl.log(excMsg, this.getClass()); } catch(Throwable ig) { System.out.println(excMsg); }
+	            return;
+	        }
+		}
 	}
 	
 	if(excMsg == null) excMsg = "";
