@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, java.io.*, java.util.* " isErrorPage="true" %><%
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, java.io.*, java.util.* , java.net.*" isErrorPage="true" %><%
 /*
 Copyright 2024 HJOW (Heo Jin Won)
 
@@ -14,12 +14,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
 String excMsg = "";
-if(exception != null) excMsg = exception.getMessage();
-if(excMsg    == null) excMsg = "";
-excMsg = excMsg.replace("<", "&lt;").replace(">", "&gt;");
-%>
+try {
+	if(exception != null) {
+		excMsg = exception.getMessage();
+		if(exception instanceof SocketException) {
+			excMsg = "On error.jsp, " + excMsg;
+			try { FSControl.log(excMsg, this.getClass()); } catch(Throwable ig) { System.out.println(excMsg); }
+			return;
+		}
+	}
+	
+	if(excMsg == null) excMsg = "";
+	excMsg = excMsg.replace("<", "&lt;").replace(">", "&gt;");
+	%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -34,4 +42,11 @@ excMsg = excMsg.replace("<", "&lt;").replace(">", "&gt;");
         <a href="../index.jsp">[Home]</a>
     </div>
 </body>
-</html>
+</html>	
+	<%
+} catch(Throwable tx) {
+	excMsg = "Exception on error.jsp - (" + tx.getClass().getName() + ") - " + tx.getMessage() + "\n";
+	if(exception != null) excMsg += "    Caused exception - (" + exception.getClass().getName() + ") - " + exception.getMessage();
+	try { FSControl.log(excMsg, this.getClass()); } catch(Throwable ig) { System.out.println(excMsg); }
+}
+%>

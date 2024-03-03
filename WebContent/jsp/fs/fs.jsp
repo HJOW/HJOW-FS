@@ -433,7 +433,7 @@ $(function() {
                     var aLink = $(this);
                     aLink.on('click', function() {
                     	if($(this).is('.disabled')) return;
-                        var popOpt = 'width=' + (captchaWidth + 50) + "," + "height=" + (captchaHeight + 50);
+                        var popOpt = 'width=' + (captchaWidth + 150) + "," + "height=" + (captchaHeight + 50);
                         popOpt += ',scrollbars=no,status=no,location=no,toolbar=no';
                         var theme = '';
                         if($('body').is('.dark')) theme='dark';

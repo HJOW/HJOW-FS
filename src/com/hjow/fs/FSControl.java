@@ -111,10 +111,10 @@ public class FSControl {
 	protected int  bufferSize   = 10;
 
 	// Perform downloading thread's sleeping gap (milliseconds) - Downloading speed faster when this value is become lower.
-	protected long sleepGap     = 100;
+	protected long sleepGap     = 50;
 
 	// Perform downloading thread's sleeping cycle (times) - Downloading speed faster when this value is become higher.
-	protected int  sleepRoutine = 100;
+	protected int  sleepRoutine = 10;
 
 	// Captcha
 	protected boolean captchaDownload = true, captchaLogin = true;
@@ -2126,10 +2126,16 @@ public class FSControl {
 		return msg;
 	}
 	
-	public String download(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+	private int downloadSerial = 0;
+	public void download(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
 		request.setCharacterEncoding("UTF-8");
 		
 		long now = System.currentTimeMillis();
+		
+		if(this.downloadSerial >= Integer.MAX_VALUE - 10) this.downloadSerial = 0;
+	    this.downloadSerial++;
+		int downloadSerial = this.downloadSerial;
+		
 		StringBuilder results = new StringBuilder("");
 		
 		String clients = request.getHeader("User-Agent");
@@ -2350,6 +2356,8 @@ public class FSControl {
 			
 			outputs = response.getOutputStream();
 			
+			logIn("Download requested, " + file.getName() + " at " + System.currentTimeMillis() + " from " + request.getRemoteAddr() + ", serial : " + downloadSerial);
+			
 			int sleepCnt = sleepRoutine;
 		    fIn = new FileInputStream(file);
 			while(true) {
@@ -2366,23 +2374,28 @@ public class FSControl {
 			
 			try { fIn.close();       } catch(Throwable te) {}
 		    try { outputs.close();   } catch(Throwable te) {}
-		    return null;
+		    fIn     = null;
+		    outputs = null;
+		    return;
 		} catch(Throwable tx) {
-			logIn("Exception message while sending file : " + tx.getMessage());
-			if((tx instanceof java.net.SocketException) && tx.getMessage().indexOf("socket write error") >= 0) {
-				// NOTHING
-			} else {
-				logIn("Exception message while sending file : " + tx.getMessage());
-				response.reset();
-				response.setContentType("text/html;charset=UTF-8");
-				
-				results = results.append("<pre>").append("Error : ").append(tx.getMessage()).append("</pre>");
-			}
+			try {
+				if(((tx instanceof java.net.SocketException) || (tx.getCause() != null && (tx.getCause() instanceof java.net.SocketException)))) {
+					logIn("SocketException - " + tx.getMessage() + "... May be, downloading cancelled by client. Serial : " + downloadSerial);
+				} else {
+					logIn("Exception message while sending file : (" + tx.getClass().getName() + ") " + tx.getMessage() + "... Serial : " + downloadSerial);
+					
+					response.reset();
+					response.setContentType("text/html;charset=UTF-8");
+					
+					results = results.append("<pre>").append("Error : ").append(tx.getMessage()).append("</pre>");
+					if(outputs == null) outputs = response.getOutputStream();
+					outputs.write(results.toString().getBytes(cs));
+				}
+			} catch(Throwable tIn) { logIn("Exception when processing main exception on performing download - (" + tIn.getClass().getName() + ") " + tIn.getMessage()); }
 		} finally {
 			if(fIn     != null) { try { fIn.close();       } catch(Throwable te) {}}
 			if(outputs != null) { try { outputs.close();   } catch(Throwable te) {}}
 		}
-		return results.toString();
 	}
 	
 	public JsonObject mkdir(HttpServletRequest request) {
@@ -2921,7 +2934,7 @@ public class FSControl {
 			        	
 			        	sessionMap = accountOne;
 			        	request.getSession().setAttribute("fssession", accountJsonNew.toJSON());
-			            logIn("Login Accept : " + id + " at " + now);
+			            logIn("Login Accept : " + id + " at " + now + " from " + request.getRemoteAddr());
 			            needInvalidate = false;
 			            json.put("success", new Boolean(true));
 			        }
