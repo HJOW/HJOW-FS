@@ -323,6 +323,7 @@ public class FSControl {
 			                        fileConfigPath = new File(System.getProperty(cf) + File.separator + ".fs" + File.separator);
 			                    } else {
 			                        // Else, then get directory as absolute path.
+			                    	cf = cf.replace("\\", File.separator);
 			                    	fileConfigPath = new File(cf + File.separator + ".fs" + File.separator);
 			                    }
 			                    if(! fileConfigPath.exists()) fileConfigPath.mkdirs();
