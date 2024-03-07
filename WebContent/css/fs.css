@@ -16,13 +16,34 @@ limitations under the License.
 */
 body {
     margin: 0; padding: 0;
+    background-color: #FFFFFF;
 }
+
 body, div, span, a, p, pre, input {
     font-family : D2Coding, 'D2 coding', NanumGothicCoding, '나눔고딕코딩', NanumGothic, '나눔고딕', 돋움;
 }
+
 body td.td_mark_dir, body.dark div.td_mark_dir {
     color: #C4B73B;
 }
+
+body .container {
+    background-color: #EEEEEE;
+}
+
+body .container div, body .container p, body .container table {
+    background-color: #DDDDDD;
+}
+
+body input, body textarea, body select {
+    background-color: #BBBBBB;
+    color: #222222;
+}
+
+body div, body p, body h1, body h2, body h3, body h4, body h5, body h6, body table, body td, body th {
+    color: #333333;
+}
+
 .full {
     width: 100%;
 }
