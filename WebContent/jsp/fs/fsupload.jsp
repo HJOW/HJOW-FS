@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*"%><%@ include file="common.pront.jsp"%><%
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, hjow.common.util.*"%><%@ include file="common.pront.jsp"%><%
 /*
 Copyright 2024 HJOW (Heo Jin Won)
 
@@ -20,6 +20,11 @@ pathParam = pathParam.trim();
 if(pathParam.equals("/")) pathParam = "";
 pathParam = FSUtils.removeSpecials(pathParam, false, true, true, false, true).replace("\\", "/").trim();
 if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
+
+String sPopin = request.getParameter("popin");
+if(sPopin == null) sPopin = "false";
+boolean popin = DataUtil.parseBoolean(sPopin);
+
 %>
 <!DOCTYPE html>
 <html>
@@ -39,7 +44,8 @@ $(function() {
 </head>
 <body class='popup'>
     <form action="<%=fsc.getContextPath()%>/jsp/fs/fsuploadin.jsp" method="post" enctype="multipart/form-data">
-    <input type='hidden' name='path' class='hidden_path'/>
+    <input type='hidden' name='path'  class='hidden_path' />
+    <input type='hidden' name='popin' class='hidden_popin' value='<%=popin%>'/>
     <div class='container show-grid full'>
         <div class='row'>
             <div class='col-sm-12'>

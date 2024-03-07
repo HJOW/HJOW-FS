@@ -52,45 +52,71 @@ body.dark a.flatbutton, body.dark input.flatbutton, body.dark button.flatbutton 
     border: 1px solid rgb(110, 150, 230);
     color: rgb(110, 150, 230);
 }
+
 body.dark a.flatbutton.thick, body.dark input.flatbutton.thick, body.dark button.flatbutton.thick {
 	background-color: #4f4f6a;
 	border: 3px solid rgb(110, 150, 230);
 }
+
 body.dark a.flatbutton.green, input.flatbutton.green, button.flatbutton.green {
     border: 1px solid rgb(110, 230, 150);
     color: rgb(110, 230, 150);
 }
+
 body.dark a.flatbutton.green.thick, input.flatbutton.green.thick, button.flatbutton.green.thick {
 	border: 3px solid rgb(110, 230, 150);
 }
+
 body.dark a.flatbutton.red, input.flatbutton.red, button.flatbutton.red {
     border: 1px solid rgb(230, 120, 120);
     color: rgb(230, 120, 120);
 }
+
 body.dark a.flatbutton.red.thick, input.flatbutton.red.thick, button.flatbutton.red.thick {
 	border: 3px solid rgb(230, 120, 120);
 }
+
 body.dark a.flatbutton.disabled, body.dark input.flatbutton.disabled, body.dark button.flatbutton.disabled {
     border: 1px solid rgb(110, 110, 110);
     color: rgb(110, 110, 110);
 }
+
 body.dark a.flatbutton.disabled.thick, body.dark input.flatbutton.disabled.thick, body.dark button.flatbutton.disabled.thick {
 	border: 3px solid rgb(110, 110, 110);
 }
+
 body.dark a.flatbutton:hover, body.dark input.flatbutton:hover, body.dark button.flatbutton:hover {
     background-color: #4f4f6a;
     box-shadow: 2px 2px 2px 0 rgb(70, 100, 150);
 }
+
 body.dark a.flatbutton.green:hover, body.dark input.flatbutton.green:hover, body.dark button.flatbutton.green:hover {
 	background-color: #4f6a4f;
 }
+
 body.dark a.flatbutton.red:hover, body.dark input.flatbutton.red:hover, body.dark button.flatbutton.red:hover {
 	background-color: #6a4f4f;
 }
+
 body.dark a.flatbutton.disabled:hover, input.flatbutton.disabled:hover, button.flatbutton.disabled:hover {
     border: 1px solid rgb(110, 110, 110);
     box-shadow: 0;
 }
+
 body.dark a.flatbutton.disabled.thick:hover, input.flatbutton.disabled.thick:hover, button.flatbutton.disabled.thick:hover {
 	border: 3px solid rgb(110, 110, 110);
+}
+
+body.dark .ui-dialog {
+	background-color: #2f2f2f;
+}
+
+body.dark .ui-dialog-content {
+    background-color: #2f2f2f;
+    color: #C9C9C9;
+}
+
+body.dark .ui-dialog-titlebar {
+	background-color: #3f3f3f;
+	color: #C9C9C9;
 }

@@ -34,6 +34,10 @@ a {
 .invisible {
     display: none !important;
 }
+.invisible_wh {
+	height: 0px !important;
+	overflow: hidden !important;
+}
 .fs_filedndacts {
 	overflow: hidden;
 	height: 0px;
@@ -145,4 +149,12 @@ a.flatbutton.disabled:hover, input.flatbutton.disabled:hover, button.flatbutton.
 a.flatbutton.disabled.thick:hover, input.flatbutton.disabled.thick:hover, button.flatbutton.disabled.thick:hover {
 	background-color: rgb(200, 200, 200);
     border: 3px solid rgb(180, 180, 180);
+}
+
+.ui-dialog .ui-dialog-content.fs_pop_in {
+	overflow: hidden;
+}
+
+.ui-dialog .ui-dialog-content.fs_pop_in.full {
+	width: 100% !important;
 }

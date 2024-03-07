@@ -1,6 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8" import="com.hjow.fs.*, java.io.*, java.util.* "
-	session="true"%><%@ include file="common.pront.jsp"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, java.io.*, java.util.* " session="true"%><%@ include file="common.pront.jsp"%>
 <%
 /*
 Copyright 2024 HJOW (Heo Jin Won)
@@ -44,6 +42,7 @@ if (pathParam.startsWith("/"))
 boolean useConsole = (!fsc.isNoConsoleMode());
 %>
 <script type='text/javascript'>
+var debugs = {};
 $(function() {
     var ctxPath = "<%=fsc.getContextPath()%>";
     var useIcon        = <%=fsc.isReadFileIconOn() ? "true" : "false"%>;
@@ -52,6 +51,10 @@ $(function() {
     var captchaHeight  = parseInt("<%=fsc.getCaptchaHeight() + 180%>");
     var noAnonymous    = <%=fsc.isNoAnonymous() ? "true" : "false"%>;
     var loginedFirst   = <%=(fsc.getSessionUserId(request) != null) ? "true" : "false"%>
+    
+    var captSizes = {};
+    captSizes['width' ] = <%= fsc.getCaptchaWidth()  %>;
+    captSizes['height'] = <%= fsc.getCaptchaHeight() %>;
     
     var fsRoot = $('.fs_root');
     
@@ -71,6 +74,102 @@ $(function() {
     
     var formAllSr = fsRoot.find('.form_allsearch');
     var inpAllSr  = formAllSr.find('.inp_allsearch');
+    
+    var popRoot = $('.fs_pops');
+    var pops = {};
+    pops['captdown'] = {};
+    pops['captdown'].iframe = popRoot.find('.fs_pop_captdown').find('iframe');
+    pops['captdown'].dialog = popRoot.find('.fs_pop_captdown').dialog({ autoOpen : false, title : 'Downloads', width : captSizes['width'] + 300, height : captSizes['height'] + 320, resize : function(event, ui) { pops['captdown'].iframe.height(ui.size.height - 90);  } });
+    pops['captdown'].open   = function() {
+    	var d   = pops['captdown'].dialog;
+    	var ifr = pops['captdown'].iframe;
+    	ifr.css('width', '100%');
+    	ifr.css('overflow-y', 'hidden');
+    	ifr.height(captSizes['height'] + 320 - 90);
+    	ifr.attr('scrolling', 'no');
+    	ifr.attr('frameborder', '0');
+    	
+    	ifr.on('load', function() {
+    		var ct = ifr.contents();
+    		var cForm = ct.find('form');
+            cForm.on('submit', function() {
+                pops['captdown'].close();
+            });
+    	});
+    	$('.ui-dialog-titlebar-close').text('X');
+    	d.dialog('open');
+    };
+    pops['captdown'].close = function() {
+    	var d = pops['captdown'].dialog;
+        d.dialog('close');
+    };
+    pops['upload'] = {};
+    pops['upload'].iframe = popRoot.find('.fs_pop_upload').find('iframe');
+    pops['upload'].dialog = popRoot.find('.fs_pop_upload').dialog({ autoOpen : false, title : 'Uploads', width : 350, height : 230, resize : function(event, ui) { pops['upload'].iframe.height(ui.size.height - 90);  } });
+    pops['upload'].open   = function() {
+    	var d   = pops['upload'].dialog;
+        var ifr = pops['upload'].iframe;
+        ifr.css('width', '100%');
+        ifr.css('overflow-y', 'hidden');
+        ifr.height(230 - 90);
+        ifr.attr('scrolling', 'no');
+        ifr.attr('frameborder', '0');
+        
+        ifr.on('load', function() {
+        	var ct = ifr.contents();
+            var cForm = ct.find('form');
+            cForm.on('submit', function() {
+                pops['captdown'].close();
+            });
+        });
+        $('.ui-dialog-titlebar-close').text('X');
+        d.dialog('open');
+    };
+    pops['upload'].close  = function() {
+    	var d = pops['upload'].dialog;
+        d.dialog('close');
+    };
+    pops['console'] = {};
+    pops['console'].iframe = popRoot.find('.fs_pop_console').find('iframe');
+    pops['console'].dialog = popRoot.find('.fs_pop_console').dialog({ autoOpen : false, title : 'Console', width : 780, height : 550, resize : function(event, ui) { pops['console'].iframe.height(ui.size.height - 90);  } });
+    pops['console'].open   = function() {
+        var d   = pops['console'].dialog;
+        var ifr = pops['console'].iframe;
+        ifr.css('width', '100%');
+        ifr.css('overflow-y', 'hidden');
+        ifr.height(550 - 90);
+        ifr.attr('scrolling', 'no');
+        ifr.attr('frameborder', '0');
+        
+        ifr.on('load', function() {
+            var ct = ifr.contents();
+            ct.find('.tf_terminal_console').focus();
+        });
+        $('.ui-dialog-titlebar-close').text('X');
+        d.dialog('open');
+    };
+    pops['console'].close  = function() {
+        var d = pops['console'].dialog;
+        d.dialog('close');
+    };
+    pops['admin'] = {};
+    pops['admin'].iframe = popRoot.find('.fs_pop_admin').find('iframe');
+    pops['admin'].dialog = popRoot.find('.fs_pop_admin').dialog({ autoOpen : false, title : 'Admin', width : 780, height : 550, resize : function(event, ui) { pops['admin'].iframe.height(ui.size.height - 90);  } });
+    pops['admin'].open   = function() {
+        var d   = pops['admin'].dialog;
+        var ifr = pops['admin'].iframe;
+        ifr.css('width', '100%');
+        ifr.css('overflow-y', 'scroll');
+        ifr.height(550 - 90);
+        ifr.attr('scrolling', 'yes');
+        ifr.attr('frameborder', '0');
+        $('.ui-dialog-titlebar-close').text('X');
+        d.dialog('open');
+    };
+    pops['admin'].close  = function() {
+        var d = pops['admin'].dialog;
+        d.dialog('close');
+    };
     
     var arDirs  = [];
     var arFiles = [];
@@ -457,12 +556,11 @@ $(function() {
                     var aLink = $(this);
                     aLink.on('click', function() {
                     	if($(this).is('.disabled')) return;
-                        var popOpt = 'width=' + (captchaWidth + 150) + "," + "height=" + (captchaHeight + 50);
-                        popOpt += ',scrollbars=no,status=no,location=no,toolbar=no';
                         var theme = '';
                         if($('body').is('.dark')) theme='dark';
                         if(useCaptchaDown) {
-                        	window.open(ctxPath + '/jsp/fs/' + 'fscaptdown.jsp?theme=' + theme + '&path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')), 'download', popOpt);
+                        	pops['captdown'].iframe.attr('src', ctxPath + '/jsp/fs/' + 'fscaptdown.jsp?popin=true&theme=' + theme + '&path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')));
+                        	pops['captdown'].open();
                         } else {
                         	location.href = ctxPath + '/jsp/fs/' + 'fsdown.jsp?path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name'));
                         }
@@ -524,19 +622,21 @@ $(function() {
 
     btnUpload.on('click', function() {
         var paths = inpPath.val();
-        var popOpt = 'width=300,height=200,scrollbars=no,status=no,location=no,toolbar=no';
         var theme = '';
         if($('body').is('.dark'))   theme='dark';
         else if(fsRoot.is('.dark')) theme='dark';
-        window.open(ctxPath + '/jsp/fs/fsupload.jsp?theme=' + theme + '&path=' + encodeURIComponent(paths), 'upload', popOpt);
+        
+        pops['upload'].iframe.attr('src', ctxPath + '/jsp/fs/fsupload.jsp?popin=true&theme=' + theme + '&path=' + encodeURIComponent(paths));
+        pops['upload'].open();
     });
     
     btnConfig.on('click', function() {
-        var popOpt = 'width=780,height=550,scrollbars=yes,status=no,location=no,toolbar=no';
         var theme = '';
         if($('body').is('.dark')) theme='dark';
         else if(fsRoot.is('.dark')) theme='dark';
-        window.open(ctxPath + '/jsp/fs/fsadmin.jsp?theme=' + theme, 'config', popOpt);
+        
+        pops['admin'].iframe.attr('src', ctxPath + '/jsp/fs/fsadmin.jsp?popin=true&theme=' + theme);
+        pops['admin'].open();
     });
     
     btnMkdir.on('click', function() {
@@ -683,7 +783,9 @@ $(function() {
         var theme = '';
         if($('body').is('.dark'))   theme='dark';
         else if(fsRoot.is('.dark')) theme='dark';
-        window.open(ctxPath + '/jsp/fs/fsconsolepop.jsp?theme=' + theme, 'console', 'width=780,height=450,scrollbars=yes,status=no,location=no,toolbar=no');
+        
+        pops['console'].iframe.attr('src', ctxPath + '/jsp/fs/fsconsolepop.jsp?popin=true&theme=' + theme);
+        pops['console'].open();
     });
     <%}%>
     
@@ -755,6 +857,12 @@ $(function() {
 	</div>
 	<div class='fs_filelist fs_filelist_anonymous full invisible'>
 		<jsp:include page="fsanonymousblock.jsp"></jsp:include>
+	</div>
+	<div class='fs_pops invisible_wh'>
+	    <div class='fs_pop_captdown fs_pop_in full'><iframe></iframe></div>
+	    <div class='fs_pop_upload   fs_pop_in full'><iframe></iframe></div>
+	    <div class='fs_pop_console  fs_pop_in full'><iframe></iframe></div>
+	    <div class='fs_pop_admin    fs_pop_in full'><iframe></iframe></div>
 	</div>
 </div>
 <jsp:include page="common.footer.jsp"></jsp:include>
