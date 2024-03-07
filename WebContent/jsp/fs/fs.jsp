@@ -69,7 +69,8 @@ $(function() {
     var btnMkdir  = form.find('.btn_mkdir');
     var btnConfig = form.find('.btn_config');
     
-    var formAllSr = fsRoot.find('.fs_allsearch');
+    var formAllSr = fsRoot.find('.form_allsearch');
+    var inpAllSr  = formAllSr.find('.inp_allsearch');
     
     var arDirs  = [];
     var arFiles = [];
@@ -169,7 +170,7 @@ $(function() {
     function fReload(firsts) {
     	if(firsts) {
     		tables.find('.col_controls').css('width', '50px');
-            listRoot.find('binded-click').each(function() { $(this).off('click'); });
+            listRoot.find('binded_click').each(function() { $(this).off('click'); });
             
             listRoot.empty();
             listRoot.append("<tr class='element element_special progressing'><td colspan='4'>...</td></tr>");
@@ -177,6 +178,7 @@ $(function() {
             
             inpExcep.val('');
     	}
+    	inpAllSr.val('');
     	
         fsRoot.find('.reloading_readonly').each(function() {
         	if(! $(this).prop('readonly')) {
@@ -206,6 +208,11 @@ $(function() {
                     pathDisp.text('');
                 } else {
                 	listRoot.find('.progressing').remove();
+                }
+                
+                if(! data.success) {
+                    listRoot.append("<tr class='element error'><td>ERROR ! " + data.message + "</td></tr>");
+                    return;
                 }
 
                 var idType = 'U';
@@ -434,7 +441,7 @@ $(function() {
                         inpPath.val(newPath);
                         fReload(true);
                     });
-                    aLink.addClass('binded-click');
+                    aLink.addClass('binded_click');
                 });
                 
                 fsRoot.find('.link_dir').each(function() {
@@ -443,7 +450,7 @@ $(function() {
                     	inpPath.val($(this).attr('data-path'));
                     	fReload(true);
                     });
-                    aLink.addClass('binded-click');
+                    aLink.addClass('binded_click');
                 });
                 
                 fsRoot.find('.link_file').each(function() {
@@ -460,7 +467,7 @@ $(function() {
                         	location.href = ctxPath + '/jsp/fs/' + 'fsdown.jsp?path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name'));
                         }
                     });
-                    aLink.addClass('binded-click');
+                    aLink.addClass('binded_click');
                 });
 
                 fsRoot.find('.privilege_element').addClass('invisible');
@@ -593,6 +600,68 @@ $(function() {
             }
         });
     });
+    
+    formAllSr.on('submit', function() {
+    	tables.find('.col_controls').css('width', '10px');
+        listRoot.find('binded_click').each(function() { $(this).off('click'); });
+        
+        listRoot.empty();
+        listRoot.append("<tr class='element element_special progressing'><td colspan='4'>...</td></tr>");
+        pathDisp.text('');
+        inpSearch.val('');
+        
+    	fsRoot.find('.reloading_readonly').each(function() {
+            if(! $(this).prop('readonly')) {
+                $(this).prop('readonly', true);
+                $(this).addClass('reloading_readonly_applied');
+            }
+        });
+        fsRoot.find('.reloading_disabled').each(function() {
+            if(! $(this).prop('disabled')) {
+                $(this).prop('disabled', true);
+                $(this).addClass('reloading_disabled_applied');
+            }
+        });
+        
+        $.ajax({
+            url    : ctxPath + "/jsp/fs/fslistall.jsp",
+            data   : formAllSr.serialize(),
+            method : "POST",
+            dataType : "json",
+            success : function(data) {
+            	listRoot.empty();
+            	if(! data.success) {
+            		listRoot.append("<tr class='element error'><td>ERROR ! " + data.message + "</td></tr>");
+            		return;
+            	}
+            	
+            	if(data.list.length <= 0) {
+            		listRoot.append("<tr class='element element_special empty'><td colspan='4' class='lang_element filednd' data-lang-en='Empty'>비어 있음</td></tr>");
+            		return;
+            	}
+            	
+            	for(idx = 0; idx < data.list.length; idx++) {
+                    listRoot.append("<tr class='element tr_dir tr_dir_" + idx + "'><td class='td_allsearch ellipsis' colspan='4'></td></tr>");
+                    var tr = listRoot.find('.tr_dir_' + idx);
+                    tr.find('.td_allsearch').text(data.list[idx]);
+                    
+                }
+            }, error : function(jqXHR, textStatus, errorThrown) {
+                textStatus  = String(textStatus).replace(/[<>]+/g, '');
+                errorThrown = String(errorThrown).replace(/[<>]+/g, '');
+                listRoot.append("<tr class='element error'><td>ERROR ! " + textStatus + ", " + errorThrown + "</td></tr>");
+            }, complete : function() {
+            	fsRoot.find('.reloading_readonly.reloading_readonly_applied').each(function() {
+                    $(this).prop('readonly', false);
+                    $(this).removeClass('reloading_readonly_applied');
+                });
+                fsRoot.find('.reloading_disabled.reloading_disabled_applied').each(function() {
+                    $(this).prop('disabled', false);
+                    $(this).removeClass('reloading_disabled_applied');
+                });
+            }
+        });
+    });
 
     var fsFileList = fsRoot.find('.fs_filelist');
     if(noAnonymous) {
@@ -627,8 +696,10 @@ $(function() {
             <div class='col-sm-8'>
                 <h2><%=fsc.getTitle()%></h2>
             </div>
-            <div class='col-sm-4 fs_allsearch align_right invisible'>
+            <div class='col-sm-4 fs_allsearch align_right'>
                 <form class='form_allsearch' onsubmit='return false;'>
+                    <input type='hidden' name='path' class='hidden_path' value='<%=pathParam%>' />
+                    <input type='hidden' name='all'  class='hidden_conf' value='true' />
                     <input type='text' class='inp_allsearch lang_attr_element reloading_readonly' name='keyword' placeholder="전체 검색" data-lang-target='placeholder' data-lang-en='Search whole directory' style='width: 200px;'/>
                     <input type='submit' class='btn_allsearch lang_attr_element reloading_disabled' value='검색' data-lang-target='value' data-lang-en='Search' />
                 </form>

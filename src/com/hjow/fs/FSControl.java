@@ -27,6 +27,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -434,7 +435,7 @@ public class FSControl {
 				
 				// Applying Configs
 				if(conf.get("Installed") != null) {
-					installed = Boolean.parseBoolean(conf.get("Installed").toString().trim());
+					installed = DataUtil.parseBoolean(conf.get("Installed").toString().trim());
 				}
 				if(installed) {
 					if(conf.get("Path") != null) {
@@ -743,16 +744,16 @@ public class FSControl {
 				boolean useReadFileIcon = false;
 				boolean useConsole      = false;
 				
-				if(sUseCaptchaDown  != null) useCaptchaDown  = Boolean.parseBoolean(sUseCaptchaDown.trim());
-				if(sUseCaptchaLogin != null) useCaptchaLogin = Boolean.parseBoolean(sUseCaptchaLogin.trim());
-				if(sReadFileIcon    != null) useReadFileIcon = Boolean.parseBoolean(sReadFileIcon.trim());
-				if(sUseConsole      != null) useConsole      = Boolean.parseBoolean(sUseConsole.trim());
+				if(sUseCaptchaDown  != null) useCaptchaDown  = DataUtil.parseBoolean(sUseCaptchaDown.trim());
+				if(sUseCaptchaLogin != null) useCaptchaLogin = DataUtil.parseBoolean(sUseCaptchaLogin.trim());
+				if(sReadFileIcon    != null) useReadFileIcon = DataUtil.parseBoolean(sReadFileIcon.trim());
+				if(sUseConsole      != null) useConsole      = DataUtil.parseBoolean(sUseConsole.trim());
 				
 				String sUseAccounts = request.getParameter("useaccount");
 				if(sUseAccounts != null) {
-					noLogin = (! Boolean.parseBoolean(sUseAccounts.trim()));
+					noLogin = (! DataUtil.parseBoolean(sUseAccounts.trim()));
 					if(! noLogin) {
-						if(sUseCaptchaLogin != null) useCaptchaLogin = Boolean.parseBoolean(sUseCaptchaLogin.trim());
+						if(sUseCaptchaLogin != null) useCaptchaLogin = DataUtil.parseBoolean(sUseCaptchaLogin.trim());
 						
 						String adminId, adminPw, aSalt;
 						adminId = request.getParameter("adminid");
@@ -1073,10 +1074,10 @@ public class FSControl {
 				boolean useReadFileIcon = false;
 				boolean useConsole      = false;
 				
-				if(sUseCaptchaDown  != null) useCaptchaDown  = Boolean.parseBoolean(sUseCaptchaDown.trim());
-				if(sUseCaptchaLogin != null) useCaptchaLogin = Boolean.parseBoolean(sUseCaptchaLogin.trim());
-				if(sReadFileIcon    != null) useReadFileIcon = Boolean.parseBoolean(sReadFileIcon.trim());
-				if(sUseConsole      != null) useConsole      = Boolean.parseBoolean(sUseConsole.trim());
+				if(sUseCaptchaDown  != null) useCaptchaDown  = DataUtil.parseBoolean(sUseCaptchaDown.trim());
+				if(sUseCaptchaLogin != null) useCaptchaLogin = DataUtil.parseBoolean(sUseCaptchaLogin.trim());
+				if(sReadFileIcon    != null) useReadFileIcon = DataUtil.parseBoolean(sReadFileIcon.trim());
+				if(sUseConsole      != null) useConsole      = DataUtil.parseBoolean(sUseConsole.trim());
 				
 				conf.put("Title", titles);
 				conf.put("sHiddenDirs", sHiddenDirs);
@@ -1888,11 +1889,194 @@ public class FSControl {
 			}
 			json.put("files", files);
 			if(json.get("privilege") == null) json.put("privilege", "view");
+			json.put("success", new Boolean(true));
 		} catch(Throwable t) {
 			t.printStackTrace();
 			if(jsonSess != null) jsonSess.clear();
+			json.put("success", new Boolean(false));
+			if(t instanceof RuntimeException) {
+				json.put("message", t.getMessage());
+			} else {
+				json.put("message", "Error : " + t.getMessage());
+			}
 		}
 		json.put("session", jsonSess);
+		
+		return json;
+	}
+	
+	/** Called from fs.jsp, which is called by file list page by ajax. */
+	public JsonObject listAll(HttpServletRequest request) {
+		JsonObject json = processHandler("listAll", request);
+		if(json != null) return json;
+		json = new JsonObject();
+		
+		String pathParam = request.getParameter("path");
+		if(pathParam == null) pathParam = "";
+		pathParam = pathParam.trim();
+		if(pathParam.equals("/")) pathParam = "";
+		pathParam = FSUtils.removeSpecials(pathParam, false, true, true, false, true).replace("\\", "/").trim();
+		if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
+
+		String keyword = request.getParameter("keyword");
+		if(keyword == null) keyword = "";
+		keyword = keyword.replace("'", "").replace("\"", "").replace("<", "").replace(">", "").trim();
+		
+		JsonObject jsonSess = getSessionObject(request);
+		String     lang     = getLanguage(request);
+		if(keyword.equals("")) {
+			json.put("success", new Boolean(false));
+			if(lang.equals("ko")) json.put("message", "전체 디렉토리 검색 기능을 이용하려면 검색어가 반드시 필요합니다.");
+			else                  json.put("message", "Please input the keyword to search whole path !");
+			return json;
+		}
+		
+		JsonArray dirPrv = null;
+		String idtype = "U";
+		
+		if(jsonSess != null) {
+			if(jsonSess.get("idtype") != null) {
+				idtype = jsonSess.get("idtype").toString();
+				if(! idtype.equalsIgnoreCase("A")) {
+					Object oDirPrv = (Object) jsonSess.get("privileges");
+				    if(oDirPrv != null) {
+				    	dirPrv = null;
+			            if(oDirPrv instanceof JsonArray) {
+			                dirPrv = (JsonArray) oDirPrv;
+			            } else {
+			            	dirPrv = (JsonArray) JsonCompatibleUtil.parseJson(oDirPrv.toString().trim());
+			            }
+			            
+			            for(Object row : dirPrv) {
+			            	JsonObject dirOne = null;
+			            	if(row instanceof JsonObject) dirOne = (JsonObject) row;
+			            	else                          dirOne = (JsonObject) JsonCompatibleUtil.parseJson(row.toString().trim());
+			            	
+			            	try {
+			            		String dPath = dirOne.get("path"     ).toString();
+			            		String dPrv  = dirOne.get("privilege").toString();
+			            		
+			            		if(pathParam.startsWith(dPath) || ("/" + pathParam).startsWith(dPath)) {
+			            			if(dPrv.equals("edit")) {
+			            				json.put("privilege", "edit");
+			            				break;
+			            			}
+			            		}
+			            	} catch(Throwable t) {
+			            		logIn("Wrong account configuration - " + t.getMessage());
+			            	}
+			            }
+				    }
+				} else {
+					json.put("privilege", "edit");
+				}
+				
+				if(idtype.equalsIgnoreCase("B")) {
+					if(noAnonymous) throw new RuntimeException("No privilege");
+				}
+			} else {
+				if(noAnonymous) throw new RuntimeException("No privilege");
+			}
+		} else {
+			if(noAnonymous) throw new RuntimeException("No privilege");
+		}
+		if(dirPrv == null) dirPrv = new JsonArray();
+		
+		Object oHiddenDir = conf.get("HiddenDirs");
+		List<String> hiddenDirList = new ArrayList<String>();
+		
+		if(oHiddenDir != null) {
+			JsonArray hiddenDir = null;
+			if(oHiddenDir instanceof JsonArray) hiddenDir = (JsonArray) oHiddenDir;
+			else                                hiddenDir = (JsonArray) JsonCompatibleUtil.parseJson(oHiddenDir.toString().trim());
+			oHiddenDir = null;
+			
+			if(idtype.equalsIgnoreCase("A")) {
+				hiddenDirList.clear();
+			} else {
+				if(hiddenDir != null) {
+					for(Object obj : hiddenDir) {
+						if(obj == null) continue;
+						hiddenDirList.add(obj.toString().trim());
+					}
+				}
+				
+				for(Object row : dirPrv) {
+	            	JsonObject dirOne = null;
+	            	if(row instanceof JsonObject) dirOne = (JsonObject) row;
+	            	else                          dirOne = (JsonObject) JsonCompatibleUtil.parseJson(row.toString().trim());
+	            	
+	            	try {
+	            		String dPath = dirOne.get("path"     ).toString();
+	            		String dPrv  = dirOne.get("privilege").toString();
+	            		
+	            		int hdx=0;
+	            		while(hdx < hiddenDirList.size()) {
+	            			String hiddenDirOne = hiddenDirList.get(hdx);
+	            			if(hiddenDirOne.startsWith(dPath) || ("/" + hiddenDirOne).startsWith(dPath)) {
+		            			if(dPrv.equals("view") || dPrv.equals("edit")) {
+		            				hiddenDirList.remove(hdx);
+		            				continue;
+		            			}
+		            		}
+	            			hdx++;
+	            		}
+	            	} catch(Throwable t) {
+	            		logIn("Wrong account configuration - " + t.getMessage());
+	            	}
+	            }
+			}
+		}
+		
+		final List<String> hiddenDirListF = hiddenDirList;
+		hiddenDirList = null;
+		
+		try {
+			File dir = new File(rootPath.getCanonicalPath() + File.separator + pathParam);
+			List<String> res = FSUtils.find(dir, pathParam, keyword, limitSize, new FileFilter() {
+				@Override
+				public boolean accept(File pathname) {
+					String name = pathname.getName();
+					
+					if(name.equals(".garbage")) return false;
+				    if(name.equals(".upload" )) return false;
+				    
+				    String linkDisp = null;
+					try {
+						linkDisp = pathname.getCanonicalPath().replace(getRootPath().getCanonicalPath(), "").replace("\\", "/").replace("'", "").replace("\"", "");
+					    if(pathname.isDirectory() && linkDisp.indexOf(".") == 0) return false;
+					    linkDisp = linkDisp.replace("\\", "/");
+					    if(linkDisp.indexOf("/") == 0) linkDisp = linkDisp.substring(1);
+					    
+						for(String h : hiddenDirListF) {
+					    	if(linkDisp.startsWith(h        )) return false;
+					    	if(("/" + linkDisp).startsWith(h)) return false;
+					    }
+					} catch(IOException ex) {
+						log("Exception on searching all directory at " + name + " - (" + ex.getClass().getName()+ ")" + ex.getMessage(), FSControl.class);
+						return false;
+					}
+					return true;
+				}
+			});
+			
+			JsonArray arr = new JsonArray();
+			for(String r : res) {
+				r = r.replace("\\", "/");
+				arr.add(r); 
+			}
+			res.clear();
+			
+			json.put("list", arr);
+			json.put("success", new Boolean(true));
+		} catch(Throwable t) {
+			json.put("success", new Boolean(false));
+			if(t instanceof RuntimeException) {
+				json.put("message", t.getMessage());
+			} else {
+				json.put("message", "Error : " + t.getMessage());
+			}
+		}
 		
 		return json;
 	}
@@ -2667,7 +2851,7 @@ public class FSControl {
 				
 				boolean applys = false;
 				if(request.getSession().getAttribute("fslanguage") != null) {
-					if(Boolean.parseBoolean(frce)) {
+					if(DataUtil.parseBoolean(frce)) {
 						applys = true;
 					}
 				} else {
@@ -3544,27 +3728,27 @@ public class FSControl {
 	
 	public synchronized void applyConfigs() {
 		if(conf.get("NoAnonymous") != null) {
-			noAnonymous = Boolean.parseBoolean(conf.get("NoAnonymous").toString().trim());
+			noAnonymous = DataUtil.parseBoolean(conf.get("NoAnonymous").toString().trim());
 		} else {
 			conf.put("NoAnonymous", new Boolean(noAnonymous));
 		}
 		if(conf.get("UseAccount") != null) {
-			noLogin = (! Boolean.parseBoolean(conf.get("UseAccount").toString().trim()));
+			noLogin = (! DataUtil.parseBoolean(conf.get("UseAccount").toString().trim()));
 		} else {
 			conf.put("UseAccount", new Boolean(! noLogin));
 		}
 		if(conf.get("UseConsole") != null) {
-			noConsole = (! Boolean.parseBoolean(conf.get("UseConsole").toString().trim()));
+			noConsole = (! DataUtil.parseBoolean(conf.get("UseConsole").toString().trim()));
 		} else {
 			conf.put("UseConsole", new Boolean(! noConsole));
 		}
 		if(conf.get("UseCaptchaDown") != null) {
-			captchaDownload = Boolean.parseBoolean(conf.get("UseCaptchaDown").toString().trim());
+			captchaDownload = DataUtil.parseBoolean(conf.get("UseCaptchaDown").toString().trim());
 		} else {
 			conf.put("UseCaptchaDown", new Boolean(captchaDownload));
 		}
 		if(conf.get("UseCaptchaLogin") != null) {
-			captchaLogin = Boolean.parseBoolean(conf.get("UseCaptchaLogin").toString().trim());
+			captchaLogin = DataUtil.parseBoolean(conf.get("UseCaptchaLogin").toString().trim());
 		} else {
 			conf.put("UseCaptchaLogin", new Boolean(captchaLogin));
 		}
@@ -3599,7 +3783,7 @@ public class FSControl {
 			if(sleepRoutine <= 1) sleepRoutine = 1;
 		}
 		if(conf.get("ReadFileIcon") != null) {
-			readFileIcon = Boolean.parseBoolean(conf.get("ReadFileIcon").toString().trim());
+			readFileIcon = DataUtil.parseBoolean(conf.get("ReadFileIcon").toString().trim());
 		} else {
 			conf.put("ReadFileIcon", new Boolean(readFileIcon));
 		}
@@ -3618,13 +3802,13 @@ public class FSControl {
 			else confLog = (JsonObject) JsonObject.parseJson(conf.get("Log").toString());
 			
             if(confLog.get("OnFile") != null) {
-            	logOnFile = Boolean.parseBoolean(confLog.get("OnFile").toString().trim());
+            	logOnFile = DataUtil.parseBoolean(confLog.get("OnFile").toString().trim());
             }
             if(confLog.get("OnJdbc") != null) {
-            	logOnJdbc = Boolean.parseBoolean(confLog.get("OnJdbc").toString().trim());
+            	logOnJdbc = DataUtil.parseBoolean(confLog.get("OnJdbc").toString().trim());
             }
             if(confLog.get("OnStdOut") != null) {
-            	logOnStd = Boolean.parseBoolean(confLog.get("OnStdOut").toString().trim());
+            	logOnStd = DataUtil.parseBoolean(confLog.get("OnStdOut").toString().trim());
             }
 		} else {
 			JsonObject jsonSample = new JsonObject();

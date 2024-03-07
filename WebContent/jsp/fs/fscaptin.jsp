@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, java.util.*, java.io.*, java.awt.*, java.awt.image.*, javax.imageio.*" %><%@ include file="common.pront.jsp"%><%
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, java.util.*, java.io.*, java.awt.*, java.awt.image.*, javax.imageio.*, hjow.common.util.DataUtil" %><%@ include file="common.pront.jsp"%><%
 /*
 Copyright 2024 HJOW (Heo Jin Won)
 
@@ -23,7 +23,7 @@ String code  = (String) request.getSession().getAttribute(key + "_captcha_code")
 Long   time  = (Long)   request.getSession().getAttribute(key + "_captcha_time");
 
 if(randm != null) {
-	boolean randomize = Boolean.parseBoolean(randm);
+	boolean randomize = DataUtil.parseBoolean(randm);
 	if(randomize) {
 		int randomNo  = (int) Math.round(1000000 + Math.random() * 1000000 + Math.random() * 10000 + Math.random() * 100);
 		String strRan = String.valueOf(randomNo).substring(0, 7);

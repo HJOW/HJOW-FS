@@ -16,6 +16,7 @@ limitations under the License.
  */
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -143,6 +144,11 @@ public class FSUtils {
     
     /** Find files in root directory with search keyword and maximum sizes. */
     public static List<String> find(File rootPath, String pPath, String pKeyword, long limitSize) throws IOException {
+    	return find(rootPath, pPath, pKeyword, limitSize);
+    }
+    
+    /** Find files in root directory with search keyword and maximum sizes. */
+    public static List<String> find(File rootPath, String pPath, String pKeyword, long limitSize, FileFilter filter) throws IOException {
     	String pathParam = pPath;
 		if(pathParam == null) pathParam = "";
 		pathParam = pathParam.trim();
@@ -155,14 +161,17 @@ public class FSUtils {
 		keyword = keyword.replace("'", "").replace("\"", "").replace("<", "").replace(">", "").trim();
 		
 		File dir = new File(rootPath.getCanonicalPath() + File.separator + pathParam);
+		if(filter != null) {
+			if(! filter.accept(dir)) return new ArrayList<String>();
+		}
 		
-		List<String> res = find(rootPath, dir, keyword, limitSize, 0);
+		List<String> res = find(rootPath, dir, keyword, limitSize, 0, filter);
 		Collections.sort(res);
 		return res;
     }
     
     /** Find files in root directory with search keyword and maximum sizes. */
-    private static List<String> find(File rootPath, File dir, String keyword, long limitSize, int recursiveDepth) throws IOException {
+    private static List<String> find(File rootPath, File dir, String keyword, long limitSize, int recursiveDepth, FileFilter filter) throws IOException {
     	if(recursiveDepth >= 20) return new ArrayList<String>();
     	List<String> res = new ArrayList<String>();
     	
@@ -177,12 +186,14 @@ public class FSUtils {
             if(nm.indexOf("..") >= 0) continue;
             
             if(f.isDirectory()) {
-            	res.addAll(find(rootPath, f, keyword, limitSize, recursiveDepth + 1));
+            	res.addAll(find(rootPath, f, keyword, limitSize, recursiveDepth + 1, filter));
             } else {
             	if(f.length() / 1024 >= limitSize) continue;
             }
             
             if(! keyword.equals("")) { if(! nm.toLowerCase().contains(keyword.toLowerCase())) continue; }
+            if(filter != null) { if(! filter.accept(f)) continue; }
+            
             res.add(f.getCanonicalPath().replace(rootPath.getCanonicalPath(), ""));
     	}
     	
