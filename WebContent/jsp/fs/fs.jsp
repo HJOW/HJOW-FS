@@ -700,7 +700,7 @@ $(function() {
                 <form class='form_allsearch' onsubmit='return false;'>
                     <input type='hidden' name='path' class='hidden_path' value='<%=pathParam%>' />
                     <input type='hidden' name='all'  class='hidden_conf' value='true' />
-                    <input type='text' class='inp_allsearch lang_attr_element reloading_readonly' name='keyword' placeholder="전체 검색" data-lang-target='placeholder' data-lang-en='Search whole directory' style='width: 200px;'/>
+                    <input type='text' class='inp_allsearch lang_attr_element reloading_readonly' name='keyword' placeholder="전체 디렉토리 검색" data-lang-target='placeholder' data-lang-en='Search whole directories' style='width: 200px;'/>
                     <input type='submit' class='btn_allsearch lang_attr_element reloading_disabled' value='검색' data-lang-target='value' data-lang-en='Search' />
                 </form>
             </div>
