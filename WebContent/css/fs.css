@@ -28,20 +28,24 @@ body td.td_mark_dir, body.dark div.td_mark_dir {
 }
 
 body .container {
-    background-color: #EEEEEE;
+    background-color: #FEFEFE;
 }
 
 body .container div, body .container p, body .container table {
-    background-color: #DDDDDD;
+    background-color: #FAFAFA;
 }
 
 body input, body textarea, body select {
-    background-color: #BBBBBB;
+    background-color: #CCCCCC;
     color: #222222;
 }
 
 body div, body p, body h1, body h2, body h3, body h4, body h5, body h6, body table, body td, body th {
     color: #333333;
+}
+
+body .table-hover tbody tr:hover {
+  background-color: #EAEAEA;
 }
 
 .full {
