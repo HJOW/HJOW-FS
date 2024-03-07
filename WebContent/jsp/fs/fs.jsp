@@ -53,10 +53,12 @@ $(function() {
     var noAnonymous    = <%=fsc.isNoAnonymous() ? "true" : "false"%>;
     var loginedFirst   = <%=(fsc.getSessionUserId(request) != null) ? "true" : "false"%>
     
-    var form     = $('.form_fs');
-    var tables   = $('.fs_table_list');
+    var fsRoot = $('.fs_root');
+    
+    var form     = fsRoot.find('.form_fs');
+    var tables   = fsRoot.find('.fs_table_list');
     var listRoot = tables.find('.fs_list');
-    var pathDisp = $('.path');
+    var pathDisp = fsRoot.find('.path');
 
     var inpPath   = form.find('.hidden_path');
     var inpExcep  = form.find('.hidden_excepts');
@@ -66,6 +68,8 @@ $(function() {
     var btnUpload = form.find('.btn_upload');
     var btnMkdir  = form.find('.btn_mkdir');
     var btnConfig = form.find('.btn_config');
+    
+    var formAllSr = fsRoot.find('.fs_allsearch');
     
     var arDirs  = [];
     var arFiles = [];
@@ -98,7 +102,8 @@ $(function() {
         var iconizeArray = [];
         var breaks = false;
         var bkColor = {r : 255, g : 255, b : 255};
-        if($('body').is('.dark')) bkColor = {r : 59, g : 59, b : 59};
+        if($('body').is('.dark'))   bkColor = {r : 59, g : 59, b : 59};
+        else if(fsRoot.is('.dark')) bkColor = {r : 59, g : 59, b : 59};
         
         listRoot.find('.tr_file.no_icon').each(function() {
         	if(breaks) return;
@@ -173,8 +178,20 @@ $(function() {
             inpExcep.val('');
     	}
     	
-    	var expVal = inpExcep.val();
+        fsRoot.find('.reloading_readonly').each(function() {
+        	if(! $(this).prop('readonly')) {
+        		$(this).prop('readonly', true);
+        		$(this).addClass('reloading_readonly_applied');
+            }
+        });
+        fsRoot.find('.reloading_disabled').each(function() {
+            if(! $(this).prop('disabled')) {
+                $(this).prop('disabled', true);
+                $(this).addClass('reloading_disabled_applied');
+            }
+        });
         
+        var expVal = inpExcep.val();
     	$.ajax({
             url    : ctxPath + "/jsp/fs/fslist.jsp",
             data   : form.serialize(),
@@ -404,7 +421,7 @@ $(function() {
                 pathDisp.text(data.dpath);
                 inpSearch.val(data.keyword);
 
-                $('.link_back').each(function() {
+                fsRoot.find('.link_back').each(function() {
                     var aLink = $(this);
                     aLink.on('click', function() {
                         var lists = inpPath.val().split('/');
@@ -420,7 +437,7 @@ $(function() {
                     aLink.addClass('binded-click');
                 });
                 
-                $('.link_dir').each(function() {
+                fsRoot.find('.link_dir').each(function() {
                     var aLink = $(this);
                     aLink.on('click', function() {
                     	inpPath.val($(this).attr('data-path'));
@@ -429,7 +446,7 @@ $(function() {
                     aLink.addClass('binded-click');
                 });
                 
-                $('.link_file').each(function() {
+                fsRoot.find('.link_file').each(function() {
                     var aLink = $(this);
                     aLink.on('click', function() {
                     	if($(this).is('.disabled')) return;
@@ -446,12 +463,12 @@ $(function() {
                     aLink.addClass('binded-click');
                 });
 
-                $('.privilege_element').addClass('invisible');
+                fsRoot.find('.privilege_element').addClass('invisible');
                 if(data.privilege == 'edit') {
-                	$('.privilege_element').removeClass('invisible');
-                	FSUtil.applyDragAndDrop($('body'), ctxPath, inpPath.val());
+                	fsRoot.find('.privilege_element').removeClass('invisible');
+                	FSUtil.applyDragAndDrop(fsRoot, ctxPath, inpPath.val());
                 } else {
-                	$('body').find('.filednd').each(function() {
+                	fsRoot.find('.filednd').each(function() {
                 		var area = $(this);
                         area.off('drop');
                         area.off('dragover');
@@ -461,7 +478,7 @@ $(function() {
                 	});
                 }
                 if(idType != 'A') {
-                	$('.only_admin ').addClass('invisible');
+                	fsRoot.find('.only_admin').addClass('invisible');
                 }
                 
                 if(typeof(data.skipped) != 'undefined') {
@@ -483,6 +500,15 @@ $(function() {
             	textStatus  = String(textStatus).replace(/[<>]+/g, '');
             	errorThrown = String(errorThrown).replace(/[<>]+/g, '');
             	listRoot.append("<tr class='element error'><td>ERROR ! " + textStatus + ", " + errorThrown + "</td></tr>");
+            }, complete : function() {
+            	fsRoot.find('.reloading_readonly.reloading_readonly_applied').each(function() {
+            		$(this).prop('readonly', false);
+            		$(this).removeClass('reloading_readonly_applied');
+            	});
+            	fsRoot.find('.reloading_disabled.reloading_disabled_applied').each(function() {
+                    $(this).prop('disabled', false);
+                    $(this).removeClass('reloading_disabled_applied');
+                });
             }
         });
     }
@@ -493,7 +519,8 @@ $(function() {
         var paths = inpPath.val();
         var popOpt = 'width=300,height=200,scrollbars=no,status=no,location=no,toolbar=no';
         var theme = '';
-        if($('body').is('.dark')) theme='dark';
+        if($('body').is('.dark'))   theme='dark';
+        else if(fsRoot.is('.dark')) theme='dark';
         window.open(ctxPath + '/jsp/fs/fsupload.jsp?theme=' + theme + '&path=' + encodeURIComponent(paths), 'upload', popOpt);
     });
     
@@ -501,6 +528,7 @@ $(function() {
         var popOpt = 'width=780,height=550,scrollbars=yes,status=no,location=no,toolbar=no';
         var theme = '';
         if($('body').is('.dark')) theme='dark';
+        else if(fsRoot.is('.dark')) theme='dark';
         window.open(ctxPath + '/jsp/fs/fsadmin.jsp?theme=' + theme, 'config', popOpt);
     });
     
@@ -566,25 +594,26 @@ $(function() {
         });
     });
 
-    var fsFileList = $('.fs_filelist');
+    var fsFileList = fsRoot.find('.fs_filelist');
     if(noAnonymous) {
     	if(loginedFirst) {
     		fsFileList.addClass('invisible');
-            $('.fs_filelist_view').removeClass('invisible');
+    		fsRoot.find('.fs_filelist_view').removeClass('invisible');
     	} else {
     		fsFileList.addClass('invisible');
-            $('.fs_filelist_anonymous').removeClass('invisible');
+    		fsRoot.find('.fs_filelist_anonymous').removeClass('invisible');
     	}
     } else {
     	fsFileList.addClass('invisible');
-        $('.fs_filelist_view').removeClass('invisible');
+    	fsRoot.find('.fs_filelist_view').removeClass('invisible');
     }
     
     <%if (useConsole) {%>
     var btnConsole = form.find('.btn_console');
     btnConsole.on('click', function() {
         var theme = '';
-        if($('body').is('.dark')) theme='dark';
+        if($('body').is('.dark'))   theme='dark';
+        else if(fsRoot.is('.dark')) theme='dark';
         window.open(ctxPath + '/jsp/fs/fsconsolepop.jsp?theme=' + theme, 'console', 'width=780,height=450,scrollbars=yes,status=no,location=no,toolbar=no');
     });
     <%}%>
@@ -594,15 +623,20 @@ $(function() {
 </script>
 <div class='fs_root'>
 	<div class='fs_filelist fs_filelist_view container show-grid full'>
+	    <div class='row fs_title'>
+            <div class='col-sm-8'>
+                <h2><%=fsc.getTitle()%></h2>
+            </div>
+            <div class='col-sm-4 fs_allsearch align_right invisible'>
+                <form class='form_allsearch' onsubmit='return false;'>
+                    <input type='text' class='inp_allsearch lang_attr_element reloading_readonly' name='keyword' placeholder="전체 검색" data-lang-target='placeholder' data-lang-en='Search whole directory' style='width: 200px;'/>
+                    <input type='submit' class='btn_allsearch lang_attr_element reloading_disabled' value='검색' data-lang-target='value' data-lang-en='Search' />
+                </form>
+            </div>
+        </div>
 		<form class='form_fs' onsubmit='return false;'>
-			<input type='hidden' name='path' class='hidden_path'
-				value='<%=pathParam%>' /> <input type='hidden' name='excepts'
-				class='hidden_excepts' value='' />
-			<div class='row fs_title'>
-				<div class='col-sm-12'>
-					<h2><%=fsc.getTitle()%></h2>
-				</div>
-			</div>
+			<input type='hidden' name='path' class='hidden_path' value='<%=pathParam%>' />
+			<input type='hidden' name='excepts' class='hidden_excepts' value='' />
 			<div class='row fs_directory'>
 				<div class='col-sm-10'>
 					<h4 class='path_title'>
@@ -610,22 +644,14 @@ $(function() {
 							디렉토리 : </span><span class='path'></span>
 					</h4>
 				</div>
-				<div class='col-sm-2'>
-					<input type='button'
-						class='btn_upload  privilege_element invisible lang_attr_element'
-						value='업로드' data-lang-target='value' data-lang-en='Upload' /> <input
-						type='button'
-						class='btn_mkdir   privilege_element invisible lang_attr_element'
-						value='새 폴더' data-lang-target='value' data-lang-en='New Folder' />
-					<input type='button'
-						class='btn_config  privilege_element only_admin invisible lang_attr_element'
-						value='설정' data-lang-target='value' data-lang-en='Config' />
+				<div class='col-sm-2 align_right'>
+					<input type='button' class='btn_upload  privilege_element invisible lang_attr_element' value='업로드' data-lang-target='value' data-lang-en='Upload' />
+					<input type='button' class='btn_mkdir   privilege_element invisible lang_attr_element' value='새 폴더' data-lang-target='value' data-lang-en='New Folder' />
+					<input type='button' class='btn_config  privilege_element only_admin invisible lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config' />
 					<%
 					if (useConsole) {
 					%>
-					<input type='button' class='btn_console lang_attr_element'
-						value='콘솔' data-lang-target='value' data-lang-en='Console'
-						accesskey="t" />
+					<input type='button' class='btn_console lang_attr_element' value='콘솔' data-lang-target='value' data-lang-en='Console' accesskey="t" />
 					<%
 					}
 					%>
@@ -633,14 +659,10 @@ $(function() {
 			</div>
 			<div class='row fs_search'>
 				<div class='col-sm-10'>
-					<input type='text' class='inp_search full lang_attr_element'
-						name='keyword' placeholder="디렉토리 내 검색"
-						data-lang-target='placeholder'
-						data-lang-en='Search in current directory' />
+					<input type='text' class='inp_search full lang_attr_element reloading_readonly' name='keyword' placeholder="디렉토리 내 검색" data-lang-target='placeholder' data-lang-en='Search in current directory' />
 				</div>
 				<div class='col-sm-2'>
-					<input type='submit' class='btn_search full lang_attr_element'
-						value='검색' data-lang-target='value' data-lang-en='Search' />
+					<input type='submit' class='btn_search full lang_attr_element reloading_disabled' value='검색' data-lang-target='value' data-lang-en='Search' />
 				</div>
 			</div>
 			<div class='row fs_root'>

@@ -22,15 +22,19 @@ if(! fsc.isInstalled()) {
 <div class='fs_accbar container valign_middle full'>
 	<script type='text/javascript'>
 	$(function() {
-		var ctxPath = "<%=fsc.getContextPath()%>";
-	    var formObj = $('.form_fs_login');
-	    var inpReq  = formObj.find('.inp_req');
+		var ctxPath   = "<%=fsc.getContextPath()%>";
+		var fsRoot    = $('.fs_root');
+		var acRoot    = $('.fs_accbar');
+	    var formObj   = acRoot.find('.form_fs_login');
+	    var inpReq    = formObj.find('.inp_req');
 	    var btnLogout = formObj.find('.btn_logout');
 	    
 	    var ser = formObj.serialize();
 
-	    $('.login_element').addClass('invisible');
-	    $('.login_element.not_logined').removeClass('invisible');
+	    acRoot.find('.login_element').addClass('invisible');
+	    acRoot.find('.login_element.not_logined').removeClass('invisible');
+	    fsRoot.find('.login_element').addClass('invisible');
+        fsRoot.find('.login_element.not_logined').removeClass('invisible');
 
 	    function fLogin() {
 	    	inpReq.val('login');
@@ -48,40 +52,42 @@ if(! fsc.isInstalled()) {
 		function fRef(data, alerts) {
 			if(alerts && (! data.success)) alert(data.message);
 			if(data.needrefresh) { location.reload(); return; }
-			$('.login_element').addClass('invisible');
+			acRoot.find('.login_element').addClass('invisible');
+			fsRoot.find('.login_element').addClass('invisible');
 			if(data.logined) {
 				$('.login_element.logined').removeClass('invisible');
 				formObj.find('.span_type').text('[' + data.idtype + ']');
 				formObj.find('.span_nick').text(data.nick);
             } else {
-                $('.login_element.not_logined').removeClass('invisible');
+                acRoot.find('.login_element.not_logined').removeClass('invisible');
+                fsRoot.find('.login_element.not_logined').removeClass('invisible');
             }
 			inpReq.val('status');
 			
-			var captLogin = $('.if_captcha_l');
+			var captLogin = acRoot.find('.if_captcha_l');
             if(captLogin != null && typeof(captLogin) != 'undefined' && captLogin.length >= 1) {
                 captLogin.attr('src', captLogin.attr('src') + '&not=' + Math.round(Math.random() * 100));
             }
             
             formObj.find('.inp_login_element').val('');
             
-            var fsFileList = $('.fs_filelist');
+            var fsFileList = fsRoot.find('.fs_filelist');
             if(fsFileList != null && typeof(fsFileList) != 'undefined' && fsFileList.length >= 1) {
             	if(data.noanonymous) {
             		if(data.logined) {
                         fsFileList.addClass('invisible');
-                        $('.fs_filelist_view').removeClass('invisible');
+                        fsRoot.find('.fs_filelist_view').removeClass('invisible');
                     } else {
                         fsFileList.addClass('invisible');
-                        $('.fs_filelist_anonymous').removeClass('invisible');
+                        fsRoot.find('.fs_filelist_anonymous').removeClass('invisible');
                     }
             	} else {
             		fsFileList.addClass('invisible');
-                    $('.fs_filelist_view').removeClass('invisible');
+            		fsRoot.find('.fs_filelist_view').removeClass('invisible');
             	}
             }
 
-			var formFList = $('.form_fs');
+			var formFList = fsRoot.find('.form_fs');
 			if(formFList.length >= 1) {
 				if(data.noanonymous && (! data.logined)) return;
 				formFList.trigger('submit');
@@ -115,7 +121,7 @@ if(! fsc.isInstalled()) {
 		});
 	    
 	    <% if(! fsc.isCaptchaLoginOn()) { %>
-	    $('.div_captcha_login').addClass('invisible');
+	    acRoot.find('.div_captcha_login').addClass('invisible');
 	    <% } %>
 	});
 	</script>
