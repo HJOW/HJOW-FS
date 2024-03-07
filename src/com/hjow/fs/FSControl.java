@@ -1924,10 +1924,18 @@ public class FSControl {
 		
 		JsonObject jsonSess = getSessionObject(request);
 		String     lang     = getLanguage(request);
+		
 		if(keyword.equals("")) {
 			json.put("success", new Boolean(false));
 			if(lang.equals("ko")) json.put("message", "전체 디렉토리 검색 기능을 이용하려면 검색어가 반드시 필요합니다.");
 			else                  json.put("message", "Please input the keyword to search whole path !");
+			return json;
+		}
+		
+		if(keyword.length() <= 1) {
+			json.put("success", new Boolean(false));
+			if(lang.equals("ko")) json.put("message", "전체 디렉토리 검색 기능을 이용하려면 검색어가 2자 이상 필요합니다.");
+			else                  json.put("message", "Please input the keyword more than 2 letters to search whole path !");
 			return json;
 		}
 		
