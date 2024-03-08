@@ -1655,103 +1655,9 @@ public class FSControl {
 
 			jsonSess = getSessionObject(request);
 			
-			JsonArray dirPrv = null;
-			String idtype = "U";
+			List<String> hiddenDirList = getHiddensOnCurrentUser(jsonSess, pathParam, false);
+			if(hiddenDirList == null) hiddenDirList = new ArrayList<String>();
 			
-			if(jsonSess != null) {
-				if(jsonSess.get("idtype") != null) {
-					idtype = jsonSess.get("idtype").toString();
-					if(! idtype.equalsIgnoreCase("A")) {
-						Object oDirPrv = (Object) jsonSess.get("privileges");
-					    if(oDirPrv != null) {
-					    	dirPrv = null;
-				            if(oDirPrv instanceof JsonArray) {
-				                dirPrv = (JsonArray) oDirPrv;
-				            } else {
-				            	dirPrv = (JsonArray) JsonCompatibleUtil.parseJson(oDirPrv.toString().trim());
-				            }
-				            
-				            for(Object row : dirPrv) {
-				            	JsonObject dirOne = null;
-				            	if(row instanceof JsonObject) dirOne = (JsonObject) row;
-				            	else                          dirOne = (JsonObject) JsonCompatibleUtil.parseJson(row.toString().trim());
-				            	
-				            	try {
-				            		String dPath = dirOne.get("path"     ).toString();
-				            		String dPrv  = dirOne.get("privilege").toString();
-				            		
-				            		if(pathParam.startsWith(dPath) || ("/" + pathParam).startsWith(dPath)) {
-				            			if(dPrv.equals("edit")) {
-				            				json.put("privilege", "edit");
-				            				break;
-				            			}
-				            		}
-				            	} catch(Throwable t) {
-				            		logIn("Wrong account configuration - " + t.getMessage());
-				            	}
-				            }
-					    }
-					} else {
-						json.put("privilege", "edit");
-					}
-					
-					if(idtype.equalsIgnoreCase("B")) {
-						if(noAnonymous) throw new RuntimeException("No privilege");
-					}
-				} else {
-					if(noAnonymous) throw new RuntimeException("No privilege");
-				}
-			} else {
-				if(noAnonymous) throw new RuntimeException("No privilege");
-			}
-			if(dirPrv == null) dirPrv = new JsonArray();
-			
-			Object oHiddenDir = conf.get("HiddenDirs");
-			List<String> hiddenDirList = new ArrayList<String>();
-			
-			if(oHiddenDir != null) {
-				JsonArray hiddenDir = null;
-				if(oHiddenDir instanceof JsonArray) hiddenDir = (JsonArray) oHiddenDir;
-				else                                hiddenDir = (JsonArray) JsonCompatibleUtil.parseJson(oHiddenDir.toString().trim());
-				oHiddenDir = null;
-				
-				if(idtype.equalsIgnoreCase("A")) {
-					hiddenDirList.clear();
-				} else {
-					if(hiddenDir != null) {
-						for(Object obj : hiddenDir) {
-							if(obj == null) continue;
-							hiddenDirList.add(obj.toString().trim());
-						}
-					}
-					
-					for(Object row : dirPrv) {
-		            	JsonObject dirOne = null;
-		            	if(row instanceof JsonObject) dirOne = (JsonObject) row;
-		            	else                          dirOne = (JsonObject) JsonCompatibleUtil.parseJson(row.toString().trim());
-		            	
-		            	try {
-		            		String dPath = dirOne.get("path"     ).toString();
-		            		String dPrv  = dirOne.get("privilege").toString();
-		            		
-		            		int hdx=0;
-		            		while(hdx < hiddenDirList.size()) {
-		            			String hiddenDirOne = hiddenDirList.get(hdx);
-		            			if(hiddenDirOne.startsWith(dPath) || ("/" + hiddenDirOne).startsWith(dPath)) {
-			            			if(dPrv.equals("view") || dPrv.equals("edit")) {
-			            				hiddenDirList.remove(hdx);
-			            				continue;
-			            			}
-			            		}
-		            			hdx++;
-		            		}
-		            	} catch(Throwable t) {
-		            		logIn("Wrong account configuration - " + t.getMessage());
-		            	}
-		            }
-				}
-			}
-
 			JsonArray dirs = new JsonArray();
 			for(File f : flist.getDirs()) {
 				String name = f.getName();
@@ -1884,102 +1790,8 @@ public class FSControl {
 			return json;
 		}
 		
-		JsonArray dirPrv = null;
-		String idtype = "U";
-		
-		if(jsonSess != null) {
-			if(jsonSess.get("idtype") != null) {
-				idtype = jsonSess.get("idtype").toString();
-				if(! idtype.equalsIgnoreCase("A")) {
-					Object oDirPrv = (Object) jsonSess.get("privileges");
-				    if(oDirPrv != null) {
-				    	dirPrv = null;
-			            if(oDirPrv instanceof JsonArray) {
-			                dirPrv = (JsonArray) oDirPrv;
-			            } else {
-			            	dirPrv = (JsonArray) JsonCompatibleUtil.parseJson(oDirPrv.toString().trim());
-			            }
-			            
-			            for(Object row : dirPrv) {
-			            	JsonObject dirOne = null;
-			            	if(row instanceof JsonObject) dirOne = (JsonObject) row;
-			            	else                          dirOne = (JsonObject) JsonCompatibleUtil.parseJson(row.toString().trim());
-			            	
-			            	try {
-			            		String dPath = dirOne.get("path"     ).toString();
-			            		String dPrv  = dirOne.get("privilege").toString();
-			            		
-			            		if(pathParam.startsWith(dPath) || ("/" + pathParam).startsWith(dPath)) {
-			            			if(dPrv.equals("edit")) {
-			            				json.put("privilege", "edit");
-			            				break;
-			            			}
-			            		}
-			            	} catch(Throwable t) {
-			            		logIn("Wrong account configuration - " + t.getMessage());
-			            	}
-			            }
-				    }
-				} else {
-					json.put("privilege", "edit");
-				}
-				
-				if(idtype.equalsIgnoreCase("B")) {
-					if(noAnonymous) throw new RuntimeException("No privilege");
-				}
-			} else {
-				if(noAnonymous) throw new RuntimeException("No privilege");
-			}
-		} else {
-			if(noAnonymous) throw new RuntimeException("No privilege");
-		}
-		if(dirPrv == null) dirPrv = new JsonArray();
-		
-		Object oHiddenDir = conf.get("HiddenDirs");
-		List<String> hiddenDirList = new ArrayList<String>();
-		
-		if(oHiddenDir != null) {
-			JsonArray hiddenDir = null;
-			if(oHiddenDir instanceof JsonArray) hiddenDir = (JsonArray) oHiddenDir;
-			else                                hiddenDir = (JsonArray) JsonCompatibleUtil.parseJson(oHiddenDir.toString().trim());
-			oHiddenDir = null;
-			
-			if(idtype.equalsIgnoreCase("A")) {
-				hiddenDirList.clear();
-			} else {
-				if(hiddenDir != null) {
-					for(Object obj : hiddenDir) {
-						if(obj == null) continue;
-						hiddenDirList.add(obj.toString().trim());
-					}
-				}
-				
-				for(Object row : dirPrv) {
-	            	JsonObject dirOne = null;
-	            	if(row instanceof JsonObject) dirOne = (JsonObject) row;
-	            	else                          dirOne = (JsonObject) JsonCompatibleUtil.parseJson(row.toString().trim());
-	            	
-	            	try {
-	            		String dPath = dirOne.get("path"     ).toString();
-	            		String dPrv  = dirOne.get("privilege").toString();
-	            		
-	            		int hdx=0;
-	            		while(hdx < hiddenDirList.size()) {
-	            			String hiddenDirOne = hiddenDirList.get(hdx);
-	            			if(hiddenDirOne.startsWith(dPath) || ("/" + hiddenDirOne).startsWith(dPath)) {
-		            			if(dPrv.equals("view") || dPrv.equals("edit")) {
-		            				hiddenDirList.remove(hdx);
-		            				continue;
-		            			}
-		            		}
-	            			hdx++;
-	            		}
-	            	} catch(Throwable t) {
-	            		logIn("Wrong account configuration - " + t.getMessage());
-	            	}
-	            }
-			}
-		}
+		List<String> hiddenDirList = getHiddensOnCurrentUser(jsonSess, pathParam, false);
+		if(hiddenDirList == null) hiddenDirList = new ArrayList<String>();
 		
 		final List<String> hiddenDirListF = hiddenDirList;
 		hiddenDirList = null;
@@ -2345,71 +2157,8 @@ public class FSControl {
 				}
 			}
 			
-			Object oHiddenDir = conf.get("HiddenDirs");
-			List<String> hiddenDirList = new ArrayList<String>();
-			
-			if(oHiddenDir != null) {
-				JsonObject jsonSess = getSessionObject(request);
-				String idtype = "U";
-				if(jsonSess != null) {
-					JsonArray dirPrv = null;
-					if(jsonSess.get("idtype") != null) {
-						idtype = jsonSess.get("idtype").toString();
-						if(! idtype.equalsIgnoreCase("A")) {
-							Object oDirPrv = (Object) jsonSess.get("privileges");
-						    if(oDirPrv != null) {
-						    	dirPrv = null;
-					            if(oDirPrv instanceof JsonArray) {
-					                dirPrv = (JsonArray) oDirPrv;
-					            } else {
-					            	dirPrv = (JsonArray) JsonCompatibleUtil.parseJson(oDirPrv.toString().trim());
-					            }
-						    }
-						}
-					}
-					if(dirPrv == null) dirPrv = new JsonArray();
-					
-					JsonArray hiddenDir = null;
-					if(oHiddenDir instanceof JsonArray) hiddenDir = (JsonArray) oHiddenDir;
-					else                                hiddenDir = (JsonArray) JsonCompatibleUtil.parseJson(oHiddenDir.toString().trim());
-					oHiddenDir = null;
-					
-					if(idtype.equalsIgnoreCase("A")) {
-						hiddenDirList.clear();
-					} else {
-						if(hiddenDir != null) {
-							for(Object obj : hiddenDir) {
-								hiddenDirList.add(obj.toString().trim());
-							}
-						}
-						
-						for(Object row : dirPrv) {
-			            	JsonObject dirOne = null;
-			            	if(row instanceof JsonObject) dirOne = (JsonObject) row;
-			            	else                          dirOne = (JsonObject) JsonCompatibleUtil.parseJson(row.toString().trim());
-			            	
-			            	try {
-			            		String dPath = dirOne.get("path"     ).toString();
-			            		String dPrv  = dirOne.get("privilege").toString();
-			            		
-			            		int hdx=0;
-			            		while(hdx < hiddenDirList.size()) {
-			            			String hiddenDirOne = hiddenDirList.get(hdx);
-			            			if(hiddenDirOne.startsWith(dPath) || ("/" + hiddenDirOne).startsWith(dPath)) {
-				            			if(dPrv.equals("view") || dPrv.equals("edit")) {
-				            				hiddenDirList.remove(hdx);
-				            				continue;
-				            			}
-				            		}
-			            			hdx++;
-			            		}
-			            	} catch(Throwable t) {
-			            		logIn("Wrong account configuration - " + t.getMessage());
-			            	}
-			            }
-					}
-				}
-			}
+			List<String> hiddenDirList = getHiddensOnCurrentUser(sessions, pathParam, false);
+			if(hiddenDirList == null) hiddenDirList = new ArrayList<String>();
 			
 			for(String h : hiddenDirList) {
 		    	if(pathParam.startsWith(h))         throw new RuntimeException("No privilege");
@@ -3822,6 +3571,105 @@ public class FSControl {
 		}
 		if(caught != null) throw new RuntimeException(caught.getMessage(), caught);
 		return propTest;
+	}
+	
+	public List<String> getHiddensOnCurrentUser(JsonObject jsonSess, String path, boolean editpriv) {
+		String idtype = "G";
+		JsonArray dirPrv = null;
+		if(jsonSess != null) {
+			if(jsonSess.get("idtype") != null) {
+				idtype = jsonSess.get("idtype").toString();
+				if(! idtype.equalsIgnoreCase("A")) {
+					Object oDirPrv = (Object) jsonSess.get("privileges");
+				    if(oDirPrv != null) {
+				    	dirPrv = null;
+			            if(oDirPrv instanceof JsonArray) {
+			                dirPrv = (JsonArray) oDirPrv;
+			            } else {
+			            	dirPrv = (JsonArray) JsonCompatibleUtil.parseJson(oDirPrv.toString().trim());
+			            }
+			            
+			            for(Object row : dirPrv) {
+			            	JsonObject dirOne = null;
+			            	if(row instanceof JsonObject) dirOne = (JsonObject) row;
+			            	else                          dirOne = (JsonObject) JsonCompatibleUtil.parseJson(row.toString().trim());
+			            	
+			            	try {
+			            		String dPath = dirOne.get("path"     ).toString();
+			            		String dPrv  = dirOne.get("privilege").toString();
+			            		
+			            		if(path.startsWith(dPath) || ("/" + path).startsWith(dPath)) {
+			            			if(dPrv.equals("edit") || ((! editpriv) && dPrv.equals("view"))) {
+			            				return null;
+			            			}
+			            		}
+			            	} catch(Throwable t) {
+			            		logIn("Wrong account configuration - " + t.getMessage());
+			            	}
+			            }
+				    }
+				} else {
+					return null;
+				}
+				
+				if(idtype.equalsIgnoreCase("B")) {
+					if(noAnonymous) throw new RuntimeException("No privilege");
+				}
+			} else {
+				if(noAnonymous) throw new RuntimeException("No privilege");
+			}
+		} else {
+			if(noAnonymous) throw new RuntimeException("No privilege");
+		}
+		if(dirPrv == null) dirPrv = new JsonArray();
+		
+		Object oHiddenDir = conf.get("HiddenDirs");
+		List<String> hiddenDirList = new ArrayList<String>();
+		
+		if(oHiddenDir != null) {
+			JsonArray hiddenDir = null;
+			if(oHiddenDir instanceof JsonArray) hiddenDir = (JsonArray) oHiddenDir;
+			else                                hiddenDir = (JsonArray) JsonCompatibleUtil.parseJson(oHiddenDir.toString().trim());
+			oHiddenDir = null;
+			
+			if(idtype.equalsIgnoreCase("A")) {
+				hiddenDirList.clear();
+			} else {
+				if(hiddenDir != null) {
+					for(Object obj : hiddenDir) {
+						if(obj == null) continue;
+						hiddenDirList.add(obj.toString().trim());
+					}
+				}
+				
+				for(Object row : dirPrv) {
+	            	JsonObject dirOne = null;
+	            	if(row instanceof JsonObject) dirOne = (JsonObject) row;
+	            	else                          dirOne = (JsonObject) JsonCompatibleUtil.parseJson(row.toString().trim());
+	            	
+	            	try {
+	            		String dPath = dirOne.get("path"     ).toString();
+	            		String dPrv  = dirOne.get("privilege").toString();
+	            		
+	            		int hdx=0;
+	            		while(hdx < hiddenDirList.size()) {
+	            			String hiddenDirOne = hiddenDirList.get(hdx);
+	            			if(hiddenDirOne.startsWith(dPath) || ("/" + hiddenDirOne).startsWith(dPath)) {
+		            			if(dPrv.equals("view") || dPrv.equals("edit")) {
+		            				hiddenDirList.remove(hdx);
+		            				continue;
+		            			}
+		            		}
+	            			hdx++;
+	            		}
+	            	} catch(Throwable t) {
+	            		logIn("Wrong account configuration - " + t.getMessage());
+	            	}
+	            }
+			}
+		}
+		
+		return hiddenDirList;
 	}
 	
 	/** Call action for FSPack alternative works for FSControl */
