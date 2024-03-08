@@ -45,7 +45,7 @@ body input.btnx, body button.btnx {
     background-color: #CCCCC0;
 }
 
-body input.btnx:disabled, body button.btnx:disabled {
+body input.btnx:disabled, body button.btnx:disabled, body input.btnx.disabled, body button.btnx.disabled {
     background-color: #BBBBB0;
     color: #888888;
 }
