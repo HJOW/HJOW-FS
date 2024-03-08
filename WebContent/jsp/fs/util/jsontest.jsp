@@ -39,7 +39,7 @@ $(function() {
         </textarea>
     </div>
     <div>
-        <input type='button' id='btn' value='run'/>
+        <input type='button' id='btn' class='btn' value='run'/>
     </div>
     <div>
         <textarea style='width: 100%; min-height: 500px;' id='result' readonly></textarea>

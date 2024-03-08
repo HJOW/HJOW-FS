@@ -62,7 +62,7 @@ limitations under the License.
 	                <input type='text' name='content' class='full'/>
 	            </div>
 	            <div class='col-sm-2'>
-	                <input type='submit' value='조회'/>
+	                <input type='submit' value='조회' class='btn'/>
 	            </div>
 	        </div>
 	        <div>

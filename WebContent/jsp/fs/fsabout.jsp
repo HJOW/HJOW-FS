@@ -49,7 +49,7 @@ $(function() {
         </div>
         <div class='row'>
             <div class='col-sm-12 align_right'>
-                <input type='button' value='닫기' class='btn_close lang_attr_element' data-lang-target='value' data-lang-en='Close'/>
+                <input type='button' value='닫기' class='btn_close btn lang_attr_element' data-lang-target='value' data-lang-en='Close'/>
             </div>
         </div>
     </div>

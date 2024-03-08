@@ -56,7 +56,7 @@ $(function() {
     <div class='row'>
         <div class='col-sm-12 align_left'>
             <input type='text' name='command' class='tf_terminal_console' style='min-width: 500px;' value='first'/>
-            <input type='submit' value='>'/>
+            <input type='submit' value='>' class='btn'/>
         </div>
     </div>
 </form>

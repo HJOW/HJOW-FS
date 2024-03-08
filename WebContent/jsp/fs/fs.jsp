@@ -357,7 +357,7 @@ $(function() {
                     	
                     	if(typeof(arDirs[idx].elements) != 'undefined') {
                     		if(arDirs[idx].elements <= 0) {
-                    			tdBtns.append("<input type='button' class='btn_delete' value='X'/>");
+                    			tdBtns.append("<input type='button' class='btn_delete btn' value='X'/>");
                     			
                     			var btnDel = tdBtns.find('.btn_delete');
                                 btnDel.attr('data-path', a.attr('data-path'));
@@ -432,7 +432,7 @@ $(function() {
 
                     var tdBtns = tr.find('.td_buttons');
                     tdBtns.css('text-align', 'right');
-                    tdBtns.append("<input type='button' class='btn_preview not_opened invisible' value='▼'/>");
+                    tdBtns.append("<input type='button' class='btn_preview btn not_opened invisible' value='▼'/>");
                     
                     var divPrev = tr.find('.div_td_file_preview');
                     var btnPreview = tdBtns.find('.btn_preview');
@@ -485,7 +485,7 @@ $(function() {
                     }
                     
                     if(idType == 'A') {
-                        tdBtns.append("<input type='button' class='btn_delete' value='X'/>");
+                        tdBtns.append("<input type='button' class='btn_delete btn' value='X'/>");
 
                         var btnDel = tdBtns.find('.btn_delete');
                         btnDel.attr('data-path', a.attr('data-path'));
@@ -802,8 +802,8 @@ $(function() {
                 <form class='form_allsearch' onsubmit='return false;'>
                     <input type='hidden' name='path' class='hidden_path' value='<%=pathParam%>' />
                     <input type='hidden' name='all'  class='hidden_conf' value='true' />
-                    <input type='text' class='inp_allsearch lang_attr_element reloading_readonly' name='keyword' placeholder="전체 디렉토리 검색" data-lang-target='placeholder' data-lang-en='Search whole directories' style='width: 200px;'/>
-                    <input type='submit' class='btn_allsearch lang_attr_element reloading_disabled' value='검색' data-lang-target='value' data-lang-en='Search' />
+                    <input type='text'   class='inp_allsearch lang_attr_element reloading_readonly'     name='keyword' placeholder="전체 디렉토리 검색" data-lang-target='placeholder' data-lang-en='Search whole directories' style='width: 200px;'/>
+                    <input type='submit' class='btn_allsearch lang_attr_element reloading_disabled btn' value='검색' data-lang-target='value' data-lang-en='Search' />
                 </form>
             </div>
         </div>
@@ -818,13 +818,13 @@ $(function() {
 					</h4>
 				</div>
 				<div class='col-sm-2 align_right'>
-					<input type='button' class='btn_upload  privilege_element invisible lang_attr_element' value='업로드' data-lang-target='value' data-lang-en='Upload' />
-					<input type='button' class='btn_mkdir   privilege_element invisible lang_attr_element' value='새 폴더' data-lang-target='value' data-lang-en='New Folder' />
-					<input type='button' class='btn_config  privilege_element only_admin invisible lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config' />
+					<input type='button' class='btn_upload btn privilege_element invisible lang_attr_element' value='업로드' data-lang-target='value' data-lang-en='Upload' />
+					<input type='button' class='btn_mkdir  btn privilege_element invisible lang_attr_element' value='새 폴더' data-lang-target='value' data-lang-en='New Folder' />
+					<input type='button' class='btn_config btn privilege_element only_admin invisible lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config' />
 					<%
 					if (useConsole) {
 					%>
-					<input type='button' class='btn_console lang_attr_element' value='콘솔' data-lang-target='value' data-lang-en='Console' accesskey="t" />
+					<input type='button' class='btn_console btn lang_attr_element' value='콘솔' data-lang-target='value' data-lang-en='Console' accesskey="t" />
 					<%
 					}
 					%>
@@ -835,7 +835,7 @@ $(function() {
 					<input type='text' class='inp_search full lang_attr_element reloading_readonly' name='keyword' placeholder="디렉토리 내 검색" data-lang-target='placeholder' data-lang-en='Search in current directory' />
 				</div>
 				<div class='col-sm-2'>
-					<input type='submit' class='btn_search full lang_attr_element reloading_disabled' value='검색' data-lang-target='value' data-lang-en='Search' />
+					<input type='submit' class='btn_search full lang_attr_element reloading_disabled btn' value='검색' data-lang-target='value' data-lang-en='Search' />
 				</div>
 			</div>
 			<div class='row fs_root'>
