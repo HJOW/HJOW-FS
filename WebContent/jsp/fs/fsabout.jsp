@@ -36,7 +36,7 @@ $(function() {
 </script>
 </head>
 <body class='popup'>
-    <div class='container show-grid full'>
+    <div class='fs_div fs_about container show-grid full'>
         <div class='row'>
             <div class='col-sm-12'>
                 <h4>About FS</h4>

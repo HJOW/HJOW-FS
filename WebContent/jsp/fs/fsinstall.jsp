@@ -33,7 +33,7 @@ theme = FSUtils.removeSpecials(theme);
 if(! fsc.isInstalled()) {
 	%>
 <body>
-    <div class='fs_root container show-grid full fs_install'>
+    <div class='fs_root fs_div container show-grid full fs_install'>
         <script type="text/javascript">
         $(function() {
         	var bodys = $('body');

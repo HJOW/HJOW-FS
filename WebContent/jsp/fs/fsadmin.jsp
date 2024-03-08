@@ -23,7 +23,7 @@ limitations under the License.
 <jsp:include page="./common.header.jsp"></jsp:include>
 </head>
 <body>
-    <div class='fs_root full fs_admin'>
+    <div class='fs_root fs_div full fs_admin'>
         <script type="text/javascript">
         $(function() {
         	var selfId = "<%=fsc.getSessionUserId(request)%>";

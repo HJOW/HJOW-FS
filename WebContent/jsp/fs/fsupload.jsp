@@ -46,7 +46,7 @@ $(function() {
     <form action="<%=fsc.getContextPath()%>/jsp/fs/fsuploadin.jsp" method="post" enctype="multipart/form-data">
     <input type='hidden' name='path'  class='hidden_path' />
     <input type='hidden' name='popin' class='hidden_popin' value='<%=popin%>'/>
-    <div class='container show-grid full'>
+    <div class='fs_div fs_uploadpop container show-grid full'>
         <div class='row'>
             <div class='col-sm-12'>
                 <h4 class='lang_element' data-lang-en='Upload'>업로드</h4>

@@ -95,7 +95,7 @@ $(function() {
 </script>
 </head>
 <body class='popup'>
-    <div class='fs_capt container show-grid full'>
+    <div class='fs_capt fs_div container show-grid full'>
         <div class='row'>
             <div class='col-sm-12'>
                 <h3 class='lang_element' data-lang-en='Download'>다운로드</h3>
