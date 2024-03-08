@@ -154,7 +154,7 @@ if(! fsc.isInstalled()) {
                     </div>
 		        </div>
 		        <div class='col-sm-2'>
-		            <div class='col-sm-12'><input type='submit' value='설치' class='full lang_attr_element' style='height:50px;' data-lang-target='value' data-lang-en='Install'/></div>
+		            <div class='col-sm-12'><input type='submit' value='설치' class='full lang_attr_element btnx' style='height:50px;' data-lang-target='value' data-lang-en='Install'/></div>
 		        </div>
 		    </div>
         </form>

@@ -74,7 +74,7 @@ $(function() {
         </div>
         <div class='row'>
             <div class='col-sm-12 align_right'>
-                <input type='submit' value='업로드' class='lang_attr_element btn' data-lang-target='value' data-lang-en='UPLOAD'/>
+                <input type='submit' value='업로드' class='lang_attr_element btnx' data-lang-target='value' data-lang-en='UPLOAD'/>
             </div>
         </div>
     </div>

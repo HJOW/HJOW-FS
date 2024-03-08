@@ -21,6 +21,7 @@ body {
 
 body, div, span, a, p, pre, input {
     font-family : D2Coding, 'D2 coding', NanumGothicCoding, '나눔고딕코딩', NanumGothic, '나눔고딕', 돋움;
+    vertical-align: middle;
 }
 
 body td.td_mark_dir, body.dark div.td_mark_dir {
@@ -36,12 +37,21 @@ body .container div, body .container p, body .container table {
 }
 
 body input, body textarea, body select {
-    background-color: #CCCCCC;
+    background-color: #C0C0C0;
     color: #222222;
+}
+
+body input.btnx, body button.btnx {
+    background-color: #CCCCC0;
+}
+
+body input.btnx:disabled, body button.btnx:disabled {
+    background-color: #BCBCB0;
 }
 
 body div, body p, body h1, body h2, body h3, body h4, body h5, body h6, body table, body td, body th {
     color: #333333;
+    vertical-align: middle;
 }
 
 body .table-hover tbody tr:hover {

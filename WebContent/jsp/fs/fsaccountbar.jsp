@@ -147,13 +147,13 @@ if(! fsc.isInstalled()) {
 	         <input  style='width: <%=((fsc.getCaptchaWidth() / 2) + 5)%>px; height: <%=((fsc.getCaptchaHeight() / 2) + 5)%>px;' type='text' class='inp_captcha_l inp_login_element lang_attr_element valign_middle' name='captcha' placeholder='옆의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code left'/>
 	     </div>
 	     <div class='d_inline_block valign_middle' style='width:100px;  height: 60px;'>
-	         <input type='submit' value='로그인' class='lang_attr_element btn' data-lang-target='value' data-lang-en='LOGIN' style='height: 50px;'/>
+	         <input type='submit' value='로그인' class='lang_attr_element btnx' data-lang-target='value' data-lang-en='LOGIN' style='height: 50px;'/>
 	     </div>
 	</div>
 	<div class='row login_element logined padding_top_10'>
 	    <div class='col-sm-12'>
 	        <span class='lang_element' data-lang-en='Welcome, '></span><span class='span_type'></span> <span class='span_nick'></span><span class='lang_element' data-lang-en=''> 님 환영합니다.</span> 
-	        <input type='button' value='로그아웃' class='btn_logout btn lang_attr_element' data-lang-target='value' data-lang-en='LOGOUT'/>
+	        <input type='button' value='로그아웃' class='btn_logout btnx lang_attr_element' data-lang-target='value' data-lang-en='LOGOUT'/>
 	    </div>
 	</div>
 	</form>

@@ -189,7 +189,7 @@ limitations under the License.
                     		tr.find('.td_type').text(rowOne['idtype']);
                     		
                     		if(rowOne['id'] != selfId) {
-                    			tr.find('.td_etc').append("<input type='button' value='X' class='btn_delete btn' data-id=''/>");
+                    			tr.find('.td_etc').append("<input type='button' value='X' class='btn_delete btnx' data-id=''/>");
                                 
                                 var btnDel = tr.find('.btn_delete');
                                 btnDel.attr('data-id', rowOne['id']);
@@ -315,7 +315,7 @@ limitations under the License.
                         </div>
                         <div class='row'>
                             <div class='col-sm-12 align_center'>
-                                <input type='submit' value='적용' class='full lang_attr_element btn_apply btn' style='height:50px;' data-lang-target='value' data-lang-en='Apply'/>
+                                <input type='submit' value='적용' class='full lang_attr_element btn_apply btnx' style='height:50px;' data-lang-target='value' data-lang-en='Apply'/>
                             </div>
                         </div>
                     </div>
@@ -329,7 +329,7 @@ limitations under the License.
                     <form class='form_fs_user_search' onsubmit='return false;'>
                         <input type='hidden' name='req' value='userlist' class='hidden_req'/>
                         <input type='text' name='keyword'/>
-                        <input type='submit' value='검색' class='lang_attr_element btn' data-lang-target='value' data-lang-en='Search'/>
+                        <input type='submit' value='검색' class='lang_attr_element btnx' data-lang-target='value' data-lang-en='Search'/>
                     </form>
                 </div>
             </div>
@@ -389,7 +389,7 @@ limitations under the License.
                             </div>
                             <div class='row'>
                                 <div class='col-sm-12 align_right'>
-                                    <input type='submit' value='등록' class='lang_attr_element btn' data-lang-target='value' data-lang-en='Create'/>
+                                    <input type='submit' value='등록' class='lang_attr_element btnx' data-lang-target='value' data-lang-en='Create'/>
                                 </div>
                             </div>
                         </div>
@@ -411,7 +411,7 @@ limitations under the License.
                         </div>
                         <div class='row'>
                             <div class='col-sm-12 align_center'>
-                                <input type='submit' value='초기화' class='full lang_attr_element btn_apply btn' style='height:50px;' data-lang-target='value' data-lang-en='Reset'/>
+                                <input type='submit' value='초기화' class='full lang_attr_element btn_apply btnx' style='height:50px;' data-lang-target='value' data-lang-en='Reset'/>
                             </div>
                         </div>
                     </div>
