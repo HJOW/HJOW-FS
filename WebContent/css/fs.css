@@ -14,9 +14,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-div.fs_div {
+body, div.fs_div {
     margin: 0; padding: 0;
     background-color: #FFFFFF;
+}
+
+body.noscroll, div.noscroll {
+	overflow: hidden !important;
 }
 
 div.fs_div, div.fs_div div, div.fs_div span, div.fs_div a, div.fs_div p, div.fs_div pre, div.fs_div input {
