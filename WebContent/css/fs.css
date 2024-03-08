@@ -46,7 +46,8 @@ body input.btnx, body button.btnx {
 }
 
 body input.btnx:disabled, body button.btnx:disabled {
-    background-color: #BCBCB0;
+    background-color: #BBBBB0;
+    color: #888888;
 }
 
 body div, body p, body h1, body h2, body h3, body h4, body h5, body h6, body table, body td, body th {
