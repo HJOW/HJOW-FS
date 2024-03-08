@@ -41,21 +41,21 @@ div.fs_div .container div, div.fs_div .container p, div.fs_div .container table 
 }
 
 div.fs_div input, div.fs_div textarea, div.fs_div select {
-    background-color: #ECECE0;
+    background-color: #ECECEC;
     color: #222222;
 }
 
 div.fs_div input:disabled, div.fs_div textarea.disabled, div.fs_div select.disabled {
-    background-color: #BBBBB0;
+    background-color: #BBBBBB;
     color: #888888;
 }
 
 div.fs_div input.btnx, div.fs_div button.btnx {
-    background-color: #CCCCC0;
+    background-color: #CCCCCC;
 }
 
 div.fs_div input.btnx:disabled, div.fs_div button.btnx:disabled, div.fs_div input.btnx.disabled, div.fs_div button.btnx.disabled {
-    background-color: #BBBBB0;
+    background-color: #BBBBBB;
     color: #888888;
 }
 
