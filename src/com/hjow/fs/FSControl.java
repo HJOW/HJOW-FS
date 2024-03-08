@@ -74,6 +74,7 @@ import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 import hjow.common.json.JsonArray;
 import hjow.common.json.JsonCompatibleUtil;
 import hjow.common.json.JsonObject;
+import hjow.common.util.ClassUtil;
 import hjow.common.util.DataUtil;
 import hjow.common.util.SecurityUtil;
 
@@ -2816,12 +2817,15 @@ public class FSControl {
 			        		}
 		                    accChanging = false;
 			        	}
-			        	
-			        	JsonObject accountJsonNew = (JsonObject) accountOne.cloneObject();
-			        	accountJsonNew.remove("pw");
-			        	
 			        	sessionMap = accountOne;
+			        	
+			        	JsonObject accountJsonNew = new JsonObject();
+			        	accountJsonNew.put("id"    , accountOne.get("id"));
+			        	accountJsonNew.put("idtype", accountOne.get("idtype"));
+			        	accountJsonNew.put("nick"  , accountOne.get("nick"));
+			        	
 			        	request.getSession().setAttribute("fssession", accountJsonNew.toJSON());
+			        	accountJsonNew = null;
 			            logIn("Login Accept : " + id + " at " + now + " from " + request.getRemoteAddr());
 			            needInvalidate = false;
 			            json.put("success", new Boolean(true));
@@ -2872,25 +2876,105 @@ public class FSControl {
 	}
 	
 	public JsonObject getSessionObject(HttpServletRequest request) {
-		String sessionJson = (String) request.getSession().getAttribute("fssession");
-		if(sessionJson != null) {
-			sessionJson = sessionJson.trim();
-			if(! sessionJson.equals("")) {
-				JsonObject obj = (JsonObject) JsonCompatibleUtil.parseJson(sessionJson);
-				if(obj != null) { if(obj.get("id"    ) == null) obj = null;         }
-			    if(obj != null) { if(obj.get("idtype") == null) obj = null;         }
-			    if(obj != null) { if(obj.get("nick"  ) == null) obj = null;         }
-			    if(obj != null) {
-			    	JsonObject jsonSess = (JsonObject) obj.cloneObject();
-			    	jsonSess.remove("pw");
-			    	
-			    	if(jsonSess.get("privgroup") == null) jsonSess.put("privgroup", new JsonArray());
-			    	
-			    	return jsonSess;
-			    }
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		FileInputStream fIn = null;
+		Reader r1 = null;
+		Reader r2 = null;
+		Throwable caught = null;
+		JsonObject obj = null;
+		try {
+			String sessionJson = (String) request.getSession().getAttribute("fssession");
+			if(sessionJson != null) {
+				sessionJson = sessionJson.trim();
+				if(! sessionJson.equals("")) {
+					obj = (JsonObject) JsonCompatibleUtil.parseJson(sessionJson);
+					if(obj != null) { if(obj.get("id"    ) == null) obj = null;         }
+				    if(obj != null) { if(obj.get("idtype") == null) obj = null;         }
+				    if(obj != null) { if(obj.get("nick"  ) == null) obj = null;         }
+				    if(obj != null) {
+				    	JsonObject jsonSess = (JsonObject) obj.cloneObject();
+				    	obj = null;
+				    	
+				    	if(useJDBC) {
+							if(conn == null) {
+								Class.forName(jdbcClass);
+								conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+							}
+							
+							pstmt = conn.prepareStatement("SELECT USERID, USERPW, USERNICK, USERTYPE, FAILCNT, FAILTIME, PRIVILEGES FROM FS_USER WHERE USERID = ?");
+							pstmt.setString(1, jsonSess.get("id").toString());
+							
+							rs = pstmt.executeQuery();
+							obj = new JsonObject();
+							
+							while(rs.next()) {
+								obj.put("id"       , rs.getString("USERID"));
+								obj.put("idtype"   , rs.getString("USERTYPE"));
+								obj.put("nick"     , rs.getString("USERNICK"));
+								obj.put("fail_cnt" , rs.getLong("FAILCNT"));
+								obj.put("fail_time", rs.getLong("FAILTIME"));
+							}
+							
+							rs.close(); rs = null;
+							pstmt.close(); pstmt = null;
+							conn.close(); conn = null;
+							
+							jsonSess.putAll(obj);
+						} else {
+							File faJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts");
+			                if(! faJson.exists()) {
+			                    faJson.mkdirs();
+			                }
+							
+							File fileAcc = new File(faJson.getCanonicalPath() + File.separator + jsonSess.get("id") + ".json");
+							fileAcc.getCanonicalPath(); // Check valid
+						    if(fileAcc.exists()) {
+						        StringBuilder lineCollector = new StringBuilder("");
+						        String line;
+						        
+						        fIn = new FileInputStream(fileAcc);
+						        r1 = new InputStreamReader(fIn, cs);
+						        r2 = new BufferedReader(r1);
+						        while(true) {
+						            line = ((BufferedReader) r2).readLine();
+						            if(line == null) break;
+						            lineCollector = lineCollector.append("\n").append(line);
+						        }
+						        r2.close(); r2 = null;
+						        r1.close(); r1 = null;
+						        fIn.close(); fIn = null;
+						        
+						        obj = (JsonObject) JsonCompatibleUtil.parseJson(lineCollector.toString().trim());
+						        lineCollector.setLength(0);
+						        lineCollector = null;
+						        
+						        jsonSess.putAll(obj);
+						    }
+						}
+				    	obj = null;
+				    	
+				    	jsonSess.remove("pw");
+				    	if(jsonSess.get("privgroup") == null) jsonSess.put("privgroup", new JsonArray());
+				    	
+				    	return jsonSess;
+				    }
+				}
 			}
+		} catch(Throwable t) {
+			caught = t;
+		} finally {
+			ClassUtil.closeAll(rs, pstmt, conn);
 		}
-		return null;
+		if(caught != null) throw new RuntimeException(caught.getMessage(), caught);
+		obj = new JsonObject();
+		obj.put("id"        , "guest");
+    	obj.put("nick"      , "GUEST");
+        obj.put("idtype"    , "G");
+        obj.put("privileges", new JsonArray());
+        obj.put("privgroup" , new JsonArray());
+		return obj;
 	}
 	
 	public String getSessionUserId(HttpServletRequest request) {
