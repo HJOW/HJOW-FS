@@ -200,24 +200,9 @@ public class FSControl {
 	/** Get FSControl class or alternatives (read CL property on fs.properties) */
 	@SuppressWarnings("unchecked")
 	protected static Class<? extends FSControl> getControlClass() {
-		InputStream propIn = null;
 		try {
-			Properties propTest = new Properties();
+			Properties propTest = getFSProperties();
 			
-		    propIn = FSControl.class.getResourceAsStream("/fs.properties");
-		    if(propIn != null) {
-		        propTest.load(propIn);
-		        propIn.close(); propIn = null;
-		    } else {
-		    	propIn = FSControl.class.getResourceAsStream("/fs.xml");
-		        if(propIn != null) {
-		        	propTest.loadFromXML(propIn);
-			        propIn.close(); propIn = null;
-		        } else {
-		        	propTest = null;
-		        }
-		    }
-		    
 		    if(propTest != null) {
 		    	String ctrlClass = propTest.getProperty("CL");
 		    	if(ctrlClass != null) {
@@ -229,8 +214,6 @@ public class FSControl {
 		    }
 		} catch(Throwable t) {
 			System.out.println("Cannot find or load fs control class - (" + t.getClass().getSimpleName() + ") " + t.getMessage());
-		} finally {
-			if(propIn != null) { try { propIn.close(); } catch(Throwable t) {} }
 		}
 		return FSControl.class;
 	}
@@ -279,23 +262,7 @@ public class FSControl {
 				String s2 = "";
 				String s3 = "";
 				
-				Properties propTest = new Properties();
-				
-			    propIn = FSControl.class.getResourceAsStream("/fs.properties");
-			    if(propIn != null) {
-			        propTest.load(propIn);
-			        propIn.close(); propIn = null;
-			    } else {
-			    	logIn("No fs.properties ! Trying to find fs.xml...");
-			    	propIn = FSControl.class.getResourceAsStream("/fs.xml");
-			        if(propIn != null) {
-			        	propTest.loadFromXML(propIn);
-				        propIn.close(); propIn = null;
-			        } else {
-			        	logIn("No fs.xml !");
-			        	propTest = null;
-			        }
-			    }
+				Properties propTest = getFSProperties();
 			    
 			    if(propTest != null) {
 			    	// Check fs.properties
@@ -536,8 +503,7 @@ public class FSControl {
 		json = new JsonObject();
 		
 		if(! installed) {
-			Properties   propTest = new Properties();
-		    InputStream  propIn   = null;
+			Properties   propTest = null;
 			OutputStream fileOut  = null;
 			
 			Connection conn = null;
@@ -552,17 +518,7 @@ public class FSControl {
 				}
 				passwords = passwords.trim();
 				
-				propIn = this.getClass().getResourceAsStream("/fs.properties");
-		        if(propIn == null) {
-		        	String rex = "No fs.properties found at ./WEB-INF/classes/";
-					if(getLanguage(request).equals("ko")) rex = "fs.properties 파일을 찾을 수 없습니다. ./WEB-INF/classes/ 경로 상에 이 파일이 있어야 합니다.";
-		        	throw new FileNotFoundException(rex);
-		        }
-		        
-		        propTest = new Properties();
-		        propTest.load(propIn);
-		        
-		        propIn.close(); propIn = null;
+		        propTest = getFSProperties();
 		        
 		        // Check fs.properties
 		        String tx1 = propTest.getProperty("FS");
@@ -891,7 +847,6 @@ public class FSControl {
 				}
 			} finally {
 				if(fileOut != null) { try { fileOut.close(); } catch(Throwable txc) {} }
-				if(propIn  != null) { try { propIn.close();  } catch(Throwable txc) {} }
 				if(rs      != null) { try { rs.close();      } catch(Throwable txc) {} }
 				if(pstmt   != null) { try { pstmt.close();   } catch(Throwable txc) {} }
 				if(conn    != null) { try { conn.close();    } catch(Throwable txc) {} }
@@ -951,17 +906,7 @@ public class FSControl {
 				throw new RuntimeException(rex);
 			}
 			
-			propIn = this.getClass().getResourceAsStream("/fs.properties");
-	        if(propIn == null) {
-	        	String rex = "No fs.properties found at ./WEB-INF/classes/";
-				if(getLanguage(request).equals("ko")) rex = "fs.properties 파일을 찾을 수 없습니다. ./WEB-INF/classes/ 경로 상에 이 파일이 있어야 합니다.";
-	        	throw new FileNotFoundException(rex);
-	        }
-	        
-	        propTest = new Properties();
-	        propTest.load(propIn);
-	        
-	        propIn.close(); propIn = null;
+	        propTest = getFSProperties();
 	        
 	        // Check fs.properties
 	        String tx1 = propTest.getProperty("FS");
@@ -3832,6 +3777,51 @@ public class FSControl {
 			try { logConn.close(); } catch(Throwable txc) {}
 			logConn = null;
 		}
+	}
+	
+	protected static Properties getFSProperties() {
+		Properties propTest = new Properties();
+		InputStream propIn = null;
+		Throwable caught = null;
+		try {
+			int fileCnt = 0;
+			Properties temp = new Properties();
+			
+			propIn = FSControl.class.getResourceAsStream("/fsdefault.properties");
+		    if(propIn != null) {
+		    	temp.load(propIn);
+		        propIn.close(); propIn = null;
+		        propTest.putAll(temp);
+		        temp.clear();
+		    }
+			
+		    propIn = FSControl.class.getResourceAsStream("/fs.properties");
+		    if(propIn != null) {
+		    	temp.load(propIn);
+		        propIn.close(); propIn = null;
+		        fileCnt++;
+		        propTest.putAll(temp);
+		        temp.clear();
+		    }
+		    
+	    	propIn = FSControl.class.getResourceAsStream("/fs.xml");
+	        if(propIn != null) {
+	        	temp.loadFromXML(propIn);
+		        propIn.close(); propIn = null;
+		        fileCnt++;
+		        propTest.putAll(temp);
+		        temp.clear();
+	        }
+	        
+	        if(fileCnt <= 0) throw new FileNotFoundException("There is no fs.properties or fs.xml !");
+		} catch(Throwable t) {
+			System.out.println("Exception when loading fs properties... (" + t.getClass().getName() + ") - " + t.getMessage());
+			caught = t;
+		} finally {
+			if(propIn != null) { try { propIn.close(); } catch(Throwable ignores) {} }
+		}
+		if(caught != null) throw new RuntimeException(caught.getMessage(), caught);
+		return propTest;
 	}
 	
 	/** Call action for FSPack alternative works for FSControl */

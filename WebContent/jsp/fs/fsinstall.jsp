@@ -77,7 +77,7 @@ if(! fsc.isInstalled()) {
         </script>
         <form class='form_fs_ins' onsubmit='return false;'>
             <div class='row'>
-                <div class='col-sm-2'><h2>FS Installation</h2></div>
+                <div class='col-sm-12'><h2>FS Installation</h2></div>
             </div>
             <div class='row'>
                 <div class='col-sm-12'>
