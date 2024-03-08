@@ -25,7 +25,7 @@ String msg = fsc.upload(request);
 </head>
 <body>
     <div class='container show-grid full'>
-	    <div class='row'><div class='col-sm-12'><%= msg %></div></div>
+        <div class='row'><div class='col-sm-12'><%= msg %></div></div>
     </div>
 </body>
 </html>

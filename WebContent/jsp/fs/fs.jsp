@@ -18,26 +18,26 @@ limitations under the License.
 if (!fsc.isInstalled()) {
 %>
 <script type="text/javascript">
-	$(function() {
-		location.href = "<%=fsc.getContextPath()%>/jsp/fs/fsinstall.jsp";
-	});
-	</script>
+    $(function() {
+        location.href = "<%=fsc.getContextPath()%>/jsp/fs/fsinstall.jsp";
+    });
+    </script>
 <a href="<%=fsc.getContextPath()%>/jsp/fs/fsinstall.jsp"
-	class='lang_element' data-lang-en='[Install]'>[설치]</a>
+    class='lang_element' data-lang-en='[Install]'>[설치]</a>
 <%
 } else {
 String pathParam = request.getParameter("path");
 if (pathParam == null)
-	pathParam = "";
+    pathParam = "";
 
 // 상대경로 방지를 위해 . 기호  및 따옴표 문자는 반드시 제거 !
 pathParam = pathParam.trim();
 if (pathParam.equals("/"))
-	pathParam = "";
+    pathParam = "";
 pathParam = FSUtils.removeSpecials(pathParam, false, true, true, false, true).replace("\\", "/").trim();
 
 if (pathParam.startsWith("/"))
-	pathParam = pathParam.substring(1);
+    pathParam = pathParam.substring(1);
 
 boolean useConsole = (!fsc.isNoConsoleMode());
 %>
@@ -81,33 +81,33 @@ $(function() {
     pops['captdown'].iframe = popRoot.find('.fs_pop_captdown').find('iframe');
     pops['captdown'].dialog = popRoot.find('.fs_pop_captdown').dialog({ autoOpen : false, title : 'Downloads', width : captSizes['width'] + 300, height : captSizes['height'] + 320, resize : function(event, ui) { pops['captdown'].iframe.height(ui.size.height - 90);  } });
     pops['captdown'].open   = function() {
-    	var d   = pops['captdown'].dialog;
-    	var ifr = pops['captdown'].iframe;
-    	ifr.css('width', '100%');
-    	ifr.css('overflow-y', 'hidden');
-    	ifr.height(captSizes['height'] + 320 - 90);
-    	ifr.attr('scrolling', 'no');
-    	ifr.attr('frameborder', '0');
-    	
-    	ifr.on('load', function() {
-    		var ct = ifr.contents();
-    		var cForm = ct.find('form');
+        var d   = pops['captdown'].dialog;
+        var ifr = pops['captdown'].iframe;
+        ifr.css('width', '100%');
+        ifr.css('overflow-y', 'hidden');
+        ifr.height(captSizes['height'] + 320 - 90);
+        ifr.attr('scrolling', 'no');
+        ifr.attr('frameborder', '0');
+        
+        ifr.on('load', function() {
+            var ct = ifr.contents();
+            var cForm = ct.find('form');
             cForm.on('submit', function() {
                 pops['captdown'].close();
             });
-    	});
-    	$('.ui-dialog-titlebar-close').text('X');
-    	d.dialog('open');
+        });
+        $('.ui-dialog-titlebar-close').text('X');
+        d.dialog('open');
     };
     pops['captdown'].close = function() {
-    	var d = pops['captdown'].dialog;
+        var d = pops['captdown'].dialog;
         d.dialog('close');
     };
     pops['upload'] = {};
     pops['upload'].iframe = popRoot.find('.fs_pop_upload').find('iframe');
     pops['upload'].dialog = popRoot.find('.fs_pop_upload').dialog({ autoOpen : false, title : 'Uploads', width : 350, height : 230, resize : function(event, ui) { pops['upload'].iframe.height(ui.size.height - 90);  } });
     pops['upload'].open   = function() {
-    	var d   = pops['upload'].dialog;
+        var d   = pops['upload'].dialog;
         var ifr = pops['upload'].iframe;
         ifr.css('width', '100%');
         ifr.css('overflow-y', 'hidden');
@@ -116,7 +116,7 @@ $(function() {
         ifr.attr('frameborder', '0');
         
         ifr.on('load', function() {
-        	var ct = ifr.contents();
+            var ct = ifr.contents();
             var cForm = ct.find('form');
             cForm.on('submit', function() {
                 pops['captdown'].close();
@@ -126,7 +126,7 @@ $(function() {
         d.dialog('open');
     };
     pops['upload'].close  = function() {
-    	var d = pops['upload'].dialog;
+        var d = pops['upload'].dialog;
         d.dialog('close');
     };
     pops['console'] = {};
@@ -180,25 +180,25 @@ $(function() {
     pathDisp.text('');
     
     function fIconize() {
-    	listRoot.find('.tr_dir.no_icon').each(function() {
-    		var tdIcon = $(this).find('.td_mark_dir');
-    		tdIcon.empty();
-    		tdIcon.append("<img style='width: 20px; height: 20px;'/>");
-    		tdIcon.find('img').attr('src', ctxPath + '/css/images/dir.ico');
-    		tdIcon.find('img').attr('alt', 'Directory');
-    	});
-    	listRoot.find('.tr_file.no_icon').each(function() {
-    		var tdIcon = $(this).find('.td_mark_file');
+        listRoot.find('.tr_dir.no_icon').each(function() {
+            var tdIcon = $(this).find('.td_mark_dir');
+            tdIcon.empty();
+            tdIcon.append("<img style='width: 20px; height: 20px;'/>");
+            tdIcon.find('img').attr('src', ctxPath + '/css/images/dir.ico');
+            tdIcon.find('img').attr('alt', 'Directory');
+        });
+        listRoot.find('.tr_file.no_icon').each(function() {
+            var tdIcon = $(this).find('.td_mark_file');
             tdIcon.empty();
             tdIcon.append("<img style='width: 20px; height: 20px;'/>");
             tdIcon.find('img').attr('src', ctxPath + '/css/images/files.png');
             tdIcon.find('img').attr('alt', 'File');
-    	});
-    	
-    	if(! useIcon) return;
-    	
-    	var iconizeWorkSize = 10;
-    	var iconizeIndex = 0;
+        });
+        
+        if(! useIcon) return;
+        
+        var iconizeWorkSize = 10;
+        var iconizeIndex = 0;
         var iconizeArray = [];
         var breaks = false;
         var bkColor = {r : 255, g : 255, b : 255};
@@ -206,11 +206,11 @@ $(function() {
         else if(fsRoot.is('.dark')) bkColor = {r : 59, g : 59, b : 59};
         
         listRoot.find('.tr_file.no_icon').each(function() {
-        	if(breaks) return;
-        	
+            if(breaks) return;
+            
             var fileNm = $(this).find('a.link_file').attr('data-name');
             if(typeof(fileNm) != 'undefined') {
-            	var tries = $(this).attr('data-try');
+                var tries = $(this).attr('data-try');
                 
                 if(tries == null || typeof(tries) == 'undefined' || tries == '') tries = 0;
                 else tries = parseInt(String(tries).trim());
@@ -219,47 +219,47 @@ $(function() {
                 $(this).attr('data-try', '' + tries);
                 
                 if(tries >= 3) return;
-            	iconizeArray.push(fileNm);
+                iconizeArray.push(fileNm);
             }
             
             if(iconizeArray.length >= iconizeWorkSize) {
-            	var filelist = '';
-            	var fdx=0;
-            	for(fdx=0; fdx<iconizeArray.length; fdx++) {
-            		if(filelist != '') filelist += ',';
-            		filelist += iconizeArray[fdx];
-            	}
-            	var workingArray = iconizeArray;
-            	iconizeArray = [];
+                var filelist = '';
+                var fdx=0;
+                for(fdx=0; fdx<iconizeArray.length; fdx++) {
+                    if(filelist != '') filelist += ',';
+                    filelist += iconizeArray[fdx];
+                }
+                var workingArray = iconizeArray;
+                iconizeArray = [];
                 $.ajax({
-                	url  : ctxPath + "/jsp/fs/fsfileicons.jsp",
-                	data : { path : inpPath.val(), files : filelist, br : bkColor.r, bg : bkColor.g, bb : bkColor.b },
-                	method : 'POST',
-                	dataType : 'json',
-                	success : function(data) {
-                		if(data.success) {
-                			// Apply received icon
-                			$.each(data.data, function(dFileName, dImage) {
-                				listRoot.find('.tr_file.no_icon').each(function() {
-                					if(! $(this).is('.no_icon')) return;
-                					
-                					var inFileNm = $(this).find('a.link_file').attr('data-name');
-                					if(inFileNm != dFileName) return;
-                					
-                					var inTdIcon = $(this).find('.td_mark_file');
-                					inTdIcon.empty();
-                					inTdIcon.append("<img style='width: 20px; height: 20px;'/>");
-                					inTdIcon.find('img').attr('src', dImage);
-                					inTdIcon.find('img').attr('alt', 'File');
-                					
-                					$(this).removeClass('no_icon');
-                					$(this).addClass('icon');
-                				});
-                			});
-                		}
-                	}, complete : function() {
-                		fIconize();
-                	}
+                    url  : ctxPath + "/jsp/fs/fsfileicons.jsp",
+                    data : { path : inpPath.val(), files : filelist, br : bkColor.r, bg : bkColor.g, bb : bkColor.b },
+                    method : 'POST',
+                    dataType : 'json',
+                    success : function(data) {
+                        if(data.success) {
+                            // Apply received icon
+                            $.each(data.data, function(dFileName, dImage) {
+                                listRoot.find('.tr_file.no_icon').each(function() {
+                                    if(! $(this).is('.no_icon')) return;
+                                    
+                                    var inFileNm = $(this).find('a.link_file').attr('data-name');
+                                    if(inFileNm != dFileName) return;
+                                    
+                                    var inTdIcon = $(this).find('.td_mark_file');
+                                    inTdIcon.empty();
+                                    inTdIcon.append("<img style='width: 20px; height: 20px;'/>");
+                                    inTdIcon.find('img').attr('src', dImage);
+                                    inTdIcon.find('img').attr('alt', 'File');
+                                    
+                                    $(this).removeClass('no_icon');
+                                    $(this).addClass('icon');
+                                });
+                            });
+                        }
+                    }, complete : function() {
+                        fIconize();
+                    }
                 });
                 breaks = true;
             }
@@ -267,8 +267,8 @@ $(function() {
     }
 
     function fReload(firsts) {
-    	if(firsts) {
-    		tables.find('.col_controls').css('width', '50px');
+        if(firsts) {
+            tables.find('.col_controls').css('width', '50px');
             listRoot.find('binded_click').each(function() { $(this).off('click'); });
             
             listRoot.empty();
@@ -276,13 +276,13 @@ $(function() {
             pathDisp.text('');
             
             inpExcep.val('');
-    	}
-    	inpAllSr.val('');
-    	
+        }
+        inpAllSr.val('');
+        
         fsRoot.find('.reloading_readonly').each(function() {
-        	if(! $(this).prop('readonly')) {
-        		$(this).prop('readonly', true);
-        		$(this).addClass('reloading_readonly_applied');
+            if(! $(this).prop('readonly')) {
+                $(this).prop('readonly', true);
+                $(this).addClass('reloading_readonly_applied');
             }
         });
         fsRoot.find('.reloading_disabled').each(function() {
@@ -293,7 +293,7 @@ $(function() {
         });
         
         var expVal = inpExcep.val();
-    	$.ajax({
+        $.ajax({
             url    : ctxPath + "/jsp/fs/fslist.jsp",
             data   : form.serialize(),
             method : "POST",
@@ -303,10 +303,10 @@ $(function() {
                 arFiles = data.files;
 
                 if(firsts) {
-                	listRoot.empty();
+                    listRoot.empty();
                     pathDisp.text('');
                 } else {
-                	listRoot.find('.progressing').remove();
+                    listRoot.find('.progressing').remove();
                 }
                 
                 if(! data.success) {
@@ -318,7 +318,7 @@ $(function() {
 
                 if(data.session != null && typeof(data.session) != 'undefined') {
                     if(data.session.id != null && typeof(data.session.id) != 'undefined' && data.session.idtype != null && typeof(data.session.idtype) != 'undefined') {
-                    	idType = String(data.session.idtype);
+                        idType = String(data.session.idtype);
                     }
                 }
 
@@ -329,7 +329,7 @@ $(function() {
                 }
 
                 if(arDirs.length == 0 && arFiles.length == 0) {
-                	listRoot.append("<tr class='element element_special empty'><td colspan='4' class='lang_element filednd' data-lang-en='Empty'>비어 있음</td></tr>");
+                    listRoot.append("<tr class='element element_special empty'><td colspan='4' class='lang_element filednd' data-lang-en='Empty'>비어 있음</td></tr>");
                 }
 
                 var idx = 0;
@@ -352,14 +352,14 @@ $(function() {
                     tr.addClass('no_icon');
 
                     if(idType == 'A') {
-                    	var tdBtns = tr.find('.td_buttons');
-                    	tdBtns.css('text-align', 'right');
-                    	
-                    	if(typeof(arDirs[idx].elements) != 'undefined') {
-                    		if(arDirs[idx].elements <= 0) {
-                    			tdBtns.append("<input type='button' class='btn_delete btnx' value='X'/>");
-                    			
-                    			var btnDel = tdBtns.find('.btn_delete');
+                        var tdBtns = tr.find('.td_buttons');
+                        tdBtns.css('text-align', 'right');
+                        
+                        if(typeof(arDirs[idx].elements) != 'undefined') {
+                            if(arDirs[idx].elements <= 0) {
+                                tdBtns.append("<input type='button' class='btn_delete btnx' value='X'/>");
+                                
+                                var btnDel = tdBtns.find('.btn_delete');
                                 btnDel.attr('data-path', a.attr('data-path'));
                                 btnDel.attr('data-name', a.attr('data-name'));
 
@@ -386,14 +386,14 @@ $(function() {
                                     }
                                 });
                                 btnDel.addClass('binded_click');
-                    		}
-                    	}
+                            }
+                        }
                     }
                 }
                 
                 for(idx = 0; idx < arFiles.length; idx++) {
-                	var fileOne = arFiles[idx];
-                	
+                    var fileOne = arFiles[idx];
+                    
                     var lname   = String(fileOne.name);
                     var lsize   = String(fileOne.size);
                     var cttype  = String(fileOne.contentType);
@@ -437,12 +437,12 @@ $(function() {
                     var divPrev = tr.find('.div_td_file_preview');
                     var btnPreview = tdBtns.find('.btn_preview');
                     if(prvtype >= 0) {
-                    	if(fileOne['over_prev']) {
-                    		btnPreview.addClass('disabled');
-                    		btnPreview.prop('disabled', true);
-                    		btnPreview.attr('title', 'This file is too big. Cannot preview.');
-                    	} else {
-                    		btnPreview.attr('data-path', a.attr('data-path'));
+                        if(fileOne['over_prev']) {
+                            btnPreview.addClass('disabled');
+                            btnPreview.prop('disabled', true);
+                            btnPreview.attr('title', 'This file is too big. Cannot preview.');
+                        } else {
+                            btnPreview.attr('data-path', a.attr('data-path'));
                             btnPreview.attr('data-name', a.attr('data-name'));
                             btnPreview.attr('data-idx', '' + idx);
                             btnPreview.attr('data-prv', '' + prvtype);
@@ -480,8 +480,8 @@ $(function() {
                                 
                             });
                             btnPreview.addClass('binded_click');
-                    	}
-                    	btnPreview.removeClass('invisible');
+                        }
+                        btnPreview.removeClass('invisible');
                     }
                     
                     if(idType == 'A') {
@@ -546,8 +546,8 @@ $(function() {
                 fsRoot.find('.link_dir').each(function() {
                     var aLink = $(this);
                     aLink.on('click', function() {
-                    	inpPath.val($(this).attr('data-path'));
-                    	fReload(true);
+                        inpPath.val($(this).attr('data-path'));
+                        fReload(true);
                     });
                     aLink.addClass('binded_click');
                 });
@@ -555,14 +555,14 @@ $(function() {
                 fsRoot.find('.link_file').each(function() {
                     var aLink = $(this);
                     aLink.on('click', function() {
-                    	if($(this).is('.disabled')) return;
+                        if($(this).is('.disabled')) return;
                         var theme = '';
                         if($('body').is('.dark')) theme='dark';
                         if(useCaptchaDown) {
-                        	pops['captdown'].iframe.attr('src', ctxPath + '/jsp/fs/' + 'fscaptdown.jsp?popin=true&theme=' + theme + '&path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')));
-                        	pops['captdown'].open();
+                            pops['captdown'].iframe.attr('src', ctxPath + '/jsp/fs/' + 'fscaptdown.jsp?popin=true&theme=' + theme + '&path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')));
+                            pops['captdown'].open();
                         } else {
-                        	location.href = ctxPath + '/jsp/fs/' + 'fsdown.jsp?path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name'));
+                            location.href = ctxPath + '/jsp/fs/' + 'fsdown.jsp?path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name'));
                         }
                     });
                     aLink.addClass('binded_click');
@@ -570,30 +570,30 @@ $(function() {
 
                 fsRoot.find('.privilege_element').addClass('invisible');
                 if(data.privilege == 'edit') {
-                	fsRoot.find('.privilege_element').removeClass('invisible');
-                	FSUtil.applyDragAndDrop(fsRoot, ctxPath, inpPath.val());
+                    fsRoot.find('.privilege_element').removeClass('invisible');
+                    FSUtil.applyDragAndDrop(fsRoot, ctxPath, inpPath.val());
                 } else {
-                	fsRoot.find('.filednd').each(function() {
-                		var area = $(this);
+                    fsRoot.find('.filednd').each(function() {
+                        var area = $(this);
                         area.off('drop');
                         area.off('dragover');
                         area.off('dragenter');
                         area.off('dragleave');
                         area.removeClass('filedndin');
-                	});
+                    });
                 }
                 if(idType != 'A') {
-                	fsRoot.find('.only_admin').addClass('invisible');
+                    fsRoot.find('.only_admin').addClass('invisible');
                 }
                 
                 if(typeof(data.skipped) != 'undefined') {
                     if(data.skipped >= 1) {
                         listRoot.append("<tr class='element element_special askmore'><td colspan='4'><a href='#' class='a_askmore lang_element' data-lang-en='More...'>더 조회하기...</a></td></tr>");
                         listRoot.find('.a_askmore').on('click', function() {
-                        	listRoot.find('.askmore').find('.binded_click').off('click');
-                        	listRoot.find('.askmore').remove();
-                        	
-                        	fReload(false);
+                            listRoot.find('.askmore').find('.binded_click').off('click');
+                            listRoot.find('.askmore').remove();
+                            
+                            fReload(false);
                         });
                         listRoot.find('.a_askmore').addClass('binded_click');
                     }
@@ -602,15 +602,15 @@ $(function() {
                 FSUtil.applyLanguage();
                 fIconize();
             }, error : function(jqXHR, textStatus, errorThrown) {
-            	textStatus  = String(textStatus).replace(/[<>]+/g, '');
-            	errorThrown = String(errorThrown).replace(/[<>]+/g, '');
-            	listRoot.append("<tr class='element error'><td>ERROR ! " + textStatus + ", " + errorThrown + "</td></tr>");
+                textStatus  = String(textStatus).replace(/[<>]+/g, '');
+                errorThrown = String(errorThrown).replace(/[<>]+/g, '');
+                listRoot.append("<tr class='element error'><td>ERROR ! " + textStatus + ", " + errorThrown + "</td></tr>");
             }, complete : function() {
-            	fsRoot.find('.reloading_readonly.reloading_readonly_applied').each(function() {
-            		$(this).prop('readonly', false);
-            		$(this).removeClass('reloading_readonly_applied');
-            	});
-            	fsRoot.find('.reloading_disabled.reloading_disabled_applied').each(function() {
+                fsRoot.find('.reloading_readonly.reloading_readonly_applied').each(function() {
+                    $(this).prop('readonly', false);
+                    $(this).removeClass('reloading_readonly_applied');
+                });
+                fsRoot.find('.reloading_disabled.reloading_disabled_applied').each(function() {
                     $(this).prop('disabled', false);
                     $(this).removeClass('reloading_disabled_applied');
                 });
@@ -640,53 +640,53 @@ $(function() {
     });
     
     btnMkdir.on('click', function() {
-    	var msg = 'Please input the name for new folder. (No dot, /, quotes, <>, ?, &)';
-    	if(FSUtil.detectLanguage() == 'ko') msg = '생성할 폴더 이름을 입력해 주세요. (마침표, /, 따옴표, <>, ?, & 를 넣을 수 없습니다.)';
-    	
-    	var dirName = prompt(msg, '');
-    	
-    	if(dirName == null || typeof(dirName) == 'undefined') {
-    		return;
-    	}
-    	dirName = dirName.trim();
-    	if(dirName == '') return;
-    	
-    	if(dirName.indexOf('.') >= 0) {
-    		msg = 'Wrong name !';
-            if(FSUtil.detectLanguage() == 'ko') msg = '폴더 이름으로 적합하지 않습니다.';
-            alert(msg);
+        var msg = 'Please input the name for new folder. (No dot, /, quotes, <>, ?, &)';
+        if(FSUtil.detectLanguage() == 'ko') msg = '생성할 폴더 이름을 입력해 주세요. (마침표, /, 따옴표, <>, ?, & 를 넣을 수 없습니다.)';
+        
+        var dirName = prompt(msg, '');
+        
+        if(dirName == null || typeof(dirName) == 'undefined') {
             return;
-    	}
-    	
-    	if(dirName.indexOf('/') >= 0 || dirName.indexOf('\\') >= 0) {
+        }
+        dirName = dirName.trim();
+        if(dirName == '') return;
+        
+        if(dirName.indexOf('.') >= 0) {
             msg = 'Wrong name !';
             if(FSUtil.detectLanguage() == 'ko') msg = '폴더 이름으로 적합하지 않습니다.';
             alert(msg);
             return;
         }
-    	
-    	if(dirName.indexOf("'") >= 0 || dirName.indexOf('"') >= 0) {
+        
+        if(dirName.indexOf('/') >= 0 || dirName.indexOf('\\') >= 0) {
             msg = 'Wrong name !';
             if(FSUtil.detectLanguage() == 'ko') msg = '폴더 이름으로 적합하지 않습니다.';
             alert(msg);
             return;
         }
-    	
-    	if(dirName.indexOf("<") >= 0 || dirName.indexOf('>') >= 0) {
+        
+        if(dirName.indexOf("'") >= 0 || dirName.indexOf('"') >= 0) {
             msg = 'Wrong name !';
             if(FSUtil.detectLanguage() == 'ko') msg = '폴더 이름으로 적합하지 않습니다.';
             alert(msg);
             return;
         }
-    	
-    	if(dirName.indexOf("?") >= 0 || dirName.indexOf('&') >= 0) {
+        
+        if(dirName.indexOf("<") >= 0 || dirName.indexOf('>') >= 0) {
             msg = 'Wrong name !';
             if(FSUtil.detectLanguage() == 'ko') msg = '폴더 이름으로 적합하지 않습니다.';
             alert(msg);
             return;
         }
-    	
-    	$.ajax({
+        
+        if(dirName.indexOf("?") >= 0 || dirName.indexOf('&') >= 0) {
+            msg = 'Wrong name !';
+            if(FSUtil.detectLanguage() == 'ko') msg = '폴더 이름으로 적합하지 않습니다.';
+            alert(msg);
+            return;
+        }
+        
+        $.ajax({
             url  : ctxPath + '/jsp/fs/fsmkdir.jsp',
             data : {
                 path : inpPath.val(),
@@ -702,7 +702,7 @@ $(function() {
     });
     
     formAllSr.on('submit', function() {
-    	tables.find('.col_controls').css('width', '10px');
+        tables.find('.col_controls').css('width', '10px');
         listRoot.find('binded_click').each(function() { $(this).off('click'); });
         
         listRoot.empty();
@@ -710,7 +710,7 @@ $(function() {
         pathDisp.text('');
         inpSearch.val('');
         
-    	fsRoot.find('.reloading_readonly').each(function() {
+        fsRoot.find('.reloading_readonly').each(function() {
             if(! $(this).prop('readonly')) {
                 $(this).prop('readonly', true);
                 $(this).addClass('reloading_readonly_applied');
@@ -729,18 +729,18 @@ $(function() {
             method : "POST",
             dataType : "json",
             success : function(data) {
-            	listRoot.empty();
-            	if(! data.success) {
-            		listRoot.append("<tr class='element error'><td>ERROR ! " + data.message + "</td></tr>");
-            		return;
-            	}
-            	
-            	if(data.list.length <= 0) {
-            		listRoot.append("<tr class='element element_special empty'><td colspan='4' class='lang_element filednd' data-lang-en='Empty'>비어 있음</td></tr>");
-            		return;
-            	}
-            	
-            	for(idx = 0; idx < data.list.length; idx++) {
+                listRoot.empty();
+                if(! data.success) {
+                    listRoot.append("<tr class='element error'><td>ERROR ! " + data.message + "</td></tr>");
+                    return;
+                }
+                
+                if(data.list.length <= 0) {
+                    listRoot.append("<tr class='element element_special empty'><td colspan='4' class='lang_element filednd' data-lang-en='Empty'>비어 있음</td></tr>");
+                    return;
+                }
+                
+                for(idx = 0; idx < data.list.length; idx++) {
                     listRoot.append("<tr class='element tr_dir tr_dir_" + idx + "'><td class='td_allsearch ellipsis' colspan='4'></td></tr>");
                     var tr = listRoot.find('.tr_dir_' + idx);
                     tr.find('.td_allsearch').text(data.list[idx]);
@@ -751,7 +751,7 @@ $(function() {
                 errorThrown = String(errorThrown).replace(/[<>]+/g, '');
                 listRoot.append("<tr class='element error'><td>ERROR ! " + textStatus + ", " + errorThrown + "</td></tr>");
             }, complete : function() {
-            	fsRoot.find('.reloading_readonly.reloading_readonly_applied').each(function() {
+                fsRoot.find('.reloading_readonly.reloading_readonly_applied').each(function() {
                     $(this).prop('readonly', false);
                     $(this).removeClass('reloading_readonly_applied');
                 });
@@ -765,16 +765,16 @@ $(function() {
 
     var fsFileList = fsRoot.find('.fs_filelist');
     if(noAnonymous) {
-    	if(loginedFirst) {
-    		fsFileList.addClass('invisible');
-    		fsRoot.find('.fs_filelist_view').removeClass('invisible');
-    	} else {
-    		fsFileList.addClass('invisible');
-    		fsRoot.find('.fs_filelist_anonymous').removeClass('invisible');
-    	}
+        if(loginedFirst) {
+            fsFileList.addClass('invisible');
+            fsRoot.find('.fs_filelist_view').removeClass('invisible');
+        } else {
+            fsFileList.addClass('invisible');
+            fsRoot.find('.fs_filelist_anonymous').removeClass('invisible');
+        }
     } else {
-    	fsFileList.addClass('invisible');
-    	fsRoot.find('.fs_filelist_view').removeClass('invisible');
+        fsFileList.addClass('invisible');
+        fsRoot.find('.fs_filelist_view').removeClass('invisible');
     }
     
     <%if (useConsole) {%>
@@ -793,8 +793,8 @@ $(function() {
 });
 </script>
 <div class='fs_root fs_div'>
-	<div class='fs_filelist fs_filelist_view container show-grid full'>
-	    <div class='row fs_title'>
+    <div class='fs_filelist fs_filelist_view container show-grid full'>
+        <div class='row fs_title'>
             <div class='col-sm-8'>
                 <h2><%=fsc.getTitle()%></h2>
             </div>
@@ -807,63 +807,63 @@ $(function() {
                 </form>
             </div>
         </div>
-		<form class='form_fs' onsubmit='return false;'>
-			<input type='hidden' name='path' class='hidden_path' value='<%=pathParam%>' />
-			<input type='hidden' name='excepts' class='hidden_excepts' value='' />
-			<div class='row fs_directory'>
-				<div class='col-sm-10'>
-					<h4 class='path_title'>
-						<span class='lang_element' data-lang-en='Current Directory : '>현재
-							디렉토리 : </span><span class='path'></span>
-					</h4>
-				</div>
-				<div class='col-sm-2 align_right'>
-					<input type='button' class='btn_upload btnx privilege_element invisible lang_attr_element' value='업로드' data-lang-target='value' data-lang-en='Upload' />
-					<input type='button' class='btn_mkdir  btnx privilege_element invisible lang_attr_element' value='새 폴더' data-lang-target='value' data-lang-en='New Folder' />
-					<input type='button' class='btn_config btnx privilege_element only_admin invisible lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config' />
-					<%
-					if (useConsole) {
-					%>
-					<input type='button' class='btn_console btnx lang_attr_element' value='콘솔' data-lang-target='value' data-lang-en='Console' accesskey="t" />
-					<%
-					}
-					%>
-				</div>
-			</div>
-			<div class='row fs_search'>
-				<div class='col-sm-10'>
-					<input type='text' class='inp_search full lang_attr_element reloading_readonly' name='keyword' placeholder="디렉토리 내 검색" data-lang-target='placeholder' data-lang-en='Search in current directory' />
-				</div>
-				<div class='col-sm-2'>
-					<input type='submit' class='btn_search full lang_attr_element reloading_disabled btnx' value='검색' data-lang-target='value' data-lang-en='Search' />
-				</div>
-			</div>
-			<div class='row fs_root'>
-				<div class='col-sm-12'>
-					<table class="table table-hover full fs_table_list">
-						<colgroup>
-							<col style='width: 50px;' />
-							<col />
-							<col style='width: 100px;' />
-							<col style='width: 50px;' class='col_controls' />
-						</colgroup>
-						<tbody class='fs_list'>
+        <form class='form_fs' onsubmit='return false;'>
+            <input type='hidden' name='path' class='hidden_path' value='<%=pathParam%>' />
+            <input type='hidden' name='excepts' class='hidden_excepts' value='' />
+            <div class='row fs_directory'>
+                <div class='col-sm-10'>
+                    <h4 class='path_title'>
+                        <span class='lang_element' data-lang-en='Current Directory : '>현재
+                            디렉토리 : </span><span class='path'></span>
+                    </h4>
+                </div>
+                <div class='col-sm-2 align_right'>
+                    <input type='button' class='btn_upload btnx privilege_element invisible lang_attr_element' value='업로드' data-lang-target='value' data-lang-en='Upload' />
+                    <input type='button' class='btn_mkdir  btnx privilege_element invisible lang_attr_element' value='새 폴더' data-lang-target='value' data-lang-en='New Folder' />
+                    <input type='button' class='btn_config btnx privilege_element only_admin invisible lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config' />
+                    <%
+                    if (useConsole) {
+                    %>
+                    <input type='button' class='btn_console btnx lang_attr_element' value='콘솔' data-lang-target='value' data-lang-en='Console' accesskey="t" />
+                    <%
+                    }
+                    %>
+                </div>
+            </div>
+            <div class='row fs_search'>
+                <div class='col-sm-10'>
+                    <input type='text' class='inp_search full lang_attr_element reloading_readonly' name='keyword' placeholder="디렉토리 내 검색" data-lang-target='placeholder' data-lang-en='Search in current directory' />
+                </div>
+                <div class='col-sm-2'>
+                    <input type='submit' class='btn_search full lang_attr_element reloading_disabled btnx' value='검색' data-lang-target='value' data-lang-en='Search' />
+                </div>
+            </div>
+            <div class='row fs_root'>
+                <div class='col-sm-12'>
+                    <table class="table table-hover full fs_table_list">
+                        <colgroup>
+                            <col style='width: 50px;' />
+                            <col />
+                            <col style='width: 100px;' />
+                            <col style='width: 50px;' class='col_controls' />
+                        </colgroup>
+                        <tbody class='fs_list'>
 
-						</tbody>
-					</table>
-				</div>
-			</div>
-		</form>
-	</div>
-	<div class='fs_filelist fs_filelist_anonymous full invisible'>
-		<jsp:include page="fsanonymousblock.jsp"></jsp:include>
-	</div>
-	<div class='fs_pops invisible_wh'>
-	    <div class='fs_pop_captdown fs_pop_in full'><iframe></iframe></div>
-	    <div class='fs_pop_upload   fs_pop_in full'><iframe></iframe></div>
-	    <div class='fs_pop_console  fs_pop_in full'><iframe></iframe></div>
-	    <div class='fs_pop_admin    fs_pop_in full'><iframe></iframe></div>
-	</div>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class='fs_filelist fs_filelist_anonymous full invisible'>
+        <jsp:include page="fsanonymousblock.jsp"></jsp:include>
+    </div>
+    <div class='fs_pops invisible_wh'>
+        <div class='fs_pop_captdown fs_pop_in full'><iframe></iframe></div>
+        <div class='fs_pop_upload   fs_pop_in full'><iframe></iframe></div>
+        <div class='fs_pop_console  fs_pop_in full'><iframe></iframe></div>
+        <div class='fs_pop_admin    fs_pop_in full'><iframe></iframe></div>
+    </div>
 </div>
 <jsp:include page="common.footer.jsp"></jsp:include>
 <%

@@ -56,7 +56,7 @@ $(function() {
 
     var spl = fileName.split('.');
     if(spl.length >= 2) {
-    	for(var idx=0; idx<spl.length; idx++) {
+        for(var idx=0; idx<spl.length; idx++) {
             ext = spl[idx];
         }
     }
@@ -64,22 +64,22 @@ $(function() {
 
     selMn.empty();
     if(ext == 'jpg' || ext == 'jpeg' || ext == 'png' || ext == 'gif' || ext == 'pdf') {
-    	selMn.append("<option value='DOWNLOAD' class='lang_element' data-lang-en='DOWNLOAD'>다운로드</option>");
-    	selMn.append("<option value='VIEW'     class='lang_element' data-lang-en='VIEW'    >보기</option>");
+        selMn.append("<option value='DOWNLOAD' class='lang_element' data-lang-en='DOWNLOAD'>다운로드</option>");
+        selMn.append("<option value='VIEW'     class='lang_element' data-lang-en='VIEW'    >보기</option>");
     } else {
         selMn.append("<option value='DOWNLOAD' class='lang_element' data-lang-en='DOWNLOAD'>다운로드</option>");
     }
     selMn.val('DOWNLOAD');
     
     selMn.on('change', function() {
-    	var currVal = $(this).val();
-    	var target = '';
-    	if(currVal == 'VIEW') {
-    		target = '_target';
-    	} else {
-    		target = '_self';
-    	}
-    	form.attr('target', target);
+        var currVal = $(this).val();
+        var target = '';
+        if(currVal == 'VIEW') {
+            target = '_target';
+        } else {
+            target = '_self';
+        }
+        form.attr('target', target);
     });
     selMn.addClass('binded_change');
 
@@ -118,8 +118,8 @@ $(function() {
             <input type='hidden' name='filename' class='hid_name' value='<%=fileName%>'/>
             <div class='row div_captcha_download'>
                 <div class='col-sm-6 align_center'>
-	                <input type='text'   class='inp_captcha_d lang_attr_element' name='captcha' placeholder='위의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code above'/>
-	                <input type='button' class='btn_re btnx lang_attr_element' value='새로고침' data-lang-target='value' data-lang-en='Refresh'/>
+                    <input type='text'   class='inp_captcha_d lang_attr_element' name='captcha' placeholder='위의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code above'/>
+                    <input type='button' class='btn_re btnx lang_attr_element' value='새로고침' data-lang-target='value' data-lang-en='Refresh'/>
                 </div>
             </div>
             <div class='row padding_top_10 padding_bottom_10'>

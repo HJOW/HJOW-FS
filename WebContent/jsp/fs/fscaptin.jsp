@@ -23,17 +23,17 @@ String code  = (String) request.getSession().getAttribute(key + "_captcha_code")
 Long   time  = (Long)   request.getSession().getAttribute(key + "_captcha_time");
 
 if(randm != null) {
-	boolean randomize = DataUtil.parseBoolean(randm);
-	if(randomize) {
-		int randomNo  = (int) Math.round(1000000 + Math.random() * 1000000 + Math.random() * 10000 + Math.random() * 100);
-		String strRan = String.valueOf(randomNo).substring(0, 7);
-		
-		code = strRan;
-		time = new Long(now);
+    boolean randomize = DataUtil.parseBoolean(randm);
+    if(randomize) {
+        int randomNo  = (int) Math.round(1000000 + Math.random() * 1000000 + Math.random() * 10000 + Math.random() * 100);
+        String strRan = String.valueOf(randomNo).substring(0, 7);
+        
+        code = strRan;
+        time = new Long(now);
 
-		request.getSession().setAttribute(key + "_captcha_code", code);
-		request.getSession().setAttribute(key + "_captcha_time", time);
-	}
+        request.getSession().setAttribute(key + "_captcha_code", code);
+        request.getSession().setAttribute(key + "_captcha_time", time);
+    }
 }
 
 if(scale == null) scale = "1.0";
@@ -52,7 +52,7 @@ if(theme != null) {
     <jsp:include page="./common.header.jsp"></jsp:include>
     <script type='text/javascript'>
     function iRefresh() {
-    	location.reload();
+        location.reload();
     }
     $(function() {
         setTimeout(function() { location.reload(); }, <%= fsc.getCaptchaLimitTime() %>);

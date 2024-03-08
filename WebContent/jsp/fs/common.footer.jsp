@@ -15,16 +15,16 @@ limitations under the License.
  --%>
 <script type='text/javascript'>
 $(function(){
-	var footer = $('.fs_footer');
-	var aLink  = footer.find('.a_footer');
-	aLink.on('click', function() {
-		var theme = $('body').attr('data-theme');
-		if(theme == null || typeof(theme) == 'undefined') theme = '';
-		window.open("<%=request.getContextPath()%>/jsp/fs/fsabout.jsp?theme=" + theme, "pop_about", "width=750,height=600,scrollbars=no,status=no,location=no,toolbar=no");
-	});
-	var spanJs = footer.find('.span_js_version');
-	spanJs.text(FSUtil.version[0] + '.' + FSUtil.version[1] + '.' + FSUtil.version[2]);
-	spanJs.attr('title', 'Build ' + FSUtil.version[3]);
+    var footer = $('.fs_footer');
+    var aLink  = footer.find('.a_footer');
+    aLink.on('click', function() {
+        var theme = $('body').attr('data-theme');
+        if(theme == null || typeof(theme) == 'undefined') theme = '';
+        window.open("<%=request.getContextPath()%>/jsp/fs/fsabout.jsp?theme=" + theme, "pop_about", "width=750,height=600,scrollbars=no,status=no,location=no,toolbar=no");
+    });
+    var spanJs = footer.find('.span_js_version');
+    spanJs.text(FSUtil.version[0] + '.' + FSUtil.version[1] + '.' + FSUtil.version[2]);
+    spanJs.attr('title', 'Build ' + FSUtil.version[3]);
 });
 </script>
 <div class='fs_footer footer container show-grid full'>

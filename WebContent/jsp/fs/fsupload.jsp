@@ -34,11 +34,11 @@ boolean popin = DataUtil.parseBoolean(sPopin);
 <jsp:include page="./common.header.jsp"></jsp:include>
 <script type="text/javascript">
 $(function() {
-	var ctxPath = "<%=fsc.getContextPath()%>";
-	var path    = "<%=pathParam%>";
+    var ctxPath = "<%=fsc.getContextPath()%>";
+    var path    = "<%=pathParam%>";
 
-	$('.hidden_path').val(path);
-	$('.div_path').text('DIR : /' + path);
+    $('.hidden_path').val(path);
+    $('.div_path').text('DIR : /' + path);
 });
 </script>
 </head>

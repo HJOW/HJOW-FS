@@ -23,9 +23,9 @@ theme = FSUtils.removeSpecials(theme);
 <jsp:include page="common.header.libs.jsp"></jsp:include>
 <script type='text/javascript'>
 $(function() {
-	var lang = FSUtil.applyLanguage(bodys);
-	
-	var browser = FSUtil.detectBrowser();
+    var lang = FSUtil.applyLanguage(bodys);
+    
+    var browser = FSUtil.detectBrowser();
     if(browser.nm == 'ie' && browser.ver < 8) {
         if(lang == 'ko') alert('이 웹 브라우저에서는 FS 를 원활히 사용할 수 없습니다.');
         else             alert('FS does not support this web browser !');
@@ -33,7 +33,7 @@ $(function() {
     if(browser.nm != 'ie' && browser.ver >= 20) {
         // TODO : Go to modern web
     }
-	
+    
     var bodys = $('body');
     if(bodys.is('.popup')) bodys.removeClass('dark');
     bodys.removeAttr('data-theme');
@@ -44,15 +44,15 @@ $(function() {
         bodys.attr('data-theme', theme);
     } else if(! bodys.is('.popup')) {
         if(FSUtil.detectDark()) {
-        	theme = 'dark';
-        	bodys.addClass(theme);
+            theme = 'dark';
+            bodys.addClass(theme);
             bodys.attr('data-theme', theme);
         }
     }
     
     var captLogin = $('.if_captcha_l');
     if(captLogin != null && typeof(captLogin) != 'undefined' && captLogin.length >= 1) {
-    	captLogin.attr('src', "<%=request.getContextPath()%>/jsp/fs/fscaptin.jsp?key=fsl&randomize=true&scale=1&theme=" + theme);
+        captLogin.attr('src', "<%=request.getContextPath()%>/jsp/fs/fscaptin.jsp?key=fsl&randomize=true&scale=1&theme=" + theme);
     }
     
     $.ajax({
@@ -61,9 +61,9 @@ $(function() {
         method : "POST",
         dataType : "json",
         success : function(data) {
-        	if(data) {
-        		if(data.needrefresh) location.reload();
-        	}
+            if(data) {
+                if(data.needrefresh) location.reload();
+            }
         }
     });
 });

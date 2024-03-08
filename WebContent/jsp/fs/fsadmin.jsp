@@ -26,12 +26,12 @@ limitations under the License.
     <div class='fs_root fs_div full fs_admin'>
         <script type="text/javascript">
         $(function() {
-        	var selfId = "<%=fsc.getSessionUserId(request)%>";
-        	
-        	var bodys = $('body');
+            var selfId = "<%=fsc.getSessionUserId(request)%>";
+            
+            var bodys = $('body');
             if(bodys.is('.popup')) bodys.removeClass('dark');
             
-        	var ctxPath = "<%=fsc.getContextPath()%>";
+            var ctxPath = "<%=fsc.getContextPath()%>";
             var form    = $('.form_fs_admin');
             var chkAc   = form.find('.chk_account');
             chkAc.on('change', function() {
@@ -49,73 +49,73 @@ limitations under the License.
                 method : "POST",
                 dataType : "json",
                 success : function(acc) {
-                	if(! acc.logined) location.href = '/';
-                	if(acc.idtype != 'A') location.href = '/';
-                	
-                	$.ajax({
-                		url    : ctxPath + "/jsp/fs/fsadminin.jsp",
+                    if(! acc.logined) location.href = '/';
+                    if(acc.idtype != 'A') location.href = '/';
+                    
+                    $.ajax({
+                        url    : ctxPath + "/jsp/fs/fsadminin.jsp",
                         data   : { req : 'read' },
                         method : "POST",
                         dataType : "json",
                         success : function(data) {
-                        	if(! data.success) {
-                        		alert(data.message);
-                        		location.href = '/';
-                        		return;
-                        	}
-                        	
-                        	var conf = data.config;
-                        	form.find("[name='title']").val(conf['Title']);
-                        	
-                        	if(conf['UseAccount']) {
-                        		beforeAccountFeatEnabled = true;
-                        		form.find("[name='useaccount']").prop('checked', true);
-                        		form.find('.onlyaccount').removeClass('invisible');
-                        		
-                        		if(conf['UseCaptchaLogin']) {
+                            if(! data.success) {
+                                alert(data.message);
+                                location.href = '/';
+                                return;
+                            }
+                            
+                            var conf = data.config;
+                            form.find("[name='title']").val(conf['Title']);
+                            
+                            if(conf['UseAccount']) {
+                                beforeAccountFeatEnabled = true;
+                                form.find("[name='useaccount']").prop('checked', true);
+                                form.find('.onlyaccount').removeClass('invisible');
+                                
+                                if(conf['UseCaptchaLogin']) {
                                     form.find("[name='usecaptchalogin']").prop('checked', true);
                                 } else {
-                                	form.find("[name='usecaptchalogin']").prop('checked', false);
+                                    form.find("[name='usecaptchalogin']").prop('checked', false);
                                 }
-                        	} else {
-                        		beforeAccountFeatEnabled = false;
-                        		form.find("[name='useaccount']").prop('checked', false);
-                        		form.find("[name='useaccount']").prop('disabled', true);
-                        		form.find('.onlyaccount').addClass('invisible');
-                        		form.find("[name='usecaptchalogin']").prop('checked', false);
-                        	}
-                        	form.find("[name='rootdir']").val('...');
-                        	form.find("[name='rootdir']").prop('disabled', true);
-                        	
-                        	var hddirs = conf['HiddenDirs'];
-                        	if(typeof(hddirs) != 'string') hddirs = JSON.stringify(hddirs);
-                        	if(typeof(conf['sHiddenDirs']) != 'undefined') hddirs = conf['sHiddenDirs'];
-                        	form.find("[name='hiddendirs']").val(hddirs);
-                        	
-                        	form.find("[name='limitsize']").val(conf['LimitDownloadSize']);
-                        	form.find("[name='limitprev']").val(conf['LimitPreviewSize']);
-                        	
-                        	if(conf['UseCaptchaDown']) {
-                        		form.find("[name='usecaptchadown']").prop('checked', true);
-                        	} else {
-                        		form.find("[name='usecaptchadown']").prop('checked', false);
-                        	}
-                        	
-                        	if(conf['ReadFileIcon']) {
+                            } else {
+                                beforeAccountFeatEnabled = false;
+                                form.find("[name='useaccount']").prop('checked', false);
+                                form.find("[name='useaccount']").prop('disabled', true);
+                                form.find('.onlyaccount').addClass('invisible');
+                                form.find("[name='usecaptchalogin']").prop('checked', false);
+                            }
+                            form.find("[name='rootdir']").val('...');
+                            form.find("[name='rootdir']").prop('disabled', true);
+                            
+                            var hddirs = conf['HiddenDirs'];
+                            if(typeof(hddirs) != 'string') hddirs = JSON.stringify(hddirs);
+                            if(typeof(conf['sHiddenDirs']) != 'undefined') hddirs = conf['sHiddenDirs'];
+                            form.find("[name='hiddendirs']").val(hddirs);
+                            
+                            form.find("[name='limitsize']").val(conf['LimitDownloadSize']);
+                            form.find("[name='limitprev']").val(conf['LimitPreviewSize']);
+                            
+                            if(conf['UseCaptchaDown']) {
+                                form.find("[name='usecaptchadown']").prop('checked', true);
+                            } else {
+                                form.find("[name='usecaptchadown']").prop('checked', false);
+                            }
+                            
+                            if(conf['ReadFileIcon']) {
                                 form.find("[name='readfileicon']").prop('checked', true);
                             } else {
                                 form.find("[name='readfileicon']").prop('checked', false);
                             }
-                        	if(conf['UseConsole']) {
-                        		form.find("[name='useconsole']").prop('checked', true);
-                        	} else {
-                        		form.find("[name='useconsole']").prop('checked', false);
-                        	}
+                            if(conf['UseConsole']) {
+                                form.find("[name='useconsole']").prop('checked', true);
+                            } else {
+                                form.find("[name='useconsole']").prop('checked', false);
+                            }
                         }, error : function(jqXHR, textStatus, errorThrown) {
-                        	alert('Error : ' + textStatus + '\n' + errorThrown)
+                            alert('Error : ' + textStatus + '\n' + errorThrown)
                         }, complete : function() {
-                        	form.find('.hidden_req').val('update');
-                        	form.on('submit', function() {
+                            form.find('.hidden_req').val('update');
+                            form.on('submit', function() {
                                 $.ajax({
                                     url    : ctxPath + "/jsp/fs/fsadminin.jsp",
                                     data   : form.serialize(),
@@ -126,9 +126,9 @@ limitations under the License.
                                     }
                                 });
                             });
-                        	
-                        	var formReset = $('.form_fs_reset');
-                        	formReset.on('submit', function() {
+                            
+                            var formReset = $('.form_fs_reset');
+                            formReset.on('submit', function() {
                                 $.ajax({
                                     url    : ctxPath + "/jsp/fs/fsadminin.jsp",
                                     data   : formReset.serialize(),
@@ -141,55 +141,55 @@ limitations under the License.
                                 });
                             });
                         }
-                	});
+                    });
                 }
             });
             
             var tabButtons = $('.flatbuttons');
             
             tabButtons.find('.admintab').each(function() {
-            	$(this).on('click', function() {
-            		tabButtons.find('.admintab').removeClass('thick');
-            		$(this).addClass('thick');
-            		
-            		$('.adminelement').addClass('invisible');
-            		$('.adminelement_' + $(this).attr('data-target')).removeClass('invisible');
-            	});
+                $(this).on('click', function() {
+                    tabButtons.find('.admintab').removeClass('thick');
+                    $(this).addClass('thick');
+                    
+                    $('.adminelement').addClass('invisible');
+                    $('.adminelement_' + $(this).attr('data-target')).removeClass('invisible');
+                });
             });
             
             var formUserSrch = $('.form_fs_user_search');
             var tbodyUsers   = $('.tbody_users');
             
             formUserSrch.on('submit', function() {
-            	tbodyUsers.find('.binded_click').off('click');
-            	tbodyUsers.empty();
-            	tbodyUsers.append("<tr><td colspan='5'>...</td></tr>");
-            	
-            	$.ajax({
+                tbodyUsers.find('.binded_click').off('click');
+                tbodyUsers.empty();
+                tbodyUsers.append("<tr><td colspan='5'>...</td></tr>");
+                
+                $.ajax({
                     url    : ctxPath + "/jsp/fs/fsadminin.jsp",
                     data   : formUserSrch.serialize(),
                     method : "POST",
                     dataType : "json",
                     success : function(data) {
-                    	tbodyUsers.empty();
-                    	if(! data.success) {
+                        tbodyUsers.empty();
+                        if(! data.success) {
                             tbodyUsers.append("<tr><td colspan='5' class='td_empty'></td></tr>");
                             tbodyUsers.find('.td_empty').text(data.message);
                             return;
-                    	}
-                    	
-                    	for(var idx=0; idx<data.userlist.length; idx++) {
-                    		var rowOne = data.userlist[idx];
-                    		tbodyUsers.append("<tr class='tr_user tr_user_" + idx + "'><td class='td_no'></td><td class='td_id'></td><td class='td_nick'></td><td class='td_type'></td><td class='td_etc'></td></tr>");
-                    		
-                    		var tr = tbodyUsers.find('.tr_user_' + idx);
-                    		tr.find('.td_no').text(String(idx));
-                    		tr.find('.td_id').text(rowOne['id']);
-                    		tr.find('.td_nick').text(rowOne['nick']);
-                    		tr.find('.td_type').text(rowOne['idtype']);
-                    		
-                    		if(rowOne['id'] != selfId) {
-                    			tr.find('.td_etc').append("<input type='button' value='X' class='btn_delete btnx' data-id=''/>");
+                        }
+                        
+                        for(var idx=0; idx<data.userlist.length; idx++) {
+                            var rowOne = data.userlist[idx];
+                            tbodyUsers.append("<tr class='tr_user tr_user_" + idx + "'><td class='td_no'></td><td class='td_id'></td><td class='td_nick'></td><td class='td_type'></td><td class='td_etc'></td></tr>");
+                            
+                            var tr = tbodyUsers.find('.tr_user_' + idx);
+                            tr.find('.td_no').text(String(idx));
+                            tr.find('.td_id').text(rowOne['id']);
+                            tr.find('.td_nick').text(rowOne['nick']);
+                            tr.find('.td_type').text(rowOne['idtype']);
+                            
+                            if(rowOne['id'] != selfId) {
+                                tr.find('.td_etc').append("<input type='button' value='X' class='btn_delete btnx' data-id=''/>");
                                 
                                 var btnDel = tr.find('.btn_delete');
                                 btnDel.attr('data-id', rowOne['id']);
@@ -205,32 +205,32 @@ limitations under the License.
                                         dataType : "json",
                                         success : function(data) {
                                             if(! data.success) {
-                                            	alert(data.message);
+                                                alert(data.message);
                                             } else {
-                                            	alert('Success !');
-                                            	formUserSrch.trigger('submit');
+                                                alert('Success !');
+                                                formUserSrch.trigger('submit');
                                             }
                                         }
                                     });
                                 });
                                 btnDel.addClass('binded_click');
-                    		}
-                    		
-                    		FSUtil.applyLanguage();
-                    	}
+                            }
+                            
+                            FSUtil.applyLanguage();
+                        }
                     }
                 });
             });
             
             var formUserCr = $('.form_fs_user_new');
             formUserCr.on('submit', function() {
-            	$.ajax({
+                $.ajax({
                     url    : ctxPath + "/jsp/fs/fsadminin.jsp",
                     data   : formUserCr.serialize(),
                     method : "POST",
                     dataType : "json",
                     success : function(data) {
-                    	if(! data.success) {
+                        if(! data.success) {
                             alert(data.message);
                         } else {
                             alert('Success !');

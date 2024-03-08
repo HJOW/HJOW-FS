@@ -1,14 +1,14 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <script type="text/javascript">
 $(function() {
-	var ctxPathIn    = "<%=request.getContextPath()%>";
-	var formTerminal = $('.form_fs_terminal');
+    var ctxPathIn    = "<%=request.getContextPath()%>";
+    var formTerminal = $('.form_fs_terminal');
     var taTermDisp   = formTerminal.find('.ta_terminal');
     var inpTermPath  = formTerminal.find('.tf_terminal_path');
     var inpTermCons  = formTerminal.find('.tf_terminal_console');
     
     function fRun(displayInput, callback) {
-    	inpTermCons.prop('readonly', true);
+        inpTermCons.prop('readonly', true);
         if(displayInput) taTermDisp.val(taTermDisp.val() + '\n' + '>> ' + inpTermCons.val());
         $.ajax({
             url    : ctxPathIn + "/jsp/fs/fsconsolein.jsp",
@@ -20,10 +20,10 @@ $(function() {
                 if(! data.displaynull) taTermDisp.val(taTermDisp.val() + '\n' + data.display);
                 
                 if(data.downloadaccept) {
-                	window.open(ctxPathIn + '/jsp/fs/' + 'fsdown.jsp?path=' + encodeURIComponent(data.path) + "&filename=" + encodeURIComponent(data.downloadfile), 'cdownload', 'width=300,height=200,toolbar=no,status=no,location=no');
+                    window.open(ctxPathIn + '/jsp/fs/' + 'fsdown.jsp?path=' + encodeURIComponent(data.path) + "&filename=" + encodeURIComponent(data.downloadfile), 'cdownload', 'width=300,height=200,toolbar=no,status=no,location=no');
                 }
                 if(data.closepopup) {
-                	window.close();
+                    window.close();
                 }
             }, error : function(jqXHR, textStatus, errorThrown) {
                 taTermDisp.val(taTermDisp.val() + '\n' + 'Error ! ' + textStatus + '\n    ' + errorThrown);

@@ -23,7 +23,7 @@ limitations under the License.
 <jsp:include page="./common.header.jsp"></jsp:include>
 <script type='text/javascript'>
 $(function() {
-	$('.tf_terminal_console').focus();
+    $('.tf_terminal_console').focus();
 });
 </script>
 </head>

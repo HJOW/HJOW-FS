@@ -25,12 +25,12 @@ $(function() {
     var taAbout = $('.ta_about');
 
     $('.btn_close').on('click', function() {
-    	window.close();
+        window.close();
     });
     
     taAbout.height(window.outerHeight - 200);
     $(window).on('resize', function() {
-    	taAbout.height(window.outerHeight - 200);
+        taAbout.height(window.outerHeight - 200);
     });
 });
 </script>

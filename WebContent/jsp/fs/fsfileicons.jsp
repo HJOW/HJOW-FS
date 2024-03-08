@@ -34,60 +34,60 @@ json.put("success", new Boolean(false));
 json.put("message", "");
 
 if(fsc.isReadFileIconOn()) {
-	try {
-	    File dir = new File(fsc.getRootPath().getAbsolutePath() + File.separator + pathParam);
-	    List<File> files = new ArrayList<File>();
+    try {
+        File dir = new File(fsc.getRootPath().getAbsolutePath() + File.separator + pathParam);
+        List<File> files = new ArrayList<File>();
 
-	    StringTokenizer commaTokenizer = new StringTokenizer(targets, ",");
-	    int counts = 0;
-	    while(commaTokenizer.hasMoreTokens()) {
-	        String sFileOne = commaTokenizer.nextToken().trim();
-	        File   fileOne  = new File(dir.getAbsolutePath() + File.separator + sFileOne);
-	        
-	        if(! fileOne.exists()   ) continue;
-	        if(fileOne.isDirectory()) continue;
-	        
-	        if(counts >= 20) break;
-	        files.add(fileOne);
-	        counts++;
-	    }
+        StringTokenizer commaTokenizer = new StringTokenizer(targets, ",");
+        int counts = 0;
+        while(commaTokenizer.hasMoreTokens()) {
+            String sFileOne = commaTokenizer.nextToken().trim();
+            File   fileOne  = new File(dir.getAbsolutePath() + File.separator + sFileOne);
+            
+            if(! fileOne.exists()   ) continue;
+            if(fileOne.isDirectory()) continue;
+            
+            if(counts >= 20) break;
+            files.add(fileOne);
+            counts++;
+        }
 
-	    pathParam = null;
-	    targets = null;
-	    commaTokenizer = null;
-	    
-	    JsonObject jsonResults = new JsonObject();
-	    
-	    Color background = new Color(59, 59, 59);
-	    if(br != null && bg != null && bb != null) {
-	        int r, g, b;
-	        r = Integer.parseInt(br);
-	        g = Integer.parseInt(bg);
-	        b = Integer.parseInt(bb);
-	        if(r < 0) r = 0; if(r > 255) r = 255;
-	        if(g < 0) r = 0; if(g > 255) g = 255;
-	        if(b < 0) r = 0; if(b > 255) b = 255;
-	        background = new Color(r, g, b);
-	    } else {
-	        background = new Color(59, 59, 59);
-	    }
-	    Map<File, String> iconMap = fsc.getIcons(files, background);
-	    
-	    Set<File> keys = iconMap.keySet();
-	    for(File f : keys) {
-	        jsonResults.put(f.getName(), iconMap.get(f));
-	    }
-	    iconMap.clear();
-	    json.put("data", jsonResults);
-	    json.put("success", new Boolean(true));
-	    json.put("message", "");
-	} catch(Throwable t) {
-	    t.printStackTrace();
-	    json.put("success", new Boolean(false));
-	    json.put("message", "Error : " + t.getMessage());
-	}
+        pathParam = null;
+        targets = null;
+        commaTokenizer = null;
+        
+        JsonObject jsonResults = new JsonObject();
+        
+        Color background = new Color(59, 59, 59);
+        if(br != null && bg != null && bb != null) {
+            int r, g, b;
+            r = Integer.parseInt(br);
+            g = Integer.parseInt(bg);
+            b = Integer.parseInt(bb);
+            if(r < 0) r = 0; if(r > 255) r = 255;
+            if(g < 0) r = 0; if(g > 255) g = 255;
+            if(b < 0) r = 0; if(b > 255) b = 255;
+            background = new Color(r, g, b);
+        } else {
+            background = new Color(59, 59, 59);
+        }
+        Map<File, String> iconMap = fsc.getIcons(files, background);
+        
+        Set<File> keys = iconMap.keySet();
+        for(File f : keys) {
+            jsonResults.put(f.getName(), iconMap.get(f));
+        }
+        iconMap.clear();
+        json.put("data", jsonResults);
+        json.put("success", new Boolean(true));
+        json.put("message", "");
+    } catch(Throwable t) {
+        t.printStackTrace();
+        json.put("success", new Boolean(false));
+        json.put("message", "Error : " + t.getMessage());
+    }
 } else {
-	json.put("data", new JsonObject());
+    json.put("data", new JsonObject());
     json.put("success", new Boolean(true));
     json.put("message", "Icon service does not supported.");
 }
