@@ -792,7 +792,7 @@ $(function() {
     fReload(true);
 });
 </script>
-<div class='fs_root'>
+<div class='fs_root fs_div'>
 	<div class='fs_filelist fs_filelist_view container show-grid full'>
 	    <div class='row fs_title'>
             <div class='col-sm-8'>

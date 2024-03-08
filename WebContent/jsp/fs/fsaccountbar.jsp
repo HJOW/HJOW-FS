@@ -19,7 +19,7 @@ if(! fsc.isInstalled()) {
 } else if(! fsc.isNoLoginMode()) {
 	String sessionJson = (String) request.getSession().getAttribute("fssession");
 %>
-<div class='fs_accbar container valign_middle full'>
+<div class='fs_accbar fs_div container valign_middle full'>
 	<script type='text/javascript'>
 	$(function() {
 		var ctxPath   = "<%=fsc.getContextPath()%>";
