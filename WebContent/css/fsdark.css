@@ -40,7 +40,7 @@ body.dark div.fs_div input.btnx:disabled, body button.btnx:disabled, body.dark d
     background-color: #3B3B3B;
 }
 
-body.dark div.fs_div div, body.dark div.fs_div p, body.dark div.fs_div h1, body.dark div.fs_div h2, body.dark div.fs_div h3, body.dark div.fs_div h4, body.dark div.fs_div h5, body.dark div.fs_div h6, body.dark div.fs_div table, body.dark div.fs_div td, body.dark div.fs_div th {
+body.dark div.fs_div div, body.dark div.fs_div p, body.dark div.fs_div span, body.dark div.fs_div h1, body.dark div.fs_div h2, body.dark div.fs_div h3, body.dark div.fs_div h4, body.dark div.fs_div h5, body.dark div.fs_div h6, body.dark div.fs_div table, body.dark div.fs_div td, body.dark div.fs_div th {
     color: #C9C9C9;
 }
 

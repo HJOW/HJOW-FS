@@ -55,6 +55,7 @@ public class FSConsoleClose implements FSBundledConsoleCommand {
                 res = res.append("                                                                        ").append("\n");
                 res = res.append("    콘솔 창을 닫습니다.                                                 ").append("\n");
                 res = res.append("    매개변수가 필요 없습니다.                                           ").append("\n");
+                res = res.append("    브라우저의 보안 설정에 따라 동작하지 않을 수도 있습니다.            ").append("\n");
                 res = res.append("                                                                        ").append("\n");
                 res = res.append(" * 예").append("\n");
                 res = res.append("                                                                        ").append("\n");
@@ -65,6 +66,7 @@ public class FSConsoleClose implements FSBundledConsoleCommand {
                 res = res.append("                                                                        ").append("\n");
                 res = res.append("    Close the console window.                                           ").append("\n");
                 res = res.append("    No parameter needs.                                                 ").append("\n");
+                res = res.append("    May be no effect on some browsers.                                  ").append("\n");
                 res = res.append("                                                                        ").append("\n");
                 res = res.append(" * example").append("\n");
                 res = res.append("                                                                        ").append("\n");

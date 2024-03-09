@@ -27,7 +27,7 @@ $(function(){
     spanJs.attr('title', 'Build ' + FSUtil.version[3]);
 });
 </script>
-<div class='fs_footer footer container show-grid full'>
+<div class='fs_footer fs_div footer container show-grid full'>
     <div class='row'>
         <div class='col-sm-12 align_center'>
             FS (
