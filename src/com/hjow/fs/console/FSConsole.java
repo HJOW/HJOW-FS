@@ -16,6 +16,8 @@ limitations under the License.
  */
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,17 +29,22 @@ import java.util.StringTokenizer;
 import com.hjow.fs.FSControl;
 import com.hjow.fs.console.cmd.FSConsoleCat;
 import com.hjow.fs.console.cmd.FSConsoleCd;
-import com.hjow.fs.console.cmd.FSConsoleClose;
 import com.hjow.fs.console.cmd.FSConsoleCommand;
+import com.hjow.fs.console.cmd.FSConsoleConfig;
+import com.hjow.fs.console.cmd.FSConsoleDel;
 import com.hjow.fs.console.cmd.FSConsoleDown;
 import com.hjow.fs.console.cmd.FSConsoleFind;
 import com.hjow.fs.console.cmd.FSConsoleFirst;
 import com.hjow.fs.console.cmd.FSConsoleHelp;
 import com.hjow.fs.console.cmd.FSConsoleLs;
+import com.hjow.fs.console.cmd.FSConsoleMkdir;
 import com.hjow.fs.console.cmd.FSConsoleNow;
 import com.hjow.fs.console.cmd.FSConsolePwd;
 import com.hjow.fs.console.cmd.FSConsoleWho;
 
+import hjow.common.json.JsonArray;
+import hjow.common.json.JsonCompatibleUtil;
+import hjow.common.json.JsonObject;
 import hjow.common.util.DataUtil;
 
 public class FSConsole implements Serializable {
@@ -53,17 +60,19 @@ public class FSConsole implements Serializable {
     public static synchronized void init(File rootPath, List<String> commandClasses) {
         if(! (FSConsole.rootPath != null && FSConsole.rootPath.equals(rootPath))) {
             FSConsole.rootPath = rootPath;
-            if(! commands.contains(FSConsoleCat.class  )) commands.add(FSConsoleCat.class  );
-            if(! commands.contains(FSConsoleCd.class   )) commands.add(FSConsoleCd.class   );
-            if(! commands.contains(FSConsoleDown.class )) commands.add(FSConsoleDown.class );
-            if(! commands.contains(FSConsoleFirst.class)) commands.add(FSConsoleFirst.class);
-            if(! commands.contains(FSConsoleHelp.class )) commands.add(FSConsoleHelp.class );
-            if(! commands.contains(FSConsoleLs.class   )) commands.add(FSConsoleLs.class   );
-            if(! commands.contains(FSConsoleNow.class  )) commands.add(FSConsoleNow.class  );
-            if(! commands.contains(FSConsolePwd.class  )) commands.add(FSConsolePwd.class  );
-            if(! commands.contains(FSConsoleWho.class  )) commands.add(FSConsoleWho.class  );
-            if(! commands.contains(FSConsoleFind.class )) commands.add(FSConsoleFind.class );
-            if(! commands.contains(FSConsoleClose.class)) commands.add(FSConsoleClose.class);
+            if(! commands.contains(FSConsoleCat.class   )) commands.add(FSConsoleCat.class   );
+            if(! commands.contains(FSConsoleCd.class    )) commands.add(FSConsoleCd.class    );
+            if(! commands.contains(FSConsoleDown.class  )) commands.add(FSConsoleDown.class  );
+            if(! commands.contains(FSConsoleFirst.class )) commands.add(FSConsoleFirst.class );
+            if(! commands.contains(FSConsoleHelp.class  )) commands.add(FSConsoleHelp.class  );
+            if(! commands.contains(FSConsoleLs.class    )) commands.add(FSConsoleLs.class    );
+            if(! commands.contains(FSConsoleNow.class   )) commands.add(FSConsoleNow.class   );
+            if(! commands.contains(FSConsolePwd.class   )) commands.add(FSConsolePwd.class   );
+            if(! commands.contains(FSConsoleWho.class   )) commands.add(FSConsoleWho.class   );
+            if(! commands.contains(FSConsoleFind.class  )) commands.add(FSConsoleFind.class  );
+            if(! commands.contains(FSConsoleDel.class   )) commands.add(FSConsoleDel.class   );
+            if(! commands.contains(FSConsoleMkdir.class )) commands.add(FSConsoleMkdir.class );
+            if(! commands.contains(FSConsoleConfig.class)) commands.add(FSConsoleConfig.class);
         }
         
         if(commandClasses != null) {
@@ -192,5 +201,44 @@ public class FSConsole implements Serializable {
         
         if(multipleRes.size() == 1) return multipleRes.get(0);
         else return new FSConsoleMultipleResult(multipleRes);
+    }
+    
+    /** Check EDIT privileges */
+    public static boolean hasEditPriv(FSControl ctrl, Map<String, Object> sessionMap, File root, File target) throws IOException {
+    	String pathCalc = target.getCanonicalPath();
+        
+        if(! target.exists()   ) throw new FileNotFoundException("There is no " + target.getName());
+        if(! pathCalc.startsWith(root.getCanonicalPath())) return false;
+        if(pathCalc.startsWith(new File(root.getCanonicalPath() + File.separator + ".garbage").getCanonicalPath())) return false;
+        if(pathCalc.startsWith(new File(root.getCanonicalPath() + File.separator + ".upload" ).getCanonicalPath())) return false;
+        if(sessionMap               == null) return false;
+        if(sessionMap.get("idtype") == null) return false;
+        
+        String idtype = sessionMap.get("idtype").toString().toUpperCase().trim();
+        if(idtype.equals("A")) return true;
+        
+        Object oDirPrv = (Object) sessionMap.get("privileges");
+    	if(oDirPrv == null) return false;
+    	
+    	JsonArray dirPrv = (JsonArray) JsonCompatibleUtil.parseJson(oDirPrv);
+    	oDirPrv = null;
+    	
+    	for(Object row : dirPrv) {
+            JsonObject dirOne = null;
+            if(row instanceof JsonObject) dirOne = (JsonObject) row;
+            else                          dirOne = (JsonObject) JsonCompatibleUtil.parseJson(row.toString().trim());
+            
+            String dPath = dirOne.get("path"     ).toString().trim();
+            String dPrv  = dirOne.get("privilege").toString().trim().toLowerCase();
+            
+            String pathDisp = pathCalc.replace(root.getCanonicalPath(), "").replace("\\", "/");
+            if(pathDisp.startsWith(dPath) || ("/" + pathDisp).startsWith(dPath)) {
+            	if(dPrv.equals("edit")) {
+            		return true;
+            	}
+            }
+        }
+        
+        return false;
     }
 }

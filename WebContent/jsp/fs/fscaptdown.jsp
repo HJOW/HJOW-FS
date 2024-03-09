@@ -119,7 +119,7 @@ $(function() {
             <div class='row div_captcha_download'>
                 <div class='col-sm-6 align_center'>
                     <input type='text'   class='inp_captcha_d lang_attr_element' name='captcha' placeholder='위의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code above'/>
-                    <input type='button' class='btn_re btnx lang_attr_element' value='새로고침' data-lang-target='value' data-lang-en='Refresh'/>
+                    <input type='button' class='btn_re btnx lang_attr_element' value='새로고침' data-lang-target='value' data-lang-en='Refresh' accesskey='r'/>
                 </div>
             </div>
             <div class='row padding_top_10 padding_bottom_10'>
@@ -127,7 +127,7 @@ $(function() {
                     <select name='mode' class='sel_mode'>
                         <option value='DOWNLOAD' class='lang_element' data-lang-en='DOWNLOAD' selected>다운로드</option>
                     </select>
-                    <input type='submit' class='btn_dn btnx lang_attr_element' value='실행' data-lang-target='value' data-lang-en='Now !'/>
+                    <input type='submit' class='btn_dn btnx lang_attr_element' value='실행' data-lang-target='value' data-lang-en='Now !' accesskey='d'/>
                 </div>
             </div>
         </form>

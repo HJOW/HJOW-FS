@@ -119,7 +119,7 @@ $(function() {
             var ct = ifr.contents();
             var cForm = ct.find('form');
             cForm.on('submit', function() {
-                pops['captdown'].close();
+                pops['upload'].close();
             });
         });
         $('.ui-dialog-titlebar-close').text('X');
@@ -479,8 +479,16 @@ $(function() {
                                     var prvHeight = (window.innerHeight / 2);
                                     if(prvHeight < 200) prvHeight = 200;
                                     
-                                    divPrvIn.css('max-height', prvHeight + 'px');
-                                    divPrvIn.css('overflow-y', 'scroll');
+                                    if(prvIn == '4') {
+                                    	var ifrIn = divPrvIn.find('iframe');
+                                    	ifrIn.css('height', prvHeight + 'px');
+                                    	ifrIn.css('overflow-y', 'scroll');
+                                    	ifrIn.attr('scrolling', 'yes');
+                                    } else {
+                                    	divPrvIn.css('max-height', prvHeight + 'px');
+                                        divPrvIn.css('overflow-y', 'scroll');
+                                    }
+                                    
                                     elem.attr('src', srcs);
                                     divPrvIn.removeClass('invisible');
                                 } else {
