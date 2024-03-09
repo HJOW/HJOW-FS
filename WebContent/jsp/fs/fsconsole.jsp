@@ -47,16 +47,14 @@ $(function() {
 });
 </script>
 <form class='form_fs_terminal' onsubmit='return false;'>
-    <div class='row'>
-        <div class='col-sm-12'><input type='text' class='tf_terminal_path full' name='path' value='/' style='border: 0' readonly/></div>
+    <div class='align_left'>
+        <input type='text' class='tf_terminal_path full' name='path' value='/' style='border: 0' readonly/>
     </div>
-    <div class='row'>
-        <div class='col-sm-12'><textarea class='ta_terminal full' style='min-height: 390px;' readonly></textarea></div>
+    <div class='align_left'>
+        <textarea class='ta_terminal full' style='min-height: 390px;' readonly></textarea>
     </div>
-    <div class='row'>
-        <div class='col-sm-12 align_left'>
-            <input type='text' name='command' class='tf_terminal_console' style='min-width: 500px;' value='first'/>
-            <input type='submit' value='>' class='btnx'/>
-        </div>
+    <div class='align_left'>
+        <input type='text' name='command' class='tf_terminal_console' style='min-width: 500px;' value='first'/>
+        <input type='submit' value='>' class='btnx'/>
     </div>
 </form>

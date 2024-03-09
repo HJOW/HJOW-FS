@@ -24,56 +24,56 @@ import com.hjow.fs.FSControl;
 import com.hjow.fs.console.FSConsole;
 
 public class FSConsoleNow implements FSBundledConsoleCommand {
-	private static final long serialVersionUID = 5419787181379926840L;
-	public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm");
+    private static final long serialVersionUID = 5419787181379926840L;
+    public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm");
 
-	@Override
-	public String getName() {
-		return "now";
-	}
+    @Override
+    public String getName() {
+        return "now";
+    }
 
-	@Override
-	public String getShortName() {
-		return "date";
-	}
+    @Override
+    public String getShortName() {
+        return "date";
+    }
 
-	@Override
-	public Object run(FSControl ctrl, FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable {
-		return dateFormat.format(new Date(System.currentTimeMillis()));
-	}
+    @Override
+    public Object run(FSControl ctrl, FSConsole console, Map<String, Object> sessionMap, File root, String parameter, Map<String, String> options) throws Throwable {
+        return dateFormat.format(new Date(System.currentTimeMillis()));
+    }
 
-	@Override
-	public String getHelp(String lang, boolean detail) {
-		StringBuilder res = new StringBuilder("");
-		if(detail) {
-			if(lang.equals("ko")) {
-				res = res.append(" * now").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append("    오늘 날짜와 시간을 출력합니다.                                      ").append("\n");
-				res = res.append("    매개변수가 필요하지 않습니다.                                       ").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append(" * 예").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append("    now                                                                 ").append("\n");
-				res = res.append("                                                                        ").append("\n");
-			} else {
-				res = res.append(" * now").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append("    Show now date and time.                                             ").append("\n");
-				res = res.append("    No parameter needs.                                                 ").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append(" * example").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append("    now                                                                 ").append("\n");
-				res = res.append("                                                                        ").append("\n");
-			}
-		} else {
-			if(lang.equals("ko")) {
-				res = res.append("오늘 날짜와 시간을 출력합니다.").append("\n");
-			} else {
-				res = res.append("Show now date and time.").append("\n");
-			}
-		}
-		return res.toString().trim();
-	}
+    @Override
+    public String getHelp(String lang, boolean detail) {
+        StringBuilder res = new StringBuilder("");
+        if(detail) {
+            if(lang.equals("ko")) {
+                res = res.append(" * now").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append("    오늘 날짜와 시간을 출력합니다.                                      ").append("\n");
+                res = res.append("    매개변수가 필요하지 않습니다.                                       ").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append(" * 예").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append("    now                                                                 ").append("\n");
+                res = res.append("                                                                        ").append("\n");
+            } else {
+                res = res.append(" * now").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append("    Show now date and time.                                             ").append("\n");
+                res = res.append("    No parameter needs.                                                 ").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append(" * example").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append("    now                                                                 ").append("\n");
+                res = res.append("                                                                        ").append("\n");
+            }
+        } else {
+            if(lang.equals("ko")) {
+                res = res.append("오늘 날짜와 시간을 출력합니다.").append("\n");
+            } else {
+                res = res.append("Show now date and time.").append("\n");
+            }
+        }
+        return res.toString().trim();
+    }
 }

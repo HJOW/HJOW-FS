@@ -23,61 +23,61 @@ import com.hjow.fs.console.FSConsole;
 import com.hjow.fs.console.FSConsoleResult;
 
 public class FSConsoleClose implements FSBundledConsoleCommand {
-	private static final long serialVersionUID = -3808145571940246437L;
+    private static final long serialVersionUID = -3808145571940246437L;
 
-	@Override
-	public String getName() {
-		return "close";
-	}
+    @Override
+    public String getName() {
+        return "close";
+    }
 
-	@Override
-	public String getShortName() {
-		return null;
-	}
+    @Override
+    public String getShortName() {
+        return null;
+    }
 
-	@Override
-	public Object run(FSControl ctrl, FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable {
-		FSConsoleResult rs = new FSConsoleResult();
-		rs.setDisplay("");
-		rs.setNulll(false);
-		rs.setPath(console.getPath());
-		rs.setSuccess(true);
-		rs.setClosepopup(true);
-		return rs;
-	}
+    @Override
+    public Object run(FSControl ctrl, FSConsole console, Map<String, Object> sessionMap, File root, String parameter, Map<String, String> options) throws Throwable {
+        FSConsoleResult rs = new FSConsoleResult();
+        rs.setDisplay("");
+        rs.setNulll(false);
+        rs.setPath(console.getPath());
+        rs.setSuccess(true);
+        rs.setClosepopup(true);
+        return rs;
+    }
 
-	@Override
-	public String getHelp(String lang, boolean detail) {
-		StringBuilder res = new StringBuilder("");
-		if(detail) {
-			if(lang.equals("ko")) {
-				res = res.append(" * close").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append("    콘솔 창을 닫습니다.                                                 ").append("\n");
-				res = res.append("    매개변수가 필요 없습니다.                                           ").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append(" * 예").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append("    close                                                               ").append("\n");
-				res = res.append("                                                                        ").append("\n");
-			} else {
-				res = res.append(" * close").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append("    Close the console window.                                           ").append("\n");
-				res = res.append("    No parameter needs.                                                 ").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append(" * example").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append("    close                                                               ").append("\n");
-				res = res.append("                                                                        ").append("\n");
-			}
-		} else {
-			if(lang.equals("ko")) {
-				res = res.append("콘솔 창을 닫습니다.").append("\n");
-			} else {
-				res = res.append("Close the console window.").append("\n");
-			}
-		}
-		return res.toString().trim();
-	}
+    @Override
+    public String getHelp(String lang, boolean detail) {
+        StringBuilder res = new StringBuilder("");
+        if(detail) {
+            if(lang.equals("ko")) {
+                res = res.append(" * close").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append("    콘솔 창을 닫습니다.                                                 ").append("\n");
+                res = res.append("    매개변수가 필요 없습니다.                                           ").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append(" * 예").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append("    close                                                               ").append("\n");
+                res = res.append("                                                                        ").append("\n");
+            } else {
+                res = res.append(" * close").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append("    Close the console window.                                           ").append("\n");
+                res = res.append("    No parameter needs.                                                 ").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append(" * example").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append("    close                                                               ").append("\n");
+                res = res.append("                                                                        ").append("\n");
+            }
+        } else {
+            if(lang.equals("ko")) {
+                res = res.append("콘솔 창을 닫습니다.").append("\n");
+            } else {
+                res = res.append("Close the console window.").append("\n");
+            }
+        }
+        return res.toString().trim();
+    }
 }

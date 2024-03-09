@@ -17,16 +17,16 @@ package com.hjow.fs.etc;
 import java.io.Serializable;
 
 public class Counter implements Serializable {
-	private static final long serialVersionUID = -8351283205016681277L;
-	protected int count = 0;
+    private static final long serialVersionUID = -8351283205016681277L;
+    protected int count = 0;
     public Counter() {}
-	public int getCount() {
-		return count;
-	}
-	public void setCount(int count) {
-		this.count = count;
-	}
+    public int getCount() {
+        return count;
+    }
+    public void setCount(int count) {
+        this.count = count;
+    }
     public void increase() {
-    	count++;
+        count++;
     }
 }

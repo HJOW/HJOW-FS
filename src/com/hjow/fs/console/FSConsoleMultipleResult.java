@@ -19,74 +19,74 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FSConsoleMultipleResult extends FSConsoleResult {
-	private static final long serialVersionUID = -2445571763390309432L;
+    private static final long serialVersionUID = -2445571763390309432L;
     protected List<FSConsoleResult> children = new ArrayList<FSConsoleResult>();
     
     public FSConsoleMultipleResult(List<FSConsoleResult> children) {
-    	this.children = children;
+        this.children = children;
     }
     
-	public List<FSConsoleResult> getChildren() {
-		return children;
-	}
-	public void setChildren(List<FSConsoleResult> children) {
-		this.children = children;
-	}
-	@Override
-	public void setPath(String path) {
-		this.path = path;
-		for(FSConsoleResult c : children) {
-			c.setPath(path);
-		}
-	}
-	@Override
-	public boolean isNulll() {
-		for(FSConsoleResult c : children) {
-			if(! c.isNulll()) {
-				return false;
-			}
-		}
-		return true;
-	}
-	@Override
-	public boolean isClosepopup() {
-		for(FSConsoleResult c : children) {
-			if(c.isClosepopup()) return true;
-		}
-		return false;
-	}
-	@Override
-	public void setNulll(boolean nulll) {
-		throw new RuntimeException("Not supported method");
-	}
-	@Override
-	public void setDisplay(String display) {
-		throw new RuntimeException("Not supported method");
-	}
-	@Override
-	public void setSuccess(boolean b) {
-		throw new RuntimeException("Not supported method");
-	}
-	@Override
-	public void setClosepopup(boolean b) {
-		throw new RuntimeException("Not supported method");
-	}
-	@Override
-	public String getDisplay() {
-		StringBuilder res = new StringBuilder("");
-		for(FSConsoleResult c : children) {
-			if(c.isNulll()) continue;
-			res = res.append(c.getDisplay()).append("\n");
-		}
-		return res.toString().trim();
-	}
-	@Override
-	public boolean isSuccess() {
-		for(FSConsoleResult c : children) {
-			if(! c.isSuccess()) {
-				return false;
-			}
-		}
-		return true;
-	}
+    public List<FSConsoleResult> getChildren() {
+        return children;
+    }
+    public void setChildren(List<FSConsoleResult> children) {
+        this.children = children;
+    }
+    @Override
+    public void setPath(String path) {
+        this.path = path;
+        for(FSConsoleResult c : children) {
+            c.setPath(path);
+        }
+    }
+    @Override
+    public boolean isNulll() {
+        for(FSConsoleResult c : children) {
+            if(! c.isNulll()) {
+                return false;
+            }
+        }
+        return true;
+    }
+    @Override
+    public boolean isClosepopup() {
+        for(FSConsoleResult c : children) {
+            if(c.isClosepopup()) return true;
+        }
+        return false;
+    }
+    @Override
+    public void setNulll(boolean nulll) {
+        throw new RuntimeException("Not supported method");
+    }
+    @Override
+    public void setDisplay(String display) {
+        throw new RuntimeException("Not supported method");
+    }
+    @Override
+    public void setSuccess(boolean b) {
+        throw new RuntimeException("Not supported method");
+    }
+    @Override
+    public void setClosepopup(boolean b) {
+        throw new RuntimeException("Not supported method");
+    }
+    @Override
+    public String getDisplay() {
+        StringBuilder res = new StringBuilder("");
+        for(FSConsoleResult c : children) {
+            if(c.isNulll()) continue;
+            res = res.append(c.getDisplay()).append("\n");
+        }
+        return res.toString().trim();
+    }
+    @Override
+    public boolean isSuccess() {
+        for(FSConsoleResult c : children) {
+            if(! c.isSuccess()) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

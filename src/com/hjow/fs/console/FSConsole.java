@@ -38,153 +38,159 @@ import com.hjow.fs.console.cmd.FSConsoleNow;
 import com.hjow.fs.console.cmd.FSConsolePwd;
 import com.hjow.fs.console.cmd.FSConsoleWho;
 
+import hjow.common.util.DataUtil;
+
 public class FSConsole implements Serializable {
-	private static final long serialVersionUID = 7995402708882449267L;
-	private static List<Class<? extends FSConsoleCommand>> commands = new ArrayList<Class<? extends FSConsoleCommand>>();
-	private static File rootPath = null;
-	
-	public static void init(File rootPath) {
-		init(rootPath, null);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static synchronized void init(File rootPath, List<String> commandClasses) {
-		if(! (FSConsole.rootPath != null && FSConsole.rootPath.equals(rootPath))) {
-			FSConsole.rootPath = rootPath;
-			if(! commands.contains(FSConsoleCat.class  )) commands.add(FSConsoleCat.class  );
-			if(! commands.contains(FSConsoleCd.class   )) commands.add(FSConsoleCd.class   );
-			if(! commands.contains(FSConsoleDown.class )) commands.add(FSConsoleDown.class );
-			if(! commands.contains(FSConsoleFirst.class)) commands.add(FSConsoleFirst.class);
-			if(! commands.contains(FSConsoleHelp.class )) commands.add(FSConsoleHelp.class );
-			if(! commands.contains(FSConsoleLs.class   )) commands.add(FSConsoleLs.class   );
-			if(! commands.contains(FSConsoleNow.class  )) commands.add(FSConsoleNow.class  );
-			if(! commands.contains(FSConsolePwd.class  )) commands.add(FSConsolePwd.class  );
-			if(! commands.contains(FSConsoleWho.class  )) commands.add(FSConsoleWho.class  );
-			if(! commands.contains(FSConsoleFind.class )) commands.add(FSConsoleFind.class );
-			if(! commands.contains(FSConsoleClose.class)) commands.add(FSConsoleClose.class);
-		}
-		
-		if(commandClasses != null) {
-			for(String c : commandClasses) {
-				try {
-					Class<? extends FSConsoleCommand> classObj = (Class<? extends FSConsoleCommand>) Class.forName(c);
-					commands.add(classObj);
-				} catch(ClassNotFoundException e) {
-					FSControl.log("Cannot found " + c + " - " + e.getMessage(), FSConsole.class);
-				}
-			}
-		}
-	}
-	public static FSConsole getInstance() {
-		FSConsole c = new FSConsole();
-		return c;
-	}
-	
+    private static final long serialVersionUID = 7995402708882449267L;
+    private static List<Class<? extends FSConsoleCommand>> commands = new ArrayList<Class<? extends FSConsoleCommand>>();
+    private static File rootPath = null;
+    
+    public static void init(File rootPath) {
+        init(rootPath, null);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static synchronized void init(File rootPath, List<String> commandClasses) {
+        if(! (FSConsole.rootPath != null && FSConsole.rootPath.equals(rootPath))) {
+            FSConsole.rootPath = rootPath;
+            if(! commands.contains(FSConsoleCat.class  )) commands.add(FSConsoleCat.class  );
+            if(! commands.contains(FSConsoleCd.class   )) commands.add(FSConsoleCd.class   );
+            if(! commands.contains(FSConsoleDown.class )) commands.add(FSConsoleDown.class );
+            if(! commands.contains(FSConsoleFirst.class)) commands.add(FSConsoleFirst.class);
+            if(! commands.contains(FSConsoleHelp.class )) commands.add(FSConsoleHelp.class );
+            if(! commands.contains(FSConsoleLs.class   )) commands.add(FSConsoleLs.class   );
+            if(! commands.contains(FSConsoleNow.class  )) commands.add(FSConsoleNow.class  );
+            if(! commands.contains(FSConsolePwd.class  )) commands.add(FSConsolePwd.class  );
+            if(! commands.contains(FSConsoleWho.class  )) commands.add(FSConsoleWho.class  );
+            if(! commands.contains(FSConsoleFind.class )) commands.add(FSConsoleFind.class );
+            if(! commands.contains(FSConsoleClose.class)) commands.add(FSConsoleClose.class);
+        }
+        
+        if(commandClasses != null) {
+            for(String c : commandClasses) {
+                try {
+                    Class<? extends FSConsoleCommand> classObj = (Class<? extends FSConsoleCommand>) Class.forName(c);
+                    commands.add(classObj);
+                } catch(ClassNotFoundException e) {
+                    FSControl.log("Cannot found " + c + " - " + e.getMessage(), FSConsole.class);
+                }
+            }
+        }
+    }
+    public static FSConsole getInstance() {
+        FSConsole c = new FSConsole();
+        return c;
+    }
+    
     protected String path;
     protected List<FSConsoleCommand> cmds = new ArrayList<FSConsoleCommand>();
     
     private FSConsole() {
-    	for(Class<? extends FSConsoleCommand> c : commands) {
-			try { cmds.add(c.newInstance()); } catch(Throwable t) { FSControl.log("Fail to initialize console command " + c + " - Error : " + t.getMessage(), FSControl.class); }
-		}
-    	Collections.sort(cmds, new Comparator<FSConsoleCommand>() {
-			@Override
-			public int compare(FSConsoleCommand o1, FSConsoleCommand o2) {
-				return o1.getName().compareTo(o2.getName());
-			}
-		});
+        for(Class<? extends FSConsoleCommand> c : commands) {
+            try { cmds.add(c.newInstance()); } catch(Throwable t) { FSControl.log("Fail to initialize console command " + c + " - Error : " + t.getMessage(), FSControl.class); }
+        }
+        Collections.sort(cmds, new Comparator<FSConsoleCommand>() {
+            @Override
+            public int compare(FSConsoleCommand o1, FSConsoleCommand o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
     }
-	public String getPath() {
-		return path;
-	}
-	public void setPath(String path) {
-		this.path = path;
-	}
-	public List<FSConsoleCommand> getCommands() {
-		return cmds;
-	}
-	public FSConsoleResult run(FSControl ctrl, Map<String, Object> sessionMap, String command) {
-		FSControl.log("Console called by " + sessionMap.get("id") + " - " + command + " at " + System.currentTimeMillis(), this.getClass());
-		
-		FSConsoleResult res = null;
-		
-		List<String> lines = new ArrayList<String>();
-		StringTokenizer lineTokenizer1 = new StringTokenizer(command, "\n");
-		while(lineTokenizer1.hasMoreTokens()) {
-			StringTokenizer lineTokenizer2 = new StringTokenizer(lineTokenizer1.nextToken().trim(), ";");
-			while(lineTokenizer2.hasMoreTokens()) {
-				lines.add(lineTokenizer2.nextToken().trim());
-			}
-		}
-		lineTokenizer1 = null;
-		command = null;
-		
-		List<FSConsoleResult> multipleRes = new ArrayList<FSConsoleResult>();
-		
-		try {
-			for(String lineOne : lines) {
-				StringBuilder parameter = new StringBuilder("");
-				StringTokenizer spaceTokenizer = new StringTokenizer(lineOne, " ");
-				String commandName = spaceTokenizer.nextToken();
-				while(spaceTokenizer.hasMoreTokens()) {
-					parameter = parameter.append(spaceTokenizer.nextToken()).append(" ");
-				}
-				
-				FSControl.log("LINE : " + lineOne, this.getClass());
-				FSControl.log("CMD : " + commandName, this.getClass());
-				FSControl.log("PARAM : " + parameter.toString(), this.getClass());
-				
-				lineOne = null;
-				spaceTokenizer = null;
-				
-				FSConsoleCommand commandOne = null;
-				for(FSConsoleCommand c : cmds) {
-					if(c.getName().equalsIgnoreCase(commandName)) {
-						commandOne = c;
-						break;
-					}
-				}
-				if(commandOne == null) {
-					for(FSConsoleCommand c : cmds) {
-						if(c.getShortName() == null) continue;
-						if(c.getShortName().equalsIgnoreCase(commandName)) {
-							commandOne = c;
-							break;
-						}
-					}
-				}
-				
-				if(commandOne == null) throw new NullPointerException("Cannot found correct command.");
-				
-				Object result = commandOne.run(ctrl, this, sessionMap, rootPath, parameter.toString().trim());
-				if(result instanceof FSConsoleResult) {
-					res = (FSConsoleResult) result;
-				} else {
-					res = new FSConsoleResult();
-					if(result == null) {
-						res.setNulll(true);
-						res.setDisplay("");
-					} else {
-						res.setNulll(false);
-						res.setDisplay(String.valueOf(result));
-					}
-					res.setPath(path);
-					res.setSuccess(true);
-				}
-				multipleRes.add(res);
-			}
-		} catch(Throwable t) {
-			if(! (t instanceof RuntimeException)) t.printStackTrace();
-			
-			res = new FSConsoleResult();
-			res.setNulll(false);
-			res.setDisplay("Error : " + t.getMessage());
-			res.setPath(path);
-			res.setSuccess(false);
-			multipleRes.add(res);
-		}
-		
-		if(multipleRes.size() == 1) return multipleRes.get(0);
-		else return new FSConsoleMultipleResult(multipleRes);
-	}
+    public String getPath() {
+        return path;
+    }
+    public void setPath(String path) {
+        this.path = path;
+    }
+    public List<FSConsoleCommand> getCommands() {
+        return cmds;
+    }
+    public FSConsoleResult run(FSControl ctrl, Map<String, Object> sessionMap, String command) {
+        FSControl.log("Console called by " + sessionMap.get("id") + " - " + command + " at " + System.currentTimeMillis(), this.getClass());
+        
+        FSConsoleResult res = null;
+        
+        List<String> lines = new ArrayList<String>();
+        StringTokenizer lineTokenizer1 = new StringTokenizer(command, "\n");
+        while(lineTokenizer1.hasMoreTokens()) {
+            StringTokenizer lineTokenizer2 = new StringTokenizer(lineTokenizer1.nextToken().trim(), ";");
+            while(lineTokenizer2.hasMoreTokens()) {
+                lines.add(lineTokenizer2.nextToken().trim());
+            }
+        }
+        lineTokenizer1 = null;
+        command = null;
+        
+        List<FSConsoleResult> multipleRes = new ArrayList<FSConsoleResult>();
+        
+        try {
+            for(String lineOne : lines) {
+                Map<String, String> parsed = DataUtil.parseParameter(lineOne);
+                
+                String commandName = parsed.get("ORDER");
+                String parameter   = parsed.get("PARAMETER");
+                
+                if(parameter != null) parameter = parameter.trim();
+                
+                parsed.remove("ORDER");
+                parsed.remove("PARAMETER");
+                
+                FSControl.log("LINE   : " + lineOne, this.getClass());
+                FSControl.log("CMD    : " + commandName, this.getClass());
+                FSControl.log("PARAM  : " + parameter, this.getClass());
+                FSControl.log("OPTION : " + parsed.toString(), this.getClass());
+                
+                lineOne = null;
+                
+                FSConsoleCommand commandOne = null;
+                for(FSConsoleCommand c : cmds) {
+                    if(c.getName().equalsIgnoreCase(commandName)) {
+                        commandOne = c;
+                        break;
+                    }
+                }
+                if(commandOne == null) {
+                    for(FSConsoleCommand c : cmds) {
+                        if(c.getShortName() == null) continue;
+                        if(c.getShortName().equalsIgnoreCase(commandName)) {
+                            commandOne = c;
+                            break;
+                        }
+                    }
+                }
+                
+                if(commandOne == null) throw new NullPointerException("Cannot found correct command.");
+                
+                Object result = commandOne.run(ctrl, this, sessionMap, rootPath, parameter, parsed);
+                if(result instanceof FSConsoleResult) {
+                    res = (FSConsoleResult) result;
+                } else {
+                    res = new FSConsoleResult();
+                    if(result == null) {
+                        res.setNulll(true);
+                        res.setDisplay("");
+                    } else {
+                        res.setNulll(false);
+                        res.setDisplay(String.valueOf(result));
+                    }
+                    res.setPath(path);
+                    res.setSuccess(true);
+                }
+                multipleRes.add(res);
+            }
+        } catch(Throwable t) {
+            t.printStackTrace();
+            if(! (t instanceof RuntimeException)) FSControl.log(t, getClass());
+            
+            res = new FSConsoleResult();
+            res.setNulll(false);
+            res.setDisplay("Error : " + t.getMessage());
+            res.setPath(path);
+            res.setSuccess(false);
+            multipleRes.add(res);
+        }
+        
+        if(multipleRes.size() == 1) return multipleRes.get(0);
+        else return new FSConsoleMultipleResult(multipleRes);
+    }
 }

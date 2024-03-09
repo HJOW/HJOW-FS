@@ -22,60 +22,60 @@ import com.hjow.fs.FSControl;
 import com.hjow.fs.console.FSConsole;
 
 public class FSConsoleWho implements FSBundledConsoleCommand {
-	private static final long serialVersionUID = -3508005018737279193L;
+    private static final long serialVersionUID = -3508005018737279193L;
 
-	@Override
-	public String getName() {
-		return "whoami";
-	}
+    @Override
+    public String getName() {
+        return "whoami";
+    }
 
-	@Override
-	public String getShortName() {
-		return "who";
-	}
+    @Override
+    public String getShortName() {
+        return "who";
+    }
 
-	@Override
-	public Object run(FSControl ctrl, FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable {
-		StringBuilder res = new StringBuilder("");
-		res = res.append("Session Information").append("\n");
-		res = res.append("id  ").append(" : ").append(sessionMap.get("id"    )).append("\n");
-		res = res.append("type").append(" : ").append(sessionMap.get("idtype")).append("\n");
-		res = res.append("nick").append(" : ").append(sessionMap.get("nick"  )).append("\n");
-		return res.toString();
-	}
+    @Override
+    public Object run(FSControl ctrl, FSConsole console, Map<String, Object> sessionMap, File root, String parameter, Map<String, String> options) throws Throwable {
+        StringBuilder res = new StringBuilder("");
+        res = res.append("Session Information").append("\n");
+        res = res.append("id  ").append(" : ").append(sessionMap.get("id"    )).append("\n");
+        res = res.append("type").append(" : ").append(sessionMap.get("idtype")).append("\n");
+        res = res.append("nick").append(" : ").append(sessionMap.get("nick"  )).append("\n");
+        return res.toString();
+    }
 
-	@Override
-	public String getHelp(String lang, boolean detail) {
-		StringBuilder res = new StringBuilder("");
-		if(detail) {
-			if(lang.equals("ko")) {
-				res = res.append(" * who").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append("    현재 로그인한 세션 정보를 조회합니다.                               ").append("\n");
-				res = res.append("    매개변수가 필요 없습니다.                                           ").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append(" * 예").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append("    ls                                                                  ").append("\n");
-				res = res.append("                                                                        ").append("\n");
-			} else {
-				res = res.append(" * who").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append("    Print informations about current session.                           ").append("\n");
-				res = res.append("    No parameter needs.                                                 ").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append(" * example").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append("    who                                                                  ").append("\n");
-				res = res.append("                                                                        ").append("\n");
-			}
-		} else {
-			if(lang.equals("ko")) {
-				res = res.append("현재 로그인한 세션 정보를 조회합니다.").append("\n");
-			} else {
-				res = res.append("Print informations about current session.").append("\n");
-			}
-		}
-		return res.toString().trim();
-	}
+    @Override
+    public String getHelp(String lang, boolean detail) {
+        StringBuilder res = new StringBuilder("");
+        if(detail) {
+            if(lang.equals("ko")) {
+                res = res.append(" * who").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append("    현재 로그인한 세션 정보를 조회합니다.                               ").append("\n");
+                res = res.append("    매개변수가 필요 없습니다.                                           ").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append(" * 예").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append("    ls                                                                  ").append("\n");
+                res = res.append("                                                                        ").append("\n");
+            } else {
+                res = res.append(" * who").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append("    Print informations about current session.                           ").append("\n");
+                res = res.append("    No parameter needs.                                                 ").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append(" * example").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append("    who                                                                  ").append("\n");
+                res = res.append("                                                                        ").append("\n");
+            }
+        } else {
+            if(lang.equals("ko")) {
+                res = res.append("현재 로그인한 세션 정보를 조회합니다.").append("\n");
+            } else {
+                res = res.append("Print informations about current session.").append("\n");
+            }
+        }
+        return res.toString().trim();
+    }
 }

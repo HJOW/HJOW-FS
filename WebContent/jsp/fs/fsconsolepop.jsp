@@ -28,7 +28,7 @@ $(function() {
 </script>
 </head>
 <body class='popup'>
-    <div class='fs_div fs_consolepop container show-grid full'>
+    <div class='fs_div fs_consolepop full'>
         <jsp:include page="fsconsole.jsp"></jsp:include>
     </div>
 </body>

@@ -20,19 +20,19 @@ import javax.servlet.ServletContextListener;
 
 /** Declare actions on server starts or server shutdown. */
 public class FSServletContextListener implements ServletContextListener {
-	public FSServletContextListener() { }
+    public FSServletContextListener() { }
 
-	@Override
-	public synchronized void contextDestroyed(ServletContextEvent sce) {
-		System.out.println(this.getClass().getName() + ".contextDestroyed");
-		FSControl.disposeInstance();
-	}
+    @Override
+    public synchronized void contextDestroyed(ServletContextEvent sce) {
+        System.out.println(this.getClass().getName() + ".contextDestroyed");
+        FSControl.disposeInstance();
+    }
 
-	@Override
-	public synchronized void contextInitialized(ServletContextEvent sce) {
-		System.out.println(this.getClass().getName() + ".contextInitialized");
-		String ctxPath = sce.getServletContext().getContextPath();
-		FSControl.init(ctxPath);
-	}
-	
+    @Override
+    public synchronized void contextInitialized(ServletContextEvent sce) {
+        System.out.println(this.getClass().getName() + ".contextInitialized");
+        String ctxPath = sce.getServletContext().getContextPath();
+        FSControl.init(ctxPath);
+    }
+    
 }

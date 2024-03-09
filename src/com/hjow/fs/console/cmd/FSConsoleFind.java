@@ -25,73 +25,73 @@ import com.hjow.fs.FSUtils;
 import com.hjow.fs.console.FSConsole;
 
 public class FSConsoleFind implements FSBundledConsoleCommand {
-	private static final long serialVersionUID = 1139052487161349847L;
+    private static final long serialVersionUID = 1139052487161349847L;
 
-	@Override
-	public String getName() {
-		return "find";
-	}
+    @Override
+    public String getName() {
+        return "find";
+    }
 
-	@Override
-	public String getShortName() {
-		return "grep";
-	}
+    @Override
+    public String getShortName() {
+        return "grep";
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public Object run(FSControl ctrl, FSConsole console, Map<String, Object> sessionMap, File root, String parameter) throws Throwable {
-		List<String> list = FSUtils.find(root, console.getPath(), parameter, FSControl.getInstance().getLimitSize());
-		StringBuilder res = new StringBuilder("");
-		
-		List<String> hiddens = (List<String>) sessionMap.get("hiddendirs");
-		if(hiddens == null) hiddens = new ArrayList<String>();
-		boolean skip = false;
-		
-		for(String s : list) {
-			skip = false;
-			for(String h : hiddens) {
-				if(s.startsWith(h)) {
-					skip = true;
-					break;
-				}
-			}
-			if(! skip) res = res.append(s);
-		}
-		return res.toString().trim().replace("\\", "/");
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object run(FSControl ctrl, FSConsole console, Map<String, Object> sessionMap, File root, String parameter, Map<String, String> options) throws Throwable {
+        List<String> list = FSUtils.find(root, console.getPath(), parameter, FSControl.getInstance().getLimitSize());
+        StringBuilder res = new StringBuilder("");
+        
+        List<String> hiddens = (List<String>) sessionMap.get("hiddendirs");
+        if(hiddens == null) hiddens = new ArrayList<String>();
+        boolean skip = false;
+        
+        for(String s : list) {
+            skip = false;
+            for(String h : hiddens) {
+                if(s.startsWith(h)) {
+                    skip = true;
+                    break;
+                }
+            }
+            if(! skip) res = res.append(s);
+        }
+        return res.toString().trim().replace("\\", "/");
+    }
 
-	@Override
-	public String getHelp(String lang, boolean detail) {
-		StringBuilder res = new StringBuilder("");
-		if(detail) {
-			if(lang.equals("ko")) {
-				res = res.append(" * find").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append("    검색어로 파일 이름을 검색합니다.                                    ").append("\n");
-				res = res.append("    매개변수로 검색어를 입력해야 합니다.                                ").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append(" * 예").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append("    find Test                                                           ").append("\n");
-				res = res.append("                                                                        ").append("\n");
-			} else {
-				res = res.append(" * grep").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append("    Search file name.                                                   ").append("\n");
-				res = res.append("    Parameter needs as a keyword.                                       ").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append(" * example").append("\n");
-				res = res.append("                                                                        ").append("\n");
-				res = res.append("    grep Test                                                           ").append("\n");
-				res = res.append("                                                                        ").append("\n");
-			}
-		} else {
-			if(lang.equals("ko")) {
-				res = res.append("검색어로 파일을 검색합니다.").append("\n");
-			} else {
-				res = res.append("Search file name.").append("\n");
-			}
-		}
-		return res.toString().trim();
-	}
+    @Override
+    public String getHelp(String lang, boolean detail) {
+        StringBuilder res = new StringBuilder("");
+        if(detail) {
+            if(lang.equals("ko")) {
+                res = res.append(" * find").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append("    검색어로 파일 이름을 검색합니다.                                    ").append("\n");
+                res = res.append("    매개변수로 검색어를 입력해야 합니다.                                ").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append(" * 예").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append("    find Test                                                           ").append("\n");
+                res = res.append("                                                                        ").append("\n");
+            } else {
+                res = res.append(" * grep").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append("    Search file name.                                                   ").append("\n");
+                res = res.append("    Parameter needs as a keyword.                                       ").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append(" * example").append("\n");
+                res = res.append("                                                                        ").append("\n");
+                res = res.append("    grep Test                                                           ").append("\n");
+                res = res.append("                                                                        ").append("\n");
+            }
+        } else {
+            if(lang.equals("ko")) {
+                res = res.append("검색어로 파일을 검색합니다.").append("\n");
+            } else {
+                res = res.append("Search file name.").append("\n");
+            }
+        }
+        return res.toString().trim();
+    }
 }

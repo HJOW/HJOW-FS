@@ -22,7 +22,7 @@ body.dark .container {
 	background-color: #3b3b3b;
 }
 
-body.dark div.fs_div .container div, body.dark div.fs_div .container p, body.dark div.fs_div .container table {
+body.dark div.fs_div .container div, body.dark div.fs_div .container p, body.dark div.fs_div .container table, body.dark div.fs_div div {
     background-color: #3b3b3b;
 }
 

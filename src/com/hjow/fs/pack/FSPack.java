@@ -23,31 +23,31 @@ import com.hjow.fs.FSControl;
 import com.hjow.fs.cttype.FSContentType;
 
 public abstract class FSPack implements Serializable {
-	private static final long serialVersionUID = 8739449348309321444L;
-	public abstract long getSerial();
-	public abstract String getName();
-	public abstract String getDescription();
-	public abstract List<String> getCommandClasses();
-	public abstract void init(FSControl ctrl);
-	public abstract void dispose(FSControl ctrl);
-	
-	public boolean isAvail(int[] version) {
-		return true;
-	}
-	
-	public FSRequestHandler getHandler(String method) {
-		return null;
-	}
-	
-	public List<FSContentType> getContentTypes() {
-		return new ArrayList<FSContentType>();
-	}
-	
-	@Override
-	public boolean equals(Object others) {
-		if(others == null) return false;
-		if(! (others instanceof FSPack)) return false;
-		
-		return (getSerial() == ((FSPack) others).getSerial());
-	}
+    private static final long serialVersionUID = 8739449348309321444L;
+    public abstract long getSerial();
+    public abstract String getName();
+    public abstract String getDescription();
+    public abstract List<String> getCommandClasses();
+    public abstract void init(FSControl ctrl);
+    public abstract void dispose(FSControl ctrl);
+    
+    public boolean isAvail(int[] version) {
+        return true;
+    }
+    
+    public FSRequestHandler getHandler(String method) {
+        return null;
+    }
+    
+    public List<FSContentType> getContentTypes() {
+        return new ArrayList<FSContentType>();
+    }
+    
+    @Override
+    public boolean equals(Object others) {
+        if(others == null) return false;
+        if(! (others instanceof FSPack)) return false;
+        
+        return (getSerial() == ((FSPack) others).getSerial());
+    }
 }

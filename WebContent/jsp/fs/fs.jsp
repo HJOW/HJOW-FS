@@ -129,9 +129,17 @@ $(function() {
         var d = pops['upload'].dialog;
         d.dialog('close');
     };
+    
+    var popularWidth, popularHeight;
+    popularWidth  = window.innerWidth  - 100;
+    popularHeight = 550;
+    // popularHeight = window.innerHeight - 150;
+    if(popularWidth  < 780) popularWidth  = 780;
+    if(popularHeight < 550) popularHeight = 550;
+    
     pops['console'] = {};
     pops['console'].iframe = popRoot.find('.fs_pop_console').find('iframe');
-    pops['console'].dialog = popRoot.find('.fs_pop_console').dialog({ autoOpen : false, title : 'Console', width : 780, height : 550, resize : function(event, ui) { pops['console'].iframe.height(ui.size.height - 90);  } });
+    pops['console'].dialog = popRoot.find('.fs_pop_console').dialog({ autoOpen : false, title : 'Console', width : popularWidth, height : popularHeight, resize : function(event, ui) { pops['console'].iframe.height(ui.size.height - 90);  } });
     pops['console'].open   = function() {
         var d   = pops['console'].dialog;
         var ifr = pops['console'].iframe;
@@ -154,7 +162,7 @@ $(function() {
     };
     pops['admin'] = {};
     pops['admin'].iframe = popRoot.find('.fs_pop_admin').find('iframe');
-    pops['admin'].dialog = popRoot.find('.fs_pop_admin').dialog({ autoOpen : false, title : 'Admin', width : 780, height : 550, resize : function(event, ui) { pops['admin'].iframe.height(ui.size.height - 90);  } });
+    pops['admin'].dialog = popRoot.find('.fs_pop_admin').dialog({ autoOpen : false, title : 'Admin', width : popularWidth, height : popularHeight, resize : function(event, ui) { pops['admin'].iframe.height(ui.size.height - 90);  } });
     pops['admin'].open   = function() {
         var d   = pops['admin'].dialog;
         var ifr = pops['admin'].iframe;
@@ -460,15 +468,19 @@ $(function() {
                                     divPrvIn.empty();
                                     
                                     // browserInfo.nm == 'ie' && browserInfo.ver < 9
-                                    if(prvIn == '1') divPrvIn.append("<img class='img_preview preview_element'/>");
-                                    if(prvIn == '2') divPrvIn.append("<video class='video_preview preview_element'/>");
-                                    if(prvIn == '3') divPrvIn.append("<audio class='audio_preview preview_element'/>");
-                                    if(prvIn == '4') divPrvIn.append("<iframe class='iframe_preview preview_element'></iframe>");
+                                    if(prvIn == '1') divPrvIn.append("<img    class='img_preview    preview_element full'/>");
+                                    if(prvIn == '2') divPrvIn.append("<video  class='video_preview  preview_element full'/>");
+                                    if(prvIn == '3') divPrvIn.append("<audio  class='audio_preview  preview_element full'/>");
+                                    if(prvIn == '4') divPrvIn.append("<iframe class='iframe_preview preview_element full'></iframe>");
                                     
                                     var srcs = ctxPath + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent($(this).attr('data-path')) + "&filename=" + encodeURIComponent($(this).attr('data-name')) + "&mode=VIEW";
                                     var elem = divPrvIn.find('.preview_element');
                                     
-                                    elem.css('height', 400);
+                                    var prvHeight = (window.innerHeight / 2);
+                                    if(prvHeight < 200) prvHeight = 200;
+                                    
+                                    divPrvIn.css('max-height', prvHeight + 'px');
+                                    divPrvIn.css('overflow-y', 'scroll');
                                     elem.attr('src', srcs);
                                     divPrvIn.removeClass('invisible');
                                 } else {

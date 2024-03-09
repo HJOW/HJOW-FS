@@ -21,51 +21,51 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FSFileListingResult implements Serializable {
-	private static final long serialVersionUID = 6582714864695423495L;
-	protected List<File> dirs  = new ArrayList<File>();
+    private static final long serialVersionUID = 6582714864695423495L;
+    protected List<File> dirs  = new ArrayList<File>();
     protected List<File> files = new ArrayList<File>();
     protected int exceptsCount = 0;
     protected int skippedCount = 0;
     
     public FSFileListingResult() {
-    	
+        
     }
 
-	public FSFileListingResult(List<File> dirs, List<File> files) {
-		super();
-		this.dirs = dirs;
-		this.files = files;
-	}
+    public FSFileListingResult(List<File> dirs, List<File> files) {
+        super();
+        this.dirs = dirs;
+        this.files = files;
+    }
 
-	public List<File> getDirs() {
-		return dirs;
-	}
+    public List<File> getDirs() {
+        return dirs;
+    }
 
-	public void setDirs(List<File> dirs) {
-		this.dirs = dirs;
-	}
+    public void setDirs(List<File> dirs) {
+        this.dirs = dirs;
+    }
 
-	public List<File> getFiles() {
-		return files;
-	}
+    public List<File> getFiles() {
+        return files;
+    }
 
-	public void setFiles(List<File> files) {
-		this.files = files;
-	}
+    public void setFiles(List<File> files) {
+        this.files = files;
+    }
 
-	public int getExceptsCount() {
-		return exceptsCount;
-	}
+    public int getExceptsCount() {
+        return exceptsCount;
+    }
 
-	public void setExceptsCount(int exceptsCount) {
-		this.exceptsCount = exceptsCount;
-	}
+    public void setExceptsCount(int exceptsCount) {
+        this.exceptsCount = exceptsCount;
+    }
 
-	public int getSkippedCount() {
-		return skippedCount;
-	}
+    public int getSkippedCount() {
+        return skippedCount;
+    }
 
-	public void setSkippedCount(int skippedCount) {
-		this.skippedCount = skippedCount;
-	}
+    public void setSkippedCount(int skippedCount) {
+        this.skippedCount = skippedCount;
+    }
 }
