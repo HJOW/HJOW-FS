@@ -56,7 +56,7 @@ if(theme != null) {
     }
     $(function() {
         setTimeout(function() { location.reload(); }, <%= fsc.getCaptchaLimitTime() %>);
-        if(<%=captDarkMode%>) { $('body').css('background-color', 'black'); }
+        if(<%=captDarkMode%>) { $('body').css('background-color', '#3b3b3b'); }
     });
     </script>
 </head>
