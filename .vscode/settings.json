@@ -7,7 +7,9 @@
         "**/.DS_Store": true,
         "**/Thumbs.db": true,
         ".project":true,
-        ".classpath":true
+        ".classpath":true,
+        "**/.idea":true,
+        "SimpleFileStorage.iml":true
     },
     "svn.ignoreMissingSvnWarning": true,
     "java.project.sourcePaths": ["src"],
