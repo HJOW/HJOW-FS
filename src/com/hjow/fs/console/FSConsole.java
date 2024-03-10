@@ -185,6 +185,12 @@ public class FSConsole implements Serializable {
                     res.setPath(path);
                     res.setSuccess(true);
                 }
+                
+                if(parsed.containsKey("grep")) res = afterProcessResults(res, "grep", parsed.get("grep"));
+                if(parsed.containsKey("GREP")) res = afterProcessResults(res, "grep", parsed.get("GREP"));
+                if(parsed.containsKey("grgx")) res = afterProcessResults(res, "grgx", parsed.get("grgx"));
+                if(parsed.containsKey("GRGX")) res = afterProcessResults(res, "grgx", parsed.get("GRGX"));
+                
                 multipleRes.add(res);
             }
         } catch(Throwable t) {
@@ -201,6 +207,62 @@ public class FSConsole implements Serializable {
         
         if(multipleRes.size() == 1) return multipleRes.get(0);
         else return new FSConsoleMultipleResult(multipleRes);
+    }
+    
+    /** Filter console results. The input (the result object) will be affected.  */
+    protected FSConsoleResult afterProcessResults(FSConsoleResult beforeResult, String afterProcess, String afterProcessParam) {
+    	if(afterProcess      == null) return beforeResult;
+    	if(afterProcessParam == null) return beforeResult;
+    	
+    	afterProcess = afterProcess.trim().toLowerCase();
+    	StringBuilder coll = null;
+    	StringTokenizer lineTokenizer = null;
+    	
+    	if(beforeResult instanceof FSConsoleMultipleResult) {
+    		FSConsoleMultipleResult b = (FSConsoleMultipleResult) beforeResult;
+    		for(FSConsoleResult r : b.getChildren()) {
+    			String beforeMsg = r.getDisplay();
+    			if(beforeMsg != null) {
+    				coll = new StringBuilder("");
+    				lineTokenizer = new StringTokenizer(beforeMsg, "\n");
+    				while(lineTokenizer.hasMoreTokens()) {
+    					String line = lineTokenizer.nextToken();
+    					line = afterProcessResultEachLine(line, afterProcess, afterProcessParam);
+    					if(line == null) continue;
+    					coll = coll.append("\n").append(line);
+    				}
+    				r.setDisplay(coll.toString().trim());
+    			}
+    		}
+		} else {
+			String beforeMsg = beforeResult.getDisplay();
+			if(beforeMsg != null) {
+				coll = new StringBuilder("");
+				lineTokenizer = new StringTokenizer(beforeMsg, "\n");
+				while(lineTokenizer.hasMoreTokens()) {
+					String line = lineTokenizer.nextToken();
+					line = afterProcessResultEachLine(line, afterProcess, afterProcessParam);
+					if(line == null) continue;
+					coll = coll.append("\n").append(line);
+				}
+				beforeResult.setDisplay(coll.toString().trim());
+			}
+		}
+    	
+    	return beforeResult;
+    }
+    
+    protected String afterProcessResultEachLine(String lineOne, String afterProcess, String afterProcessParam) {
+    	if(lineOne == null) return null;
+    	if(afterProcess.equals("grep")) {
+    		if(lineOne.indexOf(afterProcessParam) >= 0) return lineOne;
+    		else return null;
+    	}
+    	if(afterProcess.equals("grgx")) {
+    		if(lineOne.matches(afterProcessParam)) return lineOne;
+    		else return null;
+    	}
+    	return lineOne;
     }
     
     /** Check EDIT privileges */
