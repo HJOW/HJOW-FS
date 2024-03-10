@@ -34,6 +34,11 @@ public class FSServletContextListener implements ServletContextListener {
         System.out.println(this.getClass().getName() + ".contextInitialized");
         String ctxPath = sce.getServletContext().getContextPath();
         FSControl.init(ctxPath);
+        
+        try { Class.forName("java.awt.image.BufferedImage");  } catch(ClassNotFoundException ignores) {}
+        try { Class.forName("java.awt.Graphics2D");           } catch(ClassNotFoundException ignores) {}
+        try { Class.forName("java.awt.Font");                 } catch(ClassNotFoundException ignores) {}
+        try { Class.forName("javax.imageio.ImageIO");         } catch(ClassNotFoundException ignores) {}
     }
     
 }
