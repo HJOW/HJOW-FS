@@ -60,7 +60,6 @@ if (!Array.isArray) {
    Common Utils
 
 */
- 
 function FSUtilClass() {
     this.version = [];
     this.version.push(0);
@@ -144,25 +143,51 @@ function FSUtilClass() {
         }
     }
     
-    this.detectStorage = function detectStorage() {
-        try {
-            var locals = eval('localStorage');
-            if(locals == null || typeof(locals) == 'undefined') {
-                return false;
-            }
-            if(typeof(locals.setItem) == 'undefined' || typeof(locals.getItem) == 'undefined' || typeof(locals.clear) == 'undefined' ) {
-                return false;
-            }
-            var sessions = eval('localStorage');
-            if(sessions == null || typeof(sessions) == 'undefined') {
-                return false;
-            }
-            if(typeof(sessions.setItem) == 'undefined' || typeof(sessions.getItem) == 'undefined' || typeof(sessions.clear) == 'undefined' ) {
-                return false;
-            }
-            return true;
-        } catch(e) { return false; }
-    }
+    function FSStorage(storKey) {
+        this.storageKey = storKey;
+        this.getRaw = function() {
+            return eval(this.storageKey + 'Storage');
+        }
+        this.put = function(k, v) {
+            this.getRaw().setItem(k, v);
+        };
+        this.get = function(k) {
+            return this.getRaw().getItem(k);
+        };
+        this.remove = function(k) {
+            this.getRaw().removeItem(k);
+        };
+        this.clear = function() {
+            this.getRaw().clear();
+        };
+    };
+    
+    function FSStorageCollection() {
+        this.local   = new FSStorage('local');
+        this.session = new FSStorage('session');
+        this.detect  = function detectStorage() {
+            try {
+                var locals = eval('localStorage');
+                if(locals == null || typeof(locals) == 'undefined') {
+                    return false;
+                }
+                if(typeof(locals.setItem) == 'undefined' || typeof(locals.getItem) == 'undefined' || typeof(locals.clear) == 'undefined' ) {
+                    return false;
+                }
+                var sessions = eval('sessionStorage');
+                if(sessions == null || typeof(sessions) == 'undefined') {
+                    return false;
+                }
+                if(typeof(sessions.setItem) == 'undefined' || typeof(sessions.getItem) == 'undefined' || typeof(sessions.clear) == 'undefined' ) {
+                    return false;
+                }
+                return true;
+            } catch(e) { return false; }
+        };
+    };
+    
+    this.storage = new FSStorageCollection();
+    this.detectStorage = function detectStorage() { return this.storage.detect() };
     
     this.detectBrowser = function detectBrowser() {
         var agent  = String(window.navigator.userAgent);
@@ -335,6 +360,28 @@ function FSUtilClass() {
         return { name : 'Unknown', version : 'Unknown', ver : -1, agent : agent };
     };
     
+    this.ajax = function ajax(ajaxParamJson) {
+        var obj = ajaxParamJson;
+        if(typeof(obj) == 'string') obj = JSON.parse(obj);
+        
+        if(this.storage.detect()) {
+            var tkId  = this.storage.session.get('fsid'   );
+            var tkVal = this.storage.session.get('fstoken');
+            
+            if(tkId != null && tkVal != null) {
+                var beforFunc = null;
+                if(typeof(obj.beforeSend) == 'function') beforFunc = obj.beforeSend;
+                obj.beforeSend = function(xhr) {
+                    xhr.setRequestHeader('fsid'   , tkId );
+                    xhr.setRequestHeader('fstoken', tkVal);
+                    if(beforFunc != null) beforFunc(xhr);
+                }
+            }
+        }
+        
+        $.ajax(obj);
+    };
+    
     this.applyLanguage = function applyLanguage(range) {
         if(typeof(range) == 'undefined') range = $('body');
         else range = $(range);
@@ -408,7 +455,7 @@ function FSUtilClass() {
                     formData.append('file' + idx, fileOne);
                 }
                 
-                $.ajax({
+                FSUtil.ajax({
                     url : ctxPath + '/jsp/fs/fsuploadin.jsp',
                     data : formData,
                     method : 'POST',
@@ -449,4 +496,4 @@ function FSUtilClass() {
     }
 }
 
-var FSUtil = new FSUtilClass();
+var FSUtil  = new FSUtilClass();

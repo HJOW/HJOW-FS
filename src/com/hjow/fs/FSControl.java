@@ -76,6 +76,7 @@ import hjow.common.json.JsonCompatibleUtil;
 import hjow.common.json.JsonObject;
 import hjow.common.util.ClassUtil;
 import hjow.common.util.DataUtil;
+import hjow.common.util.FileUtil;
 import hjow.common.util.SecurityUtil;
 
 public class FSControl {
@@ -131,6 +132,7 @@ public class FSControl {
     protected boolean noLogin = false;
     protected int loginFailCountLimit = 10;
     protected int loginFailOverMinute = 10;
+    protected int tokenLifeTime = 0; // Minutes  
     
     // Console Usage
     protected boolean noConsole = true;
@@ -396,6 +398,11 @@ public class FSControl {
                         if(! faJson.exists()) {
                             faJson.mkdirs();
                         }
+                        
+                        File ftJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "tokens");
+                        if(! ftJson.exists()) {
+                            ftJson.mkdirs();
+                        }
                     }
                 }
                 if(conf    == null) { try { conf = new JsonObject(); } catch(Throwable txc) {} }
@@ -637,6 +644,33 @@ public class FSControl {
                         pstmt.close(); pstmt = null;
                     }
                     
+                    // Check FS_TOKEN
+                    
+                    try {
+                        // Check FS_USER exist
+                        pstmt = conn.prepareStatement("SELECT COUNT(*) AS CNT FROM FS_TOKEN");
+                        rs = pstmt.executeQuery();
+                        
+                        while(rs.next()) {
+                            rs.getInt("CNT");
+                        }
+                        
+                        rs.close(); rs = null;
+                        pstmt.close(); pstmt = null;
+                        
+                        pstmt = conn.prepareStatement("SELECT USERID, TOKEN, CRTIME, ENTIME FROM FS_TOKEN");
+                        rs = pstmt.executeQuery();
+                        
+                        rs.close(); rs = null;
+                        pstmt.close(); pstmt = null;
+                    } catch(SQLException e) {
+                        if(dbType.equals("oracle")) pstmt = conn.prepareStatement("CREATE TABLE FS_TOKEN ( TOKEN VARCHAR2(1024) PRIMARY KEY, USERID VARCHAR2(40), CRTIME NUMBER(20) , ENTIME NUMBER(20)  )");
+                        else                        pstmt = conn.prepareStatement("CREATE TABLE FS_TOKEN ( TOKEN VARCHAR(1024)  PRIMARY KEY, USERID VARCHAR(40) , CRTIME NUMERIC(20), ENTIME NUMERIC(20) )");
+                        pstmt.execute();
+                        conn.commit();
+                        pstmt.close(); pstmt = null;
+                    }
+                    
                     // Check FS_LOG
                     
                     try {
@@ -780,6 +814,9 @@ public class FSControl {
                         } else {
                             File faJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts");
                             if(! faJson.exists()) faJson.mkdirs();
+                            
+                            File ftJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "tokens");
+                            if(! ftJson.exists()) ftJson.mkdirs();
                             
                             File fileAcc = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts" + File.separator + adminId + ".json");
                             fileAcc.getCanonicalPath(); // Check valid
@@ -1010,6 +1047,18 @@ public class FSControl {
                 if(sMaxCount == null) sMaxCount = "1000";
                 Integer.parseInt(sMaxCount); // Checking valid number
                 
+                String sLoginfailcnt  = null;
+                String sTokenlifetime = null;
+                if(! noLogin) {
+                	sLoginfailcnt = request.getParameter("loginfailcnt");
+                    if(sLoginfailcnt == null) sLoginfailcnt = "10";
+                    Integer.parseInt(sLoginfailcnt); // Checking valid number
+                    
+                    sTokenlifetime = request.getParameter("tokenlifetime");
+                    if(sTokenlifetime == null) sTokenlifetime = "10";
+                    Integer.parseInt(sTokenlifetime); // Checking valid number
+                }
+                
                 String sUseCaptchaDown  = request.getParameter("usecaptchadown");
                 String sUseCaptchaLogin = request.getParameter("usecaptchalogin");
                 String sReadFileIcon    = request.getParameter("readfileicon");
@@ -1029,7 +1078,11 @@ public class FSControl {
                 conf.put("sHiddenDirs", sHiddenDirs);
                 conf.put("HiddenDirs", hiddenDirs);
                 conf.put("UseCaptchaDown" , new Boolean(useCaptchaDown));
-                if(! noLogin) conf.put("UseCaptchaLogin", new Boolean(useCaptchaLogin));
+                if(! noLogin) {
+                	conf.put("UseCaptchaLogin", new Boolean(useCaptchaLogin));
+                	if(sLoginfailcnt  != null) conf.put("LoginFailCountLimit", new Integer(sLoginfailcnt ));
+                	if(sTokenlifetime != null) conf.put("TokenLifeTime"      , new Integer(sTokenlifetime));
+                }
                 conf.put("LimitDownloadSize", sMaxSize);
                 conf.put("LimitPreviewSize", sMaxPrev);
                 conf.put("LimitFilesSinglePage", sMaxCount);
@@ -1080,13 +1133,21 @@ public class FSControl {
                             if(c.isDirectory()) {
                                 File[] grands = c.listFiles();
                                 for(File g : grands) {
-                                    if(g.isDirectory()) continue;
+                                    if(g.isDirectory()) {
+                                    	File[] gchildren = g.listFiles();
+                                    	for(File gg : gchildren) {
+                                    		if(gg.isDirectory()) continue;
+                                    		gg.delete();
+                                    	}
+                                    }
                                     g.delete();
                                 }
+                                c.delete();
                             } else {
                                 c.delete();
                             }
                         }
+                        f.delete();
                     } else {
                         f.delete();
                     }
@@ -1155,6 +1216,9 @@ public class FSControl {
                 } else {
                     File faJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts");
                     if(! faJson.exists()) faJson.mkdirs();
+                    
+                    File ftJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "tokens");
+                    if(! ftJson.exists()) ftJson.mkdirs();
                     
                     File fileAcc = new File(faJson.getCanonicalPath());
                     File[] files = fileAcc.listFiles();
@@ -1232,6 +1296,7 @@ public class FSControl {
                 }
                 
                 File faJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts");
+                File ftJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "tokens");
                 
                 // Check ID Duplication
                 if(useJDBC) {
@@ -1257,6 +1322,7 @@ public class FSControl {
                     }
                 } else {
                     if(! faJson.exists()) faJson.mkdirs();
+                    if(! ftJson.exists()) ftJson.mkdirs();
                     
                     File fileAcc = new File(faJson.getCanonicalPath());
                     File[] files = fileAcc.listFiles();
@@ -1354,6 +1420,7 @@ public class FSControl {
                     pstmt.close(); pstmt = null;
                 } else {
                     if(! faJson.exists()) faJson.mkdirs();
+                    if(! ftJson.exists()) ftJson.mkdirs();
                     
                     File fileAcc = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts" + File.separator + cid + ".json");
                     fileAcc.getCanonicalPath(); // Check valid
@@ -1375,6 +1442,7 @@ public class FSControl {
                 }
                 
                 File faJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts");
+                File ftJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "tokens");
                 
                 if(useJDBC) {
                     if(conn == null) {
@@ -1400,6 +1468,13 @@ public class FSControl {
                         else                  throw new RuntimeException("There are no user using that ID. Please re-search.");
                     }
                     
+                    pstmt = conn.prepareStatement("DELETE FROM FS_TOKEN WHERE USERID = ?");
+                    pstmt.setString(1, dId);
+                    pstmt.executeUpdate();
+                    
+                    conn.commit();
+                    pstmt.close(); pstmt = null;
+                    
                     pstmt = conn.prepareStatement("DELETE FROM FS_USER WHERE USERID = ?");
                     pstmt.setString(1, dId);
                     pstmt.executeUpdate();
@@ -1413,6 +1488,15 @@ public class FSControl {
                         else                  throw new RuntimeException("There are no user using that ID. Please re-search.");
                     }
                     fTarget.delete();
+                    
+                    File dirTokens = new File(ftJson.getCanonicalFile() + File.separator + dId);
+                    if(dirTokens.exists() && dirTokens.isDirectory()) {
+                    	File[] children = dirTokens.listFiles();
+                    	for(File f : children) {
+                    		f.delete();
+                    	}
+                    	dirTokens.delete();
+                    }
                 }
             }
             
@@ -2318,7 +2402,7 @@ public class FSControl {
                     response.reset();
                     response.setContentType("text/html;charset=UTF-8");
                     
-                    results = results.append("<pre>").append("Error : ").append(tx.getMessage()).append("</pre>");
+                    results = results.append("<pre style='background-color: gray; color: black; padding: 5px 5px 5px 5px;'>").append("Error : ").append(tx.getMessage()).append("</pre>");
                     if(outputs == null) outputs = response.getOutputStream();
                     outputs.write(results.toString().getBytes(cs));
                 }
@@ -2582,6 +2666,9 @@ public class FSControl {
             File faJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts");
             if(! faJson.exists()) faJson.mkdirs();
             
+            File ftJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "tokens");
+            if(! ftJson.exists()) ftJson.mkdirs();
+            
             if(req.equalsIgnoreCase("status")) {
                 json.put("success", new Boolean(true));
             }
@@ -2615,8 +2702,56 @@ public class FSControl {
             }
             
             if(req.equalsIgnoreCase("logout")) {
+            	String dId = null;
+            	if(request.getHeader("fsid") != null) dId = request.getHeader("fsid").toString();
+            	
                 sessionMap = null;
                 needInvalidate = true;
+                
+                if(dId != null) {
+                	// Delete Token
+                	if(request.getHeader("fstoken") != null) {
+                    	File ftId = new File(ftJson.getCanonicalPath() + File.separator + dId);
+                    	if(ftId.exists() && ftId.isDirectory()) {
+                    		File[] fTokens = ftId.listFiles();
+                    		for(File f : fTokens) {
+                    			try {
+                    				String t = FileUtil.readString(f, "UTF-8");
+                    				JsonObject tJson = (JsonObject) JsonCompatibleUtil.parseJson(t);
+                    				String tokenOne = String.valueOf(tJson.get("token"));
+                    				if(tokenOne.equals(request.getHeader("fstoken").toString())) {
+                    					f.delete();
+                    				}
+                    			} catch(Throwable tToken) {
+                    				log("Exception when deleting token - (" + tToken.getClass().getName() + ") " + tToken.getMessage(), this.getClass());
+                    			}
+                    		}
+                    	}
+                    	
+                    	if(useJDBC) {
+                    		try {
+                    			if(conn == null) {
+                                    Class.forName(jdbcClass);
+                                    conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+                                }
+                                
+                                pstmt = conn.prepareStatement("DELETE FROM FS_TOKEN WHERE TOKEN = ?");
+                                pstmt.setString(1, request.getHeader("fstoken").toString());
+                                
+                                pstmt.executeUpdate();
+                                conn.commit();
+                                
+                                pstmt.close(); pstmt = null;
+                                conn.close(); conn = null;
+                    		} catch(Throwable tToken) {
+                				log("Exception when deleting token - (" + tToken.getClass().getName() + ") " + tToken.getMessage(), this.getClass());
+                			} finally {
+                				ClassUtil.closeAll(pstmt, conn);
+                			}
+                    	}
+                    }
+                }
+                
                 if(lang.equals("ko")) msg = "로그아웃 되었습니다."; 
                 else                  msg = "Log out complete";
                 logIn("Session log out from " + request.getRemoteAddr());
@@ -2823,7 +2958,9 @@ public class FSControl {
                     }
                     
                     if(msg.equals("")) {
+                    	// Success to login
                         if(failCnt >= 1) {
+                        	// Reset Fail Count
                             failCnt = 0;
                             accountOne.put("fail_cnt", "0");
                             
@@ -2861,13 +2998,59 @@ public class FSControl {
                         }
                         sessionMap = accountOne;
                         
+                        // Set session and create token
+                        
                         JsonObject accountJsonNew = new JsonObject();
                         accountJsonNew.put("id"    , accountOne.get("id"));
                         accountJsonNew.put("idtype", accountOne.get("idtype"));
                         accountJsonNew.put("nick"  , accountOne.get("nick"));
                         
+                        String nId = accountJsonNew.get("id").toString();
                         request.getSession().setAttribute("fssession", accountJsonNew.toJSON());
                         accountJsonNew = null;
+                        
+                        if(noLogin) tokenLifeTime = 0;
+                        if(tokenLifeTime > 0) {
+                        	String newToken = FSUtils.createToken(nId, String.valueOf(conf.get("S1")), String.valueOf(conf.get("S2")), String.valueOf(conf.get("S3")));
+                            
+                            long tCrTime = now;
+                            long tEnTime = now + (1000L * 60 * tokenLifeTime);
+                            
+                            // Save token
+                            if(useJDBC) {
+                            	pstmt = conn.prepareStatement("INSERT INTO FS_TOKEN (TOKEN, USERID, CRTIME, ENTIME) VALUES (?, ?, ?, ?)");
+                            	pstmt.setString(1, newToken);
+                            	pstmt.setString(2, nId);
+                                pstmt.setLong(3, tCrTime);
+                                pstmt.setLong(4, tEnTime);                            
+                                pstmt.executeUpdate();
+                                conn.commit();
+                                pstmt.close();
+                            } else {
+                            	File dirTokens = new File(ftJson.getCanonicalFile() + File.separator + nId);
+                            	if(! dirTokens.exists()) dirTokens.mkdirs();
+                                
+                            	int fIndex = 0;
+                            	File fToken = new File(dirTokens.getCanonicalPath() + File.separator + "t" + fIndex + ".json");
+                            	while(fToken.exists()) {
+                            		fIndex++;
+                            		fToken = new File(dirTokens.getCanonicalPath() + File.separator + "t" + fIndex + ".json");
+                            	}
+                            	
+                            	JsonObject jToken = new JsonObject();
+                            	jToken.put("id"   , nId);
+                            	jToken.put("token", newToken);
+                            	jToken.put("crtime", String.valueOf(tCrTime));
+                            	jToken.put("entime", String.valueOf(tEnTime));
+                            	
+                            	fOut = new FileOutputStream(fToken);
+                                fOut.write(jToken.toJSON().getBytes(cs));
+                                fOut.close(); fOut = null;
+                            }
+                            
+                            json.put("token", newToken);
+                        }
+                        
                         logIn("Login Accept : " + id + " at " + now + " from " + request.getRemoteAddr());
                         needInvalidate = false;
                         json.put("success", new Boolean(true));
@@ -2917,17 +3100,25 @@ public class FSControl {
         return json;
     }
     
+    /** Check session status (Not accepted, return guest session) */
     public JsonObject getSessionObject(HttpServletRequest request) {
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        FileInputStream fIn = null;
-        Reader r1 = null;
-        Reader r2 = null;
         Throwable caught = null;
         JsonObject obj = null;
         try {
-            String sessionJson = (String) request.getSession().getAttribute("fssession");
+        	String sessionJson = null;
+        	
+        	if(noLogin) tokenLifeTime = 0;
+        	if(tokenLifeTime > 0) {
+        		String tokenID  = request.getHeader("fsid");
+            	String tokenVal = request.getHeader("fstoken");
+            	
+            	if(tokenID != null && tokenVal != null) {
+            		obj = getTokenAvail(tokenID, tokenVal);
+            		if(obj != null) return obj;
+            	}
+        	}
+        	
+            sessionJson = (String) request.getSession().getAttribute("fssession");
             if(sessionJson != null) {
                 sessionJson = sessionJson.trim();
                 if(! sessionJson.equals("")) {
@@ -2936,78 +3127,14 @@ public class FSControl {
                     if(obj != null) { if(obj.get("idtype") == null) obj = null;         }
                     if(obj != null) { if(obj.get("nick"  ) == null) obj = null;         }
                     if(obj != null) {
-                        JsonObject jsonSess = (JsonObject) obj.cloneObject();
+                        JsonObject jsonSess = getSessionObjectWhenAccepted(obj.get("id").toString());
                         obj = null;
-                        
-                        if(useJDBC) {
-                            if(conn == null) {
-                                Class.forName(jdbcClass);
-                                conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
-                            }
-                            
-                            pstmt = conn.prepareStatement("SELECT USERID, USERPW, USERNICK, USERTYPE, FAILCNT, FAILTIME, PRIVILEGES FROM FS_USER WHERE USERID = ?");
-                            pstmt.setString(1, jsonSess.get("id").toString());
-                            
-                            rs = pstmt.executeQuery();
-                            obj = new JsonObject();
-                            
-                            while(rs.next()) {
-                                obj.put("id"       , rs.getString("USERID"));
-                                obj.put("idtype"   , rs.getString("USERTYPE"));
-                                obj.put("nick"     , rs.getString("USERNICK"));
-                                obj.put("fail_cnt" , rs.getLong("FAILCNT"));
-                                obj.put("fail_time", rs.getLong("FAILTIME"));
-                            }
-                            
-                            rs.close(); rs = null;
-                            pstmt.close(); pstmt = null;
-                            conn.close(); conn = null;
-                            
-                            jsonSess.putAll(obj);
-                        } else {
-                            File faJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts");
-                            if(! faJson.exists()) {
-                                faJson.mkdirs();
-                            }
-                            
-                            File fileAcc = new File(faJson.getCanonicalPath() + File.separator + jsonSess.get("id") + ".json");
-                            fileAcc.getCanonicalPath(); // Check valid
-                            if(fileAcc.exists()) {
-                                StringBuilder lineCollector = new StringBuilder("");
-                                String line;
-                                
-                                fIn = new FileInputStream(fileAcc);
-                                r1 = new InputStreamReader(fIn, cs);
-                                r2 = new BufferedReader(r1);
-                                while(true) {
-                                    line = ((BufferedReader) r2).readLine();
-                                    if(line == null) break;
-                                    lineCollector = lineCollector.append("\n").append(line);
-                                }
-                                r2.close(); r2 = null;
-                                r1.close(); r1 = null;
-                                fIn.close(); fIn = null;
-                                
-                                obj = (JsonObject) JsonCompatibleUtil.parseJson(lineCollector.toString().trim());
-                                lineCollector.setLength(0);
-                                lineCollector = null;
-                                
-                                jsonSess.putAll(obj);
-                            }
-                        }
-                        obj = null;
-                        
-                        jsonSess.remove("pw");
-                        if(jsonSess.get("privgroup") == null) jsonSess.put("privgroup", new JsonArray());
-                        
                         return jsonSess;
                     }
                 }
             }
         } catch(Throwable t) {
             caught = t;
-        } finally {
-            ClassUtil.closeAll(rs, pstmt, conn);
         }
         if(caught != null) throw new RuntimeException(caught.getMessage(), caught);
         obj = new JsonObject();
@@ -3017,6 +3144,196 @@ public class FSControl {
         obj.put("privileges", new JsonArray());
         obj.put("privgroup" , new JsonArray());
         return obj;
+    }
+    
+    /** Check token status (Not accepted, return null) */
+    public JsonObject getTokenAvail(String tokenID, String tokenVal) {
+    	if(noLogin) return null;
+    	if(tokenLifeTime <= 0) return null;
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        Throwable caught = null;
+        try {
+        	if(tokenID != null && tokenVal != null) {
+        		if(useJDBC) {
+        			Class.forName(jdbcClass);
+                    conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+                    
+                    // Delete expired tokens
+                    pstmt = conn.prepareStatement("DELETE FROM FS_TOKEN WHERE ENTIME < ?");
+                    pstmt.setLong(1, System.currentTimeMillis());
+                    
+                    pstmt.executeUpdate();
+                    conn.commit();
+                    
+                    pstmt.close(); pstmt = null;
+                    
+                    // Check token equals
+                    pstmt = conn.prepareStatement("SELECT COUNT(*) AS CNT FROM FS_TOKEN WHERE TOKEN = ? AND USERID = ?");
+                    pstmt.setString(1, tokenVal);
+                    pstmt.setString(2, tokenID);
+                    
+                    rs = pstmt.executeQuery();
+                    int c = 0;
+                    while(rs.next()) {
+                    	c = rs.getInt("CNT");
+                    }
+                    rs.close(); rs = null;
+                    pstmt.close(); pstmt = null;
+                    
+                    if(c >= 1) {
+                    	// Accept
+                    	JsonObject jsonSess = getSessionObjectWhenAccepted(tokenID);
+                    	if(jsonSess != null) {
+                    		// Extend token's enddate
+                    		pstmt = conn.prepareStatement("UPDATE FS_TOKEN SET ENTIME = ? WHERE TOKEN = ? AND USERID = ?");
+                            pstmt.setLong(1, System.currentTimeMillis() + (1000L * 60 * tokenLifeTime));
+                            pstmt.setString(2, tokenVal);
+                            pstmt.setString(3, tokenID);
+                            pstmt.executeUpdate();
+                            conn.commit();
+                    		
+                    		// Close
+                            pstmt.close(); pstmt = null;
+                    		conn.close(); conn = null;
+                    		
+        					// Return
+        					return jsonSess;
+        				}
+                    } else {
+                    	conn.close(); conn = null;
+                    }
+        		} else {
+        			File ftJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "tokens");
+                    if(! ftJson.exists()) ftJson.mkdirs();
+                    
+            		File ftId = new File(ftJson.getCanonicalPath() + File.separator + tokenID);
+            		File[] fTokens = ftId.listFiles();
+            		JsonObject jsonComp = null;
+            		for(File f : fTokens) {
+            			try {
+            				String t = FileUtil.readString(f, "UTF-8");
+            				JsonObject tJson = (JsonObject) JsonCompatibleUtil.parseJson(t);
+            				String tokenOne = String.valueOf(tJson.get("token"));
+            				
+            				Long.parseLong(String.valueOf(tJson.get("crtime"))); // Just Check
+            				long entime = Long.parseLong(String.valueOf(tJson.get("entime"))); // Check expiration
+            				
+            				if(entime < System.currentTimeMillis()) { // expiration
+            					f.delete();
+            					continue;
+            				}
+            				
+            				if(jsonComp != null) continue; // If another token is already accepted, skip.
+            				if(! tokenOne.equals(tokenVal)) continue; // Check equals
+            				
+            				// Accept
+            				JsonObject jsonSess = getSessionObjectWhenAccepted(tokenID);
+            				if(jsonSess != null) {
+            					// Extend token's enddate
+            					tJson.put("entime", String.valueOf(System.currentTimeMillis() + (1000L * 60 * tokenLifeTime)));
+            					FileUtil.writeString(f, "UTF-8", tJson.toJSON());
+            					
+            					// Accept (for loop need to be continued for deleting expired tokens)
+            					jsonComp = jsonSess;
+            				}
+            			} catch(Throwable tToken) {
+            				log("Exception when checking token - (" + tToken.getClass().getName() + ") " + tToken.getMessage(), this.getClass());
+            			}
+            		}
+            		return jsonComp;
+        		}
+        	}
+        } catch(Throwable t) {
+            caught = t;
+        } finally {
+            ClassUtil.closeAll(rs, pstmt, conn);
+        }
+        if(caught != null) throw new RuntimeException(caught.getMessage(), caught);
+        return null;
+    }
+    
+    /** Get user's data excepts password. */
+    @SuppressWarnings("unused")
+	protected JsonObject getSessionObjectWhenAccepted(String userId) {
+    	Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        FileInputStream fIn = null;
+        Reader r1 = null;
+        Reader r2 = null;
+        Throwable caught = null;
+        
+    	try {
+    		JsonObject jsonSess = null;
+    		if(useJDBC) {
+                if(conn == null) {
+                    Class.forName(jdbcClass);
+                    conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
+                }
+                
+                pstmt = conn.prepareStatement("SELECT USERID, USERPW, USERNICK, USERTYPE, FAILCNT, FAILTIME, PRIVILEGES FROM FS_USER WHERE USERID = ?");
+                pstmt.setString(1, userId);
+                
+                rs = pstmt.executeQuery();
+                jsonSess = new JsonObject();
+                
+                while(rs.next()) {
+                    jsonSess.put("id"       , rs.getString("USERID"));
+                    jsonSess.put("idtype"   , rs.getString("USERTYPE"));
+                    jsonSess.put("nick"     , rs.getString("USERNICK"));
+                    jsonSess.put("fail_cnt" , rs.getLong("FAILCNT"));
+                    jsonSess.put("fail_time", rs.getLong("FAILTIME"));
+                }
+                
+                rs.close(); rs = null;
+                pstmt.close(); pstmt = null;
+                conn.close(); conn = null;
+            } else {
+                File faJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts");
+                if(! faJson.exists()) faJson.mkdirs();
+                
+                File ftJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "tokens");
+                if(! ftJson.exists()) ftJson.mkdirs();
+                
+                File fileAcc = new File(faJson.getCanonicalPath() + File.separator + userId + ".json");
+                fileAcc.getCanonicalPath(); // Check valid
+                if(fileAcc.exists()) {
+                    StringBuilder lineCollector = new StringBuilder("");
+                    String line;
+                    
+                    fIn = new FileInputStream(fileAcc);
+                    r1 = new InputStreamReader(fIn, cs);
+                    r2 = new BufferedReader(r1);
+                    while(true) {
+                        line = ((BufferedReader) r2).readLine();
+                        if(line == null) break;
+                        lineCollector = lineCollector.append("\n").append(line);
+                    }
+                    r2.close(); r2 = null;
+                    r1.close(); r1 = null;
+                    fIn.close(); fIn = null;
+                    
+                    jsonSess = (JsonObject) JsonCompatibleUtil.parseJson(lineCollector.toString().trim());
+                    lineCollector.setLength(0);
+                    lineCollector = null;
+                }
+            }
+            
+    		if(jsonSess != null) {
+    			jsonSess.remove("pw");
+                if(jsonSess.get("privgroup") == null) jsonSess.put("privgroup", new JsonArray());
+    		}
+            
+            return jsonSess;
+    	} catch(Throwable t) {
+            caught = t;
+        } finally {
+            ClassUtil.closeAll(rs, pstmt, conn);
+        }
+    	if(caught != null) throw new RuntimeException(caught.getMessage(), caught);
+		return null;
     }
     
     public String getSessionUserId(HttpServletRequest request) {
@@ -3316,6 +3633,14 @@ public class FSControl {
 
     public void setLoginFailOverMinute(int loginFailOverMinute) {
         this.loginFailOverMinute = loginFailOverMinute;
+    }
+    
+    public int getTokenLifeTime() {
+    	return tokenLifeTime;
+    }
+    
+    public void setTokenLifeTime(int tokenLifeTime) {
+    	this.tokenLifeTime = tokenLifeTime; 
     }
 
     public boolean isNoConsoleMode() {
@@ -3617,6 +3942,17 @@ public class FSControl {
         }
         if(conf.get("Salt") != null) {
             salt = conf.get("Salt").toString().trim();
+        }
+        if(conf.get("LoginFailCountLimit") != null) {
+        	loginFailCountLimit = Integer.parseInt(conf.get("LoginFailCountLimit").toString().trim());
+        }
+        if(conf.get("LoginFailOverTime") != null) {
+        	loginFailOverMinute = Integer.parseInt(conf.get("LoginFailOverTime").toString().trim());
+        	if(loginFailOverMinute <= 0) loginFailOverMinute = 1;
+        }
+        if(conf.get("TokenLifeTime") != null) {
+        	tokenLifeTime = Integer.parseInt(conf.get("TokenLifeTime").toString().trim());
+        	if(noLogin) tokenLifeTime = 0;
         }
         if(conf.get("Title") != null) {
             String tx = conf.get("Title").toString().trim();

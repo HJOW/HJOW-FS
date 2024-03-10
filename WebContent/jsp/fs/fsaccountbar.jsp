@@ -39,12 +39,18 @@ if(! fsc.isInstalled()) {
         
             function fLogin() {
                 inpReq.val('login');
-                $.ajax({
+                FSUtil.ajax({
                     url    : ctxPath + "/jsp/fs/fslogin.jsp",
                     data   : formObj.serialize(),
                     method : "POST",
                     dataType : "json",
                     success : function(data) {
+                    	if(data.token) {
+                    		if(FSUtil.detectStorage()) {
+                    			FSUtil.storage.session.put("fsid"   , data.id   );
+                    			FSUtil.storage.session.put("fstoken", data.token);
+                    		}
+                    	}
                         fRef(data, true);
                     }
                 });
@@ -98,7 +104,7 @@ if(! fsc.isInstalled()) {
             formObj.on('submit', fLogin);
         
             inpReq.val('status');
-            $.ajax({
+            FSUtil.ajax({
                 url    : ctxPath + "/jsp/fs/fslogin.jsp",
                 data   : formObj.serialize(),
                 method : "POST",
@@ -110,7 +116,13 @@ if(! fsc.isInstalled()) {
         
             btnLogout.on('click', function() {
                 inpReq.val('logout');
-                $.ajax({
+                
+                if(FSUtil.detectStorage()) {
+                    FSUtil.storage.session.remove("fsid"   );
+                    FSUtil.storage.session.remove("fstoken");
+                }
+                
+                FSUtil.ajax({
                     url    : ctxPath + "/jsp/fs/fslogin.jsp",
                     data   : formObj.serialize(),
                     method : "POST",

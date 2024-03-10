@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import hjow.common.util.DataUtil;
+import hjow.common.util.SecurityUtil;
 
 public class FSUtils {
     /** Remove special characters */
@@ -232,5 +233,20 @@ public class FSUtils {
         }
         if(blockOne.length() >= 1) res.add(blockOne.toString());
         return res;
+    }
+    
+    /** Create random token string */
+    public static String createToken(String id) {
+    	return createToken(id, "1", "2", "3");
+    }
+    
+    /** Create random token string */
+    public static String createToken(String id, String s1, String s2, String s3) {
+    	if(id == null) return "";
+    	if(s1 == null) s1 = "";
+    	if(s2 == null) s2 = "";
+    	if(s3 == null) s3 = "";
+    	String originalString = SecurityUtil.hash(s1 + id, "SHA-256") + s3 + SecurityUtil.hash(Math.round(Math.random() * 100000000) + s2 + System.currentTimeMillis(), "SHA-256");
+    	return SecurityUtil.hash(originalString, "SHA-256");
     }
 }

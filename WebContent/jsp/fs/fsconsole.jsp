@@ -47,7 +47,7 @@ $(function() {
     function fRun(displayInput, callback) {
         inpTermCons.prop('readonly', true);
         if(displayInput) taTermDisp.val(taTermDisp.val() + '\n' + '>> ' + inpTermCons.val());
-        $.ajax({
+        FSUtil.ajax({
             url    : ctxPathIn + "/jsp/fs/fsconsolein.jsp",
             data   : formTerminal.serialize(),
             method : "POST",

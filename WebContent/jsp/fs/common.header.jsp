@@ -55,7 +55,7 @@ $(function() {
         captLogin.attr('src', "<%=request.getContextPath()%>/jsp/fs/fscaptin.jsp?key=fsl&randomize=true&scale=1&theme=" + theme);
     }
     
-    $.ajax({
+    FSUtil.ajax({
         url    : "<%=request.getContextPath()%>/jsp/fs/fslogin.jsp",
         data   : { req : 'language', language : lang, force : 'false' },
         method : "POST",

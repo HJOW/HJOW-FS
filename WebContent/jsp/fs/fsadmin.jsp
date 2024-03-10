@@ -35,15 +35,16 @@ limitations under the License.
             var form    = $('.form_fs_admin');
             var chkAc   = form.find('.chk_account');
             chkAc.on('change', function() {
-                if($(this).is(':checked')) form.find('.onlyaccount').removeClass('invisible');
-                else                       form.find('.onlyaccount').addClass('invisible');
+            	// Prevent changing (Also not changeable on server)
+            	if($(this).is(':checked')) $(this).prop('checked', false); 
+                else                       $(this).prop('checked', true ); 
             });
             
             FSUtil.applyLanguage(bodys);
             
             var beforeAccountFeatEnabled = false;
             
-            $.ajax({
+            FSUtil.ajax({
                 url    : ctxPath + "/jsp/fs/fslogin.jsp",
                 data   : { req : 'status' },
                 method : "POST",
@@ -52,7 +53,7 @@ limitations under the License.
                     if(! acc.logined) location.href = '/';
                     if(acc.idtype != 'A') location.href = '/';
                     
-                    $.ajax({
+                    FSUtil.ajax({
                         url    : ctxPath + "/jsp/fs/fsadminin.jsp",
                         data   : { req : 'read' },
                         method : "POST",
@@ -76,6 +77,14 @@ limitations under the License.
                                     form.find("[name='usecaptchalogin']").prop('checked', true);
                                 } else {
                                     form.find("[name='usecaptchalogin']").prop('checked', false);
+                                }
+                                
+                                if(conf['LoginFailCountLimit']) {
+                                	form.find("[name='loginfailcnt']").val(conf['LoginFailCountLimit']);
+                                }
+                                
+                                if(conf['TokenLifeTime']) {
+                                    form.find("[name='tokenlifetime']").val(conf['TokenLifeTime']);
                                 }
                             } else {
                                 beforeAccountFeatEnabled = false;
@@ -116,7 +125,7 @@ limitations under the License.
                         }, complete : function() {
                             form.find('.hidden_req').val('update');
                             form.on('submit', function() {
-                                $.ajax({
+                            	FSUtil.ajax({
                                     url    : ctxPath + "/jsp/fs/fsadminin.jsp",
                                     data   : form.serialize(),
                                     method : "POST",
@@ -129,7 +138,7 @@ limitations under the License.
                             
                             var formReset = $('.form_fs_reset');
                             formReset.on('submit', function() {
-                                $.ajax({
+                            	FSUtil.ajax({
                                     url    : ctxPath + "/jsp/fs/fsadminin.jsp",
                                     data   : formReset.serialize(),
                                     method : "POST",
@@ -165,7 +174,7 @@ limitations under the License.
                 tbodyUsers.empty();
                 tbodyUsers.append("<tr><td colspan='5'>...</td></tr>");
                 
-                $.ajax({
+                FSUtil.ajax({
                     url    : ctxPath + "/jsp/fs/fsadminin.jsp",
                     data   : formUserSrch.serialize(),
                     method : "POST",
@@ -195,7 +204,7 @@ limitations under the License.
                                 btnDel.attr('data-id', rowOne['id']);
                                 btnDel.on('click', function() {
                                     var dId = $(this).attr('data-id');
-                                    $.ajax({
+                                    FSUtil.ajax({
                                         url    : ctxPath + "/jsp/fs/fsadminin.jsp",
                                         data   : {
                                             req : 'userdel', 
@@ -224,7 +233,7 @@ limitations under the License.
             
             var formUserCr = $('.form_fs_user_new');
             formUserCr.on('submit', function() {
-                $.ajax({
+            	FSUtil.ajax({
                     url    : ctxPath + "/jsp/fs/fsadminin.jsp",
                     data   : formUserCr.serialize(),
                     method : "POST",
@@ -294,7 +303,11 @@ limitations under the License.
                         </div>
                         <div class='row'>
                             <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Accounts'>계정</div>
-                            <div class='col-sm-10'><label><input type='checkbox' name='useaccount' class='chk_account' value="true"/><span class='lang_element' data-lang-en='Use Accounts'>계정 기능 사용</span></label></div>
+                            <div class='col-sm-10'>
+                                <label><input type='checkbox' name='useaccount' class='chk_account' value="true"/><span class='lang_element' data-lang-en='Use Accounts'>계정 기능 사용</span></label>
+                                <label class='onlyaccount invisible'><span class='lang_element margin_left_20' data-lang-en='Login Fails Limit'>로그인 실패 횟수 제한     </span><input type='number' name='loginfailcnt'  class='num_loginfailcnt'  value="10" step="1" min="0" max="100"/></label>
+                                <label class='onlyaccount invisible'><span class='lang_element margin_left_20' data-lang-en='Token Lifetime (Minutes)'>토큰 유효시간 (분) </span><input type='number' name='tokenlifetime' class='num_tokenlifetime' value="10" step="1" min="0" max="100"/></label>
+                            </div>
                         </div>
                         <div class='row'>
                             <div class='col-sm-12'>

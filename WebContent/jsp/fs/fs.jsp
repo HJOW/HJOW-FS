@@ -93,7 +93,7 @@ $(function() {
             var ct = ifr.contents();
             var cForm = ct.find('form');
             cForm.on('submit', function() {
-                pops['captdown'].close();
+            	setTimeout(function() { pops['captdown'].close(); }, 2000);
             });
         });
         $('.ui-dialog-titlebar-close').text('X');
@@ -239,7 +239,7 @@ $(function() {
                 }
                 var workingArray = iconizeArray;
                 iconizeArray = [];
-                $.ajax({
+                FSUtil.ajax({
                     url  : ctxPath + "/jsp/fs/fsfileicons.jsp",
                     data : { path : inpPath.val(), files : filelist, br : bkColor.r, bg : bkColor.g, bb : bkColor.b },
                     method : 'POST',
@@ -301,7 +301,7 @@ $(function() {
         });
         
         var expVal = inpExcep.val();
-        $.ajax({
+        FSUtil.ajax({
             url    : ctxPath + "/jsp/fs/fslist.jsp",
             data   : form.serialize(),
             method : "POST",
@@ -378,7 +378,7 @@ $(function() {
                                     if(FSUtil.detectLanguage() == 'ko') confirmMsg = '이 폴더를 정말 삭제하시겠습니까?';
                                     
                                     if(confirm(confirmMsg)) {
-                                        $.ajax({
+                                    	FSUtil.ajax({
                                             url  : ctxPath + '/jsp/fs/fsremove.jsp',
                                             data : {
                                                 path : delpath,
@@ -519,7 +519,7 @@ $(function() {
                             if(FSUtil.detectLanguage() == 'ko') confirmMsg = '이 파일을 정말 삭제하시겠습니까?';
                             
                             if(confirm(confirmMsg)) {
-                                $.ajax({
+                            	FSUtil.ajax({
                                     url  : ctxPath + '/jsp/fs/fsremove.jsp',
                                     data : {
                                         path : delpath,
@@ -706,7 +706,7 @@ $(function() {
             return;
         }
         
-        $.ajax({
+        FSUtil.ajax({
             url  : ctxPath + '/jsp/fs/fsmkdir.jsp',
             data : {
                 path : inpPath.val(),
@@ -743,7 +743,7 @@ $(function() {
             }
         });
         
-        $.ajax({
+        FSUtil.ajax({
             url    : ctxPath + "/jsp/fs/fslistall.jsp",
             data   : formAllSr.serialize(),
             method : "POST",
@@ -877,6 +877,9 @@ $(function() {
     </div>
     <div class='fs_filelist fs_filelist_anonymous full invisible'>
         <jsp:include page="fsanonymousblock.jsp"></jsp:include>
+    </div>
+    <div class='fs_hform invisible_wh'>
+        <form class='form_hidden' target='_blank'></form>
     </div>
     <div class='fs_pops invisible_wh'>
         <div class='fs_pop_captdown fs_pop_in full'><iframe></iframe></div>
