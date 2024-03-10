@@ -75,6 +75,7 @@ import hjow.common.json.JsonObject;
 import hjow.common.util.ClassUtil;
 import hjow.common.util.DataUtil;
 import hjow.common.util.FileUtil;
+import hjow.common.util.GUIUtil;
 import hjow.common.util.SecurityUtil;
 
 public class FSControl {
@@ -2038,26 +2039,29 @@ public class FSControl {
                 code = "REFRESH";
                 request.getSession().setAttribute(key + "_captcha_code", code);
             }
-            
-            int backr, backg, backb, forer, foreg, foreb;
-        	
-        	if(captDarkMode) {
-        		backr = 59;
-        		backg = 59;
-        		backb = 59;
-        		forer = 250;
-        		foreg = 250;
-        		foreb = 250;
-        	} else {
-        		backr = 250;
-        		backg = 250;
-        		backb = 250;
-        		forer = 0;
-        		foreg = 0;
-        		foreb = 0;
-        	}
 
-            return FSUtils.createImageCaptchaBase64(code, captchaWidth, captchaHeight, captchaNoises, captchaFontSize, backr, backg, backb, forer, foreg, foreb, null);
+            return FSUtils.createImageCaptchaBase64(code, captchaWidth, captchaHeight, captchaNoises, captchaFontSize, captDarkMode, null);
+        } catch(Throwable t) {
+            t.printStackTrace();
+            return "Error : " + t.getMessage();
+        }
+    }
+    
+    /** Called from fscaptin.jsp, which is called by captcha page by iframe. */
+    public String createTextCaptcha(HttpServletRequest request, String key, String code, long time) {
+    	try {
+            if(code == null) {
+                code = "REFRESH";
+            }
+            
+            long now = System.currentTimeMillis();
+
+            if(now - time >= captchaLimitTime) {
+                code = "REFRESH";
+                request.getSession().setAttribute(key + "_captcha_code", code);
+            }
+
+            return GUIUtil.createTextCaptcha(code);
         } catch(Throwable t) {
             t.printStackTrace();
             return "Error : " + t.getMessage();

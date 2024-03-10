@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import hjow.common.json.JsonObject;
 import hjow.common.util.ClassUtil;
+import hjow.common.util.DataUtil;
 
 public class FSProtocolHandler implements Closeable {
 	private static final FSProtocolHandler instances = new FSProtocolHandler();
@@ -71,6 +72,53 @@ public class FSProtocolHandler implements Closeable {
         		response.getOutputStream().write(json.toJSON().getBytes("UTF-8"));
         	} else if(pAction.equals("console")) {
         		JsonObject json = ctrl.console(request);
+        		
+        		response.reset();
+        		response.setContentType("application/json");
+        		response.setCharacterEncoding("UTF-8");
+        		response.getOutputStream().write(json.toJSON().getBytes("UTF-8"));
+        	} else if(pAction.equals("captcha")) {
+        		String key   = request.getParameter("key");
+        		String theme = request.getParameter("theme");
+        		String randm = request.getParameter("randomize");
+        		String scale = request.getParameter("scale");
+        		String ctype = request.getParameter("captype");
+
+        		String code  = (String) request.getSession().getAttribute(key + "_captcha_code");
+        		Long   time  = (Long)   request.getSession().getAttribute(key + "_captcha_time");
+
+        		if(randm != null) {
+        		    boolean randomize = DataUtil.parseBoolean(randm);
+        		    if(randomize) {
+        		        int randomNo  = (int) Math.round(1000000 + Math.random() * 1000000 + Math.random() * 10000 + Math.random() * 100);
+        		        String strRan = String.valueOf(randomNo).substring(0, 7);
+        		        
+        		        code = strRan;
+        		        time = new Long(System.currentTimeMillis());
+
+        		        request.getSession().setAttribute(key + "_captcha_code", code);
+        		        request.getSession().setAttribute(key + "_captcha_time", time);
+        		    }
+        		}
+
+        		if(scale == null) scale = "1.0";
+
+        		if(time == null) time = new Long(0L);
+        		
+        		if(ctype == null) ctype = "image";
+        		ctype = ctype.trim().toLowerCase();
+        		
+        		JsonObject json = new JsonObject();
+        		json.put("captype", ctype);
+        		
+        		String captRes = null;
+        		
+        		if(ctype.equals("text")) {
+        			captRes = ctrl.createTextCaptcha(request, key, code, time.longValue());
+        		} else {
+        			captRes = ctrl.createCaptchaBase64(request, key, code, time.longValue(), Double.parseDouble(scale), theme);
+        		}
+        		json.put("captcha", captRes);
         		
         		response.reset();
         		response.setContentType("application/json");

@@ -18,6 +18,7 @@ String key   = request.getParameter("key");
 String theme = request.getParameter("theme");
 String randm = request.getParameter("randomize");
 String scale = request.getParameter("scale");
+String ctype = request.getParameter("captype");
 
 String code  = (String) request.getSession().getAttribute(key + "_captcha_code");
 Long   time  = (Long)   request.getSession().getAttribute(key + "_captcha_time");
@@ -37,9 +38,18 @@ if(randm != null) {
 }
 
 if(scale == null) scale = "1.0";
-
 if(time == null) time = new Long(0L);
-String bs64str = fsc.createCaptchaBase64(request, key, code, time.longValue(), Double.parseDouble(scale), theme);
+
+if(ctype == null) ctype = "image";
+ctype = ctype.trim().toLowerCase();
+
+String captRes = null;
+
+if(ctype.equals("text")) {
+	captRes = fsc.createTextCaptcha(request, key, code, time.longValue());
+} else {
+	captRes = fsc.createCaptchaBase64(request, key, code, time.longValue(), Double.parseDouble(scale), theme);
+}
 
 boolean captDarkMode  = false;
 if(theme != null) {
@@ -56,11 +66,15 @@ if(theme != null) {
     }
     $(function() {
         setTimeout(function() { location.reload(); }, <%= fsc.getCaptchaLimitTime() %>);
-        if(<%=captDarkMode%>) { $('body').css('background-color', '#3b3b3b'); }
+        if(<%=captDarkMode%>) { $('body').css('background-color', '#3b3b3b'); $('textarea').css('background-color', '#3b3b3b'); $('textarea').css('color', '#C9C9C9'); }
     });
     </script>
 </head>
 <body>
-    <img src="data:image/jpeg;base64,<%=bs64str%>"/>
+<% if(ctype.equals("text")) { %>
+    <textarea class='full' style='width: 100%; min-height: 100px; overflow-x: scroll; overflow-y: hidden; font-size: 6px;' readonly><%=captRes%></textarea>
+<% } else { %>
+    <img src="data:image/jpeg;base64,<%=captRes%>"/>
+<% } %>
 </body>
 </html>
