@@ -80,7 +80,7 @@ import hjow.common.util.FileUtil;
 import hjow.common.util.SecurityUtil;
 
 public class FSControl {
-    public static final int[] VERSION = {0, 1, 13, 20};
+    public static final int[] VERSION = {0, 1, 14, 21};
     
     private static FSControl instance = null;
     
