@@ -3112,6 +3112,13 @@ public class FSControl {
         		String tokenID  = request.getHeader("fsid");
             	String tokenVal = request.getHeader("fstoken");
             	
+            	if(tokenID == null || tokenVal == null) {
+            		if(request.getParameter("fstoken_id") != null && request.getParameter("fstoken_val") != null) {
+                		tokenID  = request.getParameter("fstoken_id");
+                		tokenVal = request.getParameter("fstoken_val");
+                	}
+            	}
+            	
             	if(tokenID != null && tokenVal != null) {
             		obj = getTokenAvail(tokenID, tokenVal);
             		if(obj != null) return obj;
