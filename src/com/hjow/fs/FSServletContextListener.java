@@ -25,6 +25,7 @@ public class FSServletContextListener implements ServletContextListener {
     @Override
     public synchronized void contextDestroyed(ServletContextEvent sce) {
         System.out.println(this.getClass().getName() + ".contextDestroyed");
+        FSProtocolHandler.disposeInstance();
         FSControl.disposeInstance();
     }
 
