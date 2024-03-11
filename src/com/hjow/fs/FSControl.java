@@ -55,6 +55,7 @@ import java.util.StringTokenizer;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.swing.Icon;
 import javax.swing.filechooser.FileSystemView;
 
@@ -222,7 +223,8 @@ public class FSControl {
     
     /** logging */
     public static void log(Object logContent, Class<?> froms) {
-        getInstance().logIn(logContent, froms);
+    	if(instance == null) System.out.println(logContent);
+    	else getInstance().logIn(logContent, froms);
     }
     
     /** Clean FSControl instance */
@@ -657,14 +659,14 @@ public class FSControl {
                         rs.close(); rs = null;
                         pstmt.close(); pstmt = null;
                         
-                        pstmt = conn.prepareStatement("SELECT USERID, TOKEN, CRTIME, ENTIME FROM FS_TOKEN");
+                        pstmt = conn.prepareStatement("SELECT USERID, TOKEN, CRTIME, ENTIME, CONTENT FROM FS_TOKEN");
                         rs = pstmt.executeQuery();
                         
                         rs.close(); rs = null;
                         pstmt.close(); pstmt = null;
                     } catch(SQLException e) {
-                        if(dbType.equals("oracle")) pstmt = conn.prepareStatement("CREATE TABLE FS_TOKEN ( TOKEN VARCHAR2(1024) PRIMARY KEY, USERID VARCHAR2(40), CRTIME NUMBER(20) , ENTIME NUMBER(20)  )");
-                        else                        pstmt = conn.prepareStatement("CREATE TABLE FS_TOKEN ( TOKEN VARCHAR(1024)  PRIMARY KEY, USERID VARCHAR(40) , CRTIME NUMERIC(20), ENTIME NUMERIC(20) )");
+                        if(dbType.equals("oracle")) pstmt = conn.prepareStatement("CREATE TABLE FS_TOKEN ( TOKEN VARCHAR2(1024) PRIMARY KEY, USERID VARCHAR2(40), CRTIME NUMBER(20) , ENTIME NUMBER(20) , CONTENT VARCHAR2(4000) )");
+                        else                        pstmt = conn.prepareStatement("CREATE TABLE FS_TOKEN ( TOKEN VARCHAR(1024)  PRIMARY KEY, USERID VARCHAR(40) , CRTIME NUMERIC(20), ENTIME NUMERIC(20), CONTENT VARCHAR(4000) )");
                         pstmt.execute();
                         conn.commit();
                         pstmt.close(); pstmt = null;
@@ -918,7 +920,7 @@ public class FSControl {
                 else                  throw new RuntimeException("No privilege");
             }
             
-            sessionMap = getSessionObject(request);
+            sessionMap = getSessionFSObject(request);
             lang       = getLanguage(request);
             
             if(sessionMap == null) {
@@ -1543,15 +1545,15 @@ public class FSControl {
                 else                  throw new RuntimeException("The console feature is disabled.");
             }
             
-            sessionMap = getSessionObject(request);
+            sessionMap = getSessionFSObject(request);
             lang       = getLanguage(request);
             
             json.put("message", "");
             
-            FSConsole console = (FSConsole) request.getSession().getAttribute("fsscen");
+            FSConsole console = (FSConsole) getSessionObject(request, "fsscen");
             if(console == null) {
                 console = FSConsole.getInstance();
-                request.getSession().setAttribute("fsscen", console);
+                setSessionObject(request, "fsscen", console);
             }
             
             String path, command;
@@ -1649,7 +1651,7 @@ public class FSControl {
             FSConsoleResult rs = console.run(this, sessionNewMap, command);
             
             // If result marked as a logout, clean session.
-            if(rs.isLogout()) request.getSession().removeAttribute("fssession");
+            if(rs.isLogout()) removeSessionObject(request, "fssession");
             
             String rsPath = rs.getPath();
             if(rsPath != null) rsPath = rsPath.replace("\\", "/");
@@ -1665,7 +1667,7 @@ public class FSControl {
             if(rs.getDownloadAccepted() != null) {
                 json.put("downloadaccept", new Boolean(true));
                 json.put("downloadfile"  , rs.getDownloadAccepted());
-                request.getSession().setAttribute("fsd_captcha_code", "SKIP");
+                setSessionObject(request, "fsd_captcha_code", "SKIP");
             } else {
                 json.put("downloadaccept", new Boolean(false));
             }
@@ -1737,7 +1739,7 @@ public class FSControl {
             json.put("path"   , pathParam);
             json.put("dpath"  , pathDisp);
 
-            jsonSess = getSessionObject(request);
+            jsonSess = getSessionFSObject(request);
             String idtype = getSessionUserType(jsonSess);
             List<String> hiddenDirList = getHiddensOnCurrentUser(jsonSess, pathParam, false);
             if(hiddenDirList == null) hiddenDirList = new ArrayList<String>();
@@ -1899,7 +1901,7 @@ public class FSControl {
         if(keyword == null) keyword = "";
         keyword = keyword.replace("'", "").replace("\"", "").replace("<", "").replace(">", "").trim();
         
-        JsonObject jsonSess = getSessionObject(request);
+        JsonObject jsonSess = getSessionFSObject(request);
         String     lang     = getLanguage(request);
         
         if(keyword.equals("")) {
@@ -2037,7 +2039,7 @@ public class FSControl {
 
             if(now - time >= captchaLimitTime) {
                 code = "REFRESH";
-                request.getSession().setAttribute(key + "_captcha_code", code);
+                setSessionObject(request, key + "_captcha_code", code);
             }
 
             return FSUtils.createImageCaptchaBase64(code, captchaWidth, captchaHeight, captchaNoises, captchaFontSize, captDarkMode, null);
@@ -2058,7 +2060,7 @@ public class FSControl {
 
             if(now - time >= captchaLimitTime) {
                 code = "REFRESH";
-                request.getSession().setAttribute(key + "_captcha_code", code);
+                setSessionObject(request, key + "_captcha_code", code);
             }
 
             return GUIUtil.createTextCaptcha(code);
@@ -2075,7 +2077,7 @@ public class FSControl {
         String uIdType = "", msg = "";
         JsonArray dirPrv = null;
         try {
-            JsonObject sessionMap = getSessionObject(request);
+            JsonObject sessionMap = getSessionFSObject(request);
             
             if(sessionMap != null) {
                 // uId     = sessionMap.get("id"    ).toString();
@@ -2186,8 +2188,8 @@ public class FSControl {
         String mode      = request.getParameter("mode");
 
         String capt      = request.getParameter("captcha");
-        String code      = (String) request.getSession().getAttribute("fsd_captcha_code");
-        Long   time      = (Long)   request.getSession().getAttribute("fsd_captcha_time");
+        String code      = (String) getSessionObject(request, "fsd_captcha_code");
+        Long   time      = (Long)   getSessionObject(request, "fsd_captcha_time");
 
         if(code == null) code = "REFRESH";
         if(capt == null) capt = "";
@@ -2200,7 +2202,7 @@ public class FSControl {
         pathParam = FSUtils.removeSpecials(pathParam, false, true, true, false, true).replace("\\", "/").trim();
         if(pathParam.startsWith("/")) pathParam = pathParam.substring(1);
         
-        JsonObject sessions = getSessionObject(request);
+        JsonObject sessions = getSessionFSObject(request);
         int speed = getSessionUserSpeedConst(sessions);
         String lang  = getLanguage(request);
         
@@ -2232,7 +2234,7 @@ public class FSControl {
                     
                     if(now - time.longValue() >= captchaLimitTime) {
                         code = "REFRESH";
-                        request.getSession().setAttribute("fsd_captcha_code", code);
+                        setSessionObject(request, "fsd_captcha_code", code);
                     }
                     
                     if(code.equals("REFRESH")) {
@@ -2241,7 +2243,7 @@ public class FSControl {
                     
                     if(code.equals("SKIP")) {
                         code = "REFRESH";
-                        request.getSession().setAttribute("fsd_captcha_code", code);
+                        setSessionObject(request, "fsd_captcha_code", code);
                     }
                 } else {
                     captchaSkipped = true;
@@ -2385,7 +2387,7 @@ public class FSControl {
         String uIdType = "";
         JsonArray dirPrv = null;
         try {
-            JsonObject sessionMap = getSessionObject(request);
+            JsonObject sessionMap = getSessionFSObject(request);
             
             if(sessionMap != null) {
                 // uId     = sessionMap.get("id"    ).toString();
@@ -2468,7 +2470,7 @@ public class FSControl {
         String uIdType = "";
         JsonArray dirPrv = null;
         try {
-            JsonObject sessionMap = getSessionObject(request);
+            JsonObject sessionMap = getSessionFSObject(request);
             
             if(sessionMap != null) {
                 // uId     = sessionMap.get("id"    ).toString();
@@ -2583,7 +2585,7 @@ public class FSControl {
         JsonObject accountOne = null;
         boolean needInvalidate = false;
         try {
-            String sessionJson = (String) request.getSession().getAttribute("fssession");
+            String sessionJson = (String) getSessionObject(request, "fssession");
             
             if(sessionJson != null) {
                 sessionMap = (JsonObject) JsonCompatibleUtil.parseJson(sessionJson.trim());
@@ -2646,7 +2648,7 @@ public class FSControl {
                 if(frce == null) frce = "false";
                 
                 boolean applys = false;
-                if(request.getSession().getAttribute("fslanguage") != null) {
+                if(getSessionObject(request, "fslanguage") != null) {
                     if(DataUtil.parseBoolean(frce)) {
                         applys = true;
                     }
@@ -2656,9 +2658,9 @@ public class FSControl {
                 
                 if(applys) {
                     if(tlng.equals("")) {
-                        request.getSession().removeAttribute("fslanguage");
+                        removeSessionObject(request, "fslanguage");
                     } else {
-                        request.getSession().setAttribute("fslanguage", tlng);
+                        setSessionObject(request, "fslanguage", tlng);
                     }
                 }
                 
@@ -2759,8 +2761,8 @@ public class FSControl {
                 
                 if(captchaLogin) {
                     String ccapt = request.getParameter("captcha");
-                    String ccode = (String) request.getSession().getAttribute("fsl_captcha_code");
-                    Long   ctime = (Long)   request.getSession().getAttribute("fsl_captcha_time");
+                    String ccode = (String) getSessionObject(request, "fsl_captcha_code");
+                    Long   ctime = (Long)   getSessionObject(request, "fsl_captcha_time");
                     
                     if(ccode == null) ccode = "REFRESH";
                     if(ccapt == null) ccapt = "";
@@ -2772,7 +2774,7 @@ public class FSControl {
                     
                     if(now - ctime.longValue() >= captchaLimitTime) {
                         ccode = "REFRESH";
-                        request.getSession().setAttribute("fsl_captcha_code", ccode);
+                        setSessionObject(request, "fsl_captcha_code", ccode);
                     }
                     
                     if(ccode.equals("REFRESH")) {
@@ -2970,7 +2972,7 @@ public class FSControl {
                         accountJsonNew.put("nick"  , accountOne.get("nick"));
                         
                         String nId = accountJsonNew.get("id").toString();
-                        request.getSession().setAttribute("fssession", accountJsonNew.toJSON());
+                        setSessionObject(request, "fssession", accountJsonNew.toJSON());
                         accountJsonNew = null;
                         
                         if(noLogin) tokenLifeTime = 0;
@@ -2982,11 +2984,12 @@ public class FSControl {
                             
                             // Save token
                             if(useJDBC) {
-                            	pstmt = conn.prepareStatement("INSERT INTO FS_TOKEN (TOKEN, USERID, CRTIME, ENTIME) VALUES (?, ?, ?, ?)");
+                            	pstmt = conn.prepareStatement("INSERT INTO FS_TOKEN (TOKEN, USERID, CRTIME, ENTIME, CONTENT) VALUES (?, ?, ?, ?, ?)");
                             	pstmt.setString(1, newToken);
                             	pstmt.setString(2, nId);
                                 pstmt.setLong(3, tCrTime);
-                                pstmt.setLong(4, tEnTime);                            
+                                pstmt.setLong(4, tEnTime);
+                                pstmt.setString(5, "{}");
                                 pstmt.executeUpdate();
                                 conn.commit();
                                 pstmt.close();
@@ -3006,6 +3009,7 @@ public class FSControl {
                             	jToken.put("token", newToken);
                             	jToken.put("crtime", String.valueOf(tCrTime));
                             	jToken.put("entime", String.valueOf(tEnTime));
+                            	jToken.put("content", new JsonObject());
                             	
                             	fOut = new FileOutputStream(fToken);
                                 fOut.write(jToken.toJSON().getBytes(cs));
@@ -3037,7 +3041,7 @@ public class FSControl {
                 json.put("nick"  , sessionMap.get("nick"));
             }
             
-            if(request.getSession().getAttribute("fslanguage") != null) json.put("language", request.getSession().getAttribute("fslanguage"));
+            if(getSessionObject(request, "fslanguage") != null) json.put("language", getSessionObject(request, "fslanguage"));
             json.put("spd", new Double(calculateSpeed(getSessionUserSpeedConst(sessionMap))));
             json.put("noanonymous", new Boolean(noAnonymous));
             json.put("message", msg);
@@ -3064,8 +3068,32 @@ public class FSControl {
         return json;
     }
     
+    public Object getSessionObject(HttpServletRequest request, String key) {
+    	return getSessionObject(request.getSession(), key);
+    }
+    
+    public Object getSessionObject(HttpSession session, String key) {
+    	return session.getAttribute(key);
+    }
+    
+    public void setSessionObject(HttpServletRequest request, String key, Object val) {
+    	setSessionObject(request.getSession(), key, val);
+    }
+    
+    public void setSessionObject(HttpSession session, String key, Object val) {
+    	session.setAttribute(key, val);
+    }
+    
+    public void removeSessionObject(HttpServletRequest request, String key) {
+    	removeSessionObject(request.getSession(), key);
+    }
+    
+    public void removeSessionObject(HttpSession session, String key) {
+    	session.removeAttribute(key);
+    }
+    
     /** Check session status (Not accepted, return guest session) */
-    public JsonObject getSessionObject(HttpServletRequest request) {
+    public JsonObject getSessionFSObject(HttpServletRequest request) {
         Throwable caught = null;
         JsonObject obj = null;
         try {
@@ -3089,7 +3117,7 @@ public class FSControl {
             	}
         	}
         	
-            sessionJson = (String) request.getSession().getAttribute("fssession");
+            sessionJson = (String) getSessionObject(request, "fssession");
             if(sessionJson != null) {
                 sessionJson = sessionJson.trim();
                 if(! sessionJson.equals("")) {
@@ -3098,7 +3126,7 @@ public class FSControl {
                     if(obj != null) { if(obj.get("idtype") == null) obj = null;         }
                     if(obj != null) { if(obj.get("nick"  ) == null) obj = null;         }
                     if(obj != null) {
-                        JsonObject jsonSess = getSessionObjectWhenAccepted(obj.get("id").toString());
+                        JsonObject jsonSess = getSessionFSObjectWhenAccepted(obj.get("id").toString());
                         obj = null;
                         return jsonSess;
                     }
@@ -3155,8 +3183,38 @@ public class FSControl {
                     
                     if(c >= 1) {
                     	// Accept
-                    	JsonObject jsonSess = getSessionObjectWhenAccepted(tokenID);
+                    	JsonObject jsonSess = getSessionFSObjectWhenAccepted(tokenID);
                     	if(jsonSess != null) {
+                    		/*
+                    		// TODO
+                    		// Get additional session attributes from FS_TOKEN
+                    		String addContents = null;
+                    		pstmt = conn.prepareStatement("SELECT CONTENT FROM FS_TOKEN WHERE TOKEN = ? AND USERID = ?");
+                            pstmt.setString(1, tokenVal);
+                            pstmt.setString(2, tokenID);
+                            rs = pstmt.executeQuery();
+                            while(rs.next()) {
+                            	addContents = rs.getString("CONTENT");
+                            }
+                            rs.close(); rs = null;
+                            pstmt.close(); pstmt = null;
+                            
+                            if(addContents != null) {
+                            	try {
+                                	JsonObject addiContent = (JsonObject) JsonCompatibleUtil.parseJson(addContents);
+                                	Set<String> aKey = addiContent.keySet();
+                                	for(String k : aKey) {
+                                		if(k.equals("id"    )) continue;
+                                		if(k.equals("idtype")) continue;
+                                		if(k.equals("nick"  )) continue;
+                                		jsonSess.put(k, addiContent.get(k));
+                                	}
+                                } catch(Throwable tx) {
+                                	log("Cannot load session attributes from FS_TOKEN CONTENT column... " + tx.getMessage(), this.getClass());
+                                }                            	
+                            }
+                            */
+                    		
                     		// Extend token's enddate
                     		pstmt = conn.prepareStatement("UPDATE FS_TOKEN SET ENTIME = ? WHERE TOKEN = ? AND USERID = ?");
                             pstmt.setLong(1, System.currentTimeMillis() + (1000L * 60 * tokenLifeTime));
@@ -3200,8 +3258,21 @@ public class FSControl {
             				if(! tokenOne.equals(tokenVal)) continue; // Check equals
             				
             				// Accept
-            				JsonObject jsonSess = getSessionObjectWhenAccepted(tokenID);
+            				JsonObject jsonSess = getSessionFSObjectWhenAccepted(tokenID);
             				if(jsonSess != null) {
+            					/*
+            					// TODO
+            					// Get additional session attributes
+            					JsonObject addiContent = (JsonObject) JsonCompatibleUtil.parseJson(tJson.get("content"));
+                            	Set<String> aKey = addiContent.keySet();
+                            	for(String k : aKey) {
+                            		if(k.equals("id"    )) continue;
+                            		if(k.equals("idtype")) continue;
+                            		if(k.equals("nick"  )) continue;
+                            		jsonSess.put(k, addiContent.get(k));
+                            	}
+                            	*/
+            					
             					// Extend token's enddate
             					tJson.put("entime", String.valueOf(System.currentTimeMillis() + (1000L * 60 * tokenLifeTime)));
             					FileUtil.writeString(f, "UTF-8", tJson.toJSON());
@@ -3227,7 +3298,7 @@ public class FSControl {
     
     /** Get user's data excepts password. */
     @SuppressWarnings("unused")
-	protected JsonObject getSessionObjectWhenAccepted(String userId) {
+	protected JsonObject getSessionFSObjectWhenAccepted(String userId) {
     	Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -3308,7 +3379,7 @@ public class FSControl {
     }
     
     public String getSessionUserId(HttpServletRequest request) {
-        JsonObject sess = getSessionObject(request);
+        JsonObject sess = getSessionFSObject(request);
         if(sess == null) return null;
         return getSessionUserId(sess);
     }
@@ -3318,7 +3389,7 @@ public class FSControl {
     }
     
     public String getSessionUserNick(HttpServletRequest request) {
-        JsonObject sess = getSessionObject(request);
+        JsonObject sess = getSessionFSObject(request);
         if(sess == null) return null;
         return getSessionUserNick(sess);
     }
@@ -3328,7 +3399,7 @@ public class FSControl {
     }
     
     public String getSessionUserType(HttpServletRequest request) {
-        JsonObject sess = getSessionObject(request);
+        JsonObject sess = getSessionFSObject(request);
         if(sess == null) return null;
         return getSessionUserType(sess);
     }
@@ -3340,7 +3411,7 @@ public class FSControl {
     }
     
     public int getSessionUserSpeedConst(HttpServletRequest request) {
-        JsonObject sess = getSessionObject(request);
+        JsonObject sess = getSessionFSObject(request);
         if(sess == null) return 2;
         return getSessionUserSpeedConst(sess);
     }
@@ -3365,8 +3436,8 @@ public class FSControl {
     }
     
     public String getLanguage(HttpServletRequest request) {
-        String lang = (String) request.getSession().getAttribute("fslanguage");
-        return getLanguage(lang, getSessionObject(request));
+        String lang = (String) getSessionObject(request, "fslanguage");
+        return getLanguage(lang, getSessionFSObject(request));
     }
     
     public String getLanguage(String fslang, JsonObject sess) {
@@ -4115,7 +4186,7 @@ public class FSControl {
                     String pr = enums.nextElement();
                     params.put(pr, req.getParameter(pr));
                 }
-                return h.handle(this, params, getSessionObject(req));
+                return h.handle(this, params, getSessionFSObject(req));
             }
         }
         return null;
@@ -4123,12 +4194,35 @@ public class FSControl {
     
     /** Dispose FSControl, all FSPacks */
     public synchronized void dispose() {
-        for(FSPack p : packs) {
-            p.dispose(this);
-        }
-        packs.clear();
-        if(logFileWr != null) { try {  logFileWr.close(); logFileWr = null; } catch(Throwable t) {} }
-        if(logConn   != null) { try {  logConn.close();   logConn   = null; } catch(Throwable t) {} }
-        conf.clear();
+    	log("FS Control starts to dispose instance...", this.getClass());
+        try {
+        	log("    Disposing FS Packs...", this.getClass());
+        	for(FSPack p : packs) {
+                try { p.dispose(this); } catch(Throwable t) { t.printStackTrace(); }
+            }
+        	
+        	packs.clear();
+        } catch(Throwable tx) { tx.printStackTrace(); }
+        try {
+        	log("    Clearing tokens...", this.getClass());
+        	
+        	File ftJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "tokens");
+            if(ftJson.exists()) {
+            	File[] children = ftJson.listFiles();
+            	for(File f : children) {
+            		if(f.isDirectory()) continue;
+            		try { f.delete(); } catch(Throwable t) { t.printStackTrace(); }
+            	}
+            }
+        } catch(Throwable tx) { tx.printStackTrace(); }
+        try {
+            
+            log("    Closing log streams...", this.getClass());
+            
+            if(logFileWr != null) { try {  logFileWr.close(); logFileWr = null; } catch(Throwable t) { t.printStackTrace(); } }
+            if(logConn   != null) { try {  logConn.close();   logConn   = null; } catch(Throwable t) { t.printStackTrace(); } }
+            conf.clear();
+        } catch(Throwable tx) { tx.printStackTrace(); }
+        System.out.println("FS Control instance is disposed.");
     }
 }

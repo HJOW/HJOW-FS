@@ -32,8 +32,8 @@ theme     = FSUtils.removeSpecials(theme   ).replace("?", "").replace("&", "").t
 int randomNo  = (int) Math.round(1000000 + Math.random() * 1000000 + Math.random() * 10000 + Math.random() * 100);
 String strRan = String.valueOf(randomNo).substring(0, 7);
 
-request.getSession().setAttribute("fsd_captcha_code", strRan);
-request.getSession().setAttribute("fsd_captcha_time", new Long(now));
+fsc.setSessionObject(request, "fsd_captcha_code", strRan);
+fsc.setSessionObject(request, "fsd_captcha_time", new Long(now));
 %>
 <!DOCTYPE html>
 <html>

@@ -84,8 +84,8 @@ public class FSProtocolHandler implements Closeable {
         		String scale = request.getParameter("scale");
         		String ctype = request.getParameter("captype");
 
-        		String code  = (String) request.getSession().getAttribute(key + "_captcha_code");
-        		Long   time  = (Long)   request.getSession().getAttribute(key + "_captcha_time");
+        		String code  = (String) ctrl.getSessionObject(request, key + "_captcha_code");
+        		Long   time  = (Long)   ctrl.getSessionObject(request, key + "_captcha_time");
 
         		if(randm != null) {
         		    boolean randomize = DataUtil.parseBoolean(randm);
@@ -96,8 +96,8 @@ public class FSProtocolHandler implements Closeable {
         		        code = strRan;
         		        time = new Long(System.currentTimeMillis());
 
-        		        request.getSession().setAttribute(key + "_captcha_code", code);
-        		        request.getSession().setAttribute(key + "_captcha_time", time);
+        		        ctrl.setSessionObject(request, key + "_captcha_code", code);
+        		        ctrl.setSessionObject(request, key + "_captcha_time", time);
         		    }
         		}
 

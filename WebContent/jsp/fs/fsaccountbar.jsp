@@ -17,7 +17,7 @@ limitations under the License.
 if(! fsc.isInstalled()) {
     %><div class='fs_accbar container show-grid full invisible'>Not installed</div><%
 } else if(! fsc.isNoLoginMode()) {
-    String sessionJson = (String) request.getSession().getAttribute("fssession");
+    String sessionJson = (String) fsc.getSessionObject(request, "fssession");
 %>
 <div class='fs_accbar fs_div full'>
     <div class='container valign_middle full'>

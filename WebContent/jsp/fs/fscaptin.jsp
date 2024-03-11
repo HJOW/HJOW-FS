@@ -20,8 +20,8 @@ String randm = request.getParameter("randomize");
 String scale = request.getParameter("scale");
 String ctype = request.getParameter("captype");
 
-String code  = (String) request.getSession().getAttribute(key + "_captcha_code");
-Long   time  = (Long)   request.getSession().getAttribute(key + "_captcha_time");
+String code  = (String) fsc.getSessionObject(request, key + "_captcha_code");
+Long   time  = (Long)   fsc.getSessionObject(request, key + "_captcha_time");
 
 if(randm != null) {
     boolean randomize = DataUtil.parseBoolean(randm);
@@ -32,8 +32,8 @@ if(randm != null) {
         code = strRan;
         time = new Long(now);
 
-        request.getSession().setAttribute(key + "_captcha_code", code);
-        request.getSession().setAttribute(key + "_captcha_time", time);
+        fsc.setSessionObject(request, key + "_captcha_code", code);
+        fsc.setSessionObject(request, key + "_captcha_time", time);
     }
 }
 
