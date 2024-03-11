@@ -16,6 +16,7 @@ limitations under the License.
 */
 request.setCharacterEncoding("UTF-8");
 String clients = request.getHeader("User-Agent");
+String ctxPathCapt = request.getContextPath();
 
 String pathParam = request.getParameter("path");
 String fileName  = request.getParameter("filename");
@@ -27,13 +28,29 @@ if(theme     == null) theme     = "";
 
 pathParam = FSUtils.removeSpecials(pathParam, false, true, true, false, true).replace("\\", "/").trim();
 fileName  = FSUtils.removeSpecials(fileName, false, true, true, true, false).replace("..", "").replace("?", "").replace("&", "").trim();
-theme     = FSUtils.removeSpecials(theme   ).replace("?", "").replace("&", "").trim();
+theme     = FSUtils.removeSpecials(theme).replace("?", "").replace("&", "").trim();
 
 int randomNo  = (int) Math.round(1000000 + Math.random() * 1000000 + Math.random() * 10000 + Math.random() * 100);
 String strRan = String.valueOf(randomNo).substring(0, 7);
 
 fsc.setSessionObject(request, "fsd_captcha_code", strRan);
 fsc.setSessionObject(request, "fsd_captcha_time", new Long(now));
+
+String tokenID  = request.getHeader("fsid");
+String tokenVal = request.getHeader("fstoken");
+
+if(tokenID == null || tokenVal == null) {
+    if(request.getParameter("fstoken_id") != null && request.getParameter("fstoken_val") != null) {
+        tokenID  = request.getParameter("fstoken_id");
+        tokenVal = request.getParameter("fstoken_val");
+    }
+}
+
+if(tokenID != null && tokenVal != null) {
+	tokenID  = FSUtils.removeSpecials(tokenID).replace("?", "").replace("&", "").trim();
+	tokenVal = FSUtils.removeSpecials(tokenVal).replace("?", "").replace("&", "").trim();
+}
+
 %>
 <!DOCTYPE html>
 <html>
@@ -50,6 +67,9 @@ $(function() {
     var form  = $('.form');
     var selMn = form.find('.sel_mode');
     var btnDn = form.find('.btn_dn');
+    var ifrIn = $('.iframe_captchain');
+    var theme = '<%=theme%>';
+    var ctxPath = '<%=ctxPathCapt%>';
 
     var fileName = form.find('.hid_name').val();
     var ext      = '';
@@ -86,6 +106,13 @@ $(function() {
     $('.p_filename').text(fileName);
     $('.p_filename').attr('title', fileName);
     
+    ifrIn.attr('src', ctxPath + '/jsp/fs/fscaptin.jsp?key=fsd&theme=' + theme + FSUtil.addTokenParameterString());
+    
+    <% if(tokenID != null && tokenVal != null) { %>
+    form.append("<input type='hidden' name='fstoken_id'  value='<%=tokenID %>'/>");
+    form.append("<input type='hidden' name='fstoken_val' value='<%=tokenVal%>'/>");
+    <% } %>
+    
     <% if(fsc.isCaptchaDownloadOn()) { %>
     $('.inp_captcha_d').focus();
     <% } else { %>
@@ -110,7 +137,7 @@ $(function() {
         </div>
         <div class='row div_captcha_download'>
             <div class='col-sm-12 align_center'>
-                <iframe style='width: <%=fsc.getCaptchaWidth() + 10%>px; height: <%=fsc.getCaptchaHeight() + 10%>px;' src='fscaptin.jsp?key=fsd&theme=<%=theme%>'></iframe>
+                <iframe class='iframe_captchain' style='width: <%=fsc.getCaptchaWidth() + 10%>px; height: <%=fsc.getCaptchaHeight() + 10%>px;' ></iframe>
             </div>
         </div>
         <form action='fsdown.jsp' method='POST' class='form' target='_self'>

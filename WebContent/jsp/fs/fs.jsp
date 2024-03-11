@@ -473,7 +473,7 @@ $(function() {
                                     if(prvIn == '3') divPrvIn.append("<audio  class='audio_preview  preview_element full'/>");
                                     if(prvIn == '4') divPrvIn.append("<iframe class='iframe_preview preview_element full'></iframe>");
                                     
-                                    var srcs = ctxPath + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent($(this).attr('data-path')) + "&filename=" + encodeURIComponent($(this).attr('data-name')) + "&mode=VIEW";
+                                    var srcs = ctxPath + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent($(this).attr('data-path')) + "&filename=" + encodeURIComponent($(this).attr('data-name')) + "&mode=VIEW" + FSUtil.addTokenParameterString();
                                     var elem = divPrvIn.find('.preview_element');
                                     
                                     var prvHeight = (window.innerHeight / 2);
@@ -579,7 +579,7 @@ $(function() {
                         var theme = '';
                         if($('body').is('.dark')) theme='dark';
                         if(useCaptchaDown) {
-                            pops['captdown'].iframe.attr('src', ctxPath + '/jsp/fs/' + 'fscaptdown.jsp?popin=true&theme=' + theme + '&path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')));
+                            pops['captdown'].iframe.attr('src', ctxPath + '/jsp/fs/' + 'fscaptdown.jsp?popin=true&theme=' + theme + '&path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name')) + FSUtil.addTokenParameterString());
                             pops['captdown'].open();
                         } else {
                             location.href = ctxPath + '/jsp/fs/' + 'fsdown.jsp?path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name'));
@@ -646,7 +646,7 @@ $(function() {
         if($('body').is('.dark'))   theme='dark';
         else if(fsRoot.is('.dark')) theme='dark';
         
-        pops['upload'].iframe.attr('src', ctxPath + '/jsp/fs/fsupload.jsp?popin=true&theme=' + theme + '&path=' + encodeURIComponent(paths));
+        pops['upload'].iframe.attr('src', ctxPath + '/jsp/fs/fsupload.jsp?popin=true&theme=' + theme + '&path=' + encodeURIComponent(paths) + FSUtil.addTokenParameterString());
         pops['upload'].open();
     });
     
@@ -655,7 +655,7 @@ $(function() {
         if($('body').is('.dark')) theme='dark';
         else if(fsRoot.is('.dark')) theme='dark';
         
-        pops['admin'].iframe.attr('src', ctxPath + '/jsp/fs/fsadmin.jsp?popin=true&theme=' + theme);
+        pops['admin'].iframe.attr('src', ctxPath + '/jsp/fs/fsadmin.jsp?popin=true&theme=' + theme + FSUtil.addTokenParameterString());
         pops['admin'].open();
     });
     
@@ -804,7 +804,7 @@ $(function() {
         if($('body').is('.dark'))   theme='dark';
         else if(fsRoot.is('.dark')) theme='dark';
         
-        pops['console'].iframe.attr('src', ctxPath + '/jsp/fs/fsconsolepop.jsp?popin=true&theme=' + theme);
+        pops['console'].iframe.attr('src', ctxPath + '/jsp/fs/fsconsolepop.jsp?popin=true&theme=' + theme + FSUtil.addTokenParameterString());
         pops['console'].open();
     });
     <%}%>

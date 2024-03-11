@@ -52,7 +52,7 @@ $(function() {
     
     var captLogin = $('.if_captcha_l');
     if(captLogin != null && typeof(captLogin) != 'undefined' && captLogin.length >= 1) {
-        captLogin.attr('src', "<%=request.getContextPath()%>/jsp/fs/fscaptin.jsp?key=fsl&randomize=true&scale=1&theme=" + theme);
+        captLogin.attr('src', "<%=request.getContextPath()%>/jsp/fs/fscaptin.jsp?key=fsl&randomize=true&scale=1&theme=" + theme + FSUtil.addTokenParameterString());
     }
     
     FSUtil.ajax({

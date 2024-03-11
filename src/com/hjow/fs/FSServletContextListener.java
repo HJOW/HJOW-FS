@@ -39,6 +39,8 @@ public class FSServletContextListener implements ServletContextListener {
         try { Class.forName("java.awt.Graphics2D");           } catch(ClassNotFoundException ignores) {}
         try { Class.forName("java.awt.Font");                 } catch(ClassNotFoundException ignores) {}
         try { Class.forName("javax.imageio.ImageIO");         } catch(ClassNotFoundException ignores) {}
+        
+        try { FSControl.getInstance().removeAllTokens();      } catch(Throwable ignores) {}
     }
     
 }

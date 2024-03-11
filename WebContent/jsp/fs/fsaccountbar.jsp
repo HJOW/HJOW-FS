@@ -17,7 +17,6 @@ limitations under the License.
 if(! fsc.isInstalled()) {
     %><div class='fs_accbar container show-grid full invisible'>Not installed</div><%
 } else if(! fsc.isNoLoginMode()) {
-    String sessionJson = (String) fsc.getSessionObject(request, "fssession");
 %>
 <div class='fs_accbar fs_div full'>
     <div class='container valign_middle full'>
@@ -29,6 +28,8 @@ if(! fsc.isInstalled()) {
             var formObj   = acRoot.find('.form_fs_login');
             var inpReq    = formObj.find('.inp_req');
             var btnLogout = formObj.find('.btn_logout');
+            var captLogin = acRoot.find('.if_captcha_l');
+            var theme     = '';
             
             var ser = formObj.serialize();
         
@@ -45,20 +46,22 @@ if(! fsc.isInstalled()) {
                     method : "POST",
                     dataType : "json",
                     success : function(data) {
-                    	if(data.token) {
-                    		if(FSUtil.detectStorage()) {
-                    			FSUtil.storage.session.put("fsid"   , data.id   );
-                    			FSUtil.storage.session.put("fstoken", data.token);
-                    		}
-                    	}
                         fRef(data, true);
                     }
                 });
-            }
+            };
         
             function fRef(data, alerts) {
-                if(alerts && (! data.success)) alert(data.message);
+                if(alerts && (! data.success)) { alert(data.message); location.reload(); return; };
                 if(data.needrefresh) { location.reload(); return; }
+                
+                if(data.token) {
+                    if(FSUtil.detectStorage()) {
+                        FSUtil.storage.session.put("fsid"   , data.id   );
+                        FSUtil.storage.session.put("fstoken", data.token);
+                    }
+                }
+                
                 acRoot.find('.login_element').addClass('invisible');
                 fsRoot.find('.login_element').addClass('invisible');
                 if(data.logined) {
@@ -71,9 +74,9 @@ if(! fsc.isInstalled()) {
                 }
                 inpReq.val('status');
                 
-                var captLogin = acRoot.find('.if_captcha_l');
+                captLogin = acRoot.find('.if_captcha_l');
                 if(captLogin != null && typeof(captLogin) != 'undefined' && captLogin.length >= 1) {
-                    captLogin.attr('src', captLogin.attr('src') + '&not=' + Math.round(Math.random() * 100));
+                	captLogin.attr('src', ctxPath + '/jsp/fs/fscaptin.jsp?key=fsl&scale=1&theme=' + theme + FSUtil.addTokenParameterString());
                 }
                 
                 formObj.find('.inp_login_element').val('');
@@ -132,6 +135,12 @@ if(! fsc.isInstalled()) {
                     }
                 });
             });
+            
+            if($('body').is('.dark')) theme = 'dark';
+            
+            if(captLogin != null && typeof(captLogin) != 'undefined' && captLogin.length >= 1) {
+                captLogin.attr('src', ctxPath + '/jsp/fs/fscaptin.jsp?key=fsl&scale=1&theme=' + theme + FSUtil.addTokenParameterString());
+            }
             
             <% if(! fsc.isCaptchaLoginOn()) { %>
             acRoot.find('.div_captcha_login').addClass('invisible');

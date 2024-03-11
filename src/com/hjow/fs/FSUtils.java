@@ -15,12 +15,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
  */
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -29,8 +23,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
-
-import javax.imageio.ImageIO;
 
 import hjow.common.util.DataUtil;
 import hjow.common.util.GUIUtil;

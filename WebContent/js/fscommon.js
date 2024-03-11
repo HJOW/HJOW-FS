@@ -104,7 +104,6 @@ function FSUtilClass() {
         if(title == null || typeof(title) == 'undefined') title = "pop_" + Math.random();
         
         var pop = window.open("", String(title), spec);
-        FSUtil.log(htmls);
         pop.document.write(String(htmls));
         return pop;
     }
@@ -368,7 +367,7 @@ function FSUtilClass() {
             var tkId  = this.storage.session.get('fsid'   );
             var tkVal = this.storage.session.get('fstoken');
             
-            if(tkId != null && tkVal != null) {
+            if(tkId != null && tkVal != null && typeof(tkId) != 'undefined' && typeof(tkVal) != 'undefined') {
                 var beforFunc = null;
                 if(typeof(obj.beforeSend) == 'function') beforFunc = obj.beforeSend;
                 obj.beforeSend = function(xhr) {
@@ -380,6 +379,16 @@ function FSUtilClass() {
         }
         
         $.ajax(obj);
+    };
+    
+    this.addTokenParameterString = function addTokenParameterString() {
+        var tkId  = this.storage.session.get('fsid'   );
+        var tkVal = this.storage.session.get('fstoken');
+        
+        if(tkId != null && tkVal != null && typeof(tkId) != 'undefined' && typeof(tkVal) != 'undefined') {
+            return '&fstoken_id=' + encodeURIComponent(tkId) + '&fstoken_val=' + encodeURIComponent(tkVal);
+        }
+        return '';
     };
     
     this.applyLanguage = function applyLanguage(range) {

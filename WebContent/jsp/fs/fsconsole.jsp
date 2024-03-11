@@ -58,7 +58,7 @@ $(function() {
                 
                 if(data.downloadaccept) {
                 	if(useCaptchaDown) {
-                		pops['captdown'].iframe.attr('src', ctxPathIn + '/jsp/fs/' + 'fscaptdown.jsp?popin=true&path=' + encodeURIComponent(data.path) + "&filename=" + encodeURIComponent(data.downloadfile));
+                		pops['captdown'].iframe.attr('src', ctxPathIn + '/jsp/fs/' + 'fscaptdown.jsp?popin=true&path=' + encodeURIComponent(data.path) + "&filename=" + encodeURIComponent(data.downloadfile) + FSUtil.addTokenParameterString());
                         pops['captdown'].open();
                 	} else {
                 		location.href = ctxPathIn + '/jsp/fs/' + 'fscaptdown.jsp?popin=true&path=' + encodeURIComponent(data.path) + "&filename=" + encodeURIComponent(data.downloadfile);
