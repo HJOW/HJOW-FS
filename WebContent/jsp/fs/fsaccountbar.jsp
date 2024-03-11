@@ -117,11 +117,6 @@ if(! fsc.isInstalled()) {
             btnLogout.on('click', function() {
                 inpReq.val('logout');
                 
-                if(FSUtil.detectStorage()) {
-                    FSUtil.storage.session.remove("fsid"   );
-                    FSUtil.storage.session.remove("fstoken");
-                }
-                
                 FSUtil.ajax({
                     url    : ctxPath + "/jsp/fs/fslogin.jsp",
                     data   : formObj.serialize(),
@@ -129,6 +124,11 @@ if(! fsc.isInstalled()) {
                     dataType : "json",
                     success : function(data) {
                         fRef(data, true);
+                    }, complete : function() {
+                    	if(FSUtil.detectStorage()) {
+                            FSUtil.storage.session.remove("fsid"   );
+                            FSUtil.storage.session.remove("fstoken");
+                        }
                     }
                 });
             });
