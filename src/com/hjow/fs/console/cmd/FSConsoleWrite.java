@@ -104,7 +104,29 @@ public class FSConsoleWrite implements FSBundledConsoleCommand {
         if(options.get("cs"     ) != null) charset = options.get("cs");
         if(options.get("charset") != null) charset = options.get("charset");
         
-        FileUtil.writeString(fileCalc, charset, parameter);
+        String content = parameter;
+        
+        String opt = options.get("v");
+        if(opt == null) opt = options.get("var");
+        if(opt == null) opt = options.get("variable");
+        if(opt != null) {
+        	String varName = opt;
+        	opt = null;
+        	
+        	if(varName.contains(" ") || varName.contains("\t") || varName.contains("\n")) throw new RuntimeException("Variable name cannot contains spaces.");
+        	if(varName.contains(".") || varName.contains("!")  || varName.contains("?" )) throw new RuntimeException("Illegal character on variable name - " + varName);
+        	if(varName.contains("'") || varName.contains("\"") || varName.contains("(" )) throw new RuntimeException("Illegal character on variable name - " + varName);
+        	if(varName.contains("[") || varName.contains("]")  || varName.contains(")" )) throw new RuntimeException("Illegal character on variable name - " + varName);
+        	if(varName.contains("-") || varName.contains("+")  || varName.contains("=" )) throw new RuntimeException("Illegal character on variable name - " + varName);
+        	
+        	Object varCon = console.getVars().get(varName);
+        	if(varCon == null) content = null;
+        	else content = console.getVars().get(varName).toString();
+        }
+        
+        if(content == null) content = "";
+        
+        FileUtil.writeString(fileCalc, charset, content);
         
         FSConsoleResult rs = new FSConsoleResult();
         rs.setDisplay("");
