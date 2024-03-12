@@ -82,7 +82,7 @@ import hjow.common.util.GUIUtil;
 import hjow.common.util.SecurityUtil;
 
 public class FSControl {
-    public static final int[] VERSION = {0, 1, 15, 22};
+    public static final int[] VERSION = {0, 1, 16, 23};
     
     private static FSControl instance = null;
     
