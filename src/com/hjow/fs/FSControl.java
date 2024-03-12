@@ -137,6 +137,7 @@ public class FSControl {
     protected boolean noAnonymous = false;
     protected boolean noLogin     = false;
     protected boolean readOnly    = false;
+    protected boolean allowSysCmd = false;
     protected int loginFailCountLimit = 10;
     protected int loginFailOverMinute = 10;
     protected int tokenLifeTime = 0; // Minutes  
@@ -2254,6 +2255,8 @@ public class FSControl {
         byte[] buffers = new byte[dBufferSize];
         
         try {
+        	if(! FSUtils.canBeFileName(fileName)) throw new RuntimeException("Illegal character on file's name - " + fileName);
+        	
             if(captchaDownload) {
                 if(! viewMode) {
                     if(code.equals("SKIP")) {
@@ -2480,6 +2483,8 @@ public class FSControl {
             
             if(hasPriv) {
                 String dirName = request.getParameter("name");
+                
+                if(! FSUtils.canBeFileName(dirName)) throw new RuntimeException("Illegal character on file's name - " + dirName);
                 dirName = FSUtils.removeSpecials(dirName, false, true, true, true, true);
                 
                 File file = new File(rootPath.getCanonicalPath() + File.separator + pathParam.replace("/", File.separator) + File.separator + dirName);
@@ -2569,6 +2574,10 @@ public class FSControl {
             if(hasPriv) {
                 String fileName = request.getParameter("name");
                 File file;
+                
+                if(fileName != null) {
+                	if(! FSUtils.canBeFileName(fileName)) throw new RuntimeException("Illegal character on file's name - " + fileName);
+                }
                 
                 if(delType.equals("dir")) file = new File(rootPath.getCanonicalPath() + File.separator + pathParam.replace("/", File.separator));
                 else                      file = new File(rootPath.getCanonicalPath() + File.separator + pathParam.replace("/", File.separator) + File.separator + fileName);
@@ -4336,6 +4345,10 @@ public class FSControl {
     public boolean isReadOnly() {
         return readOnly;
     }
+    
+    public boolean isAllowSysCmd() {
+    	return allowSysCmd;
+    }
 
     public synchronized void logIn(Object logContent) {
         logIn(logContent, FSControl.class);
@@ -4502,6 +4515,11 @@ public class FSControl {
             readOnly = DataUtil.parseBoolean(conf.get("ReadOnly").toString().trim());
         } else {
             conf.put("ReadOnly", new Boolean(readOnly));
+        }
+        if(conf.get("AllowSystemCommand") != null) {
+        	allowSysCmd = DataUtil.parseBoolean(conf.get("AllowSystemCommand").toString().trim());
+        } else {
+        	conf.put("AllowSystemCommand", new Boolean(allowSysCmd));
         }
         if(conf.get("UseConsole") != null) {
             noConsole = (! DataUtil.parseBoolean(conf.get("UseConsole").toString().trim()));

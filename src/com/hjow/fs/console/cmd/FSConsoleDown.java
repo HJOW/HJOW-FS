@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.util.Map;
 
 import com.hjow.fs.FSControl;
+import com.hjow.fs.FSUtils;
 import com.hjow.fs.console.FSConsole;
 import com.hjow.fs.console.FSConsoleResult;
 
@@ -38,6 +39,8 @@ public class FSConsoleDown implements FSBundledConsoleCommand {
 
     @Override
     public Object run(FSControl ctrl, FSConsole console, Map<String, Object> sessionMap, File root, String parameter, Map<String, String> options) throws Throwable {
+    	if(! FSUtils.canBeFileName(parameter)) throw new RuntimeException("Illegal character on file's name - " + parameter);
+        
         String pathCalc = root.getCanonicalPath() + File.separator + console.getPath() + File.separator + parameter;
         File   fileCalc = new File(pathCalc);
         

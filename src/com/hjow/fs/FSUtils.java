@@ -273,4 +273,15 @@ public class FSUtils {
         
         return GUIUtil.createImageCaptchaBase64(code, width, height, noises, fontSize, backr, backg, backb, forer, foreg, foreb, fontFamily);
     }
+    
+    /** Check the string can be as file's name */
+    public static boolean canBeFileName(String name) {
+    	if(name == null) return false;
+    	if(name.contains("/") || name.contains("\\") || name.contains(File.separator)) return false;
+        if(name.contains(":") || name.contains("*" ) || name.contains("&"           )) return false;
+        if(name.contains("?") || name.contains("'" ) || name.contains("\""          )) return false;
+        if(name.contains("|") || name.contains("<" ) || name.contains(">"           )) return false;
+        if(name.length() >= 256) return false;
+        return true;
+    }
 }
