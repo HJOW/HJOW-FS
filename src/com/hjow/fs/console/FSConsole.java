@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -40,6 +41,7 @@ import com.hjow.fs.console.cmd.FSConsoleLs;
 import com.hjow.fs.console.cmd.FSConsoleMkdir;
 import com.hjow.fs.console.cmd.FSConsoleNow;
 import com.hjow.fs.console.cmd.FSConsolePwd;
+import com.hjow.fs.console.cmd.FSConsoleVar;
 import com.hjow.fs.console.cmd.FSConsoleWho;
 import com.hjow.fs.console.cmd.FSConsoleWrite;
 
@@ -75,6 +77,7 @@ public class FSConsole implements Serializable {
             if(! commands.contains(FSConsoleMkdir.class )) commands.add(FSConsoleMkdir.class );
             if(! commands.contains(FSConsoleConfig.class)) commands.add(FSConsoleConfig.class);
             if(! commands.contains(FSConsoleWrite.class )) commands.add(FSConsoleWrite.class );
+            if(! commands.contains(FSConsoleVar.class   )) commands.add(FSConsoleVar.class   );
         }
         
         if(commandClasses != null) {
@@ -94,7 +97,8 @@ public class FSConsole implements Serializable {
     }
     
     protected String path;
-    protected List<FSConsoleCommand> cmds = new ArrayList<FSConsoleCommand>();
+    protected List<FSConsoleCommand>    cmds = new ArrayList<FSConsoleCommand>();
+    protected Map<String, Serializable> vars = new HashMap<String, Serializable>();
     
     private FSConsole() {
         for(Class<? extends FSConsoleCommand> c : commands) {
@@ -305,4 +309,20 @@ public class FSConsole implements Serializable {
         
         return false;
     }
+
+	public List<FSConsoleCommand> getCmds() {
+		return cmds;
+	}
+
+	public void setCmds(List<FSConsoleCommand> cmds) {
+		this.cmds = cmds;
+	}
+
+	public Map<String, Serializable> getVars() {
+		return vars;
+	}
+
+	public void setVars(Map<String, Serializable> vars) {
+		this.vars = vars;
+	}
 }

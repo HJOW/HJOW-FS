@@ -89,6 +89,45 @@ public class FSConsoleCat implements FSBundledConsoleCommand {
         
         if(caught != null) throw caught;
         
+        String opt = options.get("v");
+        if(opt == null) opt = options.get("var");
+        if(opt == null) opt = options.get("variable");
+        if(opt != null) {
+        	String varName = opt;
+        	opt = null;
+        	
+        	if(varName.contains(" ") || varName.contains("\t") || varName.contains("\n")) throw new RuntimeException("Variable name cannot contains spaces.");
+        	if(varName.contains(".") || varName.contains("!")  || varName.contains("?" )) throw new RuntimeException("Illegal character on variable name - " + varName);
+        	if(varName.contains("'") || varName.contains("\"") || varName.contains("(" )) throw new RuntimeException("Illegal character on variable name - " + varName);
+        	if(varName.contains("[") || varName.contains("]")  || varName.contains(")" )) throw new RuntimeException("Illegal character on variable name - " + varName);
+        	if(varName.contains("-") || varName.contains("+")  || varName.contains("=" )) throw new RuntimeException("Illegal character on variable name - " + varName);
+        	
+        	if(res.length() >= 3997) {
+        		res.setLength(3996);
+        		res = res.append("\n...");
+        	}
+        	
+        	if(res.toString().getBytes("UTF-8").length >= 4000) {
+        		int len = res.length();
+        		while(res.toString().getBytes("UTF-8").length >= 3996) {
+            		len--;
+            		res.setLength(len);
+            	}
+        		res = res.append("\n...");
+        	}
+        	
+        	String str = res.toString();
+        	res.setLength(0);
+        	
+        	if(str.getBytes("UTF-8").length >= 4000) throw new RuntimeException("The content of variable can be 4000 byte or smaller.");
+    		if(console.getVars().size() >= 200) {
+    			if(! console.getVars().containsKey(varName)) throw new RuntimeException("Cannot create new variable.");
+    		}
+        	
+        	console.getVars().put(varName, str);
+        	return null;
+        }
+        
         return res.toString();
     }
 
