@@ -1116,8 +1116,8 @@ public class FSControl {
                 
                 logIn("Configuration Updating requested by " + sessionMap.get("id") + " when " + System.currentTimeMillis());
                 
-                applyModifiedConfig(sessionMap.get("id").toString());
                 applyConfigs();
+                applyModifiedConfig(sessionMap.get("id").toString());
                 
                 logIn("Configuration Updated by " + sessionMap.get("id") + " when " + System.currentTimeMillis());
                 
