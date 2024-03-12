@@ -749,18 +749,21 @@ public class FSControl {
                 String sUseCaptchaLogin = request.getParameter("usecaptchalogin");
                 String sReadFileIcon    = request.getParameter("readfileicon");
                 String sUseConsole      = request.getParameter("useconsole");
+                String sUseSession      = request.getParameter("usesession");
                 String sReadOnly        = request.getParameter("readonlymode");
                 
                 boolean useCaptchaDown  = false;
                 boolean useCaptchaLogin = false;
                 boolean useReadFileIcon = false;
                 boolean useConsole      = false;
+                boolean useSession      = false;
                 boolean rdonly          = false;
                 
                 if(sUseCaptchaDown  != null) useCaptchaDown  = DataUtil.parseBoolean(sUseCaptchaDown.trim());
                 if(sUseCaptchaLogin != null) useCaptchaLogin = DataUtil.parseBoolean(sUseCaptchaLogin.trim());
                 if(sReadFileIcon    != null) useReadFileIcon = DataUtil.parseBoolean(sReadFileIcon.trim());
                 if(sUseConsole      != null) useConsole      = DataUtil.parseBoolean(sUseConsole.trim());
+                if(sUseSession      != null) useSession      = DataUtil.parseBoolean(sUseSession.trim());
                 if(sReadOnly        != null) rdonly          = DataUtil.parseBoolean(sReadOnly.trim());
                 
                 String sUseAccounts = request.getParameter("useaccount");
@@ -873,6 +876,7 @@ public class FSControl {
                 conf.put("UseCaptchaDown"      , new Boolean(useCaptchaDown));
                 conf.put("UseCaptchaLogin"     , new Boolean(useCaptchaLogin));
                 conf.put("UseConsole"          , new Boolean(useConsole));
+                conf.put("UseSession"          , new Boolean(useSession));
                 conf.put("ReadOnly"            , new Boolean(rdonly));
                 conf.put("LoginFailCountLimit" , new Integer(sLoginfailcnt ));
                 conf.put("TokenLifeTime"       , new Integer(sTokenlifetime));

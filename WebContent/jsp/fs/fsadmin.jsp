@@ -34,6 +34,11 @@ limitations under the License.
             var ctxPath = "<%=fsc.getContextPath()%>";
             var form    = $('.form_fs_admin');
             var chkAc   = form.find('.chk_account');
+            
+            form.find("[name='readfileicon']").prop('checked', true);
+            form.find("[name='useconsole']").prop('checked', true);
+            form.find("[name='usesession']").prop('checked', true);
+            
             chkAc.on('change', function() {
                 // Prevent changing (Also not changeable on server)
                 if($(this).is(':checked')) $(this).prop('checked', false); 
@@ -119,6 +124,11 @@ limitations under the License.
                                 form.find("[name='useconsole']").prop('checked', true);
                             } else {
                                 form.find("[name='useconsole']").prop('checked', false);
+                            }
+                            if(conf['UseSession']) {
+                                form.find("[name='usesession']").prop('checked', true);
+                            } else {
+                                form.find("[name='usesession']").prop('checked', false);
                             }
                             if(conf['ReadOnly']) {
                                 form.find("[name='readonlymode']").prop('checked', true);
@@ -338,6 +348,9 @@ limitations under the License.
                                 </span>
                                 <span class='etcspan'>
                                     <label><input type='checkbox' name='useconsole'   class='chk_use_console'  value="true"/><span class='lang_element' data-lang-en="Use Console">콘솔 사용</span></label>
+                                </span>
+                                <span class='etcspan'>
+                                    <label><input type='checkbox' name='usesession'  class='chk_use_session'  value="true"/><span class='lang_element' data-lang-en="Use Session">세션 사용</span></label>
                                 </span>
                             </div>
                         </div>

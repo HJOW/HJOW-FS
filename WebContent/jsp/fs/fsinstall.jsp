@@ -51,6 +51,10 @@ if(! fsc.isInstalled()) {
                     bodys.addClass('dark');
                 }
             }
+            
+            form.find("[name='readfileicon']").prop('checked', true);
+            form.find("[name='useconsole']").prop('checked', true);
+            form.find("[name='usesession']").prop('checked', true);
 
             chkAc.on('change', function() {
                 if($(this).is(':checked')) form.find('.onlyaccount').removeClass('invisible');
@@ -155,13 +159,22 @@ if(! fsc.isInstalled()) {
                                 <label><input type='checkbox' name='readfileicon'  class='chk_read_icon'  value="true"/><span class='lang_element' data-lang-en="Read file's icon">파일 아이콘 읽기</span></label>
                             </span>
                             <span class='etcspan'>
-                                <label><input type='checkbox' name='useconsole'   class='chk_use_console'  value="true"/><span class='lang_element' data-lang-en="Use Console">콘솔 사용</span></label>
+                                <label><input type='checkbox' name='useconsole'   class='chk_use_console' value="true"/><span class='lang_element' data-lang-en="Use Console">콘솔 사용</span></label>
+                            </span>
+                            <span class='etcspan'>
+                                <label><input type='checkbox' name='usesession'  class='chk_use_session'  value="true"/><span class='lang_element' data-lang-en="Use Session">세션 사용</span></label>
                             </span>
                         </div>
                     </div>
                 </div>
                 <div class='col-sm-2'>
-                    <div class='col-sm-12'><input type='submit' value='설치' class='full lang_attr_element btnx' style='height:50px;' data-lang-target='value' data-lang-en='Install'/></div>
+                    <div><span class='lang_element' data-lang-en="I agree that so...">위 약관에 동의하고...</span></div>
+                    <div><input type='submit' value='설치' class='full lang_attr_element btnx' style='height:50px;' data-lang-target='value' data-lang-en='Install Now'/></div>
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-sm-12'>
+                    <jsp:include page="fsinstallmanual.jsp"></jsp:include>
                 </div>
             </div>
         </form>

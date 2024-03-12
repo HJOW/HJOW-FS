@@ -141,6 +141,23 @@ div.fs_div .ellipsis {
 div.fs_div .filedndin {
 	background-color: red !important;
 }
+div.fs_install_manual_root {
+	overflow-x: hidden;
+	overflow-y: scroll;
+	white-space: pre-wrap;
+	height: 300px;
+	max-height: 300px;
+	width: 100%;
+	border: 1px solid black;
+	padding: 5px 5px 5px 5px;
+	vertical-align: top !important;
+}
+div.fs_install_manual_root td, div.fs_div.fs_install_manual_root th {
+	vertical-align: top;
+}
+div.fs_install_manual_root td, div.fs_div.fs_install_manual_root td span {
+	text-align: left;
+}
 div.fs_div a.flatbutton, div.fs_div input.flatbutton, div.fs_div button.flatbutton { 
 	background-color: rgb(255, 255, 255);
     border: 1px solid rgb(90, 120, 200);
