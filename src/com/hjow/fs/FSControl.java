@@ -2736,10 +2736,17 @@ public class FSControl {
             }
             
             if(req.equalsIgnoreCase("logout")) {
+            	String outId = "UNKNOWN";
+            	if(sessionMap != null) {
+            		if(sessionMap.get("id") != null) outId = sessionMap.get("id").toString();
+            	}
+            	
                 sessionMap = null;
                 needInvalidate = true;
                 
                 if(tokenID != null && tokenVal != null) {
+                	if(outId.equals("UNKNOWN")) outId = tokenID;
+                	
                     // Delete Token
                     File ftId = new File(ftJson.getCanonicalPath() + File.separator + tokenID);
                     if(ftId.exists() && ftId.isDirectory()) {
@@ -2783,12 +2790,11 @@ public class FSControl {
                 
                 if(lang.equals("ko")) msg = "로그아웃 되었습니다."; 
                 else                  msg = "Log out complete";
-                logIn("Session log out from " + request.getRemoteAddr());
+                logIn("[LOGOUT][SUCCESS] " + outId + " at " + now + " from " + request.getRemoteAddr());
                 json.put("success", new Boolean(true));
             }
             
             if(req.equalsIgnoreCase("login")) {
-                if(sessionMap != null) needInvalidate = true;
                 sessionMap = null;
                 
                 if(noLogin) {
@@ -2988,6 +2994,8 @@ public class FSControl {
                     
                     if(msg.equals("")) {
                         // Success to login
+                    	log("[LOGIN][ACCEPTED] " + accountOne.get("id") + " at " + now + " from " + request.getRemoteAddr(), this.getClass());
+                    	
                         if(failCnt >= 1) {
                             // Reset Fail Count
                             failCnt = 0;
@@ -3078,9 +3086,11 @@ public class FSControl {
                             json.put("token", newToken);
                         }
                         
-                        logIn("Login Accept : " + id + " at " + now + " from " + request.getRemoteAddr());
+                        logIn("[LOGIN][SUCCESS] " + id);
                         needInvalidate = false;
                         json.put("success", new Boolean(true));
+                    } else {
+                    	log("[LOGIN][FAIL] " + accountOne.get("id") + " at " + now + " from " + request.getRemoteAddr() + " - " + msg, this.getClass());
                     }
                 }
             }
