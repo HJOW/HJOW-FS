@@ -24,16 +24,19 @@ public class FSServletContextListener implements ServletContextListener {
 
     @Override
     public synchronized void contextDestroyed(ServletContextEvent sce) {
-        System.out.println(this.getClass().getName() + ".contextDestroyed");
+        System.out.println(this.getClass().getName() + ".contextDestroyed STARTS");
         FSProtocolHandler.disposeInstance();
         FSControl.disposeInstance();
+        System.out.println(this.getClass().getName() + ".contextDestroyed END");
     }
 
     @Override
     public synchronized void contextInitialized(ServletContextEvent sce) {
-        System.out.println(this.getClass().getName() + ".contextInitialized");
+        System.out.println(this.getClass().getName() + ".contextInitialized STARTS");
         String ctxPath = sce.getServletContext().getContextPath();
         FSControl.init(ctxPath);
+        
+        // Warming up
         
         try { Class.forName("java.awt.image.BufferedImage");  } catch(ClassNotFoundException ignores) {}
         try { Class.forName("java.awt.Graphics2D");           } catch(ClassNotFoundException ignores) {}
@@ -41,6 +44,9 @@ public class FSServletContextListener implements ServletContextListener {
         try { Class.forName("javax.imageio.ImageIO");         } catch(ClassNotFoundException ignores) {}
         
         try { FSControl.getInstance().removeAllTokens();      } catch(Throwable ignores) {}
+        try { FSUtils.createImageCaptchaBase64("123456789", 200, 100, 10, 0, false, null); } catch(Throwable ignores) {}
+        
+        System.out.println(this.getClass().getName() + ".contextInitialized END");
     }
     
 }

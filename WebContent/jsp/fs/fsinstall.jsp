@@ -123,7 +123,11 @@ if(! fsc.isInstalled()) {
                     </div>
                     <div class='row'>
                         <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Accounts'>계정</div>
-                        <div class='col-sm-10'><label><input type='checkbox' name='useaccount' class='chk_account' value="true"/><span class='lang_element' data-lang-en='Use Accounts'>계정 기능 사용</span></label></div>
+                        <div class='col-sm-10'>
+                            <label><input type='checkbox' name='useaccount' class='chk_account' value="true"/><span class='lang_element' data-lang-en='Use Accounts'>계정 기능 사용</span></label>
+                            <label class='onlyaccount invisible'><span class='lang_element margin_left_20' data-lang-en='Login Fails Limit'>로그인 실패 횟수 제한     </span><input type='number' name='loginfailcnt'  class='num_loginfailcnt'  value="10" step="1" min="0" max="100"/></label>
+                            <label class='onlyaccount invisible'><span class='lang_element margin_left_20' data-lang-en='Token Lifetime (Minutes)'>토큰 유효시간 (분) </span><input type='number' name='tokenlifetime' class='num_tokenlifetime' value="10" step="1" min="0" max="100"/></label>
+                        </div>
                     </div>
                     <div class='row onlyaccount invisible'>
                         <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='Admin ID'>관리자 ID</div>
@@ -144,6 +148,9 @@ if(! fsc.isInstalled()) {
                     <div class='row'>
                         <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='ETC'>기타</div>
                         <div class='col-sm-10'>
+                            <span class='etcspan'>
+                                <label><input type='checkbox' name='readonlymode'  class='chk_read_only'  value="true"/><span class='lang_element' data-lang-en="Read-Only mode">읽기 전용 모드</span></label>
+                            </span>
                             <span class='etcspan'>
                                 <label><input type='checkbox' name='readfileicon'  class='chk_read_icon'  value="true"/><span class='lang_element' data-lang-en="Read file's icon">파일 아이콘 읽기</span></label>
                             </span>

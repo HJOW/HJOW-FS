@@ -120,6 +120,18 @@ limitations under the License.
                             } else {
                                 form.find("[name='useconsole']").prop('checked', false);
                             }
+                            if(conf['ReadOnly']) {
+                                form.find("[name='readonlymode']").prop('checked', true);
+                            } else {
+                                form.find("[name='readonlymode']").prop('checked', false);
+                            }
+                            form.find("[name='readonlymode']").prop('disabled', true);
+                            
+                            if(conf['ReadOnly']) {
+                            	form.find("input").prop('disabled', true);
+                            	form.find("textarea").prop('disabled', true);
+                            	form.find("select").prop('disabled', true);
+                            }
                         }, error : function(jqXHR, textStatus, errorThrown) {
                             alert('Error : ' + textStatus + '\n' + errorThrown)
                         }, complete : function() {
@@ -318,6 +330,9 @@ limitations under the License.
                         <div class='row'>
                             <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='ETC'>기타</div>
                             <div class='col-sm-10'>
+                                <span class='etcspan'>
+                                    <label><input type='checkbox' name='readonlymode'  class='chk_read_only'  value="true"/><span class='lang_element' data-lang-en="Read-Only mode">읽기 전용 모드</span></label>
+                                </span>
                                 <span class='etcspan'>
                                     <label><input type='checkbox' name='readfileicon'  class='chk_read_icon'  value="true"/><span class='lang_element' data-lang-en="Read file's icon">파일 아이콘 읽기</span></label>
                                 </span>

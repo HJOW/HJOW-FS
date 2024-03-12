@@ -309,6 +309,8 @@ $(function() {
             success : function(data) {
                 arDirs  = data.directories;
                 arFiles = data.files;
+                
+                var privilege = data.privilege;
 
                 if(firsts) {
                     listRoot.empty();
@@ -330,7 +332,7 @@ $(function() {
                     }
                 }
 
-                if(idType == 'A') tables.find('.col_controls').css('width', '100px');
+                if(privilege == 'edit') tables.find('.col_controls').css('width', '100px');
                 
                 if(! data.path == '') {
                     listRoot.append("<tr class='element element_special back'><td colspan='4'><a href='#' class='link_back lang_element' data-lang-en='[BACK]'>[뒤로 가기]</a></td></tr>");
@@ -359,7 +361,7 @@ $(function() {
                     a.addClass('ellipsis');
                     tr.addClass('no_icon');
 
-                    if(idType == 'A') {
+                    if(privilege == 'edit') {
                         var tdBtns = tr.find('.td_buttons');
                         tdBtns.css('text-align', 'right');
                         
@@ -504,7 +506,7 @@ $(function() {
                         btnPreview.removeClass('invisible');
                     }
                     
-                    if(idType == 'A') {
+                    if(privilege == 'edit') {
                         tdBtns.append("<input type='button' class='btn_delete btnx' value='X'/>");
 
                         var btnDel = tdBtns.find('.btn_delete');

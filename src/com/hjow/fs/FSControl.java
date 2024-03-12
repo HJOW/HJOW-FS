@@ -733,20 +733,35 @@ public class FSControl {
                 if(sMaxCount == null) sMaxCount = "1000";
                 Integer.parseInt(sMaxCount); // Checking valid number
                 
+                String sLoginfailcnt  = "10";
+                String sTokenlifetime =  "0"; 
+                if(! noLogin) {
+                    sLoginfailcnt = request.getParameter("loginfailcnt");
+                    if(sLoginfailcnt == null) sLoginfailcnt = "10";
+                    Integer.parseInt(sLoginfailcnt); // Checking valid number
+                    
+                    sTokenlifetime = request.getParameter("tokenlifetime");
+                    if(sTokenlifetime == null) sTokenlifetime = "10";
+                    Integer.parseInt(sTokenlifetime); // Checking valid number
+                }
+                
                 String sUseCaptchaDown  = request.getParameter("usecaptchadown");
                 String sUseCaptchaLogin = request.getParameter("usecaptchalogin");
                 String sReadFileIcon    = request.getParameter("readfileicon");
                 String sUseConsole      = request.getParameter("useconsole");
+                String sReadOnly        = request.getParameter("readonlymode");
                 
                 boolean useCaptchaDown  = false;
                 boolean useCaptchaLogin = false;
                 boolean useReadFileIcon = false;
                 boolean useConsole      = false;
+                boolean rdonly          = false;
                 
                 if(sUseCaptchaDown  != null) useCaptchaDown  = DataUtil.parseBoolean(sUseCaptchaDown.trim());
                 if(sUseCaptchaLogin != null) useCaptchaLogin = DataUtil.parseBoolean(sUseCaptchaLogin.trim());
                 if(sReadFileIcon    != null) useReadFileIcon = DataUtil.parseBoolean(sReadFileIcon.trim());
                 if(sUseConsole      != null) useConsole      = DataUtil.parseBoolean(sUseConsole.trim());
+                if(sReadOnly        != null) rdonly          = DataUtil.parseBoolean(sReadOnly.trim());
                 
                 String sUseAccounts = request.getParameter("useaccount");
                 if(sUseAccounts != null) {
@@ -850,18 +865,21 @@ public class FSControl {
                 sHiddenDir += "# ]" + "\n";
                 sHiddenDir += "[]";
                 
-                conf.put("Title", titles);
-                conf.put("sHiddenDirs", sHiddenDir);
-                conf.put("HiddenDirs", new JsonArray());
-                conf.put("Path", rootPath.getCanonicalPath());
-                conf.put("UseAccount", new Boolean(! noLogin));
-                conf.put("UseCaptchaDown" , new Boolean(useCaptchaDown));
-                conf.put("UseCaptchaLogin", new Boolean(useCaptchaLogin));
-                conf.put("UseConsole", new Boolean(useConsole));
-                conf.put("LimitDownloadSize", sMaxSize);
-                conf.put("LimitPreviewSize", sMaxPrev);
+                conf.put("Title"               , titles);
+                conf.put("sHiddenDirs"         , sHiddenDir);
+                conf.put("HiddenDirs"          , new JsonArray());
+                conf.put("Path"                , rootPath.getCanonicalPath());
+                conf.put("UseAccount"          , new Boolean(! noLogin));
+                conf.put("UseCaptchaDown"      , new Boolean(useCaptchaDown));
+                conf.put("UseCaptchaLogin"     , new Boolean(useCaptchaLogin));
+                conf.put("UseConsole"          , new Boolean(useConsole));
+                conf.put("ReadOnly"            , new Boolean(rdonly));
+                conf.put("LoginFailCountLimit" , new Integer(sLoginfailcnt ));
+                conf.put("TokenLifeTime"       , new Integer(sTokenlifetime));
+                conf.put("LimitDownloadSize"   , sMaxSize);
+                conf.put("LimitPreviewSize"    , sMaxPrev);
                 conf.put("LimitFilesSinglePage", sMaxCount);
-                conf.put("ReadFileIcon", new Boolean(useReadFileIcon));
+                conf.put("ReadFileIcon"        , new Boolean(useReadFileIcon));
                 conf.put("S1", s1);
                 conf.put("S2", s2);
                 conf.put("S3", s3);
@@ -880,6 +898,8 @@ public class FSControl {
                     fileOut.write(conf.toJSON().getBytes(cs));
                     fileOut.close(); fileOut = null;
                 }
+                
+                applyConfigs();
                 
                 installed = true;
                 json.put("success", new Boolean(true));
@@ -1067,6 +1087,9 @@ public class FSControl {
                     sTokenlifetime = request.getParameter("tokenlifetime");
                     if(sTokenlifetime == null) sTokenlifetime = "10";
                     Integer.parseInt(sTokenlifetime); // Checking valid number
+                } else {
+                	sLoginfailcnt  = "10";
+                	sTokenlifetime = "0";
                 }
                 
                 String sUseCaptchaDown  = request.getParameter("usecaptchadown");
@@ -1760,7 +1783,8 @@ public class FSControl {
             if(hiddenDirList == null) hiddenDirList = new ArrayList<String>();
             
             if(idtype.equalsIgnoreCase("A")) {
-                json.put("privilege", "edit");
+                if(readOnly) json.put("privilege", "view");
+                else         json.put("privilege", "edit");
             } else {
                 String prv = null;
                 JsonArray dirPrv = getSessionDirectoryPrivileges(jsonSess);   
@@ -1798,6 +1822,7 @@ public class FSControl {
                     return json;
                 }
                 
+                if(readOnly && prv.equals("edit")) prv = "view";
                 json.put("privilege", prv);
             }
             
@@ -2403,8 +2428,6 @@ public class FSControl {
         String uIdType = "";
         JsonArray dirPrv = null;
         try {
-            if(readOnly) throw new RuntimeException("Blocked. FS is read-only mode.");
-            
             JsonObject sessionMap = getSessionFSObject(request);
             
             if(sessionMap != null) {
@@ -2428,6 +2451,8 @@ public class FSControl {
         json.put("message", "");
         
         try {
+        	if(readOnly) throw new RuntimeException("Blocked. FS is read-only mode.");
+        	
             String pathParam = request.getParameter("path");
             if(pathParam == null) pathParam = "";
             pathParam = pathParam.trim();
@@ -2488,8 +2513,6 @@ public class FSControl {
         String uIdType = "";
         JsonArray dirPrv = null;
         try {
-            if(readOnly) throw new RuntimeException("Blocked. FS is read-only mode.");
-            
             JsonObject sessionMap = getSessionFSObject(request);
             
             if(sessionMap != null) {
@@ -2513,6 +2536,8 @@ public class FSControl {
         json.put("message", "");
 
         try {
+        	if(readOnly) throw new RuntimeException("Blocked. FS is read-only mode.");
+        	
             String pathParam = request.getParameter("path");
             if(pathParam == null) pathParam = "";
             pathParam = pathParam.trim();
@@ -3090,6 +3115,7 @@ public class FSControl {
             if(getSessionObject(request, "fslanguage") != null) json.put("language", getSessionObject(request, "fslanguage"));
             json.put("spd", new Double(calculateSpeed(getSessionUserSpeedConst(sessionMap))));
             json.put("noanonymous", new Boolean(noAnonymous));
+            json.put("readonlymode", new Boolean(readOnly));
             json.put("message", msg);
         } catch(Throwable t) {
             json.put("success", new Boolean(false));
