@@ -886,20 +886,8 @@ public class FSControl {
                 conf.put("Salt", salt);
                 conf.put("Installed", new Boolean(true));
                 
-                if(useJDBC) {
-                    pstmt = conn.prepareStatement("UPDATE FS_CONFIG SET JSONCONFIG = ?");
-                    pstmt.setString(1, conf.toJSON());
-                    pstmt.executeUpdate();
-                    conn.commit();
-                    pstmt.close(); pstmt = null;
-                } else {
-                    File fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "config.json");
-                    fileOut = new FileOutputStream(fJson);
-                    fileOut.write(conf.toJSON().getBytes(cs));
-                    fileOut.close(); fileOut = null;
-                }
-                
                 applyConfigs();
+                applyModifiedConfig("Installation Program");
                 
                 installed = true;
                 json.put("success", new Boolean(true));
