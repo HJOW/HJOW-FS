@@ -97,6 +97,10 @@ public class FSControl {
 
     // Storage Root Directory
     protected String storPath  = "/fsdir/storage/";
+    
+    // Session remaining methods
+    protected boolean useSession = true;
+    protected boolean useToken   = true;
 
     // Reading configuration file time gap (milliseconds)
     protected long   refreshConfGap = 4000L;
@@ -131,7 +135,8 @@ public class FSControl {
     
     // Login Policy
     protected boolean noAnonymous = false;
-    protected boolean noLogin = false;
+    protected boolean noLogin     = false;
+    protected boolean readOnly    = false;
     protected int loginFailCountLimit = 10;
     protected int loginFailOverMinute = 10;
     protected int tokenLifeTime = 0; // Minutes  
@@ -1021,6 +1026,8 @@ public class FSControl {
             json.put("message", "");
             
             if(req.equalsIgnoreCase("update")) {
+            	if(readOnly) throw new RuntimeException("Blocked. FS is read-only mode.");
+            	
                 String titles = request.getParameter("title");
                 if(titles == null) titles = "File Storage";
                 titles = titles.trim();
@@ -1105,6 +1112,8 @@ public class FSControl {
                 
                 json.put("message", "Update Success !");
             } else if(req.equalsIgnoreCase("reset")) {
+            	if(readOnly) throw new RuntimeException("Blocked. FS is read-only mode.");
+            	
                 String passwords = request.getParameter("pw");
                 if(passwords == null) {
                     String rex = "Please input Password !";
@@ -1271,6 +1280,8 @@ public class FSControl {
                 
                 json.put("userlist" , arr);
             } else if(req.equalsIgnoreCase("usercreate")) {
+            	if(readOnly) throw new RuntimeException("Blocked. FS is read-only mode.");
+            	
                 String cid     = request.getParameter("id");
                 String cpw     = request.getParameter("pw");
                 String cnick   = request.getParameter("nick");
@@ -1432,6 +1443,8 @@ public class FSControl {
                     fileOut.close(); fileOut = null;
                 }
             } else if(req.equalsIgnoreCase("userdel")) {
+            	if(readOnly) throw new RuntimeException("Blocked. FS is read-only mode.");
+            	
                 String dId = request.getParameter("id");
                 
                 if(dId == null) dId = "";
@@ -2078,6 +2091,8 @@ public class FSControl {
         String uIdType = "", msg = "";
         JsonArray dirPrv = null;
         try {
+        	if(readOnly) throw new RuntimeException("Blocked. FS is read-only mode.");
+        	
             JsonObject sessionMap = getSessionFSObject(request);
             
             if(sessionMap != null) {
@@ -2388,6 +2403,8 @@ public class FSControl {
         String uIdType = "";
         JsonArray dirPrv = null;
         try {
+        	if(readOnly) throw new RuntimeException("Blocked. FS is read-only mode.");
+        	
             JsonObject sessionMap = getSessionFSObject(request);
             
             if(sessionMap != null) {
@@ -2471,6 +2488,8 @@ public class FSControl {
         String uIdType = "";
         JsonArray dirPrv = null;
         try {
+        	if(readOnly) throw new RuntimeException("Blocked. FS is read-only mode.");
+        	
             JsonObject sessionMap = getSessionFSObject(request);
             
             if(sessionMap != null) {
@@ -2639,7 +2658,7 @@ public class FSControl {
             String tokenID  = null;
             String tokenVal = null;
             
-            if((! noLogin) && tokenLifeTime >= 1) {
+            if(useToken && tokenLifeTime >= 1) {
                 tokenID  = request.getHeader("fsid");
                 tokenVal = request.getHeader("fstoken");
                 
@@ -3196,13 +3215,17 @@ public class FSControl {
     
     /** Get session attribute. */
     public Object getSessionObject(HttpServletRequest request, String key) {
-        Object res = getSessionObjectRaw(request.getSession(), key);
-        if(res != null) return res;
+    	Object res = null;
         
-        String tokenID  = null;
-        String tokenVal = null;
-        
-        if((! noLogin) && tokenLifeTime >= 1) {
+    	if(useSession) {
+    		res = getSessionObjectRaw(request.getSession(), key);
+            if(res != null) return res;
+    	}
+    	
+    	if(useToken && tokenLifeTime >= 1) {
+    		String tokenID  = null;
+            String tokenVal = null;
+            
             tokenID  = request.getHeader("fsid");
             tokenVal = request.getHeader("fstoken");
             
@@ -3212,97 +3235,98 @@ public class FSControl {
                     tokenVal = request.getParameter("fstoken_val");
                 }
             }
-        }
-        
-        if(tokenID != null && tokenVal != null) {
-            Connection conn = null;
-            PreparedStatement pstmt = null;
-            ResultSet rs = null;
-            try {
-                JsonObject addiContent = null;
-                if(useJDBC) {
-                    // Get additional session attributes from FS_TOKEN
-                    String addContents = null;
-                    if(conn == null) {
-                        Class.forName(jdbcClass);
-                        conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
-                    }
-                    pstmt = conn.prepareStatement("SELECT CONTENT FROM FS_TOKEN WHERE TOKEN = ? AND USERID = ?");
-                    pstmt.setString(1, tokenVal);
-                    pstmt.setString(2, tokenID);
-                    rs = pstmt.executeQuery();
-                    while(rs.next()) {
-                        addContents = rs.getString("CONTENT");
-                    }
-                    rs.close(); rs = null;
-                    pstmt.close(); pstmt = null;
-                    
-                    if(addContents != null) {
-                        try {
-                            addiContent = (JsonObject) JsonCompatibleUtil.parseJson(addContents);
-                        } catch(Throwable tx) {
-                            log("Cannot load session attributes from FS_TOKEN CONTENT column... " + tx.getMessage(), this.getClass());
-                            addiContent = null;
-                        }                                
-                    }
-                } else {
-                    // Get additional session attributes
-                    
-                    File ftJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "tokens");
-                    if(! ftJson.exists()) ftJson.mkdirs();
-                    
-                    File ftId = new File(ftJson.getCanonicalPath() + File.separator + tokenID);
-                    if(! ftId.exists()) ftId.mkdirs();
-                    
-                    File[] fTokens = ftId.listFiles();
-                    JsonObject jsonComp = null;
-                    for(File f : fTokens) {
-                        String t = FileUtil.readString(f, "UTF-8");
-                        JsonObject tJson = (JsonObject) JsonCompatibleUtil.parseJson(t);
-                        if(tJson == null) continue;
-                        
-                        String tokenOne = String.valueOf(tJson.get("token"));
-                        
-                        Long.parseLong(String.valueOf(tJson.get("crtime"))); // Just Check
-                        long entime = Long.parseLong(String.valueOf(tJson.get("entime"))); // Check expiration
-                        
-                        if(entime < System.currentTimeMillis()) { // expiration
-                            f.delete();
-                            continue;
+            
+            if(tokenID != null && tokenVal != null) {
+                Connection conn = null;
+                PreparedStatement pstmt = null;
+                ResultSet rs = null;
+                try {
+                    JsonObject addiContent = null;
+                    if(useJDBC) {
+                        // Get additional session attributes from FS_TOKEN
+                        String addContents = null;
+                        if(conn == null) {
+                            Class.forName(jdbcClass);
+                            conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);
                         }
+                        pstmt = conn.prepareStatement("SELECT CONTENT FROM FS_TOKEN WHERE TOKEN = ? AND USERID = ?");
+                        pstmt.setString(1, tokenVal);
+                        pstmt.setString(2, tokenID);
+                        rs = pstmt.executeQuery();
+                        while(rs.next()) {
+                            addContents = rs.getString("CONTENT");
+                        }
+                        rs.close(); rs = null;
+                        pstmt.close(); pstmt = null;
                         
-                        if(jsonComp != null) continue; // If another token is already accepted, skip.
-                        if(! tokenOne.equals(tokenVal)) continue; // Check equals
+                        if(addContents != null) {
+                            try {
+                                addiContent = (JsonObject) JsonCompatibleUtil.parseJson(addContents);
+                            } catch(Throwable tx) {
+                                log("Cannot load session attributes from FS_TOKEN CONTENT column... " + tx.getMessage(), this.getClass());
+                                addiContent = null;
+                            }                                
+                        }
+                    } else {
+                        // Get additional session attributes
                         
-                        // Accept
-                        addiContent = (JsonObject) JsonCompatibleUtil.parseJson(tJson.get("content"));
-                        break;
+                        File ftJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "tokens");
+                        if(! ftJson.exists()) ftJson.mkdirs();
+                        
+                        File ftId = new File(ftJson.getCanonicalPath() + File.separator + tokenID);
+                        if(! ftId.exists()) ftId.mkdirs();
+                        
+                        File[] fTokens = ftId.listFiles();
+                        JsonObject jsonComp = null;
+                        for(File f : fTokens) {
+                            String t = FileUtil.readString(f, "UTF-8");
+                            JsonObject tJson = (JsonObject) JsonCompatibleUtil.parseJson(t);
+                            if(tJson == null) continue;
+                            
+                            String tokenOne = String.valueOf(tJson.get("token"));
+                            
+                            Long.parseLong(String.valueOf(tJson.get("crtime"))); // Just Check
+                            long entime = Long.parseLong(String.valueOf(tJson.get("entime"))); // Check expiration
+                            
+                            if(entime < System.currentTimeMillis()) { // expiration
+                                f.delete();
+                                continue;
+                            }
+                            
+                            if(jsonComp != null) continue; // If another token is already accepted, skip.
+                            if(! tokenOne.equals(tokenVal)) continue; // Check equals
+                            
+                            // Accept
+                            addiContent = (JsonObject) JsonCompatibleUtil.parseJson(tJson.get("content"));
+                            break;
+                        }
                     }
+                    if(addiContent != null) {
+                        res = addiContent.get(key);
+                        if(res != null) return res;
+                    }
+                } catch(Throwable t) {
+                    t.printStackTrace();
+                    log("Exception when access session - (" + t.getClass().getName() + ") " + t.getMessage(), getClass());
+                } finally {
+                    ClassUtil.closeAll(rs, pstmt, conn);
                 }
-                if(addiContent != null) {
-                    res = addiContent.get(key);
-                    if(res != null) return res;
-                }
-            } catch(Throwable t) {
-                t.printStackTrace();
-                log("Exception when access session - (" + t.getClass().getName() + ") " + t.getMessage(), getClass());
-            } finally {
-                ClassUtil.closeAll(rs, pstmt, conn);
             }
-        }
+    	}
         
         return null;
     }
     
     @Deprecated
     public Object getSessionObjectRaw(HttpSession session, String key) {
+    	if(! useSession) return null;
         return session.getAttribute(key);
     }
     
     public void setSessionObject(HttpServletRequest request, String key, Object val) {
         setSessionObjectRaw(request.getSession(), key, val);
         
-        if((! noLogin) && (tokenLifeTime >= 1)) {
+        if(useToken && tokenLifeTime >= 1) {
             String tokenID  = request.getHeader("fsid");
             String tokenVal = request.getHeader("fstoken");
             boolean tokenGuest = false;
@@ -3324,13 +3348,14 @@ public class FSControl {
     
     @Deprecated
     public void setSessionObjectRaw(HttpSession session, String key, Object val) {
+    	if(! useSession) return;
         session.setAttribute(key, val);
     }
     
     public void removeSessionObject(HttpServletRequest request, String key) {
         removeSessionObjectRaw(request.getSession(), key);
         
-        if((! noLogin) && (tokenLifeTime >= 1)) {
+        if(useToken && (tokenLifeTime >= 1)) {
             String tokenID  = request.getHeader("fsid");
             String tokenVal = request.getHeader("fstoken");
             
@@ -3351,6 +3376,7 @@ public class FSControl {
     
     @Deprecated
     public void removeSessionObjectRaw(HttpSession session, String key) {
+    	if(! useSession) return;
         session.removeAttribute(key);
     }
     
@@ -3361,8 +3387,7 @@ public class FSControl {
         try {
             String sessionJson = null;
             
-            if(noLogin) tokenLifeTime = 0;
-            if(tokenLifeTime > 0) {
+            if(useToken && tokenLifeTime >= 1) {
                 String tokenID  = request.getHeader("fsid");
                 String tokenVal = request.getHeader("fstoken");
                 
@@ -3409,7 +3434,7 @@ public class FSControl {
     
     /** Check token status (Not accepted, return null) */
     public JsonObject getTokenAvail(String tokenID, String tokenVal) {
-        if(noLogin) return null;
+        if(! useToken) return null;
         if(tokenLifeTime <= 0) return null;
         
         if(isTokenAvail(tokenID, tokenVal)) {
@@ -3424,7 +3449,7 @@ public class FSControl {
     
     /** Check token ID and value available (Just check that token has correct form.) */
     public boolean isTokenAvail(String tokenID, String tokenVal) {
-        if(noLogin) return false;
+        if(! useToken) return false;
         if(tokenLifeTime <= 0) return false;
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -3514,7 +3539,7 @@ public class FSControl {
     
     /** Update token's end time and session contents. */
     public boolean updateToken(String tokenID, String tokenVal, long newEndTime, Map<String, Object> content, boolean checkAcceptedToken, boolean guest) {
-        if(noLogin) return false;
+        if(! useToken) return false;
         if(tokenLifeTime <= 0) return false;
         
         if(checkAcceptedToken && (! guest)) {
@@ -4272,7 +4297,19 @@ public class FSControl {
         this.jdbcPw = jdbcPw;
     }
     
-    public synchronized void logIn(Object logContent) {
+    public boolean useSession() {
+		return useSession;
+	}
+
+	public boolean useToken() {
+		return useToken;
+	}
+
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+
+	public synchronized void logIn(Object logContent) {
         logIn(logContent, FSControl.class);
     }
     
@@ -4423,6 +4460,21 @@ public class FSControl {
         } else {
             conf.put("UseAccount", new Boolean(! noLogin));
         }
+        if(conf.get("UseSession") != null) {
+            useSession = DataUtil.parseBoolean(conf.get("UseSession").toString().trim());
+        } else {
+            conf.put("UseSession", new Boolean(useSession));
+        }
+        if(conf.get("UseToken") != null) {
+            useToken = DataUtil.parseBoolean(conf.get("UseToken").toString().trim());
+        } else {
+            conf.put("UseToken", new Boolean(useToken));
+        }
+        if(conf.get("ReadOnly") != null) {
+            readOnly = DataUtil.parseBoolean(conf.get("ReadOnly").toString().trim());
+        } else {
+            conf.put("ReadOnly", new Boolean(readOnly));
+        }
         if(conf.get("UseConsole") != null) {
             noConsole = (! DataUtil.parseBoolean(conf.get("UseConsole").toString().trim()));
         } else {
@@ -4485,7 +4537,6 @@ public class FSControl {
         }
         if(conf.get("TokenLifeTime") != null) {
             tokenLifeTime = Integer.parseInt(conf.get("TokenLifeTime").toString().trim());
-            if(noLogin) tokenLifeTime = 0;
         }
         if(conf.get("Title") != null) {
             String tx = conf.get("Title").toString().trim();

@@ -68,13 +68,13 @@ public class FSConsoleConfig implements FSBundledConsoleCommand {
         	if(! json.containsKey(parameter)) throw new RuntimeException("There is no config key " + parameter);
         	if(parameter.equals("S1") || parameter.equals("S2") || parameter.equals("S3")) throw new RuntimeException("Cannot edit the config " + parameter);
     		if(parameter.equals("Salt")) throw new RuntimeException("Cannot edit the config " + parameter);
-    		if(parameter.equals("sHiddenDirs")) throw new RuntimeException("Cannot edit the config " + parameter);
-    		if(parameter.equals("HiddenDirs" )) throw new RuntimeException("Cannot edit the config " + parameter);
-    		if(parameter.equals("Installed"  )) throw new RuntimeException("Cannot edit the config " + parameter);
-    		if(parameter.equals("UseAccount" )) throw new RuntimeException("Cannot edit the config " + parameter);
-    		if(parameter.equals("UseConsole" )) throw new RuntimeException("Cannot edit the config " + parameter);
-    		if(parameter.equals("Path"       )) throw new RuntimeException("Cannot edit the config " + parameter);
-    		if(parameter.equals("Packs"      )) throw new RuntimeException("Cannot edit the config " + parameter);
+    		if(parameter.equals("sHiddenDirs")) throw new RuntimeException("Cannot access the config " + parameter);
+    		if(parameter.equals("HiddenDirs" )) throw new RuntimeException("Cannot access the config " + parameter);
+    		if(parameter.equals("Installed"  )) throw new RuntimeException("Cannot access the config " + parameter);
+    		if(parameter.equals("UseAccount" )) throw new RuntimeException("Cannot access the config " + parameter);
+    		if(parameter.equals("UseConsole" )) throw new RuntimeException("Cannot access the config " + parameter);
+    		if(parameter.equals("Path"       )) throw new RuntimeException("Cannot access the config " + parameter);
+    		if(parameter.equals("Packs"      )) throw new RuntimeException("Cannot access the config " + parameter);
         	
         	String editOpt = null;
         	if(options.get("e") != null) {
@@ -84,6 +84,8 @@ public class FSConsoleConfig implements FSBundledConsoleCommand {
         	}
         	
         	if(editOpt != null) {
+        		if(ctrl.isReadOnly()) throw new RuntimeException("Blocked. FS is read-only mode.");
+        		
         		json.put(parameter, editOpt);
         		ctrl.setConfig(json);
         		ctrl.applyModifiedConfig(sessionMap.get("id").toString());

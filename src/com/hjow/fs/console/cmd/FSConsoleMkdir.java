@@ -75,6 +75,8 @@ public class FSConsoleMkdir implements FSBundledConsoleCommand {
 
 	@Override
 	public Object run(FSControl ctrl, FSConsole console, Map<String, Object> sessionMap, File root, String parameter, Map<String, String> options) throws Throwable {
+		if(ctrl.isReadOnly()) throw new RuntimeException("Blocked. FS is read-only mode.");
+		
 		String pathCalc = root.getCanonicalPath() + File.separator + console.getPath() + File.separator + parameter;
         File   fileCalc = new File(pathCalc);
         
