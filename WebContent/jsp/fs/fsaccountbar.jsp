@@ -76,7 +76,7 @@ if(! fsc.isInstalled()) {
                 
                 captLogin = acRoot.find('.if_captcha_l');
                 if(captLogin != null && typeof(captLogin) != 'undefined' && captLogin.length >= 1) {
-                	captLogin.attr('src', ctxPath + '/jsp/fs/fscaptin.jsp?key=fsl&scale=1&theme=' + theme + FSUtil.addTokenParameterString());
+                    captLogin.attr('src', ctxPath + '/jsp/fs/fscaptin.jsp?key=fsl&scale=1&theme=' + theme + FSUtil.addTokenParameterString());
                 }
                 
                 formObj.find('.inp_login_element').val('');
@@ -128,7 +128,7 @@ if(! fsc.isInstalled()) {
                     success : function(data) {
                         fRef(data, true);
                     }, complete : function() {
-                    	if(FSUtil.detectStorage()) {
+                        if(FSUtil.detectStorage()) {
                             FSUtil.storage.session.remove("fsid"   );
                             FSUtil.storage.session.remove("fstoken");
                         }

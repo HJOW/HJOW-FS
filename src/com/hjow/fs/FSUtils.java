@@ -238,39 +238,39 @@ public class FSUtils {
     
     /** Create random token string */
     public static String createToken(String id) {
-    	return createToken(id, "1", "2", "3");
+        return createToken(id, "1", "2", "3");
     }
     
     /** Create random token string */
     public static String createToken(String id, String s1, String s2, String s3) {
-    	if(id == null) return "";
-    	if(s1 == null) s1 = "";
-    	if(s2 == null) s2 = "";
-    	if(s3 == null) s3 = "";
-    	String originalString = SecurityUtil.hash(s1 + id, "SHA-256") + s3 + SecurityUtil.hash(Math.round(Math.random() * 100000000) + s2 + System.currentTimeMillis(), "SHA-256");
-    	return SecurityUtil.hash(originalString, "SHA-256");
+        if(id == null) return "";
+        if(s1 == null) s1 = "";
+        if(s2 == null) s2 = "";
+        if(s3 == null) s3 = "";
+        String originalString = SecurityUtil.hash(s1 + id, "SHA-256") + s3 + SecurityUtil.hash(Math.round(Math.random() * 100000000) + s2 + System.currentTimeMillis(), "SHA-256");
+        return SecurityUtil.hash(originalString, "SHA-256");
     }
     
     /** Create captcha image and return base64 code */
     public static String createImageCaptchaBase64(String code, int width, int height, int noises, int fontSize, boolean darkMode, List<String> fontFamily) throws IOException {
-    	int backr, backg, backb, forer, foreg, foreb;
-    	
-    	if(darkMode) {
-    		backr = 59;
-    		backg = 59;
-    		backb = 59;
-    		forer = 250;
-    		foreg = 250;
-    		foreb = 250;
-    	} else {
-    		backr = 250;
-    		backg = 250;
-    		backb = 250;
-    		forer = 0;
-    		foreg = 0;
-    		foreb = 0;
-    	}
-    	
-    	return GUIUtil.createImageCaptchaBase64(code, width, height, noises, fontSize, backr, backg, backb, forer, foreg, foreb, fontFamily);
+        int backr, backg, backb, forer, foreg, foreb;
+        
+        if(darkMode) {
+            backr = 59;
+            backg = 59;
+            backb = 59;
+            forer = 250;
+            foreg = 250;
+            foreb = 250;
+        } else {
+            backr = 250;
+            backg = 250;
+            backb = 250;
+            forer = 0;
+            foreg = 0;
+            foreb = 0;
+        }
+        
+        return GUIUtil.createImageCaptchaBase64(code, width, height, noises, fontSize, backr, backg, backb, forer, foreg, foreb, fontFamily);
     }
 }

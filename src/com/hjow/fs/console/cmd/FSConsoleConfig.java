@@ -26,9 +26,9 @@ import hjow.common.json.JsonObject;
 import hjow.common.util.DataUtil;
 
 public class FSConsoleConfig implements FSBundledConsoleCommand {
-	private static final long serialVersionUID = -7730396143867553901L;
+    private static final long serialVersionUID = -7730396143867553901L;
 
-	@Override
+    @Override
     public String getName() {
         return "config";
     }
@@ -50,50 +50,50 @@ public class FSConsoleConfig implements FSBundledConsoleCommand {
         
         JsonObject json = ctrl.getConfig();
         if(DataUtil.isEmpty(parameter)) {
-        	Set<String> keys = json.keySet();
-        	for(String k : keys) {
-        		if(k.equals("S1") || k.equals("S2") || k.equals("S3")) continue;
-        		if(k.equals("Salt")) continue;
-        		if(k.equals("sHiddenDirs")) continue;
-        		if(k.equals("HiddenDirs" )) continue;
-        		if(k.equals("Installed"  )) continue;
-        		if(k.equals("UseAccount" )) continue;
-        		if(k.equals("UseConsole" )) continue;
-        		if(k.equals("Path"       )) continue;
-        		if(k.equals("Packs"      )) continue;
-        		
-        		collector = collector.append("\n").append(k);
-        	}
+            Set<String> keys = json.keySet();
+            for(String k : keys) {
+                if(k.equals("S1") || k.equals("S2") || k.equals("S3")) continue;
+                if(k.equals("Salt")) continue;
+                if(k.equals("sHiddenDirs")) continue;
+                if(k.equals("HiddenDirs" )) continue;
+                if(k.equals("Installed"  )) continue;
+                if(k.equals("UseAccount" )) continue;
+                if(k.equals("UseConsole" )) continue;
+                if(k.equals("Path"       )) continue;
+                if(k.equals("Packs"      )) continue;
+                
+                collector = collector.append("\n").append(k);
+            }
         } else {
-        	if(! json.containsKey(parameter)) throw new RuntimeException("There is no config key " + parameter);
-        	if(parameter.equals("S1") || parameter.equals("S2") || parameter.equals("S3")) throw new RuntimeException("Cannot edit the config " + parameter);
-    		if(parameter.equals("Salt")) throw new RuntimeException("Cannot edit the config " + parameter);
-    		if(parameter.equals("sHiddenDirs")) throw new RuntimeException("Cannot access the config " + parameter);
-    		if(parameter.equals("HiddenDirs" )) throw new RuntimeException("Cannot access the config " + parameter);
-    		if(parameter.equals("Installed"  )) throw new RuntimeException("Cannot access the config " + parameter);
-    		if(parameter.equals("UseAccount" )) throw new RuntimeException("Cannot access the config " + parameter);
-    		if(parameter.equals("UseConsole" )) throw new RuntimeException("Cannot access the config " + parameter);
-    		if(parameter.equals("Path"       )) throw new RuntimeException("Cannot access the config " + parameter);
-    		if(parameter.equals("Packs"      )) throw new RuntimeException("Cannot access the config " + parameter);
-        	
-        	String editOpt = null;
-        	if(options.get("e") != null) {
-        		editOpt = options.get("e").trim();
-        	} else if(options.get("edit") != null) {
-        		editOpt = options.get("edit").trim();
-        	}
-        	
-        	if(editOpt != null) {
-        		if(ctrl.isReadOnly()) throw new RuntimeException("Blocked. FS is read-only mode.");
-        		
-        		json.put(parameter, editOpt);
-        		ctrl.setConfig(json);
-        		ctrl.applyModifiedConfig(sessionMap.get("id").toString());
-        		ctrl.applyConfigs();
-        		return "Success !";
-        	} else {
-        		collector = collector.append(json.get(parameter));
-        	}
+            if(! json.containsKey(parameter)) throw new RuntimeException("There is no config key " + parameter);
+            if(parameter.equals("S1") || parameter.equals("S2") || parameter.equals("S3")) throw new RuntimeException("Cannot edit the config " + parameter);
+            if(parameter.equals("Salt")) throw new RuntimeException("Cannot edit the config " + parameter);
+            if(parameter.equals("sHiddenDirs")) throw new RuntimeException("Cannot access the config " + parameter);
+            if(parameter.equals("HiddenDirs" )) throw new RuntimeException("Cannot access the config " + parameter);
+            if(parameter.equals("Installed"  )) throw new RuntimeException("Cannot access the config " + parameter);
+            if(parameter.equals("UseAccount" )) throw new RuntimeException("Cannot access the config " + parameter);
+            if(parameter.equals("UseConsole" )) throw new RuntimeException("Cannot access the config " + parameter);
+            if(parameter.equals("Path"       )) throw new RuntimeException("Cannot access the config " + parameter);
+            if(parameter.equals("Packs"      )) throw new RuntimeException("Cannot access the config " + parameter);
+            
+            String editOpt = null;
+            if(options.get("e") != null) {
+                editOpt = options.get("e").trim();
+            } else if(options.get("edit") != null) {
+                editOpt = options.get("edit").trim();
+            }
+            
+            if(editOpt != null) {
+                if(ctrl.isReadOnly()) throw new RuntimeException("Blocked. FS is read-only mode.");
+                
+                json.put(parameter, editOpt);
+                ctrl.setConfig(json);
+                ctrl.applyModifiedConfig(sessionMap.get("id").toString());
+                ctrl.applyConfigs();
+                return "Success !";
+            } else {
+                collector = collector.append(json.get(parameter));
+            }
         }
         
         

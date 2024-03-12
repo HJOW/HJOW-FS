@@ -57,12 +57,12 @@ $(function() {
                 if(! data.displaynull) taTermDisp.val(taTermDisp.val() + '\n' + data.display);
                 
                 if(data.downloadaccept) {
-                	if(useCaptchaDown) {
-                		pops['captdown'].iframe.attr('src', ctxPathIn + '/jsp/fs/' + 'fscaptdown.jsp?popin=true&path=' + encodeURIComponent(data.path) + "&filename=" + encodeURIComponent(data.downloadfile) + FSUtil.addTokenParameterString());
+                    if(useCaptchaDown) {
+                        pops['captdown'].iframe.attr('src', ctxPathIn + '/jsp/fs/' + 'fscaptdown.jsp?popin=true&path=' + encodeURIComponent(data.path) + "&filename=" + encodeURIComponent(data.downloadfile) + FSUtil.addTokenParameterString());
                         pops['captdown'].open();
-                	} else {
-                		location.href = ctxPathIn + '/jsp/fs/' + 'fscaptdown.jsp?popin=true&path=' + encodeURIComponent(data.path) + "&filename=" + encodeURIComponent(data.downloadfile);
-                	}
+                    } else {
+                        location.href = ctxPathIn + '/jsp/fs/' + 'fscaptdown.jsp?popin=true&path=' + encodeURIComponent(data.path) + "&filename=" + encodeURIComponent(data.downloadfile);
+                    }
                 }
             }, error : function(jqXHR, textStatus, errorThrown) {
                 taTermDisp.val(taTermDisp.val() + '\n' + 'Error ! ' + textStatus + '\n    ' + errorThrown);

@@ -67,14 +67,14 @@ function FSUtilClass() {
     this.version.push(15);
     this.version.push(22);
 
-	this.log = function(logContent) {
-    	try {
-    		try {
-        		console.log(logContent);
-        	} catch(e) { window.console.log(logContent); }
-    	} catch(e) {}
-	}
-	
+    this.log = function(logContent) {
+        try {
+            try {
+                console.log(logContent);
+            } catch(e) { window.console.log(logContent); }
+        } catch(e) {}
+    }
+    
     this.isEmpty = function isEmpty(obj) {
         if(obj == null) return true;
         if(typeof(obj) == 'undefined') return true;
@@ -86,15 +86,15 @@ function FSUtilClass() {
     }
     
     this.replace = function replace(originalString, targetString, replacement) {
-    	return String(originalString).split(targetString).join(replacement);
+        return String(originalString).split(targetString).join(replacement);
     }
     
     this.map = function map(patternedString, parameterJson) {
-    	if(parameterJson == null || typeof(parameterJson) == 'undefined') return patternedString;
-    	if(typeof(parameterJson) == 'string') parameterJson = JSON.parse(parameterJson);
-    	var res = String(patternedString);
+        if(parameterJson == null || typeof(parameterJson) == 'undefined') return patternedString;
+        if(typeof(parameterJson) == 'string') parameterJson = JSON.parse(parameterJson);
+        var res = String(patternedString);
         $.each(parameterJson, function(k, v) {
-        	res = FSUtil.replace(res, '[%' + k + '%]', v);
+            res = FSUtil.replace(res, '[%' + k + '%]', v);
         });
         return res;
     }
@@ -109,10 +109,10 @@ function FSUtilClass() {
     }
     
     this.detectDark = function detectDark() {
-    	try {
-    		return eval("window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches");
-    	} catch(e) {}
-    	return false;
+        try {
+            return eval("window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches");
+        } catch(e) {}
+        return false;
     }
     
     this.detectLanguage = function detectLanguage() {

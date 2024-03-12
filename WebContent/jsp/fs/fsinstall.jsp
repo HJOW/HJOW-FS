@@ -60,7 +60,7 @@ if(! fsc.isInstalled()) {
             FSUtil.applyLanguage(bodys);
 
             form.on('submit', function() {
-            	FSUtil.ajax({
+                FSUtil.ajax({
                     url    : ctxPath + "/jsp/fs/fsinstallin.jsp",
                     data   : form.serialize(),
                     method : "POST",

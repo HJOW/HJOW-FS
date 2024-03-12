@@ -211,63 +211,63 @@ public class FSConsole implements Serializable {
     
     /** Filter console results. The input (the result object) will be affected.  */
     protected FSConsoleResult afterProcessResults(FSConsoleResult beforeResult, String afterProcess, String afterProcessParam) {
-    	if(afterProcess      == null) return beforeResult;
-    	if(afterProcessParam == null) return beforeResult;
-    	
-    	afterProcess = afterProcess.trim().toLowerCase();
-    	StringBuilder coll = null;
-    	StringTokenizer lineTokenizer = null;
-    	
-    	if(beforeResult instanceof FSConsoleMultipleResult) {
-    		FSConsoleMultipleResult b = (FSConsoleMultipleResult) beforeResult;
-    		for(FSConsoleResult r : b.getChildren()) {
-    			String beforeMsg = r.getDisplay();
-    			if(beforeMsg != null) {
-    				coll = new StringBuilder("");
-    				lineTokenizer = new StringTokenizer(beforeMsg, "\n");
-    				while(lineTokenizer.hasMoreTokens()) {
-    					String line = lineTokenizer.nextToken();
-    					line = afterProcessResultEachLine(line, afterProcess, afterProcessParam);
-    					if(line == null) continue;
-    					coll = coll.append("\n").append(line);
-    				}
-    				r.setDisplay(coll.toString().trim());
-    			}
-    		}
-		} else {
-			String beforeMsg = beforeResult.getDisplay();
-			if(beforeMsg != null) {
-				coll = new StringBuilder("");
-				lineTokenizer = new StringTokenizer(beforeMsg, "\n");
-				while(lineTokenizer.hasMoreTokens()) {
-					String line = lineTokenizer.nextToken();
-					line = afterProcessResultEachLine(line, afterProcess, afterProcessParam);
-					if(line == null) continue;
-					coll = coll.append("\n").append(line);
-				}
-				beforeResult.setDisplay(coll.toString().trim());
-			}
-		}
-    	
-    	return beforeResult;
+        if(afterProcess      == null) return beforeResult;
+        if(afterProcessParam == null) return beforeResult;
+        
+        afterProcess = afterProcess.trim().toLowerCase();
+        StringBuilder coll = null;
+        StringTokenizer lineTokenizer = null;
+        
+        if(beforeResult instanceof FSConsoleMultipleResult) {
+            FSConsoleMultipleResult b = (FSConsoleMultipleResult) beforeResult;
+            for(FSConsoleResult r : b.getChildren()) {
+                String beforeMsg = r.getDisplay();
+                if(beforeMsg != null) {
+                    coll = new StringBuilder("");
+                    lineTokenizer = new StringTokenizer(beforeMsg, "\n");
+                    while(lineTokenizer.hasMoreTokens()) {
+                        String line = lineTokenizer.nextToken();
+                        line = afterProcessResultEachLine(line, afterProcess, afterProcessParam);
+                        if(line == null) continue;
+                        coll = coll.append("\n").append(line);
+                    }
+                    r.setDisplay(coll.toString().trim());
+                }
+            }
+        } else {
+            String beforeMsg = beforeResult.getDisplay();
+            if(beforeMsg != null) {
+                coll = new StringBuilder("");
+                lineTokenizer = new StringTokenizer(beforeMsg, "\n");
+                while(lineTokenizer.hasMoreTokens()) {
+                    String line = lineTokenizer.nextToken();
+                    line = afterProcessResultEachLine(line, afterProcess, afterProcessParam);
+                    if(line == null) continue;
+                    coll = coll.append("\n").append(line);
+                }
+                beforeResult.setDisplay(coll.toString().trim());
+            }
+        }
+        
+        return beforeResult;
     }
     
     protected String afterProcessResultEachLine(String lineOne, String afterProcess, String afterProcessParam) {
-    	if(lineOne == null) return null;
-    	if(afterProcess.equals("grep")) {
-    		if(lineOne.indexOf(afterProcessParam) >= 0) return lineOne;
-    		else return null;
-    	}
-    	if(afterProcess.equals("grgx")) {
-    		if(lineOne.matches(afterProcessParam)) return lineOne;
-    		else return null;
-    	}
-    	return lineOne;
+        if(lineOne == null) return null;
+        if(afterProcess.equals("grep")) {
+            if(lineOne.indexOf(afterProcessParam) >= 0) return lineOne;
+            else return null;
+        }
+        if(afterProcess.equals("grgx")) {
+            if(lineOne.matches(afterProcessParam)) return lineOne;
+            else return null;
+        }
+        return lineOne;
     }
     
     /** Check EDIT privileges */
     public static boolean hasEditPriv(FSControl ctrl, Map<String, Object> sessionMap, File root, File target) throws IOException {
-    	String pathCalc = target.getCanonicalPath();
+        String pathCalc = target.getCanonicalPath();
         
         if(! target.exists()   ) throw new FileNotFoundException("There is no " + target.getName());
         if(! pathCalc.startsWith(root.getCanonicalPath())) return false;
@@ -280,12 +280,12 @@ public class FSConsole implements Serializable {
         if(idtype.equals("A")) return true;
         
         Object oDirPrv = (Object) sessionMap.get("privileges");
-    	if(oDirPrv == null) return false;
-    	
-    	JsonArray dirPrv = (JsonArray) JsonCompatibleUtil.parseJson(oDirPrv);
-    	oDirPrv = null;
-    	
-    	for(Object row : dirPrv) {
+        if(oDirPrv == null) return false;
+        
+        JsonArray dirPrv = (JsonArray) JsonCompatibleUtil.parseJson(oDirPrv);
+        oDirPrv = null;
+        
+        for(Object row : dirPrv) {
             JsonObject dirOne = null;
             if(row instanceof JsonObject) dirOne = (JsonObject) row;
             else                          dirOne = (JsonObject) JsonCompatibleUtil.parseJson(row.toString().trim());
@@ -295,9 +295,9 @@ public class FSConsole implements Serializable {
             
             String pathDisp = pathCalc.replace(root.getCanonicalPath(), "").replace("\\", "/");
             if(pathDisp.startsWith(dPath) || ("/" + pathDisp).startsWith(dPath)) {
-            	if(dPrv.equals("edit")) {
-            		return true;
-            	}
+                if(dPrv.equals("edit")) {
+                    return true;
+                }
             }
         }
         

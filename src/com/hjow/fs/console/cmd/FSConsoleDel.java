@@ -25,21 +25,21 @@ import com.hjow.fs.console.FSConsole;
 import com.hjow.fs.console.FSConsoleResult;
 
 public class FSConsoleDel implements FSBundledConsoleCommand {
-	private static final long serialVersionUID = -2635992384395978063L;
+    private static final long serialVersionUID = -2635992384395978063L;
 
-	@Override
-	public String getName() {
-		return "delete";
-	}
+    @Override
+    public String getName() {
+        return "delete";
+    }
 
-	@Override
-	public String getShortName() {
-		return "del";
-	}
+    @Override
+    public String getShortName() {
+        return "del";
+    }
 
-	@Override
-	public String getHelp(String lang, boolean detail) {
-		StringBuilder res = new StringBuilder("");
+    @Override
+    public String getHelp(String lang, boolean detail) {
+        StringBuilder res = new StringBuilder("");
         if(detail) {
             if(lang.equals("ko")) {
                 res = res.append(" * delete").append("\n");
@@ -72,13 +72,13 @@ public class FSConsoleDel implements FSBundledConsoleCommand {
             }
         }
         return res.toString().trim();
-	}
+    }
 
-	@Override
-	public Object run(FSControl ctrl, FSConsole console, Map<String, Object> sessionMap, File root, String parameter, Map<String, String> options) throws Throwable {
-		if(ctrl.isReadOnly()) throw new RuntimeException("Blocked. FS is read-only mode.");
-		
-		String pathCalc = root.getCanonicalPath() + File.separator + console.getPath() + File.separator + parameter;
+    @Override
+    public Object run(FSControl ctrl, FSConsole console, Map<String, Object> sessionMap, File root, String parameter, Map<String, String> options) throws Throwable {
+        if(ctrl.isReadOnly()) throw new RuntimeException("Blocked. FS is read-only mode.");
+        
+        String pathCalc = root.getCanonicalPath() + File.separator + console.getPath() + File.separator + parameter;
         File   fileCalc = new File(pathCalc);
         
         pathCalc = fileCalc.getCanonicalPath();
@@ -87,7 +87,7 @@ public class FSConsoleDel implements FSBundledConsoleCommand {
         if(! pathCalc.startsWith(root.getCanonicalPath())) throw new RuntimeException("Cannot access these path !");
         
         if(! FSConsole.hasEditPriv(ctrl, sessionMap, root, fileCalc)) {
-        	throw new RuntimeException("No privileges");
+            throw new RuntimeException("No privileges");
         }
         
         File garbage = ctrl.getGarbage();
@@ -115,6 +115,6 @@ public class FSConsoleDel implements FSBundledConsoleCommand {
         rs.setSuccess(true);
         rs.setClosepopup(false);
         return rs;
-	}
+    }
 
 }

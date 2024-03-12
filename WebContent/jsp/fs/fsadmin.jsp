@@ -35,8 +35,8 @@ limitations under the License.
             var form    = $('.form_fs_admin');
             var chkAc   = form.find('.chk_account');
             chkAc.on('change', function() {
-            	// Prevent changing (Also not changeable on server)
-            	if($(this).is(':checked')) $(this).prop('checked', false); 
+                // Prevent changing (Also not changeable on server)
+                if($(this).is(':checked')) $(this).prop('checked', false); 
                 else                       $(this).prop('checked', true ); 
             });
             
@@ -80,7 +80,7 @@ limitations under the License.
                                 }
                                 
                                 if(conf['LoginFailCountLimit']) {
-                                	form.find("[name='loginfailcnt']").val(conf['LoginFailCountLimit']);
+                                    form.find("[name='loginfailcnt']").val(conf['LoginFailCountLimit']);
                                 }
                                 
                                 if(conf['TokenLifeTime']) {
@@ -125,7 +125,7 @@ limitations under the License.
                         }, complete : function() {
                             form.find('.hidden_req').val('update');
                             form.on('submit', function() {
-                            	FSUtil.ajax({
+                                FSUtil.ajax({
                                     url    : ctxPath + "/jsp/fs/fsadminin.jsp",
                                     data   : form.serialize(),
                                     method : "POST",
@@ -138,7 +138,7 @@ limitations under the License.
                             
                             var formReset = $('.form_fs_reset');
                             formReset.on('submit', function() {
-                            	FSUtil.ajax({
+                                FSUtil.ajax({
                                     url    : ctxPath + "/jsp/fs/fsadminin.jsp",
                                     data   : formReset.serialize(),
                                     method : "POST",
@@ -233,7 +233,7 @@ limitations under the License.
             
             var formUserCr = $('.form_fs_user_new');
             formUserCr.on('submit', function() {
-            	FSUtil.ajax({
+                FSUtil.ajax({
                     url    : ctxPath + "/jsp/fs/fsadminin.jsp",
                     data   : formUserCr.serialize(),
                     method : "POST",

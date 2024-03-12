@@ -47,8 +47,8 @@ if(tokenID == null || tokenVal == null) {
 }
 
 if(tokenID != null && tokenVal != null) {
-	tokenID  = FSUtils.removeSpecials(tokenID).replace("?", "").replace("&", "").trim();
-	tokenVal = FSUtils.removeSpecials(tokenVal).replace("?", "").replace("&", "").trim();
+    tokenID  = FSUtils.removeSpecials(tokenID).replace("?", "").replace("&", "").trim();
+    tokenVal = FSUtils.removeSpecials(tokenVal).replace("?", "").replace("&", "").trim();
 }
 
 %>

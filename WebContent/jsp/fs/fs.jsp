@@ -93,7 +93,7 @@ $(function() {
             var ct = ifr.contents();
             var cForm = ct.find('form');
             cForm.on('submit', function() {
-            	setTimeout(function() { pops['captdown'].close(); }, 2000);
+                setTimeout(function() { pops['captdown'].close(); }, 2000);
             });
         });
         $('.ui-dialog-titlebar-close').text('X');
@@ -378,7 +378,7 @@ $(function() {
                                     if(FSUtil.detectLanguage() == 'ko') confirmMsg = '이 폴더를 정말 삭제하시겠습니까?';
                                     
                                     if(confirm(confirmMsg)) {
-                                    	FSUtil.ajax({
+                                        FSUtil.ajax({
                                             url  : ctxPath + '/jsp/fs/fsremove.jsp',
                                             data : {
                                                 path : delpath,
@@ -480,12 +480,12 @@ $(function() {
                                     if(prvHeight < 200) prvHeight = 200;
                                     
                                     if(prvIn == '4') {
-                                    	var ifrIn = divPrvIn.find('iframe');
-                                    	ifrIn.css('height', prvHeight + 'px');
-                                    	ifrIn.css('overflow-y', 'scroll');
-                                    	ifrIn.attr('scrolling', 'yes');
+                                        var ifrIn = divPrvIn.find('iframe');
+                                        ifrIn.css('height', prvHeight + 'px');
+                                        ifrIn.css('overflow-y', 'scroll');
+                                        ifrIn.attr('scrolling', 'yes');
                                     } else {
-                                    	divPrvIn.css('max-height', prvHeight + 'px');
+                                        divPrvIn.css('max-height', prvHeight + 'px');
                                         divPrvIn.css('overflow-y', 'scroll');
                                     }
                                     
@@ -519,7 +519,7 @@ $(function() {
                             if(FSUtil.detectLanguage() == 'ko') confirmMsg = '이 파일을 정말 삭제하시겠습니까?';
                             
                             if(confirm(confirmMsg)) {
-                            	FSUtil.ajax({
+                                FSUtil.ajax({
                                     url  : ctxPath + '/jsp/fs/fsremove.jsp',
                                     data : {
                                         path : delpath,

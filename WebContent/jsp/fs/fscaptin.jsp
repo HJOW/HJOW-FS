@@ -46,9 +46,9 @@ ctype = ctype.trim().toLowerCase();
 String captRes = null;
 
 if(ctype.equals("text")) {
-	captRes = fsc.createTextCaptcha(request, key, code, time.longValue());
+    captRes = fsc.createTextCaptcha(request, key, code, time.longValue());
 } else {
-	captRes = fsc.createCaptchaBase64(request, key, code, time.longValue(), Double.parseDouble(scale), theme);
+    captRes = fsc.createCaptchaBase64(request, key, code, time.longValue(), Double.parseDouble(scale), theme);
 }
 
 boolean captDarkMode  = false;
