@@ -55,6 +55,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -171,7 +172,8 @@ public class FSControl {
     protected transient File garbage   = null;
     protected transient File uploadd   = null;
     protected transient File logd      = null;
-    protected transient String ctxPath = "";
+    protected transient String ctxPath  = "";
+    protected transient String realPath = "";
     protected transient FSFileLister lister = new FSDefaultLister();
     protected transient List<FSPack> packs = new ArrayList<FSPack>();
     protected transient List<FSContentType> ftypes = new ArrayList<FSContentType>();
@@ -4350,7 +4352,19 @@ public class FSControl {
     	return allowSysCmd;
     }
 
-    public synchronized void logIn(Object logContent) {
+    public String getRealPath() {
+		return realPath;
+	}
+
+	public void setRealPath(ServletContext ctx) {
+		this.realPath = ctx.getRealPath("/");
+	}
+	
+	public void setRealPath(HttpServletRequest req) {
+		setRealPath(req.getServletContext());
+	}
+
+	public synchronized void logIn(Object logContent) {
         logIn(logContent, FSControl.class);
     }
     

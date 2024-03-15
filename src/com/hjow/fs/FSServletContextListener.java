@@ -35,6 +35,7 @@ public class FSServletContextListener implements ServletContextListener {
         System.out.println(this.getClass().getName() + ".contextInitialized STARTS");
         String ctxPath = sce.getServletContext().getContextPath();
         FSControl.init(ctxPath);
+        FSControl.getInstance().setRealPath(sce.getServletContext());
         
         // Warming up
         

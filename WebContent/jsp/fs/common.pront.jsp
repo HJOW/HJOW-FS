@@ -19,4 +19,5 @@ FSControl fsc = FSControl.getInstance();
 long now = System.currentTimeMillis();
 FSControl.init(request.getContextPath());
 fsc = FSControl.getInstance();
+if(fsc.getRealPath() == null) fsc.setRealPath(request);
 %>
