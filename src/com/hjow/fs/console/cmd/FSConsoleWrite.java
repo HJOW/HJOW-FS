@@ -87,12 +87,15 @@ public class FSConsoleWrite implements FSBundledConsoleCommand {
         if(fileName == null) throw new FileNotFoundException("'--file' optional parameter is necessary.");
         if(! FSUtils.canBeFileName(fileName)) throw new RuntimeException("Illegal character on file's name - " + fileName);
         
-        String pathCalc = root.getCanonicalPath() + File.separator + console.getPath() + File.separator + fileName;
+        String pathCalc = root.getCanonicalPath() + File.separator + console.getPath();
         File   fileCalc = new File(pathCalc);
+        if(! fileCalc.exists()) throw new FileNotFoundException("No such a directory !");
+        
+        pathCalc = fileCalc.getCanonicalPath() + File.separator + fileName;
+        fileCalc = new File(pathCalc);
         
         pathCalc = fileCalc.getCanonicalPath();
         
-        if(! fileCalc.exists()   ) throw new FileNotFoundException("No such a file !");
         if(! pathCalc.startsWith(root.getCanonicalPath())) throw new RuntimeException("Cannot access these path !");
         
         if(! FSConsole.hasEditPriv(ctrl, sessionMap, root, fileCalc)) {

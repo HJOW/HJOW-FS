@@ -15,11 +15,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
  */
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,6 +30,7 @@ import java.util.StringTokenizer;
 import com.hjow.fs.FSControl;
 import com.hjow.fs.console.cmd.FSConsoleCat;
 import com.hjow.fs.console.cmd.FSConsoleCd;
+import com.hjow.fs.console.cmd.FSConsoleCmd;
 import com.hjow.fs.console.cmd.FSConsoleCommand;
 import com.hjow.fs.console.cmd.FSConsoleConfig;
 import com.hjow.fs.console.cmd.FSConsoleDel;
@@ -50,7 +49,6 @@ import com.hjow.fs.console.cmd.FSConsoleWrite;
 import hjow.common.json.JsonArray;
 import hjow.common.json.JsonCompatibleUtil;
 import hjow.common.json.JsonObject;
-import hjow.common.util.ClassUtil;
 import hjow.common.util.DataUtil;
 
 public class FSConsole implements Serializable {
@@ -81,6 +79,7 @@ public class FSConsole implements Serializable {
             if(! commands.contains(FSConsoleConfig.class)) commands.add(FSConsoleConfig.class);
             if(! commands.contains(FSConsoleWrite.class )) commands.add(FSConsoleWrite.class );
             if(! commands.contains(FSConsoleVar.class   )) commands.add(FSConsoleVar.class   );
+            if(! commands.contains(FSConsoleCmd.class   )) commands.add(FSConsoleCmd.class   );
         }
         
         if(commandClasses != null) {
@@ -142,67 +141,9 @@ public class FSConsole implements Serializable {
         
         List<FSConsoleResult> multipleRes = new ArrayList<FSConsoleResult>();
         
-        Runtime rt   = null;
-    	Process proc = null;
-    	BufferedReader rd1, rd2;
-    	rd1 = null;
-    	rd2 = null;
-        
         try {
             for(String lineOne : lines) {
             	FSControl.log("LINE   : " + lineOne, this.getClass());
-            	if(ctrl.isAllowSysCmd() && (lineOne.startsWith("run ") || lineOne.startsWith("RUN "))) {
-            		lineOne = lineOne.substring(4);
-            		
-            		if(rt == null) rt = Runtime.getRuntime();
-            		
-            		StringBuilder outputs = new StringBuilder("");
-            		
-            		if(rd2 != null) ClassUtil.closeAll(rd2);
-            		if(rd1 != null) ClassUtil.closeAll(rd1);
-            		if(proc != null) proc.destroy();
-            		
-            		proc = rt.exec(lineOne);
-            		rd1 = new BufferedReader(new InputStreamReader(proc.getInputStream(), sysCmdCharset));
-            		rd2 = new BufferedReader(new InputStreamReader(proc.getErrorStream(), sysCmdCharset));
-            		
-            		String l = null;
-            		while(true) {
-            			l = rd1.readLine();
-            			if(l == null) break;
-            			outputs = outputs.append("\n").append(l);
-            		}
-            		
-            		while(true) {
-            			l = rd2.readLine();
-            			if(l == null) break;
-            			outputs = outputs.append("\n").append(l);
-            		}
-            		
-            		ClassUtil.closeAll(rd2, rd1);
-            		rd2 = null;
-            		rd1 = null;
-            		proc.destroy();
-            		proc = null;
-            		
-            		String resStr = outputs.toString().trim();
-            		outputs.setLength(0);
-            		
-            		res = new FSConsoleResult();
-                    if(resStr.equals("")) {
-                        res.setNulll(true);
-                        res.setDisplay("");
-                    } else {
-                        res.setNulll(false);
-                        res.setDisplay(resStr);
-                    }
-                    res.setPath(path);
-                    res.setSuccess(true);
-                    multipleRes.add(res);
-            		
-            		continue;
-            	}
-            	
                 Map<String, String> parsed = DataUtil.parseParameter(lineOne);
                 
                 String commandName = parsed.get("ORDER");
@@ -271,10 +212,6 @@ public class FSConsole implements Serializable {
             res.setPath(path);
             res.setSuccess(false);
             multipleRes.add(res);
-        } finally {
-        	if(rd2  != null) ClassUtil.closeAll(rd2);
-    		if(rd1  != null) ClassUtil.closeAll(rd1);
-    		if(proc != null) proc.destroy();
         }
         
         if(multipleRes.size() == 1) return multipleRes.get(0);
