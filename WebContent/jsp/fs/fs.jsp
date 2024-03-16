@@ -381,10 +381,11 @@ $(function() {
                                     
                                     if(confirm(confirmMsg)) {
                                         FSUtil.ajax({
-                                            url  : ctxPath + '/jsp/fs/fsremove.jsp',
+                                            url  : ctxPath + '/jsp/fs/fsproc.jsp',
                                             data : {
                                                 path : delpath,
-                                                dels : 'dir'
+                                                dels : 'dir',
+                                                praction : 'remove'
                                             },
                                             method : 'POST',
                                             dataType : 'JSON',
@@ -522,11 +523,12 @@ $(function() {
                             
                             if(confirm(confirmMsg)) {
                                 FSUtil.ajax({
-                                    url  : ctxPath + '/jsp/fs/fsremove.jsp',
+                                    url  : ctxPath + '/jsp/fs/fsproc.jsp',
                                     data : {
                                         path : delpath,
                                         name : delname,
-                                        dels : 'file'
+                                        dels : 'file',
+                                        praction : 'remove'
                                     },
                                     method : 'POST',
                                     dataType : 'JSON',
@@ -709,10 +711,11 @@ $(function() {
         }
         
         FSUtil.ajax({
-            url  : ctxPath + '/jsp/fs/fsmkdir.jsp',
+            url  : ctxPath + '/jsp/fs/fsproc.jsp',
             data : {
                 path : inpPath.val(),
-                name : dirName
+                name : dirName,
+                praction : 'mkdir'
             },
             method : 'POST',
             dataType : 'JSON',

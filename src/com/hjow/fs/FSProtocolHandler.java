@@ -228,6 +228,22 @@ public class FSProtocolHandler implements Closeable {
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
                 response.getOutputStream().write(json.toJSON().getBytes("UTF-8"));
+            } else if(pAction.equals("mkdir")) {
+            	JsonObject json = ctrl.mkdir(request);
+            	
+            	response.reset();
+            	response.setContentType("application/json");
+            	response.setCharacterEncoding("UTF-8");
+            	response.getOutputStream().write(json.toJSON().getBytes("UTF-8"));
+            } else if(pAction.equals("remove")) {
+                JsonObject json = ctrl.remove(request);
+            	
+            	response.reset();
+            	response.setContentType("application/json");
+            	response.setCharacterEncoding("UTF-8");
+            	response.getOutputStream().write(json.toJSON().getBytes("UTF-8"));
+            } else {
+            	throw new RuntimeException("Unknown Action " + pAction);
             }
         } catch(Throwable t) {
             FSControl.log("Exception when handling protocol - (" + t.getClass().getName() + ") " + t.getMessage(), this.getClass());
