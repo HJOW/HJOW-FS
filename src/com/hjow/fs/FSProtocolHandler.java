@@ -41,12 +41,16 @@ public class FSProtocolHandler implements Closeable {
     
     public void handle(HttpServletRequest request, HttpServletResponse response) {
         if(ctrl == null) ctrl = FSControl.getInstance();
+        String pAction = "";
         try {
-            String pAction = request.getParameter("praction");
+            pAction = request.getParameter("praction");
             if(pAction == null) pAction = request.getParameter("PRACTION");
-            if(pAction == null) return;
+            if(pAction == null) pAction = "";
             
             pAction = pAction.toLowerCase().trim();
+            
+            ctrl.invokeCallEvent("before",  pAction, request);
+            
             if(pAction.equals("list")) {
                 String pathParam = request.getParameter("path");
                 if(pathParam == null) pathParam = "";
@@ -252,8 +256,11 @@ public class FSProtocolHandler implements Closeable {
             } else {
             	throw new RuntimeException("Unknown Action " + pAction);
             }
+            
+            ctrl.invokeCallEvent("after",  pAction, request);
         } catch(Throwable t) {
             FSControl.log("Exception when handling protocol - (" + t.getClass().getName() + ") " + t.getMessage(), this.getClass());
+            try { ctrl.invokeCallEvent("exception", pAction, request); } catch(Throwable ignores) {}
             
             JsonObject json = new JsonObject();
             json.put("message", "Error : " + t.getMessage());

@@ -86,7 +86,7 @@ public class FSConsole implements Serializable {
             for(String c : commandClasses) {
                 try {
                     Class<? extends FSConsoleCommand> classObj = (Class<? extends FSConsoleCommand>) Class.forName(c);
-                    commands.add(classObj);
+                    if(! commands.contains(classObj)) commands.add(classObj);
                 } catch(ClassNotFoundException e) {
                     FSControl.log("Cannot found " + c + " - " + e.getMessage(), FSConsole.class);
                 }

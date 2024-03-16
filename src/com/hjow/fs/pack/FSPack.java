@@ -43,6 +43,10 @@ public abstract class FSPack implements Serializable {
         return new ArrayList<FSContentType>();
     }
     
+    public List<FSControlEventHandler> getEventHandlers() {
+        return new ArrayList<FSControlEventHandler>();
+    }
+    
     @Override
     public boolean equals(Object others) {
         if(others == null) return false;

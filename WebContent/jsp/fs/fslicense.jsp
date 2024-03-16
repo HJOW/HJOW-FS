@@ -27,8 +27,8 @@ jQuery UI (https://jquery.com/)
 bootstrap (https://getbootstrap.com/)
 video.js (http://videojs.com/) Copyright Brightcove, Inc.
 Apache Common Codec (https://commons.apache.org/proper/commons-codec/) - Choosable library (Necessary on JDK 9 or above)
-favicon and image from freepik.com (https://kr.freepik.com/icon/files_220980#fromView=search&term=Folder&track=ais&page=1&position=30)
-image from freepik.com (https://kr.freepik.com/icon/pdf-file_4347587#fromView=search&term=%ED%8C%8C%EC%9D%BC&track=ais&page=3&position=7)
+favicon and image from freepik.com (https://kr.freepik.com/icon/files_220980)
+image from freepik.com (https://kr.freepik.com/icon/pdf-file_4347587)
 D2Coding font (https://github.com/Joungkyun/font-d2coding)
 Java, Servlet API (https://javaee.github.io/servlet-spec/LICENSE)
 </textarea>

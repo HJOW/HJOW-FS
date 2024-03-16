@@ -16,6 +16,10 @@ limitations under the License.
 */
 out.clear();
 pageContext.pushBody();
+try { fsc.invokeCallEvent("before", "download", request); } catch(Throwable t) { t.printStackTrace(); }
+
 fsc.download(request, response);
+
+try { fsc.invokeCallEvent("after" , "download", request); } catch(Throwable t) { t.printStackTrace(); }
 return;
 %>

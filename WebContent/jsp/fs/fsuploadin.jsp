@@ -14,7 +14,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+try { fsc.invokeCallEvent("before", "download", request); } catch(Throwable t) { t.printStackTrace(); }
+
 String msg = fsc.upload(request);
+
+try { fsc.invokeCallEvent("after" , "download", request); } catch(Throwable t) { t.printStackTrace(); }
 %>
 <!DOCTYPE html>
 <html>

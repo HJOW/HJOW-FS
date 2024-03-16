@@ -71,6 +71,7 @@ import com.hjow.fs.cttype.FSContentType;
 import com.hjow.fs.lister.FSDefaultLister;
 import com.hjow.fs.lister.FSFileLister;
 import com.hjow.fs.lister.FSFileListingResult;
+import com.hjow.fs.pack.FSControlEventHandler;
 import com.hjow.fs.pack.FSPack;
 import com.hjow.fs.pack.FSRequestHandler;
 import com.oreilly.servlet.MultipartRequest;
@@ -107,7 +108,7 @@ public class FSControl {
     protected boolean useToken   = true;
 
     // Reading configuration file time gap (milliseconds)
-    protected long   refreshConfGap = 4000L;
+    protected long   refreshConfGap = 1000L * 300;
     
     // Read and display file icon
     protected boolean readFileIcon = true;
@@ -167,8 +168,10 @@ public class FSControl {
     // Other Temporary Fields
     protected transient JsonObject conf = new JsonObject();
     protected transient volatile long    confReads    = 0L;
+    protected transient volatile long    confAccess   = 0L;
     protected transient volatile boolean confChanging = false;
     protected transient volatile boolean accChanging  = false;
+    protected transient volatile boolean initializing = false;
     protected transient boolean installed = false;
     protected transient String salt = "fs";
     protected transient File rootPath  = null;
@@ -255,7 +258,33 @@ public class FSControl {
     }
     
     /** Load properties, configs, and DB tables when using JDBC */
-    private synchronized void initializeIn(String contextPath, long now) {
+    private void initializeIn(String contextPath, long now) {
+    	if(ctxPath == null) ctxPath = "";
+
+    	int preventInfLoop = 0;
+    	while(initializing) {
+    		try { Thread.sleep(100L); } catch(InterruptedException e) { break; }
+    		preventInfLoop++;
+    		if(preventInfLoop >= 10000) break;
+    	}
+    	
+    	if(fileConfigPath == null || (! ctxPath.equals(contextPath))) {
+    		initializeInSync(contextPath, now);
+    		return;
+    	}
+    	if(now - confReads >= refreshConfGap) {
+    		initializeInSync(contextPath, now);
+    	} else if(Math.abs(now - confAccess) >= refreshConfGap / 10) {
+    		initializeInSync(contextPath, now);
+    	} else {
+    		confAccess = now;
+    	}
+    }
+    
+    /** Load properties, configs, and DB tables when using JDBC */
+    private synchronized void initializeInSync(String contextPath, long now) {
+    	initializing = true;
+    	
         Connection        conn     = null;
         PreparedStatement pstmt    = null;
         ResultSet         rs       = null;
@@ -267,252 +296,255 @@ public class FSControl {
         
         String pPacks = "";
         if(ctxPath == null) ctxPath = "";
-        if(fileConfigPath == null || (! ctxPath.equals(contextPath)) || Math.abs(now - confReads) >= refreshConfGap) {
-            try {
-                confReads = now;
-                
-                // Set Global Variables
-                ctxPath = contextPath;
-                
-                // Check installation and trying to find configuration file
-                String s1 = "";
-                String s2 = "";
-                String s3 = "";
-                
-                Properties propTest = getFSProperties();
-                
-                if(propTest != null) {
-                    // Check fs.properties
-                    String t1 = propTest.getProperty("FS");
-                    String t2 = propTest.getProperty("RD");
-                    String t3 = propTest.getProperty("PW");
-                    s1 = propTest.getProperty("S1");
-                    s2 = propTest.getProperty("S2");
-                    s3 = propTest.getProperty("S3");
-                    if(t1 != null && t2 != null && t3 != null && s1 != null && s2 != null && s3 != null) {
-                        if(t1.trim().equals("FileStorage") && t2.trim().equals("SetConfigPathBelow")) {
-                            logIn("Configuration Found !");
-                            
-                            // Set CS
-                            cs = propTest.getProperty("CS");
-                            if(cs == null) cs = "UTF-8";
-                            cs = cs.trim();
-                            
-                            // Get configuration directory from fs.properties
-                            String cf = propTest.getProperty("CF");
-                            if(cf != null) {
-                                cf = cf.trim();
-                                if(cf.startsWith("ENV:")) {
-                                    // If CF starts with 'ENV:', then get directory from system environment.
-                                    cf = cf.replace("ENV:", "").trim();
-                                    fileConfigPath = new File(System.getProperty(cf) + File.separator + ".fs" + File.separator);
-                                } else {
-                                    // Else, then get directory as absolute path.
-                                    cf = cf.replace("\\", File.separator);
-                                    fileConfigPath = new File(cf + File.separator + ".fs" + File.separator);
-                                }
-                                if(! fileConfigPath.exists()) fileConfigPath.mkdirs();
+        
+        try {
+            confReads  = now;
+            confAccess = now;
+            
+            // Set Global Variables
+            ctxPath = contextPath;
+            
+            logIn("Trying to reload configs at " + System.currentTimeMillis());
+            
+            // Check installation and trying to find configuration file
+            String s1 = "";
+            String s2 = "";
+            String s3 = "";
+            
+            Properties propTest = getFSProperties();
+            
+            if(propTest != null) {
+                // Check fs.properties
+                String t1 = propTest.getProperty("FS");
+                String t2 = propTest.getProperty("RD");
+                String t3 = propTest.getProperty("PW");
+                s1 = propTest.getProperty("S1");
+                s2 = propTest.getProperty("S2");
+                s3 = propTest.getProperty("S3");
+                if(t1 != null && t2 != null && t3 != null && s1 != null && s2 != null && s3 != null) {
+                    if(t1.trim().equals("FileStorage") && t2.trim().equals("SetConfigPathBelow")) {
+                        logIn("Configuration Found !");
+                        
+                        // Set CS
+                        cs = propTest.getProperty("CS");
+                        if(cs == null) cs = "UTF-8";
+                        cs = cs.trim();
+                        
+                        // Get configuration directory from fs.properties
+                        String cf = propTest.getProperty("CF");
+                        if(cf != null) {
+                            cf = cf.trim();
+                            if(cf.startsWith("ENV:")) {
+                                // If CF starts with 'ENV:', then get directory from system environment.
+                                cf = cf.replace("ENV:", "").trim();
+                                fileConfigPath = new File(System.getProperty(cf) + File.separator + ".fs" + File.separator);
+                            } else {
+                                // Else, then get directory as absolute path.
+                                cf = cf.replace("\\", File.separator);
+                                fileConfigPath = new File(cf + File.separator + ".fs" + File.separator);
                             }
-                        }
-                    }
-                    
-                    // Check JDBC option exists and avail
-                    String pDB = propTest.getProperty("DB");
-                    if(pDB != null) {
-                        if(pDB.equalsIgnoreCase("Y") || pDB.equalsIgnoreCase("YES") || pDB.equalsIgnoreCase("TRUE")) {
-                            useJDBC = true;
-                            
-                            dbType    = propTest.getProperty("DB_TYPE");
-                            jdbcClass = propTest.getProperty("DB_CLASS");
-                            jdbcUrl   = propTest.getProperty("DB_URL");
-                            jdbcId    = propTest.getProperty("DB_USER");
-                            jdbcPw    = propTest.getProperty("DB_PW");
-                            
-                            if(dbType == null || jdbcClass == null || jdbcUrl == null || jdbcId == null || jdbcPw == null) useJDBC = false;
-                            if(useJDBC) {
-                                dbType    = dbType.trim().toLowerCase();
-                                jdbcClass = jdbcClass.trim();
-                                jdbcUrl   = jdbcUrl.trim();
-                                jdbcId    = jdbcId.trim();
-                                jdbcPw    = jdbcPw.trim();
-                                
-                                try { Class.forName(jdbcClass); } catch(ClassNotFoundException e) { logIn("No jdbc driver found - " + jdbcClass); useJDBC = false; } 
-                            }
-                        }
-                    }
-                    
-                    pPacks = propTest.getProperty("PK");
-                    if(pPacks == null) pPacks = "";
-                    pPacks = pPacks.trim();
-                    
-                    propTest.clear();
-                    propTest = null;
-                    propIn = null;
-                    
-                    // Read configs
-                    if(useJDBC) {
-                        if(conn == null) {
-                            Class.forName(jdbcClass);
-                            conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);                                
-                        }
-                        
-                        pstmt = conn.prepareStatement("SELECT JSONCONFIG FROM FS_CONFIG");
-                        rs    = pstmt.executeQuery();
-                        
-                        String confJson = null;
-                        while(rs.next()) {
-                            confJson = rs.getString("JSONCONFIG");
-                        }
-                        
-                        rs.close(); rs = null;
-                        pstmt.close(); pstmt = null;
-                        conn.close(); conn = null;
-                        
-                        conf = (JsonObject) JsonCompatibleUtil.parseJson(confJson);
-                        conf.put("S1", s1);
-                        conf.put("S2", s2);
-                        conf.put("S3", s3);
-                        
-                    } else if(fileConfigPath != null) {
-                        // Find config.json from configuration path
-                        File fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "config.json");
-                        if(! fJson.exists()) {
-                            // Not exist, create
-                            fileOut = new FileOutputStream(fJson);
-                            fileOut.write("{}".getBytes(cs));
-                            fileOut.close(); fileOut = null;
-                        }
-                        
-                        propIn = new FileInputStream(fJson);
-                        rd1 = new InputStreamReader(propIn, cs);
-                        rd2 = new BufferedReader(rd1);
-                        
-                        StringBuilder lineCollection = new StringBuilder("");
-                        String line;
-                        while(true) {
-                            line = ((BufferedReader) rd2).readLine();
-                            if(line == null) break;
-                            lineCollection = lineCollection.append("\n").append(line); 
-                        }
-                        
-                        rd2.close(); rd2 = null;
-                        rd1.close(); rd1 = null;
-                        propIn.close(); propIn = null;
-                        
-                        conf = (JsonObject) JsonCompatibleUtil.parseJson(lineCollection.toString().trim());
-                        conf.put("S1", s1);
-                        conf.put("S2", s2);
-                        conf.put("S3", s3);
-                        
-                        lineCollection.setLength(0);
-                        lineCollection = null;
-                        
-                        // Find accounts.json from configuration path
-                        File faJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts");
-                        if(! faJson.exists()) {
-                            faJson.mkdirs();
-                        }
-                        
-                        File ftJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "tokens");
-                        if(! ftJson.exists()) {
-                            ftJson.mkdirs();
+                            if(! fileConfigPath.exists()) fileConfigPath.mkdirs();
                         }
                     }
                 }
-                if(conf    == null) { try { conf = new JsonObject(); } catch(Throwable txc) {} }
+                
+                // Check JDBC option exists and avail
+                String pDB = propTest.getProperty("DB");
+                if(pDB != null) {
+                    if(pDB.equalsIgnoreCase("Y") || pDB.equalsIgnoreCase("YES") || pDB.equalsIgnoreCase("TRUE")) {
+                        useJDBC = true;
+                        
+                        dbType    = propTest.getProperty("DB_TYPE");
+                        jdbcClass = propTest.getProperty("DB_CLASS");
+                        jdbcUrl   = propTest.getProperty("DB_URL");
+                        jdbcId    = propTest.getProperty("DB_USER");
+                        jdbcPw    = propTest.getProperty("DB_PW");
+                        
+                        if(dbType == null || jdbcClass == null || jdbcUrl == null || jdbcId == null || jdbcPw == null) useJDBC = false;
+                        if(useJDBC) {
+                            dbType    = dbType.trim().toLowerCase();
+                            jdbcClass = jdbcClass.trim();
+                            jdbcUrl   = jdbcUrl.trim();
+                            jdbcId    = jdbcId.trim();
+                            jdbcPw    = jdbcPw.trim();
+                            
+                            try { Class.forName(jdbcClass); } catch(ClassNotFoundException e) { logIn("No jdbc driver found - " + jdbcClass); useJDBC = false; } 
+                        }
+                    }
+                }
+                
+                pPacks = propTest.getProperty("PK");
+                if(pPacks == null) pPacks = "";
+                pPacks = pPacks.trim();
+                
+                propTest.clear();
+                propTest = null;
                 propIn = null;
                 
-                // Applying Configs
-                if(conf.get("Installed") != null) {
-                    installed = DataUtil.parseBoolean(conf.get("Installed").toString().trim());
-                }
-                if(installed) {
-                    if(conf.get("Path") != null) {
-                        storPath = conf.get("Path").toString().trim();
+                // Read configs
+                if(useJDBC) {
+                    if(conn == null) {
+                        Class.forName(jdbcClass);
+                        conn = DriverManager.getConnection(jdbcUrl, jdbcId, jdbcPw);                                
                     }
-                    rootPath  = new File(storPath);
-                    if(! rootPath.exists()) rootPath.mkdirs();
-                    garbage = new File(rootPath.getCanonicalPath() + File.separator + ".garbage");
-                    if(! garbage.exists()) garbage.mkdirs();
-                    uploadd = new File(rootPath.getCanonicalPath() + File.separator + ".upload");
-                    if(! uploadd.exists()) uploadd.mkdirs();
-                    logd = new File(fileConfigPath.getCanonicalPath() + File.separator + ".logs");
-                    if(! logd.exists()) logd.mkdirs();
-                    applyConfigs();
-                 }
-                
-                // Searching FSPack declared from config (This config value is array filled with FSPack class names)
-                List<String> packList = new ArrayList<String>();
-                if(conf.get("Packs") != null) {
-                    JsonArray arr = null;
-                    if(conf.get("Packs") instanceof JsonArray) arr = (JsonArray) conf.get("Packs");
-                    else arr = (JsonArray) JsonCompatibleUtil.parseJson(conf.get("Packs").toString().trim());
-                    for(Object a : arr) {
-                        String packClass = a.toString().trim();
-                        if(! packList.contains(packClass)) packList.add(packClass);
+                    
+                    pstmt = conn.prepareStatement("SELECT JSONCONFIG FROM FS_CONFIG");
+                    rs    = pstmt.executeQuery();
+                    
+                    String confJson = null;
+                    while(rs.next()) {
+                        confJson = rs.getString("JSONCONFIG");
                     }
-                } else {
-                    conf.put("Packs", new JsonArray());
-                }
-                
-                // Searching FSPack declared from fs.properties (This prop value is array filled with FSPack class names)
-                if(! pPacks.equals("")) {
-                    StringTokenizer colonTokenizer = new StringTokenizer(pPacks, ",");
-                    while(colonTokenizer.hasMoreTokens()) {
-                        String packClass = colonTokenizer.nextToken().trim();
-                        if(! packList.contains(packClass)) packList.add(packClass);
+                    
+                    rs.close(); rs = null;
+                    pstmt.close(); pstmt = null;
+                    conn.close(); conn = null;
+                    
+                    conf = (JsonObject) JsonCompatibleUtil.parseJson(confJson);
+                    conf.put("S1", s1);
+                    conf.put("S2", s2);
+                    conf.put("S3", s3);
+                    
+                } else if(fileConfigPath != null) {
+                    // Find config.json from configuration path
+                    File fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "config.json");
+                    if(! fJson.exists()) {
+                        // Not exist, create
+                        fileOut = new FileOutputStream(fJson);
+                        fileOut.write("{}".getBytes(cs));
+                        fileOut.close(); fileOut = null;
                     }
-                }
-                
-                // Trying to create FSPack instances
-                for(String packClass : packList) {
-                    try {
-                        Class<?> pc = Class.forName(packClass);
-                        FSPack pack = (FSPack) pc.newInstance();
-                        if(! pack.isAvail(VERSION)) continue;
-                        if(packs.contains(pack)) continue;
-                        pack.init(this);
-                        packs.add(pack);
-                        
-                        if(pack instanceof FSFileLister) this.lister = (FSFileLister) pack;
-                        
-                        List<FSContentType> typesBundled = pack.getContentTypes();
-                        if(typesBundled != null) {
-                            for(FSContentType t : typesBundled) {
-                                if(! ftypes.contains(t)) ftypes.add(t);
-                            }
-                        }
-                    } catch(Throwable tc) {
-                        logIn("Exception when loading Pack " + packClass + " - (" + tc.getClass().getName() + ") " + tc.getMessage());
+                    
+                    propIn = new FileInputStream(fJson);
+                    rd1 = new InputStreamReader(propIn, cs);
+                    rd2 = new BufferedReader(rd1);
+                    
+                    StringBuilder lineCollection = new StringBuilder("");
+                    String line;
+                    while(true) {
+                        line = ((BufferedReader) rd2).readLine();
+                        if(line == null) break;
+                        lineCollection = lineCollection.append("\n").append(line); 
                     }
-                }
-                packList.clear();
-                packList = null;
-                
-                // Load commands from FSPack
-                List<String> cmdList = new ArrayList<String>();
-                for(FSPack p : packs) {
-                    List<String> l = p.getCommandClasses();
-                    for(String c : l) {
-                        if(! cmdList.contains(c)) cmdList.add(c);
+                    
+                    rd2.close(); rd2 = null;
+                    rd1.close(); rd1 = null;
+                    propIn.close(); propIn = null;
+                    
+                    conf = (JsonObject) JsonCompatibleUtil.parseJson(lineCollection.toString().trim());
+                    conf.put("S1", s1);
+                    conf.put("S2", s2);
+                    conf.put("S3", s3);
+                    
+                    lineCollection.setLength(0);
+                    lineCollection = null;
+                    
+                    // Find accounts.json from configuration path
+                    File faJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts");
+                    if(! faJson.exists()) {
+                        faJson.mkdirs();
+                    }
+                    
+                    File ftJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "tokens");
+                    if(! ftJson.exists()) {
+                        ftJson.mkdirs();
                     }
                 }
-                
-                FSConsole.init(rootPath, cmdList);
-            } catch(Throwable thx) {
-                thx.printStackTrace();
-                fileConfigPath = null;
-                catched = thx;
-            } finally {
-                if(rd2     != null) { try { rd2.close();             } catch(Throwable txc) {} }
-                if(rd1     != null) { try { rd1.close();             } catch(Throwable txc) {} }
-                if(propIn  != null) { try { propIn.close();          } catch(Throwable txc) {} }
-                if(fileOut != null) { try { fileOut.close();         } catch(Throwable txc) {} }
-                if(rs      != null) { try { rs.close();              } catch(Throwable txc) {} }
-                if(pstmt   != null) { try { pstmt.close();           } catch(Throwable txc) {} }
-                if(conn    != null) { try { conn.close();            } catch(Throwable txc) {} }
-                if(conf    == null) { try { conf = new JsonObject(); } catch(Throwable txc) {} }
             }
+            if(conf    == null) { try { conf = new JsonObject(); } catch(Throwable txc) {} }
+            propIn = null;
+            
+            // Applying Configs
+            if(conf.get("Installed") != null) {
+                installed = DataUtil.parseBoolean(conf.get("Installed").toString().trim());
+            }
+            if(installed) {
+                if(conf.get("Path") != null) {
+                    storPath = conf.get("Path").toString().trim();
+                }
+                rootPath  = new File(storPath);
+                if(! rootPath.exists()) rootPath.mkdirs();
+                garbage = new File(rootPath.getCanonicalPath() + File.separator + ".garbage");
+                if(! garbage.exists()) garbage.mkdirs();
+                uploadd = new File(rootPath.getCanonicalPath() + File.separator + ".upload");
+                if(! uploadd.exists()) uploadd.mkdirs();
+                logd = new File(fileConfigPath.getCanonicalPath() + File.separator + ".logs");
+                if(! logd.exists()) logd.mkdirs();
+                applyConfigs();
+             }
+            
+            // Searching FSPack declared from config (This config value is array filled with FSPack class names)
+            List<String> packList = new ArrayList<String>();
+            if(conf.get("Packs") != null) {
+                JsonArray arr = null;
+                if(conf.get("Packs") instanceof JsonArray) arr = (JsonArray) conf.get("Packs");
+                else arr = (JsonArray) JsonCompatibleUtil.parseJson(conf.get("Packs").toString().trim());
+                for(Object a : arr) {
+                    String packClass = a.toString().trim();
+                    if(! packList.contains(packClass)) packList.add(packClass);
+                }
+            } else {
+                conf.put("Packs", new JsonArray());
+            }
+            
+            // Searching FSPack declared from fs.properties (This prop value is array filled with FSPack class names)
+            if(! pPacks.equals("")) {
+                StringTokenizer colonTokenizer = new StringTokenizer(pPacks, ",");
+                while(colonTokenizer.hasMoreTokens()) {
+                    String packClass = colonTokenizer.nextToken().trim();
+                    if(! packList.contains(packClass)) packList.add(packClass);
+                }
+            }
+            
+            // Trying to create FSPack instances
+            for(String packClass : packList) {
+                try {
+                    Class<?> pc = Class.forName(packClass);
+                    FSPack pack = (FSPack) pc.newInstance();
+                    if(! pack.isAvail(VERSION)) continue;
+                    if(packs.contains(pack)) continue;
+                    pack.init(this);
+                    packs.add(pack);
+                    
+                    if(pack instanceof FSFileLister) this.lister = (FSFileLister) pack;
+                    
+                    List<FSContentType> typesBundled = pack.getContentTypes();
+                    if(typesBundled != null) {
+                        for(FSContentType t : typesBundled) {
+                            if(! ftypes.contains(t)) ftypes.add(t);
+                        }
+                    }
+                } catch(Throwable tc) {
+                    logIn("Exception when loading Pack " + packClass + " - (" + tc.getClass().getName() + ") " + tc.getMessage());
+                }
+            }
+            packList.clear();
+            packList = null;
+            
+            // Load commands from FSPack
+            List<String> cmdList = new ArrayList<String>();
+            for(FSPack p : packs) {
+                List<String> l = p.getCommandClasses();
+                for(String c : l) {
+                    if(! cmdList.contains(c)) cmdList.add(c);
+                }
+            }
+            
+            FSConsole.init(rootPath, cmdList);
+        } catch(Throwable thx) {
+            thx.printStackTrace();
+            fileConfigPath = null;
+            catched = thx;
+        } finally {
+            if(rd2     != null) { try { rd2.close();             } catch(Throwable txc) {} }
+            if(rd1     != null) { try { rd1.close();             } catch(Throwable txc) {} }
+            if(propIn  != null) { try { propIn.close();          } catch(Throwable txc) {} }
+            if(fileOut != null) { try { fileOut.close();         } catch(Throwable txc) {} }
+            if(rs      != null) { try { rs.close();              } catch(Throwable txc) {} }
+            if(pstmt   != null) { try { pstmt.close();           } catch(Throwable txc) {} }
+            if(conn    != null) { try { conn.close();            } catch(Throwable txc) {} }
+            if(conf    == null) { try { conf = new JsonObject(); } catch(Throwable txc) {} }
+            initializing = false;
         }
         
         if(catched != null) throw new RuntimeException(catched.getMessage(), catched);
@@ -520,6 +552,8 @@ public class FSControl {
     
     /** Called from fsinstall.jsp, which is called by installation page by ajax. */
     public JsonObject install(HttpServletRequest request) throws Exception {
+    	initialize(request.getContextPath());
+    	
         JsonObject json = processHandler("install", request);
         if(json != null) return json;
         json = new JsonObject();
@@ -921,6 +955,8 @@ public class FSControl {
     
     /** Called from fsadmin.jsp, which is called by administration page by ajax. */
     public JsonObject admin(HttpServletRequest request) throws Exception {
+    	initialize(request.getContextPath());
+    	
         JsonObject json = processHandler("admin", request);
         if(json != null) return json;
         json = new JsonObject();
@@ -1776,7 +1812,7 @@ public class FSControl {
     
     /** Called from fs.jsp, which is called by file list page by ajax. */
     public JsonObject list(HttpServletRequest request, String pPath, String pKeyword, String pExcept) {
-        // initialize(request.getContextPath());
+    	initialize(request.getContextPath());
         
         JsonObject json = processHandler("list", request);
         if(json != null) return json;
@@ -4952,6 +4988,18 @@ public class FSControl {
         return null;
     }
     
+    /** Call event handler */
+    public void invokeCallEvent(String event, String action, HttpServletRequest req) throws Throwable {
+    	for(FSPack pack : packs) {
+    		List<FSControlEventHandler> list = pack.getEventHandlers();
+    		if(list == null) continue;
+    		for(FSControlEventHandler e : list) {
+    			e.eventOccured(event, action, req);
+    		}
+    	}
+    }
+    
+    /** Delete all tokens */
     public void removeAllTokens() throws IOException {
         File ftJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "tokens");
         if(ftJson.exists()) {

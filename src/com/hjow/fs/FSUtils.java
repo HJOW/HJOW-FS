@@ -24,6 +24,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import javax.servlet.http.HttpServletRequest;
+
+import com.hjow.fs.etc.BrowserInfo;
+
 import hjow.common.util.DataUtil;
 import hjow.common.util.GUIUtil;
 import hjow.common.util.SecurityUtil;
@@ -283,5 +287,23 @@ public class FSUtils {
         if(name.contains("|") || name.contains("<" ) || name.contains(">"           )) return false;
         if(name.length() >= 256) return false;
         return true;
+    }
+    
+    /** Trying to parse string into double. If multiple '.' in string, then toss away except first. */
+    public static double parseFloatFirstBlock(String str) {
+    	try {
+            String[] splits = String.valueOf(str).split("\\.");
+            if(splits.length <= 1) return (double) Integer.parseInt(splits[0]);
+            return Double.parseDouble(splits[0] + '.' + splits[1]);
+        } catch(Throwable t) {
+        	System.out.println("Cannot convert string into double - " + str + " - (" + t.getClass().getName() + ") - " + t.getMessage());
+            return -1;
+        }
+    }
+    
+    /** Detect client's web browser */
+    public static BrowserInfo detectClientBrowser(HttpServletRequest request) {
+    	String agent  = request.getHeader("User-Agent");
+    	return BrowserInfo.byUserAgent(agent);
     }
 }
