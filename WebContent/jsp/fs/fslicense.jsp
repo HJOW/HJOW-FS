@@ -31,4 +31,6 @@ favicon and image from freepik.com (https://kr.freepik.com/icon/files_220980)
 image from freepik.com (https://kr.freepik.com/icon/pdf-file_4347587)
 D2Coding font (https://github.com/Joungkyun/font-d2coding)
 Java, Servlet API (https://javaee.github.io/servlet-spec/LICENSE)
+React (https://github.com/facebook/react/blob/main/LICENSE)
+Babel Standalone (https://github.com/babel/babel-standalone/blob/master/LICENSE)
 </textarea>

@@ -13,6 +13,7 @@
 $(function() {
 	if(FSUtil.detectSupportES6()) {
 		// TODO : move to modern UI page
+		// location.href = './html/modern.html';
 	}
 });
 </script>
