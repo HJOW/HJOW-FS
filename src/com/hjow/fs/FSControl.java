@@ -177,6 +177,7 @@ public class FSControl {
     protected transient File rootPath  = null;
     protected transient File garbage   = null;
     protected transient File uploadd   = null;
+    protected transient File tempd     = null;
     protected transient File logd      = null;
     protected transient String ctxPath  = "";
     protected transient String realPath = "";
@@ -470,6 +471,8 @@ public class FSControl {
                 if(! uploadd.exists()) uploadd.mkdirs();
                 logd = new File(fileConfigPath.getCanonicalPath() + File.separator + ".logs");
                 if(! logd.exists()) logd.mkdirs();
+                tempd = new File(fileConfigPath.getCanonicalPath() + File.separator + ".temp");
+                if(! tempd.exists()) tempd.mkdirs();
                 applyConfigs();
              }
             
