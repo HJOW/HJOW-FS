@@ -1542,6 +1542,50 @@ public class FSControl {
                         dirTokens.delete();
                     }
                 }
+            } else if(req.equalsIgnoreCase("gblist")) {
+            	garbage = new File(rootPath.getCanonicalPath() + File.separator + ".garbage");
+                if(! garbage.exists()) garbage.mkdirs();
+                
+                JsonArray dates = new JsonArray();
+                File[] lists = garbage.listFiles();
+                for(File f : lists) {
+                	if(f.isDirectory()) {
+                		File[] children = f.listFiles();
+                		for(File child : children) {
+                			if(child.isDirectory()) {
+                				File[] gchildren = child.listFiles();
+                				for(File gchild : gchildren) {
+                					if(gchild.isDirectory()) continue;
+                					dates.add(gchild.getCanonicalPath().replace(garbage.getCanonicalPath(), ""));
+                				}
+                			}
+                			dates.add(child.getCanonicalPath().replace(garbage.getCanonicalPath(), ""));
+                		}
+                	}
+                	dates.add(f.getCanonicalPath().replace(garbage.getCanonicalPath(), ""));
+                }
+                json.put("garbages", dates);
+            } else if(req.equalsIgnoreCase("cleangb")) {
+            	garbage = new File(rootPath.getCanonicalPath() + File.separator + ".garbage");
+                if(! garbage.exists()) garbage.mkdirs();
+                
+                File[] lists = garbage.listFiles();
+                for(File f : lists) {
+                	if(f.isDirectory()) {
+                		File[] children = f.listFiles();
+                		for(File child : children) {
+                			if(child.isDirectory()) {
+                				File[] gchildren = child.listFiles();
+                				for(File gchild : gchildren) {
+                					if(gchild.isDirectory()) continue;
+                					gchild.delete();
+                				}
+                			}
+                			child.delete();
+                		}
+                	}
+                	f.delete();
+                }
             }
             
             if(! req.equalsIgnoreCase("reset")) {

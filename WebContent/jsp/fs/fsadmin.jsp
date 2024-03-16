@@ -35,6 +35,8 @@ limitations under the License.
             var form    = $('.form_fs_admin');
             var chkAc   = form.find('.chk_account');
             
+            var tabEvents = {};
+            
             form.find("[name='readfileicon']").prop('checked', true);
             form.find("[name='useconsole']").prop('checked', true);
             form.find("[name='usesession']").prop('checked', true);
@@ -185,6 +187,9 @@ limitations under the License.
                     
                     $('.adminelement').addClass('invisible');
                     $('.adminelement_' + $(this).attr('data-target')).removeClass('invisible');
+                    
+                    var eventFunc = tabEvents[$(this).attr('data-target')];
+                    if(typeof(eventFunc) == 'function') eventFunc();
                 });
             });
             
@@ -271,6 +276,55 @@ limitations under the License.
                     }
                 });
             });
+            
+            tabEvents['users'] = function() {
+            	formUserSrch.trigger('submit');
+            };
+            tabEvents['cleangb'] = function() {
+            	var tbodyGb = bodys.find('.tbody_garbages');
+            	tbodyGb.empty();
+            	tbodyGb.append("<tr><td>...</td></tr>");
+            	FSUtil.ajax({
+                    url    : ctxPath + "/jsp/fs/fsproc.jsp",
+                    data   : { praction : 'admin', req : 'gblist' },
+                    method : "POST",
+                    dataType : "json",
+                    success : function(data) {
+                        if(! data.success) {
+                            alert(data.message);
+                            return;
+                        }
+                        var arr = data.garbages;
+                        tbodyGb.empty();
+                        for(var tdx=0; tdx<arr.length; tdx++) {
+                        	tbodyGb.append("<tr><td class='td_garbage td_garbage_" + tdx + "'></td></tr>");
+                        	tbodyGb.find('.td_garbage_' + tdx).text(arr[tdx]);
+                        }
+                        if(arr.length <= 0) {
+                        	tbodyGb.empty();
+                            tbodyGb.append("<tr><td> Empty </td></tr>");
+                        }
+                    }
+                });
+            };
+            
+            var btnCleanGb = $('.btn_cleangb');
+            btnCleanGb.on('click', function() {
+            	FSUtil.ajax({
+                    url    : ctxPath + "/jsp/fs/fsproc.jsp",
+                    data   : { praction : 'admin', req : 'cleangb' },
+                    method : "POST",
+                    dataType : "json",
+                    success : function(data) {
+                        if(! data.success) {
+                            alert(data.message);
+                            return;
+                        }
+                        if(typeof(tabEvents['cleangb']) == 'function') tabEvents['cleangb']();
+                    }
+                });
+            });
+            btnCleanGb.addClass('binded_click');
         });
         </script>
         <div class='container show-grid full'>
@@ -279,9 +333,10 @@ limitations under the License.
             </div>
             <div class='row'>
                 <div class='col-sm-12 flatbuttons'>
-                    <a href='#' class='flatbutton admintab lang_element thick' data-lang-en='Config'   data-target='config'   style='margin-left: -5px; border-top: 0; border-left: 0;'>설정</a>
-                    <a href='#' class='flatbutton admintab lang_element'       data-lang-en='Users'    data-target='users'    style='margin-left: -5px; border-top: 0; border-left: 0;'>사용자관리</a>
-                    <a href='#' class='flatbutton admintab lang_element'       data-lang-en='Reset'    data-target='reset'    style='margin-left: -5px; border-top: 0; border-left: 0;'>초기화</a>
+                    <a href='#' class='flatbutton admintab lang_element thick' data-lang-en='Config'         data-target='config'   style='margin-left: -5px; border-top: 0; border-left: 0;'>설정</a>
+                    <a href='#' class='flatbutton admintab lang_element'       data-lang-en='Clean Garbage'  data-target='cleangb'  style='margin-left: -5px; border-top: 0; border-left: 0;'>휴지통청소</a>
+                    <a href='#' class='flatbutton admintab lang_element'       data-lang-en='Users'          data-target='users'    style='margin-left: -5px; border-top: 0; border-left: 0;'>사용자관리</a>
+                    <a href='#' class='flatbutton admintab lang_element'       data-lang-en='Reset'          data-target='reset'    style='margin-left: -5px; border-top: 0; border-left: 0;'>초기화</a>
                 </div>
             </div>
         </div>
@@ -364,6 +419,25 @@ limitations under the License.
                     </div>
                 </div>
             </form>
+        </div>
+        <div class='container show-grid adminelement adminelement_cleangb invisible full'>
+            <div class='row'>
+                <div class='col-sm-12 padall20'>
+                    <input type='button' value='비우기' class='full lang_attr_element btn_cleangb btnx' style='height:50px;' data-lang-target='value' data-lang-en='비우기'/>
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-sm-12'>
+                    <table class='table table-hover full fs_table_list'>
+                        <colgroup>
+                            <col/>
+                        </colgroup>
+                        <tbody class='tbody_garbages'>
+                        
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
         <div class='container show-grid adminelement adminelement_users invisible full'>
             <div class='row'>
@@ -456,7 +530,7 @@ limitations under the License.
                             <div class='col-sm-10'><input type='password' name='pw' class='full lang_attr_element' placeholder="fs.properties 에 있는 암호" data-lang-target='placeholder' data-lang-en='Password in fs.properties'/></div>
                         </div>
                         <div class='row'>
-                            <div class='col-sm-12 align_center'>
+                            <div class='col-sm-12 align_center padall20'>
                                 <input type='submit' value='초기화' class='full lang_attr_element btn_apply btnx' style='height:50px;' data-lang-target='value' data-lang-en='Reset'/>
                             </div>
                         </div>

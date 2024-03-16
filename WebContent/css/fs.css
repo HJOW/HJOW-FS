@@ -141,6 +141,15 @@ div.fs_div .ellipsis {
 div.fs_div .filedndin {
 	background-color: red !important;
 }
+div.fs_div .padall5 {
+	padding: 5px 5px 5px 5px !important;
+}
+div.fs_div .padall10 {
+    padding: 10px 10px 10px 10px !important;
+}
+div.fs_div .padall20 {
+    padding: 20px 20px 20px 20px !important;
+}
 div.fs_install_manual_root {
 	overflow-x: hidden;
 	overflow-y: scroll;

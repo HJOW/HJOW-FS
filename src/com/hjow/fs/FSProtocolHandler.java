@@ -70,6 +70,13 @@ public class FSProtocolHandler implements Closeable {
                 response.getOutputStream().write(json.toJSON().getBytes("UTF-8"));
             } else if(pAction.equals("download") || pAction.equals("down")) {
                 ctrl.download(request, response);
+            } else if(pAction.equals("upload")) {
+            	String msg = ctrl.upload(request);
+            	
+            	response.reset();
+                response.setContentType("text/html");
+                response.setCharacterEncoding("UTF-8");
+                response.getOutputStream().write(msg.getBytes("UTF-8"));
             } else if(pAction.equals("account")) {
                 JsonObject json = ctrl.account(request);
                 
