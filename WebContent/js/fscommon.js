@@ -265,6 +265,20 @@ function FSUtilClass() {
             };
         }
         
+        // Detect Samsung Internet
+        for(idx=0; idx<splits.length; idx++) {
+            var blockOne = splits[idx];
+            var splitIn  = blockOne.split('/');
+            if(splitIn.length != 2) continue;
+            if(splitIn[0] == 'SamsungBrowser') return {
+                name : 'Samsung Browser',
+                nm   : 'samsung',
+                version  : splitIn[1],
+                ver      : FSUtil.parseFloatFirstBlock(splitIn[1]),
+                agent    : agent
+            };
+        }
+        
         // Detect Brave
         for(idx=0; idx<splits.length; idx++) {
             var blockOne = splits[idx];
@@ -357,6 +371,20 @@ function FSUtilClass() {
         }
         
         return { name : 'Unknown', version : 'Unknown', ver : -1, agent : agent };
+    };
+    
+    this.detectSupportES6 = function detectSupportES6() {
+        var browser = FSUtil.detectBrowser();
+        if(browser.nm != 'ie') {
+            if(browser.nm == 'safari'  && browser.ver >= 10) return true;
+            if(browser.nm == 'opera'   && browser.ver >= 38) return true;
+            if(browser.nm == 'chrome'  && browser.ver >= 51) return true;
+            if(browser.nm == 'edge'    && browser.ver >= 79) return true;
+            if(browser.nm == 'samsung' && browser.ver >= 79) return true;
+            if(browser.nm == 'mypal'   && browser.ver >= 68) return true;
+            if(browser.ver >= 100) return true;
+        }
+        return false;
     };
     
     this.ajax = function ajax(ajaxParamJson) {

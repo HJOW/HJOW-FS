@@ -11,10 +11,9 @@
 <!-- Not necessary script now. -->
 <script type='text/javascript'>
 $(function() {
-	var browser = FSUtil.detectBrowser();
-	if(browser.nm != 'ie' && browser.ver >= 20) {
-        // TODO : Go to modern web
-    }
+	if(FSUtil.detectSupportES6()) {
+		// TODO : move to modern UI page
+	}
 });
 </script>
 </head>
