@@ -65,7 +65,7 @@ if(! fsc.isInstalled()) {
 
             form.on('submit', function() {
                 FSUtil.ajax({
-                    url    : ctxPath + "/jsp/fs/fsinstallin.jsp",
+                    url    : ctxPath + "/jsp/fs/fsproc.jsp",
                     data   : form.serialize(),
                     method : "POST",
                     dataType : "json",
@@ -80,6 +80,7 @@ if(! fsc.isInstalled()) {
         });
         </script>
         <form class='form_fs_ins' onsubmit='return false;'>
+            <input type='hidden' name='praction' value='install'/>
             <div class='row'>
                 <div class='col-sm-12'><h2>FS Installation</h2></div>
             </div>

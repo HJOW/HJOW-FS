@@ -48,7 +48,7 @@ $(function() {
         inpTermCons.prop('readonly', true);
         if(displayInput) taTermDisp.val(taTermDisp.val() + '\n' + '>> ' + inpTermCons.val());
         FSUtil.ajax({
-            url    : ctxPathIn + "/jsp/fs/fsconsolein.jsp",
+            url    : ctxPathIn + "/jsp/fs/fsproc.jsp",
             data   : formTerminal.serialize(),
             method : "POST",
             dataType : "json",
@@ -86,6 +86,7 @@ $(function() {
 });
 </script>
 <form class='form_fs_terminal' onsubmit='return false;'>
+    <input type='hidden' name='praction' value='console'/>
     <div class='align_left'>
         <input type='text' class='tf_terminal_path full' name='path' value='/' style='border: 0' readonly/>
     </div>

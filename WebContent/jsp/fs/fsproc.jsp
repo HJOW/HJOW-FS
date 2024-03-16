@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="application/json; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, java.io.*, java.util.*, java.text.*, hjow.common.json.*" session="true" %><%@ include file="common.pront.jsp"%><%
+<%@ page language="java" import="com.hjow.fs.*, java.io.*, java.util.*, java.text.*, hjow.common.json.*" session="true" %><%@ include file="common.pront.jsp"%><%
 /*
 Copyright 2024 HJOW (Heo Jin Won)
 

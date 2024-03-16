@@ -1,5 +1,7 @@
 <%@ page language="java" pageEncoding="UTF-8" import="com.hjow.fs.*, java.io.*, java.util.*, java.security.*, hjow.common.json.*"%><%@ include file="common.pront.jsp"%><%
 /*
+DEPRECATED
+
 Copyright 2024 HJOW (Heo Jin Won)
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 JsonObject json = fsc.admin(request);
+System.out.println("DEPRECATED fsadminin.jsp");
 
 response.reset();
 response.setContentType("application/json");

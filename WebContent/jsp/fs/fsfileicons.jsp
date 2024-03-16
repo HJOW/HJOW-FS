@@ -33,6 +33,8 @@ JsonObject json = new JsonObject();
 json.put("success", new Boolean(false));
 json.put("message", "");
 
+System.out.println("DEPRECATED fsfileicons.jsp");
+
 if(fsc.isReadFileIconOn()) {
     try {
         File dir = new File(fsc.getRootPath().getAbsolutePath() + File.separator + pathParam);

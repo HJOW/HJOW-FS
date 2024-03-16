@@ -240,8 +240,8 @@ $(function() {
                 var workingArray = iconizeArray;
                 iconizeArray = [];
                 FSUtil.ajax({
-                    url  : ctxPath + "/jsp/fs/fsfileicons.jsp",
-                    data : { path : inpPath.val(), files : filelist, br : bkColor.r, bg : bkColor.g, bb : bkColor.b },
+                    url  : ctxPath + "/jsp/fs/fsproc.jsp",
+                    data : { path : inpPath.val(), files : filelist, br : bkColor.r, bg : bkColor.g, bb : bkColor.b, praction : 'fileicon' },
                     method : 'POST',
                     dataType : 'json',
                     success : function(data) {
@@ -302,7 +302,7 @@ $(function() {
         
         var expVal = inpExcep.val();
         FSUtil.ajax({
-            url    : ctxPath + "/jsp/fs/fslist.jsp",
+            url    : ctxPath + "/jsp/fs/fsproc.jsp",
             data   : form.serialize(),
             method : "POST",
             dataType : "json",
@@ -832,6 +832,7 @@ $(function() {
         <form class='form_fs' onsubmit='return false;'>
             <input type='hidden' name='path' class='hidden_path' value='<%=pathParam%>' />
             <input type='hidden' name='excepts' class='hidden_excepts' value='' />
+            <input type='hidden' name='praction' value='list' />
             <div class='row fs_directory'>
                 <div class='col-sm-10'>
                     <h4 class='path_title'>

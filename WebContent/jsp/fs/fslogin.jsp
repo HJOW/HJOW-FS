@@ -15,6 +15,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 JsonObject json = fsc.account(request);
+System.out.println("DEPRECATED fslogin.jsp");
+		
 response.reset();
 response.setContentType("application/json");
 response.setCharacterEncoding("UTF-8");

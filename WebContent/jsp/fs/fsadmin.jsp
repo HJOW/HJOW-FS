@@ -50,8 +50,8 @@ limitations under the License.
             var beforeAccountFeatEnabled = false;
             
             FSUtil.ajax({
-                url    : ctxPath + "/jsp/fs/fslogin.jsp",
-                data   : { req : 'status' },
+                url    : ctxPath + "/jsp/fs/fsproc.jsp",
+                data   : { req : 'status', praction : 'account' },
                 method : "POST",
                 dataType : "json",
                 success : function(acc) {
@@ -59,8 +59,8 @@ limitations under the License.
                     if(acc.idtype != 'A') location.href = '/';
                     
                     FSUtil.ajax({
-                        url    : ctxPath + "/jsp/fs/fsadminin.jsp",
-                        data   : { req : 'read' },
+                        url    : ctxPath + "/jsp/fs/fsproc.jsp",
+                        data   : { req : 'read', praction : 'admin' },
                         method : "POST",
                         dataType : "json",
                         success : function(data) {
@@ -148,7 +148,7 @@ limitations under the License.
                             form.find('.hidden_req').val('update');
                             form.on('submit', function() {
                                 FSUtil.ajax({
-                                    url    : ctxPath + "/jsp/fs/fsadminin.jsp",
+                                    url    : ctxPath + "/jsp/fs/fsproc.jsp",
                                     data   : form.serialize(),
                                     method : "POST",
                                     dataType : "json",
@@ -161,7 +161,7 @@ limitations under the License.
                             var formReset = $('.form_fs_reset');
                             formReset.on('submit', function() {
                                 FSUtil.ajax({
-                                    url    : ctxPath + "/jsp/fs/fsadminin.jsp",
+                                    url    : ctxPath + "/jsp/fs/fsproc.jsp",
                                     data   : formReset.serialize(),
                                     method : "POST",
                                     dataType : "json",
@@ -197,7 +197,7 @@ limitations under the License.
                 tbodyUsers.append("<tr><td colspan='5'>...</td></tr>");
                 
                 FSUtil.ajax({
-                    url    : ctxPath + "/jsp/fs/fsadminin.jsp",
+                    url    : ctxPath + "/jsp/fs/fsproc.jsp",
                     data   : formUserSrch.serialize(),
                     method : "POST",
                     dataType : "json",
@@ -227,10 +227,11 @@ limitations under the License.
                                 btnDel.on('click', function() {
                                     var dId = $(this).attr('data-id');
                                     FSUtil.ajax({
-                                        url    : ctxPath + "/jsp/fs/fsadminin.jsp",
+                                        url    : ctxPath + "/jsp/fs/fsproc.jsp",
                                         data   : {
                                             req : 'userdel', 
-                                            id  : dId
+                                            id  : dId,
+                                            praction : 'admin'
                                         },
                                         method : "POST",
                                         dataType : "json",
@@ -256,7 +257,7 @@ limitations under the License.
             var formUserCr = $('.form_fs_user_new');
             formUserCr.on('submit', function() {
                 FSUtil.ajax({
-                    url    : ctxPath + "/jsp/fs/fsadminin.jsp",
+                    url    : ctxPath + "/jsp/fs/fsproc.jsp",
                     data   : formUserCr.serialize(),
                     method : "POST",
                     dataType : "json",
@@ -287,6 +288,7 @@ limitations under the License.
         <div class='container show-grid adminelement adminelement_config full'>
             <form class='form_fs_admin' onsubmit='return false;'>
                 <input type='hidden' name='req' value='status' class='hidden_req'/>
+                <input type='hidden' name='praction' value='admin'/>
                 <div class='row'>
                     <div class='col-sm-12'><h3 class='lang_element' data-lang-en='Configuration'>설정</h3></div>
                 </div>
@@ -369,6 +371,7 @@ limitations under the License.
                     <div><h4>Users</h4></div>
                     <form class='form_fs_user_search' onsubmit='return false;'>
                         <input type='hidden' name='req' value='userlist' class='hidden_req'/>
+                        <input type='hidden' name='praction' value='admin'/>
                         <input type='text' name='keyword'/>
                         <input type='submit' value='검색' class='lang_attr_element btnx' data-lang-target='value' data-lang-en='Search'/>
                     </form>
@@ -409,6 +412,7 @@ limitations under the License.
                     <div><h4>Creating User</h4></div>
                     <form class='form_fs_user_new' onsubmit='return false;'>
                         <input type='hidden' name='req' value='usercreate' class='hidden_req'/>
+                        <input type='hidden' name='praction' value='admin'/>
                         <div class='container show-grid'>
                             <div class='row'>
                                 <div class='col-sm-1'>ID</div>
@@ -441,6 +445,7 @@ limitations under the License.
         <div class='container show-grid adminelement adminelement_reset invisible full'>
             <form class='form_fs_reset' onsubmit='return false;'>
                 <input type='hidden' name='req' value='reset' class='hidden_req'/>
+                <input type='hidden' name='praction' value='admin'/>
                 <div class='row'>
                     <div class='col-sm-12'><h3 class='lang_element' data-lang-en='Reset'>초기화</h3></div>
                 </div>

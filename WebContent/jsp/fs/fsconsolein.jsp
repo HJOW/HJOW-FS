@@ -15,6 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 JsonObject json = fsc.console(request);
+System.out.println("DEPRECATED fsconsolein.jsp");
 
 response.reset();
 response.setContentType("application/json");

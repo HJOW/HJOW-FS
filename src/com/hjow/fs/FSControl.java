@@ -515,7 +515,7 @@ public class FSControl {
         if(catched != null) throw new RuntimeException(catched.getMessage(), catched);
     }
     
-    /** Called from fsinstallin.jsp, which is called by installation page by ajax. */
+    /** Called from fsinstall.jsp, which is called by installation page by ajax. */
     public JsonObject install(HttpServletRequest request) throws Exception {
         JsonObject json = processHandler("install", request);
         if(json != null) return json;
@@ -916,7 +916,7 @@ public class FSControl {
         return json;
     }
     
-    /** Called from fsadminin.jsp, which is called by administration page by ajax. */
+    /** Called from fsadmin.jsp, which is called by administration page by ajax. */
     public JsonObject admin(HttpServletRequest request) throws Exception {
         JsonObject json = processHandler("admin", request);
         if(json != null) return json;
@@ -3133,7 +3133,7 @@ public class FSControl {
         } catch(Throwable t) {
             json.put("success", new Boolean(false));
             json.put("message", "Error : " + t.getMessage());
-            t.printStackTrace();
+            if(! (t instanceof RuntimeException)) t.printStackTrace();
         } finally {
             if(needInvalidate) {
                 request.getSession().invalidate();

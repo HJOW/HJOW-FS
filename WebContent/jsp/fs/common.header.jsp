@@ -56,8 +56,8 @@ $(function() {
     }
     
     FSUtil.ajax({
-        url    : "<%=request.getContextPath()%>/jsp/fs/fslogin.jsp",
-        data   : { req : 'language', language : lang, force : 'false' },
+        url    : "<%=request.getContextPath()%>/jsp/fs/fsproc.jsp",
+        data   : { req : 'language', language : lang, force : 'false', praction : 'account' },
         method : "POST",
         dataType : "json",
         success : function(data) {

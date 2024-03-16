@@ -29,6 +29,7 @@ String excepts = request.getParameter("excepts");
 if(excepts == null) excepts = "";
 
 JsonObject json = fsc.list(request, pathParam, keyword, excepts);
+System.out.println("DEPRECATED fslist.jsp");
 
 response.reset();
 response.setContentType("application/json");

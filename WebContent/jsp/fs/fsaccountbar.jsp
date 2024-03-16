@@ -41,7 +41,7 @@ if(! fsc.isInstalled()) {
             function fLogin() {
                 inpReq.val('login');
                 FSUtil.ajax({
-                    url    : ctxPath + "/jsp/fs/fslogin.jsp",
+                    url    : ctxPath + "/jsp/fs/fsproc.jsp",
                     data   : formObj.serialize(),
                     method : "POST",
                     dataType : "json",
@@ -108,7 +108,7 @@ if(! fsc.isInstalled()) {
         
             inpReq.val('status');
             FSUtil.ajax({
-                url    : ctxPath + "/jsp/fs/fslogin.jsp",
+                url    : ctxPath + "/jsp/fs/fsproc.jsp",
                 data   : formObj.serialize(),
                 method : "POST",
                 dataType : "json",
@@ -121,7 +121,7 @@ if(! fsc.isInstalled()) {
                 inpReq.val('logout');
                 
                 FSUtil.ajax({
-                    url    : ctxPath + "/jsp/fs/fslogin.jsp",
+                    url    : ctxPath + "/jsp/fs/fsproc.jsp",
                     data   : formObj.serialize(),
                     method : "POST",
                     dataType : "json",
@@ -148,7 +148,8 @@ if(! fsc.isInstalled()) {
         });
         </script>
         <form onsubmit='return false' class='form_fs_login'>
-        <input type='hidden' name='req' value='status' class='inp_req'/>
+        <input type='hidden' name='req'      value='status' class='inp_req'/>
+        <input type='hidden' name='praction' value='account'/>
         <div class='row login_element not_logined padding_top_10'>
             <div class='container show-grid d_inline_block valign_middle' style='width:270px; height: 60px; '>
                 <div class='row'>
