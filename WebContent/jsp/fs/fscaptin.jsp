@@ -44,7 +44,6 @@ if(ctype == null) ctype = "image";
 ctype = ctype.trim().toLowerCase();
 
 String captRes = null;
-
 if(ctype.equals("text")) {
     captRes = fsc.createTextCaptcha(request, key, code, time.longValue());
 } else {

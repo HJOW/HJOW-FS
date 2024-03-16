@@ -32,9 +32,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -1454,7 +1457,7 @@ public class FSControl {
                     if(! faJson.exists()) faJson.mkdirs();
                     if(! ftJson.exists()) ftJson.mkdirs();
                     
-                    File fileAcc = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts" + File.separator + cid + ".json");
+                    File fileAcc = new File(faJson.getCanonicalPath() + File.separator + cid + ".json");
                     fileAcc.getCanonicalPath(); // Check valid
                     fileOut = new FileOutputStream(fileAcc);
                     fileOut.write(newAcc.toJSON().getBytes(cs));
@@ -1527,6 +1530,13 @@ public class FSControl {
                     if(dirTokens.exists() && dirTokens.isDirectory()) {
                         File[] children = dirTokens.listFiles();
                         for(File f : children) {
+                        	if(f.isDirectory()) {
+                        		File[] gchildren = f.listFiles();
+                        		for(File gf : gchildren) {
+                        			if(gf.isDirectory()) continue;
+                        			gf.delete();
+                        		}
+                        	}
                             f.delete();
                         }
                         dirTokens.delete();
@@ -1685,6 +1695,10 @@ public class FSControl {
             
             // If result marked as a logout, clean session.
             if(rs.isLogout()) removeSessionObject(request, "fssession");
+            
+            if(rs.isSavetoken()) {
+            	setSessionObject(request, "fsscen", console);
+            }
             
             String rsPath = rs.getPath();
             if(rsPath != null) rsPath = rsPath.replace("\\", "/");
@@ -3078,7 +3092,19 @@ public class FSControl {
                                     if(dirTokens.exists()) {
                                         File[] lists = dirTokens.listFiles();
                                         for(File f : lists) {
-                                            if(f.isDirectory()) continue;
+                                            if(f.isDirectory()) {
+                                            	File[] children = f.listFiles();
+                                            	for(File c : children) {
+                                            		if(c.isDirectory()) {
+                                            			File[] gchildren = c.listFiles();
+                                            			for(File gc : gchildren) {
+                                            				if(gc.isDirectory()) continue;
+                                            				gc.delete();
+                                            			}
+                                            		}
+                                            		c.delete();
+                                            	}
+                                            }
                                             f.delete();
                                         }
                                     }
@@ -3179,7 +3205,8 @@ public class FSControl {
             PreparedStatement pstmt = null;
             ResultSet rs = null;
             try {
-                JsonObject addiContent = null;
+                JsonObject addiContent1 = null;
+                JsonObject addiContent2 = null;
                 if(useJDBC) {
                     // Get additional session attributes from FS_TOKEN
                     String addContents = null;
@@ -3199,10 +3226,10 @@ public class FSControl {
                     
                     if(addContents != null) {
                         try {
-                            addiContent = (JsonObject) JsonCompatibleUtil.parseJson(addContents);
+                            addiContent1 = (JsonObject) JsonCompatibleUtil.parseJson(addContents);
                         } catch(Throwable tx) {
                             log("Cannot load session attributes from FS_TOKEN CONTENT column... " + tx.getMessage(), this.getClass());
-                            addiContent = null;
+                            addiContent1 = null;
                         }                                
                     }
                 } else {
@@ -3233,12 +3260,17 @@ public class FSControl {
                         if(! tokenOne.equals(tokenVal)) continue; // Check equals
                         
                         // Accept
-                        addiContent = (JsonObject) JsonCompatibleUtil.parseJson(tJson.get("content"));
+                        addiContent1 = (JsonObject) JsonCompatibleUtil.parseJson(tJson.get("content"));
+                        addiContent2 = (JsonObject) JsonCompatibleUtil.parseJson(tJson.get("blob"));
                         break;
                     }
                 }
-                if(addiContent != null) {
-                    Set<String> keysIn = addiContent.keySet();
+                if(addiContent1 != null) {
+                    Set<String> keysIn = addiContent1.keySet();
+                    res.addAll(keysIn);
+                }
+                if(addiContent2 != null) {
+                    Set<String> keysIn = addiContent2.keySet();
                     res.addAll(keysIn);
                 }
             } catch(Throwable t) {
@@ -3280,7 +3312,8 @@ public class FSControl {
                 PreparedStatement pstmt = null;
                 ResultSet rs = null;
                 try {
-                    JsonObject addiContent = null;
+                    JsonObject addiContent1 = null;
+                    JsonObject addiContent2 = null;
                     if(useJDBC) {
                         // Get additional session attributes from FS_TOKEN
                         String addContents = null;
@@ -3300,10 +3333,10 @@ public class FSControl {
                         
                         if(addContents != null) {
                             try {
-                                addiContent = (JsonObject) JsonCompatibleUtil.parseJson(addContents);
+                                addiContent1 = (JsonObject) JsonCompatibleUtil.parseJson(addContents);
                             } catch(Throwable tx) {
                                 log("Cannot load session attributes from FS_TOKEN CONTENT column... " + tx.getMessage(), this.getClass());
-                                addiContent = null;
+                                addiContent1 = null;
                             }                                
                         }
                     } else {
@@ -3318,6 +3351,10 @@ public class FSControl {
                         File[] fTokens = ftId.listFiles();
                         JsonObject jsonComp = null;
                         for(File f : fTokens) {
+                        	if(f.isDirectory()) continue;
+                        	String fName = f.getName();
+                        	if(! fName.toLowerCase().endsWith(".json")) continue;
+                        	
                             String t = FileUtil.readString(f, "UTF-8");
                             JsonObject tJson = (JsonObject) JsonCompatibleUtil.parseJson(t);
                             if(tJson == null) continue;
@@ -3336,13 +3373,42 @@ public class FSControl {
                             if(! tokenOne.equals(tokenVal)) continue; // Check equals
                             
                             // Accept
-                            addiContent = (JsonObject) JsonCompatibleUtil.parseJson(tJson.get("content"));
+                            addiContent1 = (JsonObject) JsonCompatibleUtil.parseJson(tJson.get("content"));
+                            addiContent2 = (JsonObject) JsonCompatibleUtil.parseJson(tJson.get("blob"));
                             break;
                         }
                     }
-                    if(addiContent != null) {
-                        res = addiContent.get(key);
+                    if(addiContent1 != null) {
+                        res = addiContent1.get(key);
                         if(res != null) return res;
+                    }
+                    if(addiContent2 != null) {
+                    	Object oFilePath = addiContent2.get(key);
+                    	if(oFilePath != null) {
+                    		File ftJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "tokens");
+                            if(! ftJson.exists()) ftJson.mkdirs();
+                            
+                            File ftId = new File(ftJson.getCanonicalPath() + File.separator + tokenID);
+                            if(! ftId.exists()) ftId.mkdirs();
+                    		
+                    		File fBlob = new File(ftId.getCanonicalPath() + File.separator + oFilePath.toString());
+                    		if(fBlob.exists()) {
+                    			FileInputStream   in1 = null;
+                    			ObjectInputStream in2 = null;
+                    			Throwable ccaught = null;
+                    			try {
+                    				in1 = new FileInputStream(fBlob);
+                    				in2 = new ObjectInputStream(in1);
+                    				res = in2.readObject();
+                    			} catch(Throwable tIn) {
+                    				ccaught = tIn;
+                    			} finally {
+                    				ClassUtil.closeAll(in2, in1);
+                    			}
+                    			if(ccaught != null) throw new RuntimeException(ccaught.getMessage(), ccaught);
+                    			return  res;
+                    		}
+                    	}
                     }
                 } catch(Throwable t) {
                     t.printStackTrace();
@@ -3539,6 +3605,10 @@ public class FSControl {
                     JsonObject jsonComp = null;
                     for(File f : fTokens) {
                         try {
+                        	if(f.isDirectory()) continue;
+                        	String fName = f.getName();
+                        	if(! fName.toLowerCase().endsWith(".json")) continue;
+                        	
                             String t = FileUtil.readString(f, "UTF-8");
                             JsonObject tJson = (JsonObject) JsonCompatibleUtil.parseJson(t);
                             String tokenOne = String.valueOf(tJson.get("token"));
@@ -3677,6 +3747,10 @@ public class FSControl {
                 
                 for(File f : fTokens) {
                     try {
+                    	if(f.isDirectory()) continue;
+                    	String fName = f.getName();
+                    	if(! fName.toLowerCase().endsWith(".json")) continue;
+                    	
                         String t = FileUtil.readString(f, "UTF-8");
                         JsonObject tJson = (JsonObject) JsonCompatibleUtil.parseJson(t);
                         String tokenOne = String.valueOf(tJson.get("token"));
@@ -3691,6 +3765,8 @@ public class FSControl {
                         
                         if(! tokenOne.equals(tokenVal)) continue; // Check equals
                         
+                        // Accepts
+                        
                         // Extend token's enddate
                         tJson.put("entime", String.valueOf(newEndTime));
                         
@@ -3699,6 +3775,12 @@ public class FSControl {
                             Object oContent = tJson.get("content");
                             JsonObject jContent = (JsonObject) JsonCompatibleUtil.parseJson(oContent);
                             oContent = null;
+                            
+                            Object oBlob = tJson.get("blob");
+                            JsonObject jBlob = null;
+                            if(oBlob != null) jBlob = (JsonObject) JsonCompatibleUtil.parseJson(oBlob);
+                            else              jBlob = new JsonObject();
+                            oBlob = null;
                             
                             Set<String> updateKeys = content.keySet();
                             for(String k : updateKeys) {
@@ -3719,9 +3801,41 @@ public class FSControl {
                                     jContent.put(k, c.toString());
                                     continue;
                                 }
+                                if(c instanceof Serializable) {
+                                	File fblob = null;
+                                	
+                                	Object beforeNm = jBlob.get(k);
+                                	if(beforeNm == null) {
+                                		int no = 0;
+                                    	fblob = new File(ftId.getCanonicalPath() + File.separator + "blob" + no + ".blob");
+                                    	while(fblob.exists()) {
+                                    		no++;
+                                    		fblob = new File(ftId.getCanonicalPath() + File.separator + "blob" + no + ".blob");
+                                    	}
+                                	} else {
+                                		fblob = new File(ftId.getCanonicalPath() + File.separator + beforeNm.toString());
+                                	}
+                                	
+                                	jBlob.put(k, fblob.getName());
+                                	
+                                	FileOutputStream   out1 = null;
+                                	ObjectOutputStream out2 = null;
+                                	Throwable ccaught = null;
+                                	try {
+                                		out1 = new FileOutputStream(fblob);
+                                		out2 = new ObjectOutputStream(out1);
+                                		out2.writeObject(c);
+                                	} catch(Throwable tIn) {
+                                		ccaught = tIn;
+                                	} finally {
+                                		ClassUtil.closeAll(out2, out1);
+                                	}
+                                	if(ccaught != null) throw new RuntimeException(ccaught.getMessage(), ccaught);
+                                }
                             }
                             
                             tJson.put("content", jContent);
+                            tJson.put("blob"   , jBlob   );
                         }
                         
                         // Re-write

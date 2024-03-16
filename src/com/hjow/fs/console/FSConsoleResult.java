@@ -19,12 +19,13 @@ import java.io.Serializable;
 
 public class FSConsoleResult implements Serializable {
     private static final long serialVersionUID = 256793532787714176L;
-    protected boolean success = false;
-    protected boolean nulll   = false;
-    protected boolean logout  = false;
+    protected boolean success    = false;
+    protected boolean nulll      = false;
+    protected boolean savetoken  = false;
+    protected boolean logout     = false;
     protected boolean closepopup = false;
-    protected String  display = "";
-    protected String  path    = null;
+    protected String  display    = "";
+    protected String  path       = null;
     protected String downloadAccepted = null;
     public boolean isSuccess() {
         return success;
@@ -68,4 +69,10 @@ public class FSConsoleResult implements Serializable {
     public void setClosepopup(boolean closepopup) {
         this.closepopup = closepopup;
     }
+	public boolean isSavetoken() {
+		return savetoken;
+	}
+	public void setSavetoken(boolean savetoken) {
+		this.savetoken = savetoken;
+	}
 }

@@ -21,6 +21,7 @@ import java.util.Set;
 
 import com.hjow.fs.FSControl;
 import com.hjow.fs.console.FSConsole;
+import com.hjow.fs.console.FSConsoleResult;
 
 public class FSConsoleVar implements FSBundledConsoleCommand {
 	private static final long serialVersionUID = -9151923332826078175L;
@@ -55,7 +56,15 @@ public class FSConsoleVar implements FSBundledConsoleCommand {
     			if(! console.getVars().containsKey(varName)) throw new RuntimeException("Cannot create new variable.");
     		}
     		console.getVars().put(varName, opt);
-    		return null;
+    		
+    		FSConsoleResult rs = new FSConsoleResult();
+            rs.setDisplay("");
+            rs.setNulll(true);
+            rs.setPath(console.getPath());
+            rs.setSuccess(true);
+            rs.setSavetoken(true);
+    		
+    		return rs;
     	}
     	
     	opt = options.get("list");
@@ -73,6 +82,14 @@ public class FSConsoleVar implements FSBundledConsoleCommand {
     	if(opt == null) opt = options.get("r");
     	if(opt != null) {
     		console.getVars().remove(varName);
+    		
+    		FSConsoleResult rs = new FSConsoleResult();
+            rs.setDisplay("");
+            rs.setNulll(true);
+            rs.setPath(console.getPath());
+            rs.setSuccess(true);
+            rs.setSavetoken(true);
+    		
     		return null;
     	}
     	
