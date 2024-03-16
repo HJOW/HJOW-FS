@@ -87,6 +87,7 @@ public class BrowserInfo implements Serializable {
 		json.put("version", getVersion());
 		json.put("ver"    , getVer());
 		json.put("agent"  , getAgent());
+		if(getCompatible() != null) json.put("compatible", getCompatible().toJson());
 		
 		return json;
 	}
@@ -96,11 +97,12 @@ public class BrowserInfo implements Serializable {
 	}
 	
 	public static BrowserInfo byUserAgent(String userAgent) {
+		if(userAgent == null) return new BrowserInfo();
+		
     	String   agent  = userAgent;
         String[] splits = agent == null ? new String[0] : agent.split(" ");
-        int idx=0;
         
-        if(agent == null) agent = "Unknown";
+        int idx = 0;
         
         // Detect Microsoft Internet Explorer
         for(idx=0; idx<splits.length; idx++) {

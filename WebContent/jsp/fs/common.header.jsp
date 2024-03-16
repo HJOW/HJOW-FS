@@ -30,9 +30,6 @@ $(function() {
         if(lang == 'ko') alert('이 웹 브라우저에서는 FS 를 원활히 사용할 수 없습니다.');
         else             alert('FS does not support this web browser !');
     }
-    if(browser.nm != 'ie' && browser.ver >= 20) {
-        // TODO : Go to modern web
-    }
     
     var bodys = $('body');
     if(bodys.is('.popup')) bodys.removeClass('dark');
