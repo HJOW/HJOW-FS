@@ -35,7 +35,12 @@ public class FSServletContextListener implements ServletContextListener {
         System.out.println(this.getClass().getName() + ".contextInitialized STARTS");
         String ctxPath = sce.getServletContext().getContextPath();
         FSControl.init(ctxPath);
-        FSControl.getInstance().setRealPath(sce.getServletContext());
+        
+        FSControl ctrl = FSControl.getInstance();
+        ctrl.setRealPath(sce.getServletContext());
+        
+        try { ctrl.removeAllTokens();         } catch(Throwable ignores) {}
+        try { ctrl.emptyTempDirectory();      } catch(Throwable ignores) {}
         
         // Warming up
         
@@ -43,11 +48,9 @@ public class FSServletContextListener implements ServletContextListener {
         try { Class.forName("java.awt.Graphics2D");           } catch(ClassNotFoundException ignores) {}
         try { Class.forName("java.awt.Font");                 } catch(ClassNotFoundException ignores) {}
         try { Class.forName("javax.imageio.ImageIO");         } catch(ClassNotFoundException ignores) {}
-        
-        try { FSControl.getInstance().removeAllTokens();      } catch(Throwable ignores) {}
         try { FSUtils.createImageCaptchaBase64("123456789", 200, 100, 10, 0, false, null); } catch(Throwable ignores) {}
         
-        System.out.println(this.getClass().getName() + ".contextInitialized END");
+        System.out.println(this.getClass().getName() + ".contextInitialized END at " + System.currentTimeMillis());
     }
     
 }

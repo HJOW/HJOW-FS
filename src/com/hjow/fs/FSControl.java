@@ -5028,12 +5028,42 @@ public class FSControl {
         }
     }
     
+    /** Empty temp dir */
+    public void emptyTempDirectory() throws IOException {
+        File tempd = new File(fileConfigPath.getCanonicalPath() + File.separator + ".temp");
+        if(tempd.exists()) {
+            File[] children = tempd.listFiles();
+            for(File f : children) {
+                if(f.isDirectory()) {
+                    File[] gchildren = f.listFiles();
+                    for(File gf : gchildren) {
+                        if(gf.isDirectory()) {
+                            File[] ggchildren = gf.listFiles();
+                            for(File ggf : ggchildren) {
+                                if(ggf.isDirectory()) {
+                                    continue;
+                                }
+                                try { ggf.delete(); } catch(Throwable t) { t.printStackTrace(); }
+                            }
+                        }
+                        try { gf.delete(); } catch(Throwable t) { t.printStackTrace(); }
+                    }
+                }
+                try { f.delete(); } catch(Throwable t) { t.printStackTrace(); }
+            }
+        }
+    }
+    
     /** Dispose FSControl, all FSPacks */
     public synchronized void dispose() {
         log("FS Control starts to dispose instance...", this.getClass());
         try {
             log("    Clearing tokens...", this.getClass());
             removeAllTokens();
+        } catch(Throwable tx) { tx.printStackTrace(); }
+        try {
+            log("    Clearing temp...", this.getClass());
+            emptyTempDirectory();
         } catch(Throwable tx) { tx.printStackTrace(); }
         try {
             log("    Disposing FS Packs...", this.getClass());
