@@ -41,3 +41,12 @@ Visit https://github.com/HJOW/HJOW-FS/releases
 + Java, Servlet API (https://javaee.github.io/servlet-spec/LICENSE)
 + React (https://github.com/facebook/react/blob/main/LICENSE)
 + Babel Standalone (https://github.com/babel/babel-standalone/blob/master/LICENSE)
+
+# How to update from old version
+
+1. Backup all files and directories in web root directory.
+2. Overwrite all files with new version's.
+3. Go to "/WEb-INF/lib" directory.
+4. Check "hjow_libs_yyyyMMdd_hhmm.jar" named files. (For example, "hjow_libs_20240322_0500.jar")
+   Then, delete all "hjow_libs_yyyyMMdd_hhmm.jar" named files except the newest one.
+5. Run server and test it.
