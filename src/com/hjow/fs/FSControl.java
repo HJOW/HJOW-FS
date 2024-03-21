@@ -90,7 +90,7 @@ import hjow.common.util.SecurityUtil;
 
 public class FSControl {
     public static final int[] VERSION = {0, 1, 19, 26};
-    
+    public static final long  FIRST_ACCESS_TIME = System.currentTimeMillis();
     private static FSControl instance = null;
     
     // Charset
@@ -254,6 +254,18 @@ public class FSControl {
         FSControl c = instance;
         instance = null;
         if(c != null) c.dispose();
+    }
+    
+    /** Wait until FS prepared */
+    public static void waitProperInit() {
+    	int prvInfLoop = 0;
+    	try {
+        	while(System.currentTimeMillis() - FSControl.FIRST_ACCESS_TIME < 8000L) {
+            	Thread.sleep(1000L);
+            	prvInfLoop++;
+            	if(prvInfLoop >= 1000) break;
+            }
+        } catch(InterruptedException ignores) {}
     }
     
     /** Load properties, configs, and DB tables when using JDBC */

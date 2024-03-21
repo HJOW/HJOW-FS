@@ -50,6 +50,7 @@ public class FSServletContextListener implements ServletContextListener {
         try { Class.forName("javax.imageio.ImageIO");         } catch(ClassNotFoundException ignores) {}
         try { FSUtils.createImageCaptchaBase64("123456789", 200, 100, 10, 0, false, null); } catch(Throwable ignores) {}
         
+        FSControl.waitProperInit();
         System.out.println(this.getClass().getName() + ".contextInitialized END at " + System.currentTimeMillis());
     }
     
