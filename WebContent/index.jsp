@@ -12,7 +12,7 @@
 <script type='text/javascript'>
 $(function() {
 	if(FSUtil.detectSupportES6()) {
-		// TODO : move to modern UI page
+		// TODO : move to modern UI page (NOT NOW. The modern page is not created completely.)
 		// location.href = './html/modern.html';
 	}
 });
