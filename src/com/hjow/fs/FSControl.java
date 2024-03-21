@@ -56,6 +56,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletContext;
@@ -149,6 +151,9 @@ public class FSControl {
     
     // Console Usage
     protected boolean noConsole = true;
+    
+    // Using GZip
+    protected boolean useGzip = false;
     
     // JDBC
     protected boolean useJDBC = false;
@@ -260,32 +265,32 @@ public class FSControl {
     
     /** Load properties, configs, and DB tables when using JDBC */
     private void initializeIn(String contextPath, long now) {
-    	if(ctxPath == null) ctxPath = "";
+        if(ctxPath == null) ctxPath = "";
 
-    	int preventInfLoop = 0;
-    	while(initializing) {
-    		try { Thread.sleep(100L); } catch(InterruptedException e) { break; }
-    		preventInfLoop++;
-    		if(preventInfLoop >= 10000) break;
-    	}
-    	
-    	if(fileConfigPath == null || (! ctxPath.equals(contextPath))) {
-    		initializeInSync(contextPath, now);
-    		return;
-    	}
-    	if(now - confReads >= refreshConfGap) {
-    		initializeInSync(contextPath, now);
-    	} else if(Math.abs(now - confAccess) >= refreshConfGap / 10) {
-    		initializeInSync(contextPath, now);
-    	} else {
-    		confAccess = now;
-    	}
+        int preventInfLoop = 0;
+        while(initializing) {
+            try { Thread.sleep(100L); } catch(InterruptedException e) { break; }
+            preventInfLoop++;
+            if(preventInfLoop >= 10000) break;
+        }
+        
+        if(fileConfigPath == null || (! ctxPath.equals(contextPath))) {
+            initializeInSync(contextPath, now);
+            return;
+        }
+        if(now - confReads >= refreshConfGap) {
+            initializeInSync(contextPath, now);
+        } else if(Math.abs(now - confAccess) >= refreshConfGap / 10) {
+            initializeInSync(contextPath, now);
+        } else {
+            confAccess = now;
+        }
     }
     
     /** Load properties, configs, and DB tables when using JDBC */
     private synchronized void initializeInSync(String contextPath, long now) {
-    	initializing = true;
-    	
+        initializing = true;
+        
         Connection        conn     = null;
         PreparedStatement pstmt    = null;
         ResultSet         rs       = null;
@@ -409,36 +414,34 @@ public class FSControl {
                 } else if(fileConfigPath != null) {
                     // Find config.json from configuration path
                     File fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "config.json");
+                    if(! fJson.exists()) fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "CONFIG.JSON");
+                    if(! fJson.exists()) fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "config.gson");
+                    if(! fJson.exists()) fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "CONFIG.GSON");
                     if(! fJson.exists()) {
                         // Not exist, create
-                        fileOut = new FileOutputStream(fJson);
-                        fileOut.write("{}".getBytes(cs));
-                        fileOut.close(); fileOut = null;
+                    	if(useGzip) {
+                    		fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "config.gson");
+                    		FileUtil.writeString(fJson, cs, "{}", GZIPOutputStream.class);
+                    	} else {
+                    		fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "config.json");
+                    		FileUtil.writeString(fJson, cs, "{}");
+                    	}
                     }
                     
-                    propIn = new FileInputStream(fJson);
-                    rd1 = new InputStreamReader(propIn, cs);
-                    rd2 = new BufferedReader(rd1);
+                    String jsonContent = null;
                     
-                    StringBuilder lineCollection = new StringBuilder("");
-                    String line;
-                    while(true) {
-                        line = ((BufferedReader) rd2).readLine();
-                        if(line == null) break;
-                        lineCollection = lineCollection.append("\n").append(line); 
+                    if(fJson.getName().toLowerCase().endsWith(".gson")) {
+                    	jsonContent = FileUtil.readString(fJson, cs, GZIPInputStream.class);
+                    } else {
+                    	jsonContent = FileUtil.readString(fJson, cs);
                     }
                     
-                    rd2.close(); rd2 = null;
-                    rd1.close(); rd1 = null;
-                    propIn.close(); propIn = null;
-                    
-                    conf = (JsonObject) JsonCompatibleUtil.parseJson(lineCollection.toString().trim());
+                    conf = (JsonObject) JsonCompatibleUtil.parseJson(jsonContent.trim());
                     conf.put("S1", s1);
                     conf.put("S2", s2);
                     conf.put("S3", s3);
                     
-                    lineCollection.setLength(0);
-                    lineCollection = null;
+                    jsonContent = null;
                     
                     // Find accounts.json from configuration path
                     File faJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts");
@@ -539,13 +542,7 @@ public class FSControl {
             fileConfigPath = null;
             catched = thx;
         } finally {
-            if(rd2     != null) { try { rd2.close();             } catch(Throwable txc) {} }
-            if(rd1     != null) { try { rd1.close();             } catch(Throwable txc) {} }
-            if(propIn  != null) { try { propIn.close();          } catch(Throwable txc) {} }
-            if(fileOut != null) { try { fileOut.close();         } catch(Throwable txc) {} }
-            if(rs      != null) { try { rs.close();              } catch(Throwable txc) {} }
-            if(pstmt   != null) { try { pstmt.close();           } catch(Throwable txc) {} }
-            if(conn    != null) { try { conn.close();            } catch(Throwable txc) {} }
+        	ClassUtil.closeAll(rd2, rd1, propIn, fileOut, rs, pstmt, conn);
             if(conf    == null) { try { conf = new JsonObject(); } catch(Throwable txc) {} }
             initializing = false;
         }
@@ -555,8 +552,8 @@ public class FSControl {
     
     /** Called from fsinstall.jsp, which is called by installation page by ajax. */
     public JsonObject install(HttpServletRequest request) throws Exception {
-    	initialize(request.getContextPath());
-    	
+        initialize(request.getContextPath());
+        
         JsonObject json = processHandler("install", request);
         if(json != null) return json;
         json = new JsonObject();
@@ -887,11 +884,14 @@ public class FSControl {
                             File ftJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "tokens");
                             if(! ftJson.exists()) ftJson.mkdirs();
                             
-                            File fileAcc = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts" + File.separator + adminId + ".json");
-                            fileAcc.getCanonicalPath(); // Check valid
-                            fileOut = new FileOutputStream(fileAcc);
-                            fileOut.write(adminAc.toJSON().getBytes(cs));
-                            fileOut.close(); fileOut = null;
+                            File fileAcc = null;
+                            if(useGzip) {
+                            	fileAcc = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts" + File.separator + adminId + ".gson");
+                            	FileUtil.writeString(fileAcc, cs, adminAc.toJSON(), GZIPOutputStream.class);
+                            } else {
+                            	fileAcc = new File(fileConfigPath.getCanonicalPath() + File.separator + "accounts" + File.separator + adminId + ".json");
+                            	FileUtil.writeString(fileAcc, cs, adminAc.toJSON());
+                            }
                         }
                     }
                 } else {
@@ -947,10 +947,7 @@ public class FSControl {
                     json.put("message", "Error : " + t.getMessage());
                 }
             } finally {
-                if(fileOut != null) { try { fileOut.close(); } catch(Throwable txc) {} }
-                if(rs      != null) { try { rs.close();      } catch(Throwable txc) {} }
-                if(pstmt   != null) { try { pstmt.close();   } catch(Throwable txc) {} }
-                if(conn    != null) { try { conn.close();    } catch(Throwable txc) {} }
+            	ClassUtil.closeAll(fileOut, rs, pstmt, conn);
             }
         }
         return json;
@@ -958,8 +955,8 @@ public class FSControl {
     
     /** Called from fsadmin.jsp, which is called by administration page by ajax. */
     public JsonObject admin(HttpServletRequest request) throws Exception {
-    	initialize(request.getContextPath());
-    	
+        initialize(request.getContextPath());
+        
         JsonObject json = processHandler("admin", request);
         if(json != null) return json;
         json = new JsonObject();
@@ -969,7 +966,6 @@ public class FSControl {
         Properties   propTest = new Properties();
         InputStream  propIn   = null;
         OutputStream fileOut  = null;
-        Reader rd1 = null, rd2 = null;
         
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -1033,12 +1029,16 @@ public class FSControl {
             }
             
             File fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "config.json");
-            
+            if(! fJson.exists()) fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "CONFIG.JSON");
+            if(! fJson.exists()) fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "config.gson");
+            if(! fJson.exists()) fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "CONFIG.GSON");
             if(! fJson.exists()) {
                 // Not exist, create
-                fileOut = new FileOutputStream(fJson);
-                fileOut.write("{}".getBytes(cs));
-                fileOut.close(); fileOut = null;
+            	if(useGzip) {
+            		FileUtil.writeString(fJson, cs, "{}", GZIPOutputStream.class);
+            	} else {
+            		FileUtil.writeString(fJson, cs, "{}");
+            	}
             }
             
             if(useJDBC) {
@@ -1061,23 +1061,14 @@ public class FSControl {
                 
                 jsonConfig = (JsonObject) JsonCompatibleUtil.parseJson(content.trim());
             } else {
-                propIn = new FileInputStream(fJson);
-                rd1 = new InputStreamReader(propIn, cs);
-                rd2 = new BufferedReader(rd1);
-                
-                StringBuilder lineCollection = new StringBuilder("");
-                String line;
-                while(true) {
-                    line = ((BufferedReader) rd2).readLine();
-                    if(line == null) break;
-                    lineCollection = lineCollection.append("\n").append(line); 
-                }
-                
-                rd2.close(); rd2 = null;
-                rd1.close(); rd1 = null;
-                propIn.close(); propIn = null;
-                
-                jsonConfig = (JsonObject) JsonCompatibleUtil.parseJson(lineCollection.toString().trim());
+            	String jsonContent = null;
+            	
+            	if(fJson.getName().toLowerCase().endsWith(".gson")) {
+            		jsonContent = FileUtil.readString(fJson, cs, GZIPInputStream.class);
+            	} else {
+            		jsonContent = FileUtil.readString(fJson, cs);
+            	}
+                jsonConfig = (JsonObject) JsonCompatibleUtil.parseJson(jsonContent.trim());
             }
             
             json.put("message", "");
@@ -1125,8 +1116,8 @@ public class FSControl {
                     if(sTokenlifetime == null) sTokenlifetime = "10";
                     Integer.parseInt(sTokenlifetime); // Checking valid number
                 } else {
-                	sLoginfailcnt  = "10";
-                	sTokenlifetime = "0";
+                    sLoginfailcnt  = "10";
+                    sTokenlifetime = "0";
                 }
                 
                 String sUseCaptchaDown  = request.getParameter("usecaptchadown");
@@ -1402,32 +1393,24 @@ public class FSControl {
                     File[] files = fileAcc.listFiles();
                     for(File f : files) {
                         if(f.exists()) {
-                            if(f.getName().equals(cid + ".json") || f.getName().equals(cid + ".JSON")) {
+                            String fName = f.getName();
+                            if(fName.equals(cid + ".json") || fName.equals(cid + ".JSON") || fName.equals(cid + ".gson") || fName.equals(cid + ".GSON")) {
                                 if(lang.equals("ko")) throw new RuntimeException("이 ID를 사용할 수 없습니다.");
                                 else                  throw new RuntimeException("Cannot use these ID.");
                             }
                             
                             JsonObject accountOneTmp = new JsonObject();
                             StringBuilder lineCollector = new StringBuilder("");
-                            String lx;
                             
-                            FileInputStream fIn = null;
-                            InputStreamReader r1 = null;
-                            BufferedReader r2 = null;
                             try {
-                                fIn = new FileInputStream(f);
-                                r1 = new InputStreamReader(fIn, cs);
-                                r2 = new BufferedReader(r1);
-                                while(true) {
-                                    lx = ((BufferedReader) r2).readLine();
-                                    if(lx == null) break;
-                                    lineCollector = lineCollector.append("\n").append(lx);
+                            	String jsonContent = null;
+                            	if(fName.toLowerCase().endsWith(".gson")) {
+                                    jsonContent = FileUtil.readString(f, cs, GZIPInputStream.class);
+                                } else {
+                                	jsonContent = FileUtil.readString(f, cs);
                                 }
-                                r2.close();  r2  = null;
-                                r1.close();  r1  = null;
-                                fIn.close(); fIn = null;
-                                
-                                accountOneTmp = (JsonObject) JsonCompatibleUtil.parseJson(lineCollector.toString().trim());
+                            	
+                                accountOneTmp = (JsonObject) JsonCompatibleUtil.parseJson(jsonContent.trim());
                                 lineCollector.setLength(0);
                                 lineCollector = null;
                                 
@@ -1437,11 +1420,7 @@ public class FSControl {
                                     else                  throw new RuntimeException("Cannot use these ID.");
                                 }
                             } catch(Throwable t) {
-                                t.printStackTrace();
-                            } finally {
-                                if(r2  != null) { try { r2.close();  } catch(Throwable txc) {} }
-                                if(r1  != null) { try { r1.close();  } catch(Throwable txc) {} }
-                                if(fIn != null) { try { fIn.close(); } catch(Throwable txc) {} }
+                            	logIn("Exception when checking ID available - (" + t.getClass().getName() + ") " + t.getMessage());
                             }
                         }
                     }
@@ -1496,11 +1475,13 @@ public class FSControl {
                     if(! faJson.exists()) faJson.mkdirs();
                     if(! ftJson.exists()) ftJson.mkdirs();
                     
-                    File fileAcc = new File(faJson.getCanonicalPath() + File.separator + cid + ".json");
+                    File fileAcc = null;
+                    if(useGzip) fileAcc = new File(faJson.getCanonicalPath() + File.separator + cid + ".gson");
+                    else        fileAcc = new File(faJson.getCanonicalPath() + File.separator + cid + ".json");
                     fileAcc.getCanonicalPath(); // Check valid
-                    fileOut = new FileOutputStream(fileAcc);
-                    fileOut.write(newAcc.toJSON().getBytes(cs));
-                    fileOut.close(); fileOut = null;
+                    
+                    if(useGzip) FileUtil.writeString(fileAcc, cs, newAcc.toJSON(), GZIPOutputStream.class);
+                    else        FileUtil.writeString(fileAcc, cs, newAcc.toJSON());
                 }
             } else if(req.equalsIgnoreCase("userdel")) {
                 if(readOnly) throw new RuntimeException("Blocked. FS is read-only mode.");
@@ -1559,6 +1540,9 @@ public class FSControl {
                     pstmt.close(); pstmt = null;
                 } else {
                     File fTarget = new File(faJson.getCanonicalPath() + File.separator + dId + ".json");
+                    if(! fTarget.exists()) fTarget = new File(faJson.getCanonicalPath() + File.separator + dId + ".JSON");
+                    if(! fTarget.exists()) fTarget = new File(faJson.getCanonicalPath() + File.separator + dId + ".gson");
+                    if(! fTarget.exists()) fTarget = new File(faJson.getCanonicalPath() + File.separator + dId + ".GSON");
                     if(! fTarget.exists()) {
                         if(lang.equals("ko")) throw new RuntimeException("해당 ID의 사용자가 없습니다. 다시 검색 후 이용해 주세요.");
                         else                  throw new RuntimeException("There are no user using that ID. Please re-search.");
@@ -1569,61 +1553,61 @@ public class FSControl {
                     if(dirTokens.exists() && dirTokens.isDirectory()) {
                         File[] children = dirTokens.listFiles();
                         for(File f : children) {
-                        	if(f.isDirectory()) {
-                        		File[] gchildren = f.listFiles();
-                        		for(File gf : gchildren) {
-                        			if(gf.isDirectory()) continue;
-                        			gf.delete();
-                        		}
-                        	}
+                            if(f.isDirectory()) {
+                                File[] gchildren = f.listFiles();
+                                for(File gf : gchildren) {
+                                    if(gf.isDirectory()) continue;
+                                    gf.delete();
+                                }
+                            }
                             f.delete();
                         }
                         dirTokens.delete();
                     }
                 }
             } else if(req.equalsIgnoreCase("gblist")) {
-            	garbage = new File(rootPath.getCanonicalPath() + File.separator + ".garbage");
+                garbage = new File(rootPath.getCanonicalPath() + File.separator + ".garbage");
                 if(! garbage.exists()) garbage.mkdirs();
                 
                 JsonArray dates = new JsonArray();
                 File[] lists = garbage.listFiles();
                 for(File f : lists) {
-                	if(f.isDirectory()) {
-                		File[] children = f.listFiles();
-                		for(File child : children) {
-                			if(child.isDirectory()) {
-                				File[] gchildren = child.listFiles();
-                				for(File gchild : gchildren) {
-                					if(gchild.isDirectory()) continue;
-                					dates.add(gchild.getCanonicalPath().replace(garbage.getCanonicalPath(), ""));
-                				}
-                			}
-                			dates.add(child.getCanonicalPath().replace(garbage.getCanonicalPath(), ""));
-                		}
-                	}
-                	dates.add(f.getCanonicalPath().replace(garbage.getCanonicalPath(), ""));
+                    if(f.isDirectory()) {
+                        File[] children = f.listFiles();
+                        for(File child : children) {
+                            if(child.isDirectory()) {
+                                File[] gchildren = child.listFiles();
+                                for(File gchild : gchildren) {
+                                    if(gchild.isDirectory()) continue;
+                                    dates.add(gchild.getCanonicalPath().replace(garbage.getCanonicalPath(), ""));
+                                }
+                            }
+                            dates.add(child.getCanonicalPath().replace(garbage.getCanonicalPath(), ""));
+                        }
+                    }
+                    dates.add(f.getCanonicalPath().replace(garbage.getCanonicalPath(), ""));
                 }
                 json.put("garbages", dates);
             } else if(req.equalsIgnoreCase("cleangb")) {
-            	garbage = new File(rootPath.getCanonicalPath() + File.separator + ".garbage");
+                garbage = new File(rootPath.getCanonicalPath() + File.separator + ".garbage");
                 if(! garbage.exists()) garbage.mkdirs();
                 
                 File[] lists = garbage.listFiles();
                 for(File f : lists) {
-                	if(f.isDirectory()) {
-                		File[] children = f.listFiles();
-                		for(File child : children) {
-                			if(child.isDirectory()) {
-                				File[] gchildren = child.listFiles();
-                				for(File gchild : gchildren) {
-                					if(gchild.isDirectory()) continue;
-                					gchild.delete();
-                				}
-                			}
-                			child.delete();
-                		}
-                	}
-                	f.delete();
+                    if(f.isDirectory()) {
+                        File[] children = f.listFiles();
+                        for(File child : children) {
+                            if(child.isDirectory()) {
+                                File[] gchildren = child.listFiles();
+                                for(File gchild : gchildren) {
+                                    if(gchild.isDirectory()) continue;
+                                    gchild.delete();
+                                }
+                            }
+                            child.delete();
+                        }
+                    }
+                    f.delete();
                 }
             }
             
@@ -1780,7 +1764,7 @@ public class FSControl {
             if(rs.isLogout()) removeSessionObject(request, "fssession");
             
             if(rs.isSavetoken()) {
-            	setSessionObject(request, "fsscen", console);
+                setSessionObject(request, "fsscen", console);
             }
             
             String rsPath = rs.getPath();
@@ -1815,7 +1799,7 @@ public class FSControl {
     
     /** Called from fs.jsp, which is called by file list page by ajax. */
     public JsonObject list(HttpServletRequest request, String pPath, String pKeyword, String pExcept) {
-    	initialize(request.getContextPath());
+        initialize(request.getContextPath());
         
         JsonObject json = processHandler("list", request);
         if(json != null) return json;
@@ -2354,8 +2338,8 @@ public class FSControl {
         byte[] buffers = new byte[dBufferSize];
         
         try {
-        	if(! FSUtils.canBeFileName(fileName)) throw new RuntimeException("Illegal character on file's name - " + fileName);
-        	
+            if(! FSUtils.canBeFileName(fileName)) throw new RuntimeException("Illegal character on file's name - " + fileName);
+            
             if(captchaDownload) {
                 if(! viewMode) {
                     if(code.equals("SKIP")) {
@@ -2545,8 +2529,8 @@ public class FSControl {
         json.put("message", "");
         
         try {
-        	if(readOnly) throw new RuntimeException("Blocked. FS is read-only mode.");
-        	
+            if(readOnly) throw new RuntimeException("Blocked. FS is read-only mode.");
+            
             String pathParam = request.getParameter("path");
             if(pathParam == null) pathParam = "";
             pathParam = pathParam.trim();
@@ -2632,8 +2616,8 @@ public class FSControl {
         json.put("message", "");
 
         try {
-        	if(readOnly) throw new RuntimeException("Blocked. FS is read-only mode.");
-        	
+            if(readOnly) throw new RuntimeException("Blocked. FS is read-only mode.");
+            
             String pathParam = request.getParameter("path");
             if(pathParam == null) pathParam = "";
             pathParam = pathParam.trim();
@@ -2675,7 +2659,7 @@ public class FSControl {
                 File file;
                 
                 if(fileName != null) {
-                	if(! FSUtils.canBeFileName(fileName)) throw new RuntimeException("Illegal character on file's name - " + fileName);
+                    if(! FSUtils.canBeFileName(fileName)) throw new RuntimeException("Illegal character on file's name - " + fileName);
                 }
                 
                 if(delType.equals("dir")) file = new File(rootPath.getCanonicalPath() + File.separator + pathParam.replace("/", File.separator));
@@ -2756,6 +2740,7 @@ public class FSControl {
         String lang = getLanguage(request);
 
         FileInputStream fIn = null;
+        GZIPInputStream gzp = null;
         Reader r1 = null, r2 = null;
         FileOutputStream fOut = null;
         Connection conn = null;
@@ -2848,17 +2833,17 @@ public class FSControl {
             }
             
             if(req.equalsIgnoreCase("logout")) {
-            	String outId = "UNKNOWN";
-            	if(sessionMap != null) {
-            		if(sessionMap.get("id") != null) outId = sessionMap.get("id").toString();
-            	}
-            	
+                String outId = "UNKNOWN";
+                if(sessionMap != null) {
+                    if(sessionMap.get("id") != null) outId = sessionMap.get("id").toString();
+                }
+                
                 sessionMap = null;
                 needInvalidate = true;
                 
                 if(tokenID != null && tokenVal != null) {
-                	if(outId.equals("UNKNOWN")) outId = tokenID;
-                	
+                    if(outId.equals("UNKNOWN")) outId = tokenID;
+                    
                     // Delete Token
                     File ftId = new File(ftJson.getCanonicalPath() + File.separator + tokenID);
                     if(ftId.exists() && ftId.isDirectory()) {
@@ -2993,26 +2978,20 @@ public class FSControl {
                         accountOne = accountOneTmp;
                     } else {
                         File fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".json");
-                        fileAcc.getCanonicalPath(); // Check valid
+                        if(! fileAcc.exists()) fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".JSON");
+                        if(! fileAcc.exists()) fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".gson");
+                        if(! fileAcc.exists()) fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".GSON");
                         if(fileAcc.exists()) {
-                            StringBuilder lineCollector = new StringBuilder("");
-                            String line;
-                            
-                            fIn = new FileInputStream(fileAcc);
-                            r1 = new InputStreamReader(fIn, cs);
-                            r2 = new BufferedReader(r1);
-                            while(true) {
-                                line = ((BufferedReader) r2).readLine();
-                                if(line == null) break;
-                                lineCollector = lineCollector.append("\n").append(line);
+                            String fLower = fileAcc.getName().toLowerCase();
+                            String jsonContent = null;
+                            if(fLower.endsWith(".gson")) {
+                            	jsonContent = FileUtil.readString(fileAcc, cs, GZIPInputStream.class);
+                            } else {
+                            	jsonContent = FileUtil.readString(fileAcc, cs);
                             }
-                            r2.close(); r2 = null;
-                            r1.close(); r1 = null;
-                            fIn.close(); fIn = null;
                             
-                            accountOne = (JsonObject) JsonCompatibleUtil.parseJson(lineCollector.toString().trim());
-                            lineCollector.setLength(0);
-                            lineCollector = null;
+                            accountOne = (JsonObject) JsonCompatibleUtil.parseJson(jsonContent.trim());
+                            jsonContent = null;
                         }
                     }
                     
@@ -3093,9 +3072,19 @@ public class FSControl {
                                     pstmt.close();
                                 } else {
                                     File fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".json");
-                                    fOut = new FileOutputStream(fileAcc);
-                                    fOut.write(accountOne.toJSON().getBytes(cs));
-                                    fOut.close(); fOut = null;
+                                    if(! fileAcc.exists()) fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".JSON");
+                                    if(! fileAcc.exists()) fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".gson");
+                                    if(! fileAcc.exists()) fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".GSON");
+                                    if(! fileAcc.exists()) {
+                                    	if(useGzip) fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".gson");
+                                    	else        fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".json");
+                                    }
+                                    String fLower = fileAcc.getName().toLowerCase();
+                                	if(fLower.endsWith(".gson")) {
+                                		FileUtil.writeString(fileAcc, cs, accountOne.toJSON(), GZIPOutputStream.class);
+                                	} else {
+                                		FileUtil.writeString(fileAcc, cs, accountOne.toJSON());
+                                	}
                                 }
                                 
                                 accChanging = false;
@@ -3106,8 +3095,8 @@ public class FSControl {
                     
                     if(msg.equals("")) {
                         // Success to login
-                    	log("[LOGIN][ACCEPTED] " + accountOne.get("id") + " at " + now + " from " + request.getRemoteAddr(), this.getClass());
-                    	
+                        log("[LOGIN][ACCEPTED] " + accountOne.get("id") + " at " + now + " from " + request.getRemoteAddr(), this.getClass());
+                        
                         if(failCnt >= 1) {
                             // Reset Fail Count
                             failCnt = 0;
@@ -3138,10 +3127,20 @@ public class FSControl {
                                 conn.commit();
                                 pstmt.close();
                             } else {
-                                File fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".json");
-                                fOut = new FileOutputStream(fileAcc);
-                                fOut.write(accountOne.toJSON().getBytes(cs));
-                                fOut.close(); fOut = null;
+                            	File fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".json");
+                                if(! fileAcc.exists()) fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".JSON");
+                                if(! fileAcc.exists()) fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".gson");
+                                if(! fileAcc.exists()) fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".GSON");
+                                if(! fileAcc.exists()) {
+                                	if(useGzip) fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".gson");
+                                	else        fileAcc = new File(faJson.getCanonicalPath() + File.separator + id + ".json");
+                                }
+                                String fLower = fileAcc.getName().toLowerCase();
+                            	if(fLower.endsWith(".gson")) {
+                            		FileUtil.writeString(fileAcc, cs, accountOne.toJSON(), GZIPOutputStream.class);
+                            	} else {
+                            		FileUtil.writeString(fileAcc, cs, accountOne.toJSON());
+                            	}
                             }
                             accChanging = false;
                         }
@@ -3176,17 +3175,17 @@ public class FSControl {
                                         File[] lists = dirTokens.listFiles();
                                         for(File f : lists) {
                                             if(f.isDirectory()) {
-                                            	File[] children = f.listFiles();
-                                            	for(File c : children) {
-                                            		if(c.isDirectory()) {
-                                            			File[] gchildren = c.listFiles();
-                                            			for(File gc : gchildren) {
-                                            				if(gc.isDirectory()) continue;
-                                            				gc.delete();
-                                            			}
-                                            		}
-                                            		c.delete();
-                                            	}
+                                                File[] children = f.listFiles();
+                                                for(File c : children) {
+                                                    if(c.isDirectory()) {
+                                                        File[] gchildren = c.listFiles();
+                                                        for(File gc : gchildren) {
+                                                            if(gc.isDirectory()) continue;
+                                                            gc.delete();
+                                                        }
+                                                    }
+                                                    c.delete();
+                                                }
                                             }
                                             f.delete();
                                         }
@@ -3214,7 +3213,7 @@ public class FSControl {
                         needInvalidate = false;
                         json.put("success", new Boolean(true));
                     } else {
-                    	log("[LOGIN][FAIL] " + accountOne.get("id") + " at " + now + " from " + request.getRemoteAddr() + " - " + msg, this.getClass());
+                        log("[LOGIN][FAIL] " + accountOne.get("id") + " at " + now + " from " + request.getRemoteAddr() + " - " + msg, this.getClass());
                     }
                 }
             }
@@ -3249,13 +3248,7 @@ public class FSControl {
                 logIn("Session Invalidated");
                 json.put("invalidated", new Boolean(true));
             }
-            if(rs    != null) { try { rs.close();     } catch(Throwable tx) {}}
-            if(pstmt != null) { try { pstmt.close();  } catch(Throwable tx) {}}
-            if(conn  != null) { try { conn.close();   } catch(Throwable tx) {}}
-            if(r2    != null) { try { r2.close();     } catch(Throwable tx) {}}
-            if(r1    != null) { try { r1.close();     } catch(Throwable tx) {}}
-            if(fIn   != null) { try { fIn.close();    } catch(Throwable tx) {}}
-            if(fOut  != null) { try { fOut.close();   } catch(Throwable tx) {}}
+            ClassUtil.closeAll(rs, pstmt, conn, r2, r1, gzp, fIn, fOut);
             fOut = null;
             accChanging = false;
         }
@@ -3434,11 +3427,18 @@ public class FSControl {
                         File[] fTokens = ftId.listFiles();
                         JsonObject jsonComp = null;
                         for(File f : fTokens) {
-                        	if(f.isDirectory()) continue;
-                        	String fName = f.getName();
-                        	if(! fName.toLowerCase().endsWith(".json")) continue;
-                        	
-                            String t = FileUtil.readString(f, "UTF-8");
+                            if(f.isDirectory()) continue;
+                            String fName = f.getName();
+                            String t = null;
+                            
+                            if(fName.toLowerCase().endsWith(".json")) {
+                                t = FileUtil.readString(f, "UTF-8");
+                            } else if(fName.toLowerCase().endsWith(".gson")) {
+                                t = FileUtil.readString(f, "UTF-8", GZIPInputStream.class);
+                            } else {
+                                continue;
+                            }
+                            
                             JsonObject tJson = (JsonObject) JsonCompatibleUtil.parseJson(t);
                             if(tJson == null) continue;
                             
@@ -3466,32 +3466,32 @@ public class FSControl {
                         if(res != null) return res;
                     }
                     if(addiContent2 != null) {
-                    	Object oFilePath = addiContent2.get(key);
-                    	if(oFilePath != null) {
-                    		File ftJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "tokens");
+                        Object oFilePath = addiContent2.get(key);
+                        if(oFilePath != null) {
+                            File ftJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "tokens");
                             if(! ftJson.exists()) ftJson.mkdirs();
                             
                             File ftId = new File(ftJson.getCanonicalPath() + File.separator + tokenID);
                             if(! ftId.exists()) ftId.mkdirs();
-                    		
-                    		File fBlob = new File(ftId.getCanonicalPath() + File.separator + oFilePath.toString());
-                    		if(fBlob.exists()) {
-                    			FileInputStream   in1 = null;
-                    			ObjectInputStream in2 = null;
-                    			Throwable ccaught = null;
-                    			try {
-                    				in1 = new FileInputStream(fBlob);
-                    				in2 = new ObjectInputStream(in1);
-                    				res = in2.readObject();
-                    			} catch(Throwable tIn) {
-                    				ccaught = tIn;
-                    			} finally {
-                    				ClassUtil.closeAll(in2, in1);
-                    			}
-                    			if(ccaught != null) throw new RuntimeException(ccaught.getMessage(), ccaught);
-                    			return  res;
-                    		}
-                    	}
+                            
+                            File fBlob = new File(ftId.getCanonicalPath() + File.separator + oFilePath.toString());
+                            if(fBlob.exists()) {
+                                FileInputStream   in1 = null;
+                                ObjectInputStream in2 = null;
+                                Throwable ccaught = null;
+                                try {
+                                    in1 = new FileInputStream(fBlob);
+                                    in2 = new ObjectInputStream(in1);
+                                    res = in2.readObject();
+                                } catch(Throwable tIn) {
+                                    ccaught = tIn;
+                                } finally {
+                                    ClassUtil.closeAll(in2, in1);
+                                }
+                                if(ccaught != null) throw new RuntimeException(ccaught.getMessage(), ccaught);
+                                return  res;
+                            }
+                        }
                     }
                 } catch(Throwable t) {
                     t.printStackTrace();
@@ -3688,11 +3688,18 @@ public class FSControl {
                     JsonObject jsonComp = null;
                     for(File f : fTokens) {
                         try {
-                        	if(f.isDirectory()) continue;
-                        	String fName = f.getName();
-                        	if(! fName.toLowerCase().endsWith(".json")) continue;
-                        	
-                            String t = FileUtil.readString(f, "UTF-8");
+                            if(f.isDirectory()) continue;
+                            String fName = f.getName();
+                            String t = null;
+                            
+                            if(fName.toLowerCase().endsWith(".json")) {
+                            	t = FileUtil.readString(f, "UTF-8");
+                            } else if(fName.toLowerCase().endsWith(".gson")) {
+                            	t = FileUtil.readString(f, "UTF-8", GZIPInputStream.class);
+                            } else {
+                            	continue;
+                            }
+                            
                             JsonObject tJson = (JsonObject) JsonCompatibleUtil.parseJson(t);
                             String tokenOne = String.valueOf(tJson.get("token"));
                             
@@ -3830,11 +3837,18 @@ public class FSControl {
                 
                 for(File f : fTokens) {
                     try {
-                    	if(f.isDirectory()) continue;
-                    	String fName = f.getName();
-                    	if(! fName.toLowerCase().endsWith(".json")) continue;
-                    	
-                        String t = FileUtil.readString(f, "UTF-8");
+                        if(f.isDirectory()) continue;
+                        String fName = f.getName();
+                        String t = null;
+                        
+                        if(fName.toLowerCase().endsWith(".json")) {
+                        	t = FileUtil.readString(f, "UTF-8");
+                        } else if(fName.toLowerCase().endsWith(".gson")) {
+                        	t = FileUtil.readString(f, "UTF-8", GZIPInputStream.class);
+                        } else {
+                        	continue;
+                        }
+                        
                         JsonObject tJson = (JsonObject) JsonCompatibleUtil.parseJson(t);
                         String tokenOne = String.valueOf(tJson.get("token"));
                         
@@ -3885,35 +3899,35 @@ public class FSControl {
                                     continue;
                                 }
                                 if(c instanceof Serializable) {
-                                	File fblob = null;
-                                	
-                                	Object beforeNm = jBlob.get(k);
-                                	if(beforeNm == null) {
-                                		int no = 0;
-                                    	fblob = new File(ftId.getCanonicalPath() + File.separator + "blob" + no + ".blob");
-                                    	while(fblob.exists()) {
-                                    		no++;
-                                    		fblob = new File(ftId.getCanonicalPath() + File.separator + "blob" + no + ".blob");
-                                    	}
-                                	} else {
-                                		fblob = new File(ftId.getCanonicalPath() + File.separator + beforeNm.toString());
-                                	}
-                                	
-                                	jBlob.put(k, fblob.getName());
-                                	
-                                	FileOutputStream   out1 = null;
-                                	ObjectOutputStream out2 = null;
-                                	Throwable ccaught = null;
-                                	try {
-                                		out1 = new FileOutputStream(fblob);
-                                		out2 = new ObjectOutputStream(out1);
-                                		out2.writeObject(c);
-                                	} catch(Throwable tIn) {
-                                		ccaught = tIn;
-                                	} finally {
-                                		ClassUtil.closeAll(out2, out1);
-                                	}
-                                	if(ccaught != null) throw new RuntimeException(ccaught.getMessage(), ccaught);
+                                    File fblob = null;
+                                    
+                                    Object beforeNm = jBlob.get(k);
+                                    if(beforeNm == null) {
+                                        int no = 0;
+                                        fblob = new File(ftId.getCanonicalPath() + File.separator + "blob" + no + ".blob");
+                                        while(fblob.exists()) {
+                                            no++;
+                                            fblob = new File(ftId.getCanonicalPath() + File.separator + "blob" + no + ".blob");
+                                        }
+                                    } else {
+                                        fblob = new File(ftId.getCanonicalPath() + File.separator + beforeNm.toString());
+                                    }
+                                    
+                                    jBlob.put(k, fblob.getName());
+                                    
+                                    FileOutputStream   out1 = null;
+                                    ObjectOutputStream out2 = null;
+                                    Throwable ccaught = null;
+                                    try {
+                                        out1 = new FileOutputStream(fblob);
+                                        out2 = new ObjectOutputStream(out1);
+                                        out2.writeObject(c);
+                                    } catch(Throwable tIn) {
+                                        ccaught = tIn;
+                                    } finally {
+                                        ClassUtil.closeAll(out2, out1);
+                                    }
+                                    if(ccaught != null) throw new RuntimeException(ccaught.getMessage(), ccaught);
                                 }
                             }
                             
@@ -4025,10 +4039,12 @@ public class FSControl {
                 log("Token does not exists. Writing one...", this.getClass());
                 // Write new
                 int fIndex = 0;
-                File fToken = new File(ftId.getCanonicalPath() + File.separator + "t" + fIndex + ".json");
+                String newExt = "json";
+                if(useGzip) newExt = "gson";
+                File fToken = new File(ftId.getCanonicalPath() + File.separator + "t" + fIndex + "." + newExt);
                 while(fToken.exists()) {
                     fIndex++;
-                    fToken = new File(ftId.getCanonicalPath() + File.separator + "t" + fIndex + ".json");
+                    fToken = new File(ftId.getCanonicalPath() + File.separator + "t" + fIndex + "." + newExt);
                 }
                 
                 long tCrTime = System.currentTimeMillis();
@@ -4041,7 +4057,8 @@ public class FSControl {
                 if(content == null) jToken.put("content", new JsonObject());
                 else                jToken.put("content", (JsonObject) (JsonCompatibleUtil.parseJson(content)));
                 
-                FileUtil.writeString(fToken, "UTF-8", jToken.toJSON());
+                if(useGzip) FileUtil.writeString(fToken, "UTF-8", jToken.toJSON(), GZIPOutputStream.class);
+                else        FileUtil.writeString(fToken, "UTF-8", jToken.toJSON());
                 return true;
             }
         }
@@ -4092,26 +4109,20 @@ public class FSControl {
                 if(! ftJson.exists()) ftJson.mkdirs();
                 
                 File fileAcc = new File(faJson.getCanonicalPath() + File.separator + userId + ".json");
-                fileAcc.getCanonicalPath(); // Check valid
+                if(! fileAcc.exists()) fileAcc = new File(faJson.getCanonicalPath() + File.separator + userId + ".JSON");
+                if(! fileAcc.exists()) fileAcc = new File(faJson.getCanonicalPath() + File.separator + userId + ".gson");
+                if(! fileAcc.exists()) fileAcc = new File(faJson.getCanonicalPath() + File.separator + userId + ".GSON");
                 if(fileAcc.exists()) {
-                    StringBuilder lineCollector = new StringBuilder("");
-                    String line;
-                    
-                    fIn = new FileInputStream(fileAcc);
-                    r1 = new InputStreamReader(fIn, cs);
-                    r2 = new BufferedReader(r1);
-                    while(true) {
-                        line = ((BufferedReader) r2).readLine();
-                        if(line == null) break;
-                        lineCollector = lineCollector.append("\n").append(line);
-                    }
-                    r2.close(); r2 = null;
-                    r1.close(); r1 = null;
-                    fIn.close(); fIn = null;
-                    
-                    jsonSess = (JsonObject) JsonCompatibleUtil.parseJson(lineCollector.toString().trim());
-                    lineCollector.setLength(0);
-                    lineCollector = null;
+                	String jsonContent = null;
+                	String fLower = fileAcc.getName().toLowerCase();
+                	if(fLower.endsWith(".gson")) {
+                		jsonContent = FileUtil.readString(fileAcc, cs, GZIPInputStream.class);
+                	} else {
+                		jsonContent = FileUtil.readString(fileAcc, cs);
+                	}
+                	
+                    jsonSess = (JsonObject) JsonCompatibleUtil.parseJson(jsonContent.trim());
+                    jsonContent = null;
                 }
             }
             
@@ -4541,27 +4552,35 @@ public class FSControl {
         return useToken;
     }
 
+    public boolean isUseGzip() {
+        return useGzip;
+    }
+
+    public void setUseGzip(boolean useGzip) {
+        this.useGzip = useGzip;
+    }
+
     public boolean isReadOnly() {
         return readOnly;
     }
     
     public boolean isAllowSysCmd() {
-    	return allowSysCmd;
+        return allowSysCmd;
     }
 
     public String getRealPath() {
-		return realPath;
-	}
+        return realPath;
+    }
 
-	public void setRealPath(ServletContext ctx) {
-		this.realPath = ctx.getRealPath("/");
-	}
-	
-	public void setRealPath(HttpServletRequest req) {
-		setRealPath(req.getServletContext());
-	}
+    public void setRealPath(ServletContext ctx) {
+        this.realPath = ctx.getRealPath("/");
+    }
+    
+    public void setRealPath(HttpServletRequest req) {
+        setRealPath(req.getServletContext());
+    }
 
-	public synchronized void logIn(Object logContent) {
+    public synchronized void logIn(Object logContent) {
         logIn(logContent, FSControl.class);
     }
     
@@ -4684,9 +4703,19 @@ public class FSControl {
                 conn.close(); conn = null;
             } else {
                 File fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "config.json");
-                fileOut = new FileOutputStream(fJson);
-                fileOut.write(conf.toJSON().getBytes(cs));
-                fileOut.close(); fileOut = null;
+                if(! fJson.exists()) fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "CONFIG.JSON");
+                if(! fJson.exists()) fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "config.gson");
+                if(! fJson.exists()) fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "CONFIG.GSON");
+                if(! fJson.exists()) {
+                	if(useGzip) fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "config.gson");
+                	else        fJson = new File(fileConfigPath.getCanonicalPath() + File.separator + "config.json");
+                }
+                String fLower = fJson.getName().toLowerCase();
+                if(fLower.endsWith(".gson")) {
+                	FileUtil.writeString(fJson, cs, conf.toJSON(), GZIPOutputStream.class);
+                } else {
+                	FileUtil.writeString(fJson, cs, conf.toJSON());
+                }
             }
             
             logIn("Configuration Updated by " + changer + " when " + System.currentTimeMillis());
@@ -4694,9 +4723,7 @@ public class FSControl {
             t.printStackTrace();
             caught = t;
         } finally {
-            if(pstmt    != null) { try { pstmt.close();    } catch(Throwable tx) {} }
-            if(conn     != null) { try { conn.close();     } catch(Throwable tx) {} }
-            if(fileOut  != null) { try { fileOut.close();  } catch(Throwable tx) {} }
+        	ClassUtil.closeAll(pstmt, conn, fileOut);
         }
         if(caught != null) throw new RuntimeException(caught.getMessage(), caught);
     }
@@ -4722,15 +4749,18 @@ public class FSControl {
         } else {
             conf.put("UseToken", new Boolean(useToken));
         }
+        if(conf.get("UseGZIP") != null) {
+        	useGzip = DataUtil.parseBoolean(conf.get("UseGZIP").toString().trim());
+        }
         if(conf.get("ReadOnly") != null) {
             readOnly = DataUtil.parseBoolean(conf.get("ReadOnly").toString().trim());
         } else {
             conf.put("ReadOnly", new Boolean(readOnly));
         }
         if(conf.get("AllowSystemCommand") != null) {
-        	allowSysCmd = DataUtil.parseBoolean(conf.get("AllowSystemCommand").toString().trim());
+            allowSysCmd = DataUtil.parseBoolean(conf.get("AllowSystemCommand").toString().trim());
         } else {
-        	conf.put("AllowSystemCommand", new Boolean(allowSysCmd));
+            conf.put("AllowSystemCommand", new Boolean(allowSysCmd));
         }
         if(conf.get("UseConsole") != null) {
             noConsole = (! DataUtil.parseBoolean(conf.get("UseConsole").toString().trim()));
@@ -4993,13 +5023,13 @@ public class FSControl {
     
     /** Call event handler */
     public void invokeCallEvent(String event, String action, HttpServletRequest req) throws Throwable {
-    	for(FSPack pack : packs) {
-    		List<FSControlEventHandler> list = pack.getEventHandlers();
-    		if(list == null) continue;
-    		for(FSControlEventHandler e : list) {
-    			e.eventOccured(event, action, req);
-    		}
-    	}
+        for(FSPack pack : packs) {
+            List<FSControlEventHandler> list = pack.getEventHandlers();
+            if(list == null) continue;
+            for(FSControlEventHandler e : list) {
+                e.eventOccured(event, action, req);
+            }
+        }
     }
     
     /** Delete all tokens */
