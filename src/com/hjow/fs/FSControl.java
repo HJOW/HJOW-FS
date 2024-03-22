@@ -89,7 +89,7 @@ import hjow.common.util.GUIUtil;
 import hjow.common.util.SecurityUtil;
 
 public class FSControl {
-    public static final int[] VERSION = {0, 1, 19, 26};
+    public static final int[] VERSION = {0, 1, 20, 27};
     public static final long  FIRST_ACCESS_TIME = System.currentTimeMillis();
     private static FSControl instance = null;
     
