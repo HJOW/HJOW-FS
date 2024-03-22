@@ -38,6 +38,7 @@ import com.hjow.fs.console.cmd.FSConsoleDown;
 import com.hjow.fs.console.cmd.FSConsoleFind;
 import com.hjow.fs.console.cmd.FSConsoleFirst;
 import com.hjow.fs.console.cmd.FSConsoleHelp;
+import com.hjow.fs.console.cmd.FSConsoleJDBC;
 import com.hjow.fs.console.cmd.FSConsoleLs;
 import com.hjow.fs.console.cmd.FSConsoleMkdir;
 import com.hjow.fs.console.cmd.FSConsoleNow;
@@ -80,6 +81,7 @@ public class FSConsole implements Serializable {
             if(! commands.contains(FSConsoleWrite.class )) commands.add(FSConsoleWrite.class );
             if(! commands.contains(FSConsoleVar.class   )) commands.add(FSConsoleVar.class   );
             if(! commands.contains(FSConsoleCmd.class   )) commands.add(FSConsoleCmd.class   );
+            if(! commands.contains(FSConsoleJDBC.class  )) commands.add(FSConsoleJDBC.class  );
         }
         
         if(commandClasses != null) {
