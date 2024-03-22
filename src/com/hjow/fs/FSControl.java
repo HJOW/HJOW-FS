@@ -260,7 +260,7 @@ public class FSControl {
     public static void waitProperInit() {
     	int prvInfLoop = 0;
     	try {
-        	while(System.currentTimeMillis() - FSControl.FIRST_ACCESS_TIME < 8000L) {
+        	while(System.currentTimeMillis() - FSControl.FIRST_ACCESS_TIME < 4000L) {
             	Thread.sleep(1000L);
             	prvInfLoop++;
             	if(prvInfLoop >= 1000) break;
@@ -3854,9 +3854,9 @@ public class FSControl {
                         String t = null;
                         
                         if(fName.toLowerCase().endsWith(".json")) {
-                        	t = FileUtil.readString(f, "UTF-8");
+                        	t = FileUtil.readString(f, cs);
                         } else if(fName.toLowerCase().endsWith(".gson")) {
-                        	t = FileUtil.readString(f, "UTF-8", GZIPInputStream.class);
+                        	t = FileUtil.readString(f, cs, GZIPInputStream.class);
                         } else {
                         	continue;
                         }
@@ -3948,7 +3948,11 @@ public class FSControl {
                         }
                         
                         // Re-write
-                        FileUtil.writeString(f, "UTF-8", tJson.toJSON());
+                        if(fName.toLowerCase().endsWith(".json")) {
+                        	FileUtil.writeString(f, cs, tJson.toJSON());
+                        } else if(fName.toLowerCase().endsWith(".gson")) {
+                        	FileUtil.writeString(f, cs, tJson.toJSON(), GZIPOutputStream.class);
+                        }
                         return true;
                     } catch(Throwable tToken) {
                         log("Exception when checking token - (" + tToken.getClass().getName() + ") " + tToken.getMessage(), this.getClass());
@@ -4026,7 +4030,17 @@ public class FSControl {
             boolean exists = false;
             for(File f : fTokens) {
                 try {
-                    String t = FileUtil.readString(f, "UTF-8");
+                    String t = null;
+                    String fName = f.getName();
+                    
+                    if(fName.toLowerCase().endsWith(".json")) {
+                    	t = FileUtil.readString(f, cs);
+                    } else if(fName.toLowerCase().endsWith(".gson")) {
+                    	t = FileUtil.readString(f, cs, GZIPInputStream.class);
+                    } else {
+                    	continue;
+                    }
+                    
                     JsonObject tJson = (JsonObject) JsonCompatibleUtil.parseJson(t);
                     String tokenOne = String.valueOf(tJson.get("token"));
                     
@@ -4069,8 +4083,8 @@ public class FSControl {
                 if(content == null) jToken.put("content", new JsonObject());
                 else                jToken.put("content", (JsonObject) (JsonCompatibleUtil.parseJson(content)));
                 
-                if(useGzip) FileUtil.writeString(fToken, "UTF-8", jToken.toJSON(), GZIPOutputStream.class);
-                else        FileUtil.writeString(fToken, "UTF-8", jToken.toJSON());
+                if(useGzip) FileUtil.writeString(fToken, cs, jToken.toJSON(), GZIPOutputStream.class);
+                else        FileUtil.writeString(fToken, cs, jToken.toJSON());
                 return true;
             }
         }
