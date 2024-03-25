@@ -14,8 +14,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-if(request.getAttribute("fsmodern") == null) request.setAttribute("fsmodern", new Boolean(BrowserInfo.detectSupportES6(BrowserInfo.byUserAgent(request.getHeader("User-Agent")))));
-if(DataUtil.parseBoolean(request.getAttribute("fsmodern"))) {
+if(FSUtils.getAttribute(request, "fsmodern") == null) request.setAttribute("fsmodern", new Boolean(BrowserInfo.detectSupportES6(BrowserInfo.byUserAgent(request.getHeader("User-Agent")))));
+if(DataUtil.parseBoolean(FSUtils.getAttribute(request, "fsmodern"))) {
     // fsaccountbarmodern.jsp fsaccountbarclassic.jsp
     %><jsp:include page="fsaccountbarclassic.jsp"></jsp:include><%
 } else {

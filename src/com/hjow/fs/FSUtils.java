@@ -24,6 +24,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import hjow.common.util.DataUtil;
 import hjow.common.util.GUIUtil;
 import hjow.common.util.SecurityUtil;
@@ -283,5 +286,23 @@ public class FSUtils {
         if(name.contains("|") || name.contains("<" ) || name.contains(">"           )) return false;
         if(name.length() >= 256) return false;
         return true;
+    }
+    
+    /** Get attribute from request, session, and servlet context. */
+    public static Object getAttribute(HttpServletRequest req, String key) {
+    	if(req == null) return null;
+    	Object res;
+    	
+    	res = req.getAttribute(key);
+    	if(res != null) return res;
+    	
+    	HttpSession sess = req.getSession();
+    	res = sess.getAttribute(key);
+    	if(res != null) return res;
+    	
+    	res = sess.getServletContext().getAttribute(key);
+    	if(res != null) return res;
+    	
+    	return null;
     }
 }

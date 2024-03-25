@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="hjow.common.util.*"%><%
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="hjow.common.util.*, com.hjow.fs.*"%><%
 /*
 Copyright 2024 HJOW (Heo Jin Won)
 
@@ -16,6 +16,7 @@ limitations under the License.
 */
 
 String ctxPathCmm = request.getContextPath();
+if(FSUtils.getAttribute(request, "fsmodern") == null) request.setAttribute("fsmodern", new Boolean(BrowserInfo.detectSupportES6(BrowserInfo.byUserAgent(request.getHeader("User-Agent")))));
 %>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/jquery-ui.css"/>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/jquery-ui.structure.css"/>
@@ -35,7 +36,7 @@ String ctxPathCmm = request.getContextPath();
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/jquery-ui.js'></script>
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/bootstrap.js'></script>
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/fscommon.js'></script>
-<% if(BrowserInfo.detectSupportES6(BrowserInfo.byUserAgent(request.getHeader("User-Agent")))) { %>
+<% if(DataUtil.parseBoolean(FSUtils.getAttribute(request, "fsmodern"))) { %>
 <script type="text/javascript" src="<%=ctxPathCmm%>/js/modern/react.development.js"></script>
 <script type="text/javascript" src="<%=ctxPathCmm%>/js/modern/react-dom.development.js"></script>
 <script type="text/javascript" src="<%=ctxPathCmm%>/js/modern/babel.min.js"></script>
