@@ -16,7 +16,7 @@ limitations under the License.
 */
 if(FSControl.useModern(request)) {
     // fsaccountbarmodern.jsp fsaccountbarclassic.jsp
-    %><jsp:include page="fsaccountbarclassic.jsp"></jsp:include><%
+    %><jsp:include page="fsaccountbarmodern.jsp"></jsp:include><%
 } else {
     %><jsp:include page="fsaccountbarclassic.jsp"></jsp:include><%
 }

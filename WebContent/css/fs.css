@@ -68,8 +68,11 @@ div.fs_div .table-hover tdiv.fs_div tr:hover {
   background-color: #EAEAEA;
 }
 
-div.fs_div .full {
+div.fs_div .full, div.fs_div.full {
     width: 100%;
+}
+div.fs_div .fullforce, div.fs_div.fullforce {
+    width: 100% !important;
 }
 div.fs_div a {
     color: rgb(90, 120, 200);

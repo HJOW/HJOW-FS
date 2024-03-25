@@ -5154,8 +5154,9 @@ public class FSControl {
     	if(request.getParameter("f_i_fsmodern") != null) request.getSession().setAttribute("fsmodern", new Boolean(DataUtil.parseBoolean(request.getParameter("f_fsmodern"))));
     	if(request.getParameter("f_d_fsmodern") != null) request.getSession().removeAttribute("fsmodern");
     	if(FSUtils.getAttribute(request, "fsmodern") == null) {
-    		if(request.getParameter("fsmodern") != null) request.setAttribute("fsmodern", new Boolean(DataUtil.parseBoolean(request.getParameter("fsmodern"))));
-    		else request.setAttribute("fsmodern", new Boolean(BrowserInfo.detectSupportES6(BrowserInfo.byUserAgent(request.getHeader("User-Agent")))));
+    		// boolean modernUsage = BrowserInfo.detectSupportES6(BrowserInfo.byUserAgent(request.getHeader("User-Agent")));
+    		boolean modernUsage = false;
+    		request.setAttribute("fsmodern", new Boolean(modernUsage));
     	}
     	return DataUtil.parseBoolean(FSUtils.getAttribute(request, "fsmodern"));
     }

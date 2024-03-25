@@ -166,6 +166,8 @@ $(function() {
         var d   = pops['admin'].dialog;
         var ifr = pops['admin'].iframe;
         ifr.css('width', '100%');
+        ifr.css('overflow'  , 'hidden');
+        ifr.css('overflow-x', 'hidden');
         ifr.css('overflow-y', 'scroll');
         ifr.height(550 - 90);
         ifr.attr('scrolling', 'yes');
