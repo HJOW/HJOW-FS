@@ -2103,6 +2103,14 @@ public class FSControl {
         }
     }
     
+    /** Detect captcha code is created */
+    public boolean isCaptchaCreated(HttpServletRequest request, String key) {
+    	String capt = (String) getSessionObject(request, key + "_captcha_code");
+    	if(capt == null) return false;
+    	if(capt.equalsIgnoreCase("REFRESH")) return false;
+    	return true;
+    }
+    
     /** Called from fscaptin.jsp, which is called by captcha page by iframe. */
     public String createTextCaptcha(HttpServletRequest request, String key, String code, long time) {
         try {

@@ -45,8 +45,6 @@ function FSBasic() {
     this.ctxPath        = "<%=fscHdr.getContextPath()%>";
     this.useIcon        = <%=fscHdr.isReadFileIconOn() ? "true" : "false"%>;
     this.useCaptchaDown = <%=fscHdr.isCaptchaDownloadOn() ? "true" : "false"%>;
-    this.captchaWidth   = parseInt("<%=fscHdr.getCaptchaWidth() + 100%>");
-    this.captchaHeight  = parseInt("<%=fscHdr.getCaptchaHeight() + 180%>");
     this.noAnonymous    = <%=fscHdr.isNoAnonymous() ? "true" : "false"%>;
     this.loginedFirst   = <%=(fscHdr.getSessionUserId(request) != null) ? "true" : "false"%>;
     this.captSizes      = {

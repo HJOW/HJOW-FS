@@ -19,6 +19,9 @@ limitations under the License.
  */
  
 class FSRoot extends React.Component {
+    state = {
+        
+    }
     constructor(props) {
         super(props);
         console.log(props);
@@ -101,46 +104,97 @@ class FSRoot extends React.Component {
 }
 
 class FSAccountBar extends React.Component {
+    state = {
+        logined : false,
+        idtype : 'G',
+        nick : 'Guest',
+        noanonymous : false
+    }
     constructor(props) {
         super(props);
         console.log(props);
+    }
+    componentDidMount() {
+        this.trans('status').then((data) => { this.reloads(data, true); });
+    }
+    trans(req) {
+        let ctxPath = this.props.basic.ctxPath;
+        return new Promise(function(resolve, reject) {
+            FSUtil.ajax({
+                url    : ctxPath + "/jsp/fs/fsproc.jsp",
+                data   : $('#form_fs_login').serialize() + '&req=' + req,
+                method : "POST",
+                dataType : "json",
+                success : function(data) {
+                    resolve(data);
+                }, error : function(jqXHR, textStatus, errorThrown) {
+                    reject(errorThrown);
+                }
+            });
+        });
+    }
+    reloads(data, alerts) {
+        if(alerts && (! data.success)) { alert(data.message); location.reload(); return; };
+        if(data.needrefresh) { location.reload(); return; }
+        if(data.token) {
+            if(FSUtil.detectStorage()) {
+                FSUtil.storage.session.put("fsid"   , data.id   );
+                FSUtil.storage.session.put("fstoken", data.token);
+            }
+        }
+
+        this.state.noanonymous = data.noanonymous;
+        this.state.logined     = data.logined;
+        if(this.state.logined) {
+            this.state.idtype  = data.idtype;
+            this.state.nick    = data.nick;
+        }
+        
+        this.forceUpdate();
     }
     render() { 
         return (
             <div>
                 <div className='container valign_middle full'>
-                    <form onSubmit={() => {return false}} className='form_fs_login'>
-                    <input type='hidden' name='req'      value='status' className='inp_req'/>
+                    <form onSubmit={() => {return false}} className='form_fs_login' id='form_fs_login'>
                     <input type='hidden' name='praction' value='account'/>
-                    <div className='row login_element not_logined padding_top_10'>
-                        <div className='container show-grid d_inline_block valign_middle' style={{ width: '270px', height: '60px' }}>
-                            <div className='row'>
-                                <div className='col-xs-12'>
-                                    <span style={{display: 'inline-block', width: '80px'}}>ID</span><input type='text' name='id' className='inp_login_element' style={{width: '150px'}}/>
-                                </div>
-                            </div>
-                            <div className='row'>
-                                <div className='col-xs-12'>
-                                    <span style={{display: 'inline-block', width: '80px'}} className='lang_element' data-lang-en='Password'>암호</span><input type='password' name='pw' className='inp_login_element' style={{width: '150px'}}/>
-                                </div>
-                            </div>
-                        </div>
-                        <div className='div_captcha_login d_inline_block valign_middle' style={{ height: '60px' }}>
-                            <iframe className='if_captcha_l valign_middle'></iframe>
-                        </div>
-                        <div className='div_captcha_login d_inline_block valign_middle padding_top_10' style={{'marginLeft': '10px', height : '60px', 'textAlign' : 'left'}}>
-                            <input type='text' className='inp_captcha_l inp_login_element lang_attr_element valign_middle' name='captcha' placeholder='옆의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code left'/>
-                        </div>
-                        <div className='d_inline_block valign_middle' style={{width: '100px', height : '60px'}}>
-                            <input type='submit' value='로그인' className='lang_attr_element btnx' data-lang-target='value' data-lang-en='LOGIN' style={{height : '50px'}}/>
-                        </div>
-                    </div>
-                    <div className='row login_element logined padding_top_10'>
-                        <div className='col-sm-12'>
-                            <span className='lang_element' data-lang-en='Welcome, '></span><span className='span_type'></span> <span className='span_nick'></span><span className='lang_element' data-lang-en=''> 님 환영합니다.</span> 
-                            <input type='button' value='로그아웃' className='btn_logout btnx lang_attr_element' data-lang-target='value' data-lang-en='LOGOUT'/>
-                        </div>
-                    </div>
+                    {
+                        this.state.logined ? 
+                            (
+                                <div className='row login_element logined padding_top_10'>
+                                    <div className='col-sm-12'>
+                                        <span className='lang_element' data-lang-en='Welcome, '></span><span className='span_type'></span> <span className='span_nick'></span><span className='lang_element' data-lang-en=''> 님 환영합니다.</span> 
+                                        <input type='button' value='로그아웃' className='btn_logout btnx lang_attr_element' data-lang-target='value' data-lang-en='LOGOUT'/>
+                                    </div>
+                                </div>                                 
+                            )
+                        :
+                            (
+                                <div className='row login_element not_logined padding_top_10'>
+                                    <div className='container show-grid d_inline_block valign_middle' style={{ width: '270px', height: '60px' }}>
+                                        <div className='row'>
+                                            <div className='col-xs-12'>
+                                                <span style={{display: 'inline-block', width: '80px'}}>ID</span><input type='text' name='id' className='inp_login_element' style={{width: '150px'}}/>
+                                            </div>
+                                        </div>
+                                        <div className='row'>
+                                            <div className='col-xs-12'>
+                                                <span style={{display: 'inline-block', width: '80px'}} className='lang_element' data-lang-en='Password'>암호</span><input type='password' name='pw' className='inp_login_element' style={{width: '150px'}}/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className='div_captcha_login d_inline_block valign_middle' style={{ width: (this.props.basic.captSizes.width + 10) + 'px', height: '60px' }}>
+                                        <iframe className='if_captcha_l valign_middle' style={{width: (this.props.basic.captSizes.width + 5) + 'px', height : (this.props.basic.captSizes.height + 5) + 'px', border: 0}} src={this.props.basic.ctxPath + '/jsp/fs/fscaptin.jsp?key=fsl&scale=1&theme='}></iframe>
+                                    </div>
+                                    <div className='div_captcha_login d_inline_block valign_middle padding_top_10' style={{'marginLeft': '10px', height : '60px', 'textAlign' : 'left'}}>
+                                        <input type='text' className='inp_captcha_l inp_login_element lang_attr_element valign_middle' name='captcha' placeholder='옆의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code left'/>
+                                    </div>
+                                    <div className='d_inline_block valign_middle' style={{width: '100px', height : '60px'}}>
+                                        <input type='submit' value='로그인' className='lang_attr_element btnx' data-lang-target='value' data-lang-en='LOGIN' style={{height : '50px'}}/>
+                                    </div>
+                                </div>  
+                            )
+                    }
                     </form>
                 </div>
             </div>

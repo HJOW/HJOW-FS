@@ -54,6 +54,7 @@ if(ctype.equals("text")) {
     captRes = fsc.createCaptchaBase64(request, key, code, time.longValue(), Double.parseDouble(scale), theme);
 }
 
+boolean captchaAvail = fsc.isCaptchaCreated(request, key);
 boolean captDarkMode  = false;
 if(theme != null) {
     if(theme.equals("dark")) captDarkMode =  true;
@@ -70,16 +71,9 @@ if(theme != null) {
     $(function() {
         setTimeout(function() { location.reload(); }, <%= fsc.getCaptchaLimitTime() %>);
         if(<%=captDarkMode%>) { $('body').css('background-color', '#3b3b3b'); $('textarea').css('background-color', '#3b3b3b'); $('textarea').css('color', '#C9C9C9'); }
-        FSUtil.ajax({
-            url    : "<%=fsc.getContextPath()%>" + "/jsp/fs/fsproc.jsp",
-            data   : { praction : 'chcaptcha', key : '<%=key%>' },
-            method : "POST",
-            dataType : "json",
-            success : function(data) {
-                if(data.avail) return;
-                setTimeout(function() { location.reload(); }, 1000 + (1000 * Math.random()));
-            }
-        });
+        if(<%=(! captchaAvail)%>) {
+        	setTimeout(function() { location.reload(); }, 1000 + (1000 * Math.random()));
+        }
     });
     </script>
 </head>

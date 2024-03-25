@@ -142,6 +142,16 @@ public class FSProtocolHandler implements Closeable {
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
                 response.getOutputStream().write(json.toJSON().getBytes("UTF-8"));
+            } else if(pAction.equals("chcaptcha")) {
+            	String key = request.getParameter("key");
+            	
+            	JsonObject json = new JsonObject();
+                json.put("avail", new Boolean(ctrl.isCaptchaCreated(request, key)));
+            	
+            	response.reset();
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.getOutputStream().write(json.toJSON().getBytes("UTF-8"));
             } else if(pAction.equals("fileicon")) {
             	String pathParam = request.getParameter("path");
             	if(pathParam == null) pathParam = "";
