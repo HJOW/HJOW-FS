@@ -51,6 +51,10 @@ function FSBasic() {
         width  : <%= fscHdr.getCaptchaWidth()  %>,
         height : <%= fscHdr.getCaptchaHeight() %>
     };
+    this.version = {
+    	server : [ <%= FSControl.VERSION[0] %>, <%= FSControl.VERSION[1] %>, <%= FSControl.VERSION[2] %>, <%= FSControl.VERSION[3] %> ],
+    	client : FSUtil.version
+    };
 }
 </script>
 <script type="text/babel" data-type="module" data-presets="es2015,react" src="<%=ctxPathCmm%>/js/modern/fs.js"></script>

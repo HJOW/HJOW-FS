@@ -453,7 +453,7 @@ limitations under the License.
             </div>
             <div class='row'>
                 <div class='col-sm-12'>
-                    <table class='table table-hover full fs_table_list'>
+                    <table class='table table-hover full fs_table_list bordered padded'>
                         <colgroup>
                             <col style='width:30px'/>
                             <col style='width:120px'/>
@@ -487,23 +487,37 @@ limitations under the License.
                     <form class='form_fs_user_new' onsubmit='return false;'>
                         <input type='hidden' name='req' value='usercreate' class='hidden_req'/>
                         <input type='hidden' name='praction' value='admin'/>
-                        <div class='container show-grid'>
+                        <div class='container show-grid full'>
                             <div class='row'>
-                                <div class='col-sm-1'>ID</div>
-                                <div class='col-sm-5'><input type='text' name='id'/></div>
-                                <div class='col-sm-1'>PW</div>
-                                <div class='col-sm-5'><input type='password' name='pw'/></div>
-                            </div>
-                            <div class='row'>
-                                <div class='col-sm-1'>Nick</div>
-                                <div class='col-sm-5'><input type='text' name='nick'/></div>
-                                <div class='col-sm-1'>Type</div>
-                                <div class='col-sm-5'>
-                                    <select name='idtype'>
-                                        <option value='A'>Admin</option>
-                                        <option value='U' selected>User</option>
-                                        <option value='B'>Blocked</option>
-                                    </select>
+                                <div class='col-sm-12'>
+                                    <table class='table full padded'>
+                                        <colgroup>
+                                            <col style='width: 80px'/>
+                                            <col/>
+                                            <col style='width: 80px'/>
+                                            <col/>
+                                        </colgroup>
+                                        <tbody>
+                                            <tr>
+                                                <th>ID</th>
+                                                <td><input type='text' name='id'/></td>
+                                                <th>PW</th>
+                                                <td><input type='password' name='pw'/></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Nick</th>
+                                                <td><input type='text' name='nick'/></td>
+                                                <th>Type</th>
+                                                <td>
+                                                    <select name='idtype'>
+                                                        <option value='A'>Admin</option>
+                                                        <option value='U' selected>User</option>
+                                                        <option value='B'>Blocked</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                             <div class='row'>

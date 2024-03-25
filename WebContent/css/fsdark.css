@@ -57,6 +57,10 @@ body.dark div.fs_div td.td_mark_dir, body.dark div.fs_div div.td_mark_dir {
 	color: #E8DB5F;
 }
 
+body.dark div.fs_div .container table.bordered th, body.dark div.fs_div .container table.bordered td {
+    border-right: 1px solid #4b4b4b;
+}
+
 body.dark div.fs_div .table-hover tbody tr:hover {
   background-color: #4b4b4b;
 }

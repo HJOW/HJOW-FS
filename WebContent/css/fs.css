@@ -40,6 +40,15 @@ div.fs_div .container div, div.fs_div .container p, div.fs_div .container table 
     background-color: #FAFAFA;
 }
 
+div.fs_div .container table.bordered td, div.fs_div .container table.bordered th {
+	border-right: 1px solid #333333;
+}
+
+div.fs_div .container table.padded td, div.fs_div .container table.padded th {
+    padding-left : 8px;
+    padding-right: 8px;
+}
+
 div.fs_div input, div.fs_div textarea, div.fs_div select {
     background-color: #ECECEC;
     color: #222222;

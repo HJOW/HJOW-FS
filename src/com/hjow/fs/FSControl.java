@@ -82,7 +82,6 @@ import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 import hjow.common.json.JsonArray;
 import hjow.common.json.JsonCompatibleUtil;
 import hjow.common.json.JsonObject;
-import hjow.common.util.BrowserInfo;
 import hjow.common.util.ClassUtil;
 import hjow.common.util.DataUtil;
 import hjow.common.util.FileUtil;
