@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, hjow.common.util.*, java.io.*, java.util.* " session="true" %><%
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, java.io.*, java.util.* " session="true" %><%
 /*
 Copyright 2024 HJOW (Heo Jin Won)
 
@@ -14,8 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-if(FSUtils.getAttribute(request, "fsmodern") == null) request.setAttribute("fsmodern", new Boolean(BrowserInfo.detectSupportES6(BrowserInfo.byUserAgent(request.getHeader("User-Agent")))));
-if(DataUtil.parseBoolean(FSUtils.getAttribute(request, "fsmodern"))) {
+if(FSControl.useModern(request)) {
     // fsaccountbarmodern.jsp fsaccountbarclassic.jsp
     %><jsp:include page="fsaccountbarclassic.jsp"></jsp:include><%
 } else {

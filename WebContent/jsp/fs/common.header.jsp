@@ -18,8 +18,6 @@ String theme = request.getParameter("theme");
 
 if(theme == null) theme = "";
 theme = FSUtils.removeSpecials(theme);
-
-if(FSUtils.getAttribute(request, "fsmodern") == null) request.setAttribute("fsmodern", new Boolean(BrowserInfo.detectSupportES6(BrowserInfo.byUserAgent(request.getHeader("User-Agent")))));
 %>
 <jsp:include page="common.header.libs.jsp"></jsp:include>
 <script type='text/javascript'>

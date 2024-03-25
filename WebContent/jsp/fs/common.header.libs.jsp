@@ -16,7 +16,6 @@ limitations under the License.
 */
 
 String ctxPathCmm = request.getContextPath();
-if(FSUtils.getAttribute(request, "fsmodern") == null) request.setAttribute("fsmodern", new Boolean(BrowserInfo.detectSupportES6(BrowserInfo.byUserAgent(request.getHeader("User-Agent")))));
 %>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/jquery-ui.css"/>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/jquery-ui.structure.css"/>
@@ -36,9 +35,25 @@ if(FSUtils.getAttribute(request, "fsmodern") == null) request.setAttribute("fsmo
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/jquery-ui.js'></script>
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/bootstrap.js'></script>
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/fscommon.js'></script>
-<% if(DataUtil.parseBoolean(FSUtils.getAttribute(request, "fsmodern"))) { %>
+<% if(FSControl.useModern(request)) { %>
 <script type="text/javascript" src="<%=ctxPathCmm%>/js/modern/react.development.js"></script>
 <script type="text/javascript" src="<%=ctxPathCmm%>/js/modern/react-dom.development.js"></script>
 <script type="text/javascript" src="<%=ctxPathCmm%>/js/modern/babel.min.js"></script>
-<script type="text/babel" data-type="module" src="<%=ctxPathCmm%>/js/modern/fs.js"></script>
+<% FSControl fscHdr = FSControl.getInstance(); %>
+<script type="text/javascript">
+function FSBasic() {
+    this.ctxPath        = "<%=fscHdr.getContextPath()%>";
+    this.useIcon        = <%=fscHdr.isReadFileIconOn() ? "true" : "false"%>;
+    this.useCaptchaDown = <%=fscHdr.isCaptchaDownloadOn() ? "true" : "false"%>;
+    this.captchaWidth   = parseInt("<%=fscHdr.getCaptchaWidth() + 100%>");
+    this.captchaHeight  = parseInt("<%=fscHdr.getCaptchaHeight() + 180%>");
+    this.noAnonymous    = <%=fscHdr.isNoAnonymous() ? "true" : "false"%>;
+    this.loginedFirst   = <%=(fscHdr.getSessionUserId(request) != null) ? "true" : "false"%>;
+    this.captSizes      = {
+        width  : <%= fscHdr.getCaptchaWidth()  %>,
+        height : <%= fscHdr.getCaptchaHeight() %>
+    };
+}
+</script>
+<script type="text/babel" data-type="module" data-presets="es2015,react" src="<%=ctxPathCmm%>/js/modern/fs.js"></script>
 <% } %>

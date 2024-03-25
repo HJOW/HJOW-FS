@@ -82,6 +82,7 @@ import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 import hjow.common.json.JsonArray;
 import hjow.common.json.JsonCompatibleUtil;
 import hjow.common.json.JsonObject;
+import hjow.common.util.BrowserInfo;
 import hjow.common.util.ClassUtil;
 import hjow.common.util.DataUtil;
 import hjow.common.util.FileUtil;
@@ -5138,5 +5139,14 @@ public class FSControl {
             	if(prvInfLoop >= 1000) break;
             }
         } catch(InterruptedException ignores) {}
+    }
+    
+    /** Detect modern web usage */
+    public static boolean useModern(HttpServletRequest request) {
+    	if(FSUtils.getAttribute(request, "fsmodern") == null) {
+    		if(request.getParameter("fsmodern") != null) request.setAttribute("fsmodern", new Boolean(DataUtil.parseBoolean(request.getParameter("fsmodern"))));
+    		else request.setAttribute("fsmodern", new Boolean(BrowserInfo.detectSupportES6(BrowserInfo.byUserAgent(request.getHeader("User-Agent")))));
+    	}
+    	return DataUtil.parseBoolean(FSUtils.getAttribute(request, "fsmodern"));
     }
 }
