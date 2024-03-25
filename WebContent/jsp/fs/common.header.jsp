@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*"%><%
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, hjow.common.util.*"%><%
 /*
 Copyright 2024 HJOW (Heo Jin Won)
 
@@ -14,6 +14,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+request.setAttribute("fsmodern", new Boolean(BrowserInfo.detectSupportES6(BrowserInfo.byUserAgent(request.getHeader("User-Agent")))));
 
 String theme = request.getParameter("theme");
 

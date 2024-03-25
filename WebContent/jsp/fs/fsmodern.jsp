@@ -1,3 +1,4 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="com.hjow.fs.*, java.io.*, java.util.* " session="true"%><%@ include file="common.pront.jsp"%><%
 /*
 Copyright 2024 HJOW (Heo Jin Won)
 
@@ -13,15 +14,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
-/**
- * Modern FS page with React
- */
- 
-class FSRoot extends React.Component {
-    render() { return <h1>Hello {this.props.text}</h1> }
-}
-
-class FSAccountBar extends React.Component {
-    render() { return <h1>Hello {this.props.text}</h1> }
-}
+%>
+<div id='fs_root' class='fs_root fs_div'></div>
+<script data-plugins="transform-es2015-modules-umd" type="text/babel">
+ReactDOM.render(<FSRoot/>, document.getElementById('fs_root'));
+</script>

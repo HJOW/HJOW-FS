@@ -8,15 +8,6 @@
 <!-- This should be in head tag. (includes css, js embedding tags) -->
 <jsp:include page="./jsp/fs/common.header.jsp"></jsp:include>
 
-<!-- Not necessary script now. -->
-<script type='text/javascript'>
-$(function() {
-	if(FSUtil.detectSupportES6()) {
-		// TODO : move to modern UI page (NOT NOW. The modern page is not created completely.)
-		// location.href = './html/modern.html';
-	}
-});
-</script>
 </head>
 <body>
     <!-- Login Bar Location. -->

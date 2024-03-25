@@ -15,6 +15,7 @@ limitations under the License.
  */
 package com.hjow.fs;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
@@ -33,11 +34,13 @@ public class FSServletContextListener implements ServletContextListener {
     @Override
     public synchronized void contextInitialized(ServletContextEvent sce) {
         System.out.println(this.getClass().getName() + ".contextInitialized STARTS");
-        String ctxPath = sce.getServletContext().getContextPath();
+        ServletContext ctx = sce.getServletContext();
+        
+        String ctxPath = ctx.getContextPath();
         FSControl.init(ctxPath);
         
         FSControl ctrl = FSControl.getInstance();
-        ctrl.setRealPath(sce.getServletContext());
+        ctrl.setRealPath(ctx);
         
         try { ctrl.removeAllTokens();         } catch(Throwable ignores) {}
         try { ctrl.emptyTempDirectory();      } catch(Throwable ignores) {}

@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%><%
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" import="hjow.common.util.*"%><%
 /*
 Copyright 2024 HJOW (Heo Jin Won)
 
@@ -35,3 +35,9 @@ String ctxPathCmm = request.getContextPath();
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/jquery-ui.js'></script>
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/bootstrap.js'></script>
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/fscommon.js'></script>
+<% if(BrowserInfo.detectSupportES6(BrowserInfo.byUserAgent(request.getHeader("User-Agent")))) { %>
+<script type="text/javascript" src="<%=ctxPathCmm%>/js/modern/react.development.js"></script>
+<script type="text/javascript" src="<%=ctxPathCmm%>/js/modern/react-dom.development.js"></script>
+<script type="text/javascript" src="<%=ctxPathCmm%>/js/modern/babel.min.js"></script>
+<script type="text/babel" data-type="module" src="<%=ctxPathCmm%>/js/modern/fs.js"></script>
+<% } %>
