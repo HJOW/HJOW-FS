@@ -194,80 +194,6 @@ public class FSControl {
         ftypes.addAll(FSContentType.getDefaults());
     }
     
-    public static FSControl getInstance() { return instance; }
-    
-    /** Initialize instances */
-    public static void init(String contextPath) {
-        init(contextPath, false);
-    }
-    
-    /** Initialize instances */
-    public static void init(HttpServletRequest request) {
-        init(request.getContextPath());
-    }
-    
-    /** Initialize instances */
-    public static void init(HttpServletRequest request, boolean forceInit) {
-        init(request.getContextPath(), forceInit);
-    }
-    
-    /** Initialize instances */
-    public static synchronized void init(String contextPath, boolean forceInit) {
-        if(instance == null || forceInit) {
-            if(instance != null) instance.dispose();
-            
-            Class<? extends FSControl> ctrlClass = getControlClass();
-            try { instance = ctrlClass.newInstance(); } catch(Throwable t) { throw new RuntimeException("Cannot create fs control instance - (" + t.getClass().getSimpleName() + ") " + t.getMessage()); }
-        }
-        instance.initialize(contextPath);
-    }
-    
-    /** Get FSControl class or alternatives (read CL property on fs.properties) */
-    @SuppressWarnings("unchecked")
-    protected static Class<? extends FSControl> getControlClass() {
-        try {
-            Properties propTest = getFSProperties();
-            
-            if(propTest != null) {
-                String ctrlClass = propTest.getProperty("CL");
-                if(ctrlClass != null) {
-                    ctrlClass = ctrlClass.trim().toUpperCase();
-                    if((! (ctrlClass.equals("DEFAULT") || ctrlClass.equals("")))) {
-                        return (Class<? extends FSControl>) Class.forName(ctrlClass);
-                    }
-                }
-            }
-        } catch(Throwable t) {
-            System.out.println("Cannot find or load fs control class - (" + t.getClass().getSimpleName() + ") " + t.getMessage());
-        }
-        return FSControl.class;
-    }
-    
-    /** logging */
-    public static void log(Object logContent, Class<?> froms) {
-        if(instance == null) System.out.println(logContent);
-        else getInstance().logIn(logContent, froms);
-    }
-    
-    /** Clean FSControl instance */
-    public static synchronized void disposeInstance() {
-        FSControl c = instance;
-        instance = null;
-        if(c != null) c.dispose();
-    }
-    
-    /** Wait until FS prepared */
-    public static void waitProperInit() {
-    	int prvInfLoop = 0;
-    	try {
-        	while(System.currentTimeMillis() - FSControl.FIRST_ACCESS_TIME < 4000L) {
-            	Thread.sleep(1000L);
-            	prvInfLoop++;
-            	if(prvInfLoop >= 1000) break;
-            }
-        } catch(InterruptedException ignores) {}
-    }
-    
     /** Load properties, configs, and DB tables when using JDBC */
     protected void initialize(String contextPath) {
         long now = System.currentTimeMillis();
@@ -5138,5 +5064,79 @@ public class FSControl {
             conf.clear();
         } catch(Throwable tx) { tx.printStackTrace(); }
         System.out.println("FS Control instance is disposed.");
+    }
+    
+    public static FSControl getInstance() { return instance; }
+    
+    /** Initialize instances */
+    public static void init(String contextPath) {
+        init(contextPath, false);
+    }
+    
+    /** Initialize instances */
+    public static void init(HttpServletRequest request) {
+        init(request.getContextPath());
+    }
+    
+    /** Initialize instances */
+    public static void init(HttpServletRequest request, boolean forceInit) {
+        init(request.getContextPath(), forceInit);
+    }
+    
+    /** Initialize instances */
+    public static synchronized void init(String contextPath, boolean forceInit) {
+        if(instance == null || forceInit) {
+            if(instance != null) instance.dispose();
+            
+            Class<? extends FSControl> ctrlClass = getControlClass();
+            try { instance = ctrlClass.newInstance(); } catch(Throwable t) { throw new RuntimeException("Cannot create fs control instance - (" + t.getClass().getSimpleName() + ") " + t.getMessage()); }
+        }
+        instance.initialize(contextPath);
+    }
+    
+    /** Get FSControl class or alternatives (read CL property on fs.properties) */
+    @SuppressWarnings("unchecked")
+    protected static Class<? extends FSControl> getControlClass() {
+        try {
+            Properties propTest = getFSProperties();
+            
+            if(propTest != null) {
+                String ctrlClass = propTest.getProperty("CL");
+                if(ctrlClass != null) {
+                    ctrlClass = ctrlClass.trim().toUpperCase();
+                    if((! (ctrlClass.equals("DEFAULT") || ctrlClass.equals("")))) {
+                        return (Class<? extends FSControl>) Class.forName(ctrlClass);
+                    }
+                }
+            }
+        } catch(Throwable t) {
+            System.out.println("Cannot find or load fs control class - (" + t.getClass().getSimpleName() + ") " + t.getMessage());
+        }
+        return FSControl.class;
+    }
+    
+    /** logging */
+    public static void log(Object logContent, Class<?> froms) {
+        if(instance == null) System.out.println(logContent);
+        else getInstance().logIn(logContent, froms);
+    }
+    
+    /** Clean FSControl instance */
+    public static synchronized void disposeInstance() {
+        FSControl c = instance;
+        instance = null;
+        if(c != null) c.dispose();
+    }
+    
+    /** Wait until FS prepared */
+    public static void waitProperInit() {
+    	int prvInfLoop = 0;
+    	try {
+        	while(System.currentTimeMillis() - FSControl.FIRST_ACCESS_TIME < 4000L) {
+            	Thread.sleep(1000L);
+            	prvInfLoop++;
+            	if(prvInfLoop >= 1000) break;
+            }
+        } catch(InterruptedException ignores) {}
     }
 }
