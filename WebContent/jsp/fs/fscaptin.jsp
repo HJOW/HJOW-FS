@@ -23,6 +23,10 @@ String ctype = request.getParameter("captype");
 String code  = (String) fsc.getSessionObject(request, key + "_captcha_code");
 Long   time  = (Long)   fsc.getSessionObject(request, key + "_captcha_time");
 
+if(key != null) {
+	key = key.replace("'", "").replace("\"", "").replace("\n", "").replace("\t", "");
+}
+
 if(randm != null) {
     boolean randomize = DataUtil.parseBoolean(randm);
     if(randomize) {
@@ -66,6 +70,16 @@ if(theme != null) {
     $(function() {
         setTimeout(function() { location.reload(); }, <%= fsc.getCaptchaLimitTime() %>);
         if(<%=captDarkMode%>) { $('body').css('background-color', '#3b3b3b'); $('textarea').css('background-color', '#3b3b3b'); $('textarea').css('color', '#C9C9C9'); }
+        FSUtil.ajax({
+            url    : "<%=fsc.getContextPath()%>" + "/jsp/fs/fsproc.jsp",
+            data   : { praction : 'chcaptcha', key : '<%=key%>' },
+            method : "POST",
+            dataType : "json",
+            success : function(data) {
+                if(data.avail) return;
+                setTimeout(function() { location.reload(); }, 1000 + (1000 * Math.random()));
+            }
+        });
     });
     </script>
 </head>
