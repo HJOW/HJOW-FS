@@ -26,6 +26,38 @@ class FSRoot extends React.Component {
         super(props);
         console.log(props);
     }
+    componentDidMount() {
+        this.trans().then((data) => { this.reloads(data); });
+    }
+    trans() {
+        let ctxPath = this.props.basic.ctxPath;
+        return new Promise(function(resolve, reject) {
+            FSUtil.ajax({
+                url    : ctxPath + "/jsp/fs/fsproc.jsp",
+                data   : $('#form_fs').serialize(),
+                method : "POST",
+                dataType : "json",
+                success : function(data) {
+                    resolve(data);
+                }, error : function(jqXHR, textStatus, errorThrown) {
+                    reject(errorThrown);
+                }
+            });
+        });
+    }
+    reloads(data) {
+        let arDirs  = data.directories;
+        let arFiles = data.files;
+
+        this.state.dirs  = data.directories;
+        this.state.files = data.files;
+        this.state.success   = data.success;
+        this.state.privilege = data.privilege;
+        this.state.session   = data.session;
+
+        console.log(this.state)
+        this.forceUpdate();
+    }
     render() { 
         return (
             <div>
@@ -43,7 +75,7 @@ class FSRoot extends React.Component {
                             </form>
                         </div>
                     </div>
-                    <form className='form_fs' onSubmit={() => {return false}}>
+                    <form className='form_fs' id='form_fs' onSubmit={() => {return false}}>
                         <input type='hidden' name='path' className='hidden_path' value='' />
                         <input type='hidden' name='excepts' className='hidden_excepts' value='' />
                         <input type='hidden' name='praction' value='list' />
