@@ -54,7 +54,7 @@ import hjow.common.util.DataUtil;
 
 public class FSConsole implements Serializable {
     private static final long serialVersionUID = 7995402708882449267L;
-    private static List<Class<? extends FSConsoleCommand>> commands = new ArrayList<Class<? extends FSConsoleCommand>>();
+    private static final List<Class<? extends FSConsoleCommand>> commands = new ArrayList<Class<? extends FSConsoleCommand>>();
     private static File rootPath = null;
     
     public static void init(File rootPath) {

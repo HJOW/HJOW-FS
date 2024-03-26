@@ -119,7 +119,7 @@ public class FSUtils {
     
     /** Find files in root directory with search keyword and maximum sizes. */
     public static List<String> find(File rootPath, String pPath, String pKeyword, long limitSize) throws IOException {
-        return find(rootPath, pPath, pKeyword, limitSize);
+        return find(rootPath, pPath, pKeyword, limitSize, null);
     }
     
     /** Find files in root directory with search keyword and maximum sizes. */

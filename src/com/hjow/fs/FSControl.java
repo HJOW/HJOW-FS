@@ -4551,7 +4551,7 @@ public class FSControl {
         long now = System.currentTimeMillis();
         try {
             String classNm = "UNKNOWN";
-            if(froms != null) classNm = froms.getClass().getSimpleName();
+            if(froms != null) classNm = froms.getSimpleName();
             
             if(logContent instanceof Throwable) logContent = DataUtil.stackTrace((Throwable) logContent);
             
