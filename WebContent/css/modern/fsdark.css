@@ -1,0 +1,6 @@
+@charset "UTF-8";
+
+body.dark div.fs_div dialog {
+    border: 2px solid rgba(150, 150, 150, 0.9);
+    background-color: rgba(55, 55, 55, 0.9);
+}

@@ -59,17 +59,14 @@ class FSRoot extends React.Component {
     reloads(data) {
         const selfs = this;
         return new Promise((resolve, reject) => {
-            let arDirs  = data.directories;
-            let arFiles = data.files;
+            selfs.state.path      = data.path;
+            selfs.state.dirs      = data.directories;
+            selfs.state.files     = data.files;
+            selfs.state.success   = data.success;
+            selfs.state.privilege = data.privilege;
+            selfs.state.session   = data.session;
     
-            this.state.path      = data.path;
-            this.state.dirs      = data.directories;
-            this.state.files     = data.files;
-            this.state.success   = data.success;
-            this.state.privilege = data.privilege;
-            this.state.session   = data.session;
-    
-            if(this.state.path != '') {
+            if(selfs.state.path != '') {
                 let newArr = [];
                 newArr.push({
                     type : 'ctrl',
@@ -107,7 +104,19 @@ class FSRoot extends React.Component {
         });
     }
     onClickFile(file) {
-        console.log(file)
+        let theme = '';
+        if($('body').is('.dark')) theme='dark';
+        if(this.props.basic.useCaptchaDown) {
+            const dia = document.getElementById('fs_pop_captdown');
+            dia.style = "width : " + (this.props.basic.captSizes.width + 300) + "px; height : " + (this.props.basic.captSizes.height + 320) + "px; position: fixed; top: 100px; left : 100px;";
+            const iframes = dia.getElementsByTagName('iframe')[0];
+            iframes.src = this.props.basic.ctxPath + '/jsp/fs/fscaptdown.jsp?popin=true&theme=' + theme + '&path=' + encodeURIComponent(this.state.path) + "&filename=" + encodeURIComponent(file.name) + FSUtil.addTokenParameterString();
+            iframes.style = "width: 100%; overflow-y: hidden; height : " + (this.props.basic.captSizes.height + 320 - 90) + "px";
+            
+            dia.show();
+        } else {
+            location.href = ctxPath + '/jsp/fs/' + 'fsdown.jsp?path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name'));
+        }
     }
     render() {
         const selfs = this;
@@ -127,7 +136,10 @@ class FSRoot extends React.Component {
                             </form>
                         </div>
                     </div>
-                    <form className='form_fs' id='form_fs' onSubmit={() => {return false}}>
+                    <form className='form_fs' id='form_fs' onSubmit={() => {
+                        selfs.refresh();
+                        return false;
+                    }}>
                         <input type='hidden' name='path' className='hidden_path' value={this.state.path} />
                         <input type='hidden' name='excepts' className='hidden_excepts' value={this.state.excepts} />
                         <input type='hidden' name='praction' value='list' />
@@ -185,9 +197,10 @@ class FSRoot extends React.Component {
                                                             <td className='td_mark_file'><img style={{width: '20px', height: '20px'}} src={FSUtil.ctx + '/css/images/files.png'}/></td>
                                                             <td className="filednd">
                                                                 <div className="div_td_file_a">
-                                                                    <a href='#' className="link_file" data-path="" data-name={fileOne.name}>{fileOne.name}</a>
+                                                                    <a href='#' className="link_file" data-path="" data-name={fileOne.name} onClick={() => { this.onClickFile(fileOne); }}>{fileOne.name}</a>
                                                                 </div>
                                                             </td>
+                                                            <td className='td_file_size filednd' style={{textAlign: 'right'}}>{fileOne.size}</td>
                                                             <td className='td_buttons'></td>
                                                         </tr>
                                                     )
@@ -207,10 +220,10 @@ class FSRoot extends React.Component {
                     <form className='form_hidden' target='_blank'></form>
                 </div>
                 <div className='fs_pops invisible_wh'>
-                    <div className='fs_pop_captdown fs_pop_in full'><iframe></iframe></div>
-                    <div className='fs_pop_upload   fs_pop_in full'><iframe></iframe></div>
-                    <div className='fs_pop_console  fs_pop_in full'><iframe></iframe></div>
-                    <div className='fs_pop_admin    fs_pop_in full'><iframe></iframe></div>
+                    <dialog className='fs_pop_captdown fs_pop_in full' id='fs_pop_captdown'><div className='div_dialog_header'><button className="btn_dialog_close" onClick={() => { document.getElementById('fs_pop_captdown').close(); }}>X</button></div><iframe></iframe></dialog>
+                    <dialog className='fs_pop_upload   fs_pop_in full' id='fs_pop_upload'  ><div className='div_dialog_header'><button className="btn_dialog_close" onClick={() => { document.getElementById('fs_pop_upload').close();   }}>X</button></div><iframe></iframe></dialog>
+                    <dialog className='fs_pop_console  fs_pop_in full' id='fs_pop_console' ><div className='div_dialog_header'><button className="btn_dialog_close" onClick={() => { document.getElementById('fs_pop_console').close();  }}>X</button></div><iframe></iframe></dialog>
+                    <dialog className='fs_pop_admin    fs_pop_in full' id='fs_pop_admin'   ><div className='div_dialog_header'><button className="btn_dialog_close" onClick={() => { document.getElementById('fs_pop_admin').close();    }}>X</button></div><iframe></iframe></dialog>
                 </div>
             </div>
         )
@@ -297,7 +310,7 @@ class FSAccountBar extends React.Component {
                                         </div>
                                     </div>
                                     <div className='div_captcha_login d_inline_block valign_middle' style={{ width: (this.props.basic.captSizes.width + 10) + 'px', height: '60px' }}>
-                                        <iframe className='if_captcha_l valign_middle' style={{width: (this.props.basic.captSizes.width + 5) + 'px', height : (this.props.basic.captSizes.height + 5) + 'px', border: 0}} src={this.props.basic.ctxPath + '/jsp/fs/fscaptin.jsp?key=fsl&scale=1&theme='}></iframe>
+                                        <iframe className='if_captcha_l valign_middle' style={{width: (this.props.basic.captSizes.width + 5) + 'px', height : (this.props.basic.captSizes.height + 5) + 'px', border: 0}} src={this.props.basic.ctxPath + '/jsp/fs/fscaptin.jsp?key=fsl&scale=1&theme=' + this.props.basic.getTheme() + FSUtil.addTokenParameterString()}></iframe>
                                     </div>
                                     <div className='div_captcha_login d_inline_block valign_middle padding_top_10' style={{'marginLeft': '10px', height : '60px', 'textAlign' : 'left'}}>
                                         <input type='text' className='inp_captcha_l inp_login_element lang_attr_element valign_middle' name='captcha' placeholder='옆의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code left'/>

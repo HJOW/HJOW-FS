@@ -23,19 +23,23 @@ String ctxPathCmm = request.getContextPath();
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/bootstrap.css"/>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/bootstrap-theme.css"/>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/fonts.css"/>
-<link rel="stylesheet" href="<%= ctxPathCmm %>/css/video-js.css"/>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/fs.css"/>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/fsdark.css"/>
+<% if(! FSControl.useModern(request)) { %>
+<link rel="stylesheet" href="<%= ctxPathCmm %>/css/video-js.css"/>
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/video.js'></script>
 <!--[if lt IE 9]>
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/html5shiv-printshiv.min.js'></script>
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/videojs-ie8.min.js'></script>
 <![endif]-->
+<% } %>
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/jquery-1.12.4.js'></script>
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/jquery-ui.js'></script>
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/bootstrap.js'></script>
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/fscommon.js'></script>
 <% if(FSControl.useModern(request)) { %>
+<link rel="stylesheet" href="<%= ctxPathCmm %>/css/modern/fs.css"/>
+<link rel="stylesheet" href="<%= ctxPathCmm %>/css/modern/fsdark.css"/>
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/fscommones6.js'></script>
 <script type="text/javascript" src="<%=ctxPathCmm%>/js/modern/react.development.js"></script>
 <script type="text/javascript" src="<%=ctxPathCmm%>/js/modern/react-dom.development.js"></script>
@@ -55,6 +59,11 @@ function FSBasic() {
     this.version = {
     	server : [ <%= FSControl.VERSION[0] %>, <%= FSControl.VERSION[1] %>, <%= FSControl.VERSION[2] %>, <%= FSControl.VERSION[3] %> ],
     	client : FSUtil.version
+    };
+    this.getTheme = function getTheme() {
+    	if($('body').is('.dark'))   return 'dark';
+        else if(fsRoot.is('.dark')) return 'dark';
+    	return 'light';
     };
 }
 </script>
