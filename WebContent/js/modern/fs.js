@@ -20,6 +20,8 @@ limitations under the License.
  
 class FSRoot extends React.Component {
     state = {
+        path : '',
+        excepts : '',
         dirs : [],
         files : [],
         success : false,
@@ -31,7 +33,13 @@ class FSRoot extends React.Component {
         console.log(props);
     }
     componentDidMount() {
-        this.trans().then((data) => { this.reloads(data); });
+        this.refresh();
+    }
+    refresh() {
+        const selfs = this;
+        return new Promise((resolve, reject) => {
+            selfs.trans().then((data) => { selfs.reloads(data).then(() => { FSUtil.applyLanguage(); resolve(data); }); });
+        });
     }
     trans() {
         FSUtil.setContextPath(this.props.basic.ctxPath);
@@ -49,17 +57,57 @@ class FSRoot extends React.Component {
         });
     }
     reloads(data) {
-        let arDirs  = data.directories;
-        let arFiles = data.files;
-
-        this.state.dirs  = data.directories;
-        this.state.files = data.files;
-        this.state.success   = data.success;
-        this.state.privilege = data.privilege;
-        this.state.session   = data.session;
-
-        console.log(this.state)
-        this.forceUpdate();
+        const selfs = this;
+        return new Promise((resolve, reject) => {
+            let arDirs  = data.directories;
+            let arFiles = data.files;
+    
+            this.state.path      = data.path;
+            this.state.dirs      = data.directories;
+            this.state.files     = data.files;
+            this.state.success   = data.success;
+            this.state.privilege = data.privilege;
+            this.state.session   = data.session;
+    
+            if(this.state.path != '') {
+                let newArr = [];
+                newArr.push({
+                    type : 'ctrl',
+                    name : '[뒤로 가기]',
+                    action : 'back'
+                });
+                selfs.state.dirs = FSUtil.concatArray(newArr, selfs.state.dirs);
+            }
+    
+            console.log(selfs.state);
+            selfs.forceUpdate(() => { resolve(); });
+        });
+    }
+    onClickCtrl(action) {
+        const selfs = this;
+        if(action.action == 'back') {
+            const lists = this.state.path.split('/');
+            let   newPath = '';
+            for(let ldx = 0; ldx < lists.length - 1; ldx++) {
+                if(ldx >= 1) newPath += '/';
+                newPath += lists[ldx];
+            }
+    
+            this.state.path = newPath;
+            this.setState({ path : newPath }, () => { selfs.refresh(); });
+        }
+    }
+    onClickDir(dir) {
+        const selfs = this;
+        this.setState({
+            path : selfs.state.path + '/' + dir.name
+        }, () => {
+            console.log('reload');
+            selfs.refresh();
+        });
+    }
+    onClickFile(file) {
+        console.log(file)
     }
     render() {
         const selfs = this;
@@ -80,8 +128,8 @@ class FSRoot extends React.Component {
                         </div>
                     </div>
                     <form className='form_fs' id='form_fs' onSubmit={() => {return false}}>
-                        <input type='hidden' name='path' className='hidden_path' value='' />
-                        <input type='hidden' name='excepts' className='hidden_excepts' value='' />
+                        <input type='hidden' name='path' className='hidden_path' value={this.state.path} />
+                        <input type='hidden' name='excepts' className='hidden_excepts' value={this.state.excepts} />
                         <input type='hidden' name='praction' value='list' />
                         <div className='row fs_directory'>
                             <div className='col-sm-10'>
@@ -117,13 +165,18 @@ class FSRoot extends React.Component {
                                     <tbody className='fs_list'>
                                         {
                                             FSUtil.concatArray(selfs.state.dirs, selfs.state.files).map((fileOne, index) => {
-                                                console.log(fileOne);
                                                 if(fileOne.type == 'dir') {
                                                     return (
-                                                        <tr key={index} className='element tr_dir no_icon'>
+                                                        <tr key={index} className={"element tr_dir tr_dir_" + index + " no_icon"}>
                                                             <td className='td_mark_dir'><img style={{width: '20px', height: '20px'}} src={FSUtil.ctx + '/css/images/dir.ico'}/></td>
-                                                            <td colSpan="2"><a href='#' className='link_dir ellipsis' data-path={fileOne.name}>{fileOne.name}</a></td>
+                                                            <td colSpan="2"><a href='#' className='link_dir ellipsi binded_click' data-path={fileOne.name} onClick={() => { this.onClickDir(fileOne); }}>{fileOne.name}</a></td>
                                                             <td className='td_buttons'></td>
+                                                        </tr>
+                                                    )
+                                                } else if(fileOne.type == 'ctrl') {
+                                                    return (
+                                                        <tr key={index} className={"element element_special back"}>
+                                                            <td colSpan='4'><a href='#' className='link_back lang_element' data-lang-en='[BACK]' onClick={() => { this.onClickCtrl(fileOne); }}>{fileOne.name}</a></td>
                                                         </tr>
                                                     )
                                                 } else {
