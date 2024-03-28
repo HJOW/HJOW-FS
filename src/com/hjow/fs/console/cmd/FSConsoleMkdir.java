@@ -79,17 +79,20 @@ public class FSConsoleMkdir implements FSBundledConsoleCommand {
         if(ctrl.isReadOnly()) throw new RuntimeException("Blocked. FS is read-only mode.");
         if(! FSUtils.canBeFileName(parameter)) throw new RuntimeException("Illegal character on file's name - " + parameter);
         
-        String pathCalc = root.getCanonicalPath() + File.separator + console.getPath() + File.separator + parameter;
+        String pathCalc = root.getCanonicalPath() + File.separator + console.getPath() + File.separator;
         File   fileCalc = new File(pathCalc);
+        
+        if(! FSConsole.hasEditPriv(ctrl, sessionMap, root, fileCalc)) {
+            throw new RuntimeException("No privileges");
+        }
+        
+        pathCalc = fileCalc.getCanonicalPath() + File.separator + parameter;
+        fileCalc = new File(pathCalc);
         
         pathCalc = fileCalc.getCanonicalPath();
         
         if(fileCalc.exists()   ) throw new FileNotFoundException("Already exist !");
         if(! pathCalc.startsWith(root.getCanonicalPath())) throw new RuntimeException("Cannot access these path !");
-        
-        if(! FSConsole.hasEditPriv(ctrl, sessionMap, root, fileCalc)) {
-            throw new RuntimeException("No privileges");
-        }
         
         fileCalc.mkdirs();
         

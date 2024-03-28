@@ -74,6 +74,8 @@ $(function() {
     var formAllSr = fsRoot.find('.form_allsearch');
     var inpAllSr  = formAllSr.find('.inp_allsearch');
     
+    FSUtil.setContextPath(ctxPath);
+    
     var popRoot = $('.fs_pops');
     var pops = {};
     pops['captdown'] = {};
@@ -241,7 +243,6 @@ $(function() {
                 var workingArray = iconizeArray;
                 iconizeArray = [];
                 FSUtil.ajax({
-                    url  : ctxPath + "/jsp/fs/fsproc.jsp",
                     data : { path : inpPath.val(), files : filelist, br : bkColor.r, bg : bkColor.g, bb : bkColor.b, praction : 'fileicon' },
                     method : 'POST',
                     dataType : 'json',
@@ -303,7 +304,6 @@ $(function() {
         
         var expVal = inpExcep.val();
         FSUtil.ajax({
-            url    : ctxPath + "/jsp/fs/fsproc.jsp",
             data   : form.serialize(),
             method : "POST",
             dataType : "json",
@@ -382,7 +382,6 @@ $(function() {
                                     
                                     if(confirm(confirmMsg)) {
                                         FSUtil.ajax({
-                                            url  : ctxPath + '/jsp/fs/fsproc.jsp',
                                             data : {
                                                 path : delpath,
                                                 dels : 'dir',
@@ -524,7 +523,6 @@ $(function() {
                             
                             if(confirm(confirmMsg)) {
                                 FSUtil.ajax({
-                                    url  : ctxPath + '/jsp/fs/fsproc.jsp',
                                     data : {
                                         path : delpath,
                                         name : delname,
@@ -712,7 +710,6 @@ $(function() {
         }
         
         FSUtil.ajax({
-            url  : ctxPath + '/jsp/fs/fsproc.jsp',
             data : {
                 path : inpPath.val(),
                 name : dirName,
@@ -750,7 +747,6 @@ $(function() {
         });
         
         FSUtil.ajax({
-            url    : ctxPath + "/jsp/fs/fslistall.jsp",
             data   : formAllSr.serialize(),
             method : "POST",
             dataType : "json",
@@ -826,6 +822,7 @@ $(function() {
             </div>
             <div class='col-sm-4 fs_allsearch align_right'>
                 <form class='form_allsearch' onsubmit='return false;'>
+                    <input type='hidden' name='praction' value='listall' />
                     <input type='hidden' name='path' class='hidden_path' value='<%=pathParam%>' />
                     <input type='hidden' name='all'  class='hidden_conf' value='true' />
                     <input type='text'   class='inp_allsearch lang_attr_element reloading_readonly'      name='keyword' placeholder="전체 디렉토리 검색" data-lang-target='placeholder' data-lang-en='Search whole directories' style='width: 200px;'/>

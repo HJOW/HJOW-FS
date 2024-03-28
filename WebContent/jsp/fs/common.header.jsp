@@ -23,6 +23,7 @@ theme = FSUtils.removeSpecials(theme);
 <script type='text/javascript'>
 $(function() {
     var lang = FSUtil.applyLanguage(bodys);
+    FSUtil.setContextPath("<%=request.getContextPath()%>");
     
     var browser = FSUtil.detectBrowser();
     if(browser.nm == 'ie' && browser.ver < 8) {
@@ -52,7 +53,6 @@ $(function() {
     }
     
     FSUtil.ajax({
-        url    : "<%=request.getContextPath()%>/jsp/fs/fsproc.jsp",
         data   : { req : 'language', language : lang, force : 'false', praction : 'account' },
         method : "POST",
         dataType : "json",

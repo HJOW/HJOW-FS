@@ -14,6 +14,8 @@ $(function() {
     captSizes['height'] = <%= fscx.getCaptchaHeight() %>;
     var useCaptchaDown = <%=fscx.isCaptchaDownloadOn() ? "true" : "false"%>;
     
+    FSUtil.setContextPath(ctxPathIn);
+    
     var popRoot = $('.fs_pops');
     var pops = {};
     
@@ -48,7 +50,6 @@ $(function() {
         inpTermCons.prop('readonly', true);
         if(displayInput) taTermDisp.val(taTermDisp.val() + '\n' + '>> ' + inpTermCons.val());
         FSUtil.ajax({
-            url    : ctxPathIn + "/jsp/fs/fsproc.jsp",
             data   : formTerminal.serialize(),
             method : "POST",
             dataType : "json",

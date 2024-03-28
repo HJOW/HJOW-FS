@@ -32,8 +32,8 @@ class FSRoot extends React.Component {
     trans() {
         let ctxPath = this.props.basic.ctxPath;
         return new Promise(function(resolve, reject) {
+            FSUtil.setContextPath(ctxPath);
             FSUtil.ajax({
-                url    : ctxPath + "/jsp/fs/fsproc.jsp",
                 data   : $('#form_fs').serialize(),
                 method : "POST",
                 dataType : "json",
@@ -152,8 +152,8 @@ class FSAccountBar extends React.Component {
     trans(req) {
         let ctxPath = this.props.basic.ctxPath;
         return new Promise(function(resolve, reject) {
+            FSUtil.setContextPath(ctxPath);
             FSUtil.ajax({
-                url    : ctxPath + "/jsp/fs/fsproc.jsp",
                 data   : $('#form_fs_login').serialize() + '&req=' + req,
                 method : "POST",
                 dataType : "json",

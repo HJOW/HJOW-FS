@@ -62,10 +62,10 @@ if(! fsc.isInstalled()) {
             });
             
             FSUtil.applyLanguage(bodys);
+            FSUtil.setContextPath(ctxPath);
 
             form.on('submit', function() {
                 FSUtil.ajax({
-                    url    : ctxPath + "/jsp/fs/fsproc.jsp",
                     data   : form.serialize(),
                     method : "POST",
                     dataType : "json",

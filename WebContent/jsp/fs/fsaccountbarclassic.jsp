@@ -31,6 +31,8 @@ if(! fsc.isInstalled()) {
             var captLogin = acRoot.find('.if_captcha_l');
             var theme     = '';
             
+            FSUtil.setContextPath(ctxPath);
+            
             var ser = formObj.serialize();
         
             acRoot.find('.login_element').addClass('invisible');
@@ -41,7 +43,6 @@ if(! fsc.isInstalled()) {
             function fLogin() {
                 inpReq.val('login');
                 FSUtil.ajax({
-                    url    : ctxPath + "/jsp/fs/fsproc.jsp",
                     data   : formObj.serialize(),
                     method : "POST",
                     dataType : "json",
@@ -108,7 +109,6 @@ if(! fsc.isInstalled()) {
         
             inpReq.val('status');
             FSUtil.ajax({
-                url    : ctxPath + "/jsp/fs/fsproc.jsp",
                 data   : formObj.serialize(),
                 method : "POST",
                 dataType : "json",
@@ -121,7 +121,6 @@ if(! fsc.isInstalled()) {
                 inpReq.val('logout');
                 
                 FSUtil.ajax({
-                    url    : ctxPath + "/jsp/fs/fsproc.jsp",
                     data   : formObj.serialize(),
                     method : "POST",
                     dataType : "json",

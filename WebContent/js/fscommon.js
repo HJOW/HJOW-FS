@@ -67,6 +67,11 @@ function FSUtilClass() {
     this.version.push(22);
     this.version.push(29);
 
+    this.ctx = '';
+    this.setContextPath = function(ctxPath) {
+        this.ctx = ctxPath;
+    }
+    
     this.log = function(logContent) {
         try {
             try {
@@ -387,6 +392,10 @@ function FSUtilClass() {
         return false;
     };
     
+    this.getDefaultAjaxUrl = function getDefaultAjaxUrl() {
+        return this.ctx + "/jsp/fs/fsproc.jsp";
+    };
+    
     this.ajax = function ajax(ajaxParamJson) {
         var obj = ajaxParamJson;
         if(typeof(obj) == 'string') obj = JSON.parse(obj);
@@ -405,6 +414,8 @@ function FSUtilClass() {
                 }
             }
         }
+        
+        if(typeof(obj['url']) == 'undefined' || obj['url'] == null) obj.url = this.getDefaultAjaxUrl();
         
         $.ajax(obj);
     };

@@ -48,11 +48,11 @@ limitations under the License.
             });
             
             FSUtil.applyLanguage(bodys);
+            FSUtil.setContextPath(ctxPath);
             
             var beforeAccountFeatEnabled = false;
             
             FSUtil.ajax({
-                url    : ctxPath + "/jsp/fs/fsproc.jsp",
                 data   : { req : 'status', praction : 'account' },
                 method : "POST",
                 dataType : "json",
@@ -61,7 +61,6 @@ limitations under the License.
                     if(acc.idtype != 'A') location.href = '/';
                     
                     FSUtil.ajax({
-                        url    : ctxPath + "/jsp/fs/fsproc.jsp",
                         data   : { req : 'read', praction : 'admin' },
                         method : "POST",
                         dataType : "json",
@@ -150,7 +149,6 @@ limitations under the License.
                             form.find('.hidden_req').val('update');
                             form.on('submit', function() {
                                 FSUtil.ajax({
-                                    url    : ctxPath + "/jsp/fs/fsproc.jsp",
                                     data   : form.serialize(),
                                     method : "POST",
                                     dataType : "json",
@@ -163,7 +161,6 @@ limitations under the License.
                             var formReset = $('.form_fs_reset');
                             formReset.on('submit', function() {
                                 FSUtil.ajax({
-                                    url    : ctxPath + "/jsp/fs/fsproc.jsp",
                                     data   : formReset.serialize(),
                                     method : "POST",
                                     dataType : "json",
@@ -202,7 +199,6 @@ limitations under the License.
                 tbodyUsers.append("<tr><td colspan='5'>...</td></tr>");
                 
                 FSUtil.ajax({
-                    url    : ctxPath + "/jsp/fs/fsproc.jsp",
                     data   : formUserSrch.serialize(),
                     method : "POST",
                     dataType : "json",
@@ -232,7 +228,6 @@ limitations under the License.
                                 btnDel.on('click', function() {
                                     var dId = $(this).attr('data-id');
                                     FSUtil.ajax({
-                                        url    : ctxPath + "/jsp/fs/fsproc.jsp",
                                         data   : {
                                             req : 'userdel', 
                                             id  : dId,
@@ -262,7 +257,6 @@ limitations under the License.
             var formUserCr = $('.form_fs_user_new');
             formUserCr.on('submit', function() {
                 FSUtil.ajax({
-                    url    : ctxPath + "/jsp/fs/fsproc.jsp",
                     data   : formUserCr.serialize(),
                     method : "POST",
                     dataType : "json",
@@ -285,7 +279,6 @@ limitations under the License.
             	tbodyGb.empty();
             	tbodyGb.append("<tr><td>...</td></tr>");
             	FSUtil.ajax({
-                    url    : ctxPath + "/jsp/fs/fsproc.jsp",
                     data   : { praction : 'admin', req : 'gblist' },
                     method : "POST",
                     dataType : "json",
@@ -311,7 +304,6 @@ limitations under the License.
             var btnCleanGb = $('.btn_cleangb');
             btnCleanGb.on('click', function() {
             	FSUtil.ajax({
-                    url    : ctxPath + "/jsp/fs/fsproc.jsp",
                     data   : { praction : 'admin', req : 'cleangb' },
                     method : "POST",
                     dataType : "json",

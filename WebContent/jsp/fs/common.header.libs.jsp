@@ -36,6 +36,7 @@ String ctxPathCmm = request.getContextPath();
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/bootstrap.js'></script>
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/fscommon.js'></script>
 <% if(FSControl.useModern(request)) { %>
+<script type='text/javascript' src='<%= ctxPathCmm %>/js/fscommones6.js'></script>
 <script type="text/javascript" src="<%=ctxPathCmm%>/js/modern/react.development.js"></script>
 <script type="text/javascript" src="<%=ctxPathCmm%>/js/modern/react-dom.development.js"></script>
 <script type="text/javascript" src="<%=ctxPathCmm%>/js/modern/babel.min.js"></script>
