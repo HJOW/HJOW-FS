@@ -134,7 +134,7 @@ function FSUtilClass() {
             }
         }
         return 'en';
-    }
+    };
 
     this.parseFloatFirstBlock = function parseFloatFirstBlock(str) {
         try {
@@ -145,7 +145,29 @@ function FSUtilClass() {
             FSUtil.log('Error : ' + e);
             return -1;
         }
-    }
+    };
+
+    this.concatArray = function concatArray() {
+        if(arguments == null) return [];
+        if(typeof(arguments) == 'undefined') return [];
+        if(arguments.length <= 0) return [];
+        var newArr = [];
+        for(var idx=0; idx<arguments.length; idx++) {
+            var arrOne = arguments[idx];
+            if($.isArray(arrOne)) {
+                for(var ddx=0; ddx<arrOne.length; ddx++) {
+                    if($.isArray(arrOne[ddx])) {
+                        newArr = FSUtil.concatArray(newArr, arrOne[ddx]);
+                    } else {
+                        newArr.push(arrOne[ddx]);
+                    }
+                }
+            } else {
+                newArr.push(arrOne);
+            }
+        }
+        return newArr;
+    };
     
     function FSStorage(storKey) {
         this.storageKey = storKey;

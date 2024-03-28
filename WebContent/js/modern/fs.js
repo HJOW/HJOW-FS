@@ -20,7 +20,11 @@ limitations under the License.
  
 class FSRoot extends React.Component {
     state = {
-        
+        dirs : [],
+        files : [],
+        success : false,
+        privilege : [],
+        session : {}
     }
     constructor(props) {
         super(props);
@@ -30,9 +34,8 @@ class FSRoot extends React.Component {
         this.trans().then((data) => { this.reloads(data); });
     }
     trans() {
-        let ctxPath = this.props.basic.ctxPath;
+        FSUtil.setContextPath(this.props.basic.ctxPath);
         return new Promise(function(resolve, reject) {
-            FSUtil.setContextPath(ctxPath);
             FSUtil.ajax({
                 data   : $('#form_fs').serialize(),
                 method : "POST",
@@ -58,7 +61,8 @@ class FSRoot extends React.Component {
         console.log(this.state)
         this.forceUpdate();
     }
-    render() { 
+    render() {
+        const selfs = this;
         return (
             <div>
                 <div className='fs_filelist fs_filelist_view container show-grid full'>
@@ -111,7 +115,32 @@ class FSRoot extends React.Component {
                                         <col style={{width: '50px'}} className='col_controls' />
                                     </colgroup>
                                     <tbody className='fs_list'>
-            
+                                        {
+                                            FSUtil.concatArray(selfs.state.dirs, selfs.state.files).map((fileOne, index) => {
+                                                console.log(fileOne);
+                                                if(fileOne.type == 'dir') {
+                                                    return (
+                                                        <tr key={index} className='element tr_dir no_icon'>
+                                                            <td className='td_mark_dir'><img style={{width: '20px', height: '20px'}} src={FSUtil.ctx + '/css/images/dir.ico'}/></td>
+                                                            <td colSpan="2"><a href='#' className='link_dir ellipsis' data-path={fileOne.name}>{fileOne.name}</a></td>
+                                                            <td className='td_buttons'></td>
+                                                        </tr>
+                                                    )
+                                                } else {
+                                                    return (
+                                                        <tr key={index} className='element tr_file no_icon'>
+                                                            <td className='td_mark_file'><img style={{width: '20px', height: '20px'}} src={FSUtil.ctx + '/css/images/files.png'}/></td>
+                                                            <td className="filednd">
+                                                                <div className="div_td_file_a">
+                                                                    <a href='#' className="link_file" data-path="" data-name={fileOne.name}>{fileOne.name}</a>
+                                                                </div>
+                                                            </td>
+                                                            <td className='td_buttons'></td>
+                                                        </tr>
+                                                    )
+                                                }
+                                            })
+                                        }
                                     </tbody>
                                 </table>
                             </div>
@@ -119,7 +148,7 @@ class FSRoot extends React.Component {
                     </form>
                 </div>
                 <div className='fs_filelist fs_filelist_anonymous full invisible'>
-        
+                    
                 </div>
                 <div className='fs_hform invisible_wh'>
                     <form className='form_hidden' target='_blank'></form>
@@ -150,9 +179,8 @@ class FSAccountBar extends React.Component {
         this.trans('status').then((data) => { this.reloads(data, true); });
     }
     trans(req) {
-        let ctxPath = this.props.basic.ctxPath;
+        FSUtil.setContextPath(this.props.basic.ctxPath);
         return new Promise(function(resolve, reject) {
-            FSUtil.setContextPath(ctxPath);
             FSUtil.ajax({
                 data   : $('#form_fs_login').serialize() + '&req=' + req,
                 method : "POST",
@@ -233,14 +261,3 @@ class FSAccountBar extends React.Component {
         )
     }
 }
-
-
-/*
-class FSRoot extends React.Component {
-    render() { return <div><h1>FSRoot {this.props.text}</h1></div> }
-}
-
-class FSAccountBar extends React.Component {
-    render() { return <div><h1>FSAccountBar {this.props.text}</h1></div> }
-}
-*/
