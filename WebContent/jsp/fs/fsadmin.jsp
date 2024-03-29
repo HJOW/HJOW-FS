@@ -303,6 +303,7 @@ limitations under the License.
             
             var btnCleanGb = $('.btn_cleangb');
             btnCleanGb.on('click', function() {
+            	if(! confirm('If you really want to empty the garbage can?')) return;
             	FSUtil.ajax({
                     data   : { praction : 'admin', req : 'cleangb' },
                     method : "POST",
@@ -326,7 +327,7 @@ limitations under the License.
             <div class='row'>
                 <div class='col-sm-12 flatbuttons'>
                     <a href='#' class='flatbutton admintab lang_element thick' data-lang-en='Config'         data-target='config'   style='margin-left: -5px; border-top: 0; border-left: 0;'>설정</a>
-                    <a href='#' class='flatbutton admintab lang_element'       data-lang-en='Clean Garbage'  data-target='cleangb'  style='margin-left: -5px; border-top: 0; border-left: 0;'>휴지통청소</a>
+                    <a href='#' class='flatbutton admintab lang_element'       data-lang-en='Garbage Can'    data-target='cleangb'  style='margin-left: -5px; border-top: 0; border-left: 0;'>휴지통</a>
                     <a href='#' class='flatbutton admintab lang_element'       data-lang-en='Users'          data-target='users'    style='margin-left: -5px; border-top: 0; border-left: 0;'>사용자관리</a>
                     <a href='#' class='flatbutton admintab lang_element'       data-lang-en='Reset'          data-target='reset'    style='margin-left: -5px; border-top: 0; border-left: 0;'>초기화</a>
                 </div>
