@@ -70,7 +70,7 @@ class FSRoot extends React.Component {
             }
     
             console.log(selfs.state);
-            selfs.forceUpdate(() => { resolve(); });
+            selfs.forceUpdate(() => { resolve(); selfs.fIconize(); });
         });
     }
     onClickCtrl(action) {
@@ -108,7 +108,7 @@ class FSRoot extends React.Component {
             
             dia.show();
         } else {
-            location.href = ctxPath + '/jsp/fs/' + 'fsdown.jsp?path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name'));
+            location.href = this.props.basic.ctxPath + '/jsp/fs/' + 'fsdown.jsp?path=' + encodeURIComponent(this.state.path) + "&filename=" + encodeURIComponent(file.name);
         }
     }
     onClickDelete(file) {
@@ -153,6 +153,97 @@ class FSRoot extends React.Component {
                 });
             }
         }
+    }
+    fIconize() {
+        const selfs = this;
+        const fsRoot = $('.fs_root');
+        const form     = fsRoot.find('.form_fs');
+        const tables   = fsRoot.find('.fs_table_list');
+        const listRoot = tables.find('.fs_list');
+        const pathDisp = fsRoot.find('.path');
+        listRoot.find('.tr_dir.no_icon').each(function() {
+            const tdIcon = $(this).find('.td_mark_dir');
+            tdIcon.empty();
+            tdIcon.append("<img style='width: 20px; height: 20px;'/>");
+            tdIcon.find('img').attr('src', FSUtil.ctx + '/css/images/dir.ico');
+            tdIcon.find('img').attr('alt', 'Directory');
+        });
+        listRoot.find('.tr_file.no_icon').each(function() {
+            const tdIcon = $(this).find('.td_mark_file');
+            tdIcon.empty();
+            tdIcon.append("<img style='width: 20px; height: 20px;'/>");
+            tdIcon.find('img').attr('src', selfs.props.basic.ctxPath + '/css/images/files.png');
+            tdIcon.find('img').attr('alt', 'File');
+        });
+        
+        if(! selfs.props.basic.useIcon) return;
+        
+        let iconizeWorkSize = 10;
+        let iconizeIndex = 0;
+        let iconizeArray = [];
+        let breaks = false;
+        let bkColor = {r : 255, g : 255, b : 255};
+        if($('body').is('.dark'))   bkColor = {r : 59, g : 59, b : 59};
+        else if(fsRoot.is('.dark')) bkColor = {r : 59, g : 59, b : 59};
+        
+        listRoot.find('.tr_file.no_icon').each(function() {
+            if(breaks) return;
+            
+            var fileNm = $(this).find('a.link_file').attr('data-name');
+            if(typeof(fileNm) != 'undefined') {
+                var tries = $(this).attr('data-try');
+                
+                if(tries == null || typeof(tries) == 'undefined' || tries == '') tries = 0;
+                else tries = parseInt(String(tries).trim());
+                
+                tries++;
+                $(this).attr('data-try', '' + tries);
+                
+                if(tries >= 3) return;
+                iconizeArray.push(fileNm);
+            }
+            
+            if(iconizeArray.length >= iconizeWorkSize) {
+                let filelist = '';
+                let fdx=0;
+                for(fdx=0; fdx<iconizeArray.length; fdx++) {
+                    if(filelist != '') filelist += ',';
+                    filelist += iconizeArray[fdx];
+                }
+                let workingArray = iconizeArray;
+                iconizeArray = [];
+                FSUtil.ajax({
+                    data : { path : selfs.state.path, files : filelist, br : bkColor.r, bg : bkColor.g, bb : bkColor.b, praction : 'fileicon' },
+                    method : 'POST',
+                    dataType : 'json',
+                    success : function(data) {
+                        if(data.success) {
+                            // Apply received icon
+                            $.each(data.data, function(dFileName, dImage) {
+                                listRoot.find('.tr_file.no_icon').each(function() {
+                                    if(! $(this).is('.no_icon')) return;
+                                    
+                                    var inFileNm = $(this).find('a.link_file').attr('data-name');
+                                    if(inFileNm != dFileName) return;
+                                    
+                                    var inTdIcon = $(this).find('.td_mark_file');
+                                    inTdIcon.empty();
+                                    inTdIcon.append("<img style='width: 20px; height: 20px;'/>");
+                                    inTdIcon.find('img').attr('src', dImage);
+                                    inTdIcon.find('img').attr('alt', 'File');
+                                    
+                                    $(this).removeClass('no_icon');
+                                    $(this).addClass('icon');
+                                });
+                            });
+                        }
+                    }, complete : function() {
+                        selfs.fIconize();
+                    }
+                });
+                breaks = true;
+            }
+        });
     }
     render() {
         const selfs = this;
