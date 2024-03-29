@@ -396,6 +396,7 @@ class FSRoot extends React.Component {
                                 <input type='button' className='btn_mkdir  btnx privilege_element invisible lang_attr_element' value='새 폴더' data-lang-target='value' data-lang-en='New Folder' />
                                 <input type='button' className='btn_config btnx privilege_element only_admin invisible lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config' />
                                 <input type='button' className='btn_console btnx lang_attr_element' value='콘솔' data-lang-target='value' data-lang-en='Console' accessKey="t" onClick={() => { selfs.onClickConsole(); }}/>
+                                <input type='button' className='btn_classic btnx lang_attr_element' value='클래식' data-lang-target='value' data-lang-en='Classic' onClick={() => { window.open( FSUtil.ctx + '/jsp/fs/fsx.jsp' ); }}/>
                             </div>
                         </div>
                         {
