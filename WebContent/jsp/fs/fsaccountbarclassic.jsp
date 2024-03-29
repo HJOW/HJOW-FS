@@ -138,7 +138,7 @@ if(! fsc.isInstalled()) {
             if($('body').is('.dark')) theme = 'dark';
             
             if(captLogin != null && typeof(captLogin) != 'undefined' && captLogin.length >= 1) {
-                captLogin.attr('src', ctxPath + '/jsp/fs/fscaptin.jsp?key=fsl&scale=1&theme=' + theme + FSUtil.addTokenParameterString());
+                captLogin.attr('src', ctxPath + '/jsp/fs/fscaptin.jsp?key=fsl&scale=1&randomize=true&theme=' + theme + FSUtil.addTokenParameterString());
             }
             
             <% if(! fsc.isCaptchaLoginOn()) { %>
@@ -163,7 +163,7 @@ if(! fsc.isInstalled()) {
                 </div>
             </div>
             <div class='div_captcha_login d_inline_block valign_middle' style='width: <%=(fsc.getCaptchaWidth() + 10)%>px;  height: 60px;'>
-                <iframe style='width: <%=(fsc.getCaptchaWidth() + 5)%>px; height: <%=(fsc.getCaptchaHeight() + 5)%>px; border:0;' class='if_captcha_l valign_middle' src='<%=fsc.getContextPath()%>/jsp/fs/fscaptin.jsp?key=fsl&scale=1&theme='></iframe>
+                <iframe style='width: <%=(fsc.getCaptchaWidth() + 5)%>px; height: <%=(fsc.getCaptchaHeight() + 5)%>px; border:0;' class='if_captcha_l valign_middle' src='<%=fsc.getContextPath()%>/jsp/fs/fscaptin.jsp?key=fsl&scale=1&randomize=true&theme='></iframe>
             </div>
             <div class='div_captcha_login d_inline_block valign_middle padding_top_10' style='margin-left: 10px; width: <%=((fsc.getCaptchaWidth() / 2) + 10)%>px;  height: 60px; text-align: left;'>
                 <input  style='width: <%=((fsc.getCaptchaWidth() / 2) + 5)%>px; height: <%=((fsc.getCaptchaHeight() / 2) + 5)%>px;' type='text' class='inp_captcha_l inp_login_element lang_attr_element valign_middle' name='captcha' placeholder='옆의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code left'/>

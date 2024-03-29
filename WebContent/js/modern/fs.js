@@ -310,7 +310,7 @@ class FSAccountBar extends React.Component {
                                         </div>
                                     </div>
                                     <div className='div_captcha_login d_inline_block valign_middle' style={{ width: (this.props.basic.captSizes.width + 10) + 'px', height: '60px' }}>
-                                        <iframe className='if_captcha_l valign_middle' style={{width: (this.props.basic.captSizes.width + 5) + 'px', height : (this.props.basic.captSizes.height + 5) + 'px', border: 0}} src={this.props.basic.ctxPath + '/jsp/fs/fscaptin.jsp?key=fsl&scale=1&theme=' + this.props.basic.getTheme() + FSUtil.addTokenParameterString()}></iframe>
+                                        <iframe className='if_captcha_l valign_middle' style={{width: (this.props.basic.captSizes.width + 5) + 'px', height : (this.props.basic.captSizes.height + 5) + 'px', border: 0}} src={this.props.basic.ctxPath + '/jsp/fs/fscaptin.jsp?key=fsl&scale=1&randomize=true&theme=' + this.props.basic.getTheme() + FSUtil.addTokenParameterString()}></iframe>
                                     </div>
                                     <div className='div_captcha_login d_inline_block valign_middle padding_top_10' style={{'marginLeft': '10px', height : '60px', 'textAlign' : 'left'}}>
                                         <input type='text' className='inp_captcha_l inp_login_element lang_attr_element valign_middle' name='captcha' placeholder='옆의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code left'/>
