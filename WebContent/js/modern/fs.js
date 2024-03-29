@@ -51,10 +51,9 @@ class FSRoot extends React.Component {
         excepts : '',
         allsearching : false,
         allsclist : [],
-        dirs : [],
         files : [],
         success : false,
-        privilege : [],
+        privilege : 'view',
         session : {}
     }
     constructor(props) {
@@ -67,6 +66,7 @@ class FSRoot extends React.Component {
     refresh() {
         const selfs = this;
         return new Promise((resolve, reject) => {
+            // $('.fs_root').find('.img_icon').remove();
             selfs.trans().then((data) => { selfs.reloads(data).then(() => { selfs.applyFSChanges(); resolve(data); }); });
         });
     }
@@ -82,8 +82,7 @@ class FSRoot extends React.Component {
         const selfs = this;
         return new Promise((resolve, reject) => {
             selfs.state.path      = data.path;
-            selfs.state.dirs      = data.directories;
-            selfs.state.files     = data.files;
+            selfs.state.files     = FSUtil.concatArray(data.directories, data.files);
             selfs.state.success   = data.success;
             selfs.state.privilege = data.privilege;
             selfs.state.session   = data.session;
@@ -95,7 +94,7 @@ class FSRoot extends React.Component {
                     name : '[뒤로 가기]',
                     action : 'back'
                 });
-                selfs.state.dirs = FSUtil.concatArray(newArr, selfs.state.dirs);
+                selfs.state.files = FSUtil.concatArray(newArr, selfs.state.files);
             }
     
             console.log(selfs.state);
@@ -207,8 +206,8 @@ class FSRoot extends React.Component {
         let theme = '';
         if($('body').is('.dark')) theme='dark';
 
-        var popularWidth, popularHeight;
-        popularWidth  = window.innerWidth  - 100;
+        let popularWidth, popularHeight;
+        popularWidth  = window.innerWidth  - 120;
         popularHeight = 550;
         if(popularWidth  < 780) popularWidth  = 780;
         if(popularHeight < 550) popularHeight = 550;
@@ -227,6 +226,77 @@ class FSRoot extends React.Component {
         dia.show();
         $(dia).draggable();
     }
+    onClickClassic() {
+        let popularWidth, popularHeight;
+        popularWidth  = window.innerWidth  - 120;
+        popularHeight = window.innerHeight - 150;
+        if(popularWidth  < 780) popularWidth  = 780;
+        if(popularHeight < 550) popularHeight = 550;
+        window.open( FSUtil.ctx + '/jsp/fs/fsx.jsp', 'FSClassic', 'width=' + popularWidth + ',height=' + popularHeight + ',toolbar=yes,status=no,location=no,resizable=yes' );
+    }
+    onClickNewDir() {
+        const selfs = this;
+
+        let msg = 'Please input the name for new folder. (No dot, /, quotes, <>, ?, &)';
+        if(FSUtil.detectLanguage() == 'ko') msg = '생성할 폴더 이름을 입력해 주세요. (마침표, /, 따옴표, <>, ?, & 를 넣을 수 없습니다.)';
+        
+        let dirName = prompt(msg, '');
+        
+        if(dirName == null || typeof(dirName) == 'undefined') {
+            return;
+        }
+        dirName = dirName.trim();
+        if(dirName == '') return;
+        
+        if(dirName.indexOf('.') >= 0) {
+            msg = 'Wrong name !';
+            if(FSUtil.detectLanguage() == 'ko') msg = '폴더 이름으로 적합하지 않습니다.';
+            alert(msg);
+            return;
+        }
+        
+        if(dirName.indexOf('/') >= 0 || dirName.indexOf('\\') >= 0) {
+            msg = 'Wrong name !';
+            if(FSUtil.detectLanguage() == 'ko') msg = '폴더 이름으로 적합하지 않습니다.';
+            alert(msg);
+            return;
+        }
+        
+        if(dirName.indexOf("'") >= 0 || dirName.indexOf('"') >= 0) {
+            msg = 'Wrong name !';
+            if(FSUtil.detectLanguage() == 'ko') msg = '폴더 이름으로 적합하지 않습니다.';
+            alert(msg);
+            return;
+        }
+        
+        if(dirName.indexOf("<") >= 0 || dirName.indexOf('>') >= 0) {
+            msg = 'Wrong name !';
+            if(FSUtil.detectLanguage() == 'ko') msg = '폴더 이름으로 적합하지 않습니다.';
+            alert(msg);
+            return;
+        }
+        
+        if(dirName.indexOf("?") >= 0 || dirName.indexOf('&') >= 0) {
+            msg = 'Wrong name !';
+            if(FSUtil.detectLanguage() == 'ko') msg = '폴더 이름으로 적합하지 않습니다.';
+            alert(msg);
+            return;
+        }
+        
+        FSUtil.ajax({
+            data : {
+                path : selfs.state.path,
+                name : dirName,
+                praction : 'mkdir'
+            },
+            method : 'POST',
+            dataType : 'JSON',
+            success : function(data) {
+                if(! data.success) alert(data.message);
+                selfs.refresh();
+            }
+        });
+    }
     fIconize() {
         const selfs = this;
         const fsRoot = $('.fs_root');
@@ -236,17 +306,15 @@ class FSRoot extends React.Component {
         const pathDisp = fsRoot.find('.path');
         listRoot.find('.tr_dir.no_icon').each(function() {
             const tdIcon = $(this).find('.td_mark_dir');
-            tdIcon.empty();
-            tdIcon.append("<img style='width: 20px; height: 20px;'/>");
-            tdIcon.find('img').attr('src', FSUtil.ctx + '/css/images/dir.ico');
-            tdIcon.find('img').attr('alt', 'Directory');
+            const imgTag = tdIcon.find('img');
+            imgTag.attr('src', FSUtil.ctx + '/css/images/dir.ico');
+            imgTag.attr('alt', 'Directory');
         });
         listRoot.find('.tr_file.no_icon').each(function() {
             const tdIcon = $(this).find('.td_mark_file');
-            tdIcon.empty();
-            tdIcon.append("<img style='width: 20px; height: 20px;'/>");
-            tdIcon.find('img').attr('src', FSCTX.ctxPath + '/css/images/files.png');
-            tdIcon.find('img').attr('alt', 'File');
+            const imgTag = tdIcon.find('img');
+            imgTag.find('img').attr('src', FSCTX.ctxPath + '/css/images/files.png');
+            imgTag.find('img').attr('alt', 'File');
         });
         
         if(! FSCTX.useIcon) return;
@@ -296,14 +364,13 @@ class FSRoot extends React.Component {
                                 listRoot.find('.tr_file.no_icon').each(function() {
                                     if(! $(this).is('.no_icon')) return;
                                     
-                                    var inFileNm = $(this).find('a.link_file').attr('data-name');
+                                    const inFileNm = $(this).find('a.link_file').attr('data-name');
                                     if(inFileNm != dFileName) return;
                                     
-                                    var inTdIcon = $(this).find('.td_mark_file');
-                                    inTdIcon.empty();
-                                    inTdIcon.append("<img style='width: 20px; height: 20px;'/>");
-                                    inTdIcon.find('img').attr('src', dImage);
-                                    inTdIcon.find('img').attr('alt', 'File');
+                                    const inTdIcon = $(this).find('.td_mark_file');
+                                    const imgTagIn = inTdIcon.find('img');
+                                    imgTagIn.find('img').attr('src', dImage);
+                                    imgTagIn.find('img').attr('alt', 'File');
                                     
                                     $(this).removeClass('no_icon');
                                     $(this).addClass('icon');
@@ -333,7 +400,6 @@ class FSRoot extends React.Component {
             this.setState({
                 allsearching : true,
                 allsclist : ['...'],
-                dirs : [],
                 files : []
             }, () => {
                 FSUtil.ajaxx({
@@ -392,11 +458,20 @@ class FSRoot extends React.Component {
                                 </h4>
                             </div>
                             <div className='col-sm-2 align_right'>
-                                <input type='button' className='btn_upload btnx privilege_element invisible lang_attr_element' value='업로드' data-lang-target='value' data-lang-en='Upload' />
-                                <input type='button' className='btn_mkdir  btnx privilege_element invisible lang_attr_element' value='새 폴더' data-lang-target='value' data-lang-en='New Folder' />
-                                <input type='button' className='btn_config btnx privilege_element only_admin invisible lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config' />
+                                {
+                                    selfs.state.privilege == 'edit' ? (
+                                        <span>
+                                            <input type='button' className='btn_mkdir  btnx privilege_element lang_attr_element' value='새 폴더' data-lang-target='value' data-lang-en='New Folder' onClick={() => { selfs.onClickNewDir(); }}/>
+                                        </span>
+                                    ) : null
+                                }
+                                {
+                                    FSCTX.idtype == 'A' ? (
+                                        <input type='button' className='btn_config btnx privilege_element only_admin lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config' />
+                                    ) : null
+                                }
                                 <input type='button' className='btn_console btnx lang_attr_element' value='콘솔' data-lang-target='value' data-lang-en='Console' accessKey="t" onClick={() => { selfs.onClickConsole(); }}/>
-                                <input type='button' className='btn_classic btnx lang_attr_element' value='클래식' data-lang-target='value' data-lang-en='Classic' onClick={() => { window.open( FSUtil.ctx + '/jsp/fs/fsx.jsp' ); }}/>
+                                <input type='button' className='btn_classic btnx lang_attr_element' value='클래식' data-lang-target='value' data-lang-en='Classic' onClick={() => { selfs.onClickClassic(); }}/>
                             </div>
                         </div>
                         {
@@ -444,15 +519,15 @@ class FSRoot extends React.Component {
                                                 </colgroup>
                                                 <tbody className='fs_list'>
                                                     {
-                                                        FSUtil.concatArray(selfs.state.dirs, selfs.state.files).map((fileOne, index) => {
+                                                        selfs.state.files.map((fileOne, index) => {
                                                             if(fileOne.type == 'dir') {
                                                                 return (
                                                                     <tr key={index} className={"element tr_dir tr_dir_" + index + " no_icon"}>
-                                                                        <td className='td_mark_dir'><img style={{width: '20px', height: '20px'}} src={FSUtil.ctx + '/css/images/dir.ico'}/></td>
+                                                                        <td className='td_mark_dir'><img style={{width: '20px', height: '20px'}} className='img_icon' src={FSUtil.ctx + '/css/images/dir.ico'}/></td>
                                                                         <td colSpan="2"><a href='#' className='link_dir ellipsi binded_click' data-path={fileOne.name} onClick={() => { this.onClickDir(fileOne); }}>{fileOne.name}</a></td>
                                                                         <td className='td_buttons'>
                                                                             {
-                                                                                (fileOne.elements <= 0 && selfs.state.privilege) ? (
+                                                                                (fileOne.elements <= 0 && selfs.state.privilege == 'edit') ? (
                                                                                     <input type='button' className='btn_delete btnx' value='X' onClick={ () => { selfs.onClickDelete(fileOne); } }/>
                                                                                 ) : null
                                                                             }
@@ -468,7 +543,7 @@ class FSRoot extends React.Component {
                                                             } else {
                                                                 return (
                                                                     <tr key={index} className='element tr_file no_icon'>
-                                                                        <td className='td_mark_file'><img style={{width: '20px', height: '20px'}} src={FSUtil.ctx + '/css/images/files.png'}/></td>
+                                                                        <td className='td_mark_file'><img style={{width: '20px', height: '20px'}} className='img_icon' src={FSUtil.ctx + '/css/images/files.png'}/></td>
                                                                         <td className="filednd">
                                                                             <div className="div_td_file_a">
                                                                                 <a href='#' className="link_file" data-path={ this.state.path } data-name={fileOne.name} onClick={() => { this.onClickFile(fileOne); }}>{fileOne.name}</a>

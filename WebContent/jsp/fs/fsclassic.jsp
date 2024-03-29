@@ -194,14 +194,14 @@ $(function() {
         listRoot.find('.tr_dir.no_icon').each(function() {
             var tdIcon = $(this).find('.td_mark_dir');
             tdIcon.empty();
-            tdIcon.append("<img style='width: 20px; height: 20px;'/>");
+            tdIcon.append("<img style='width: 20px; height: 20px;' class='img_icon'/>");
             tdIcon.find('img').attr('src', ctxPath + '/css/images/dir.ico');
             tdIcon.find('img').attr('alt', 'Directory');
         });
         listRoot.find('.tr_file.no_icon').each(function() {
             var tdIcon = $(this).find('.td_mark_file');
             tdIcon.empty();
-            tdIcon.append("<img style='width: 20px; height: 20px;'/>");
+            tdIcon.append("<img style='width: 20px; height: 20px;' class='img_icon'/>");
             tdIcon.find('img').attr('src', ctxPath + '/css/images/files.png');
             tdIcon.find('img').attr('alt', 'File');
         });
@@ -258,7 +258,7 @@ $(function() {
                                     
                                     var inTdIcon = $(this).find('.td_mark_file');
                                     inTdIcon.empty();
-                                    inTdIcon.append("<img style='width: 20px; height: 20px;'/>");
+                                    inTdIcon.append("<img style='width: 20px; height: 20px;' class='img_icon'/>");
                                     inTdIcon.find('img').attr('src', dImage);
                                     inTdIcon.find('img').attr('alt', 'File');
                                     
