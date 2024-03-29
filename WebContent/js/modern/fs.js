@@ -201,6 +201,32 @@ class FSRoot extends React.Component {
             }
         }
     }
+    onClickConsole() {
+        const dia = document.getElementById('fs_pop_console');
+
+        let theme = '';
+        if($('body').is('.dark')) theme='dark';
+
+        var popularWidth, popularHeight;
+        popularWidth  = window.innerWidth  - 100;
+        popularHeight = 550;
+        if(popularWidth  < 780) popularWidth  = 780;
+        if(popularHeight < 550) popularHeight = 550;
+
+        dia.style = "width : " + popularWidth + "px; height : " + popularHeight + "px; position: fixed; top: 100px; left : 100px; overflow: hidden";
+        const iframes = dia.getElementsByTagName('iframe')[0];
+        iframes.src = FSCTX.ctxPath + '/jsp/fs/fsconsolepop.jsp?popin=true&theme=' + theme + FSUtil.addTokenParameterString();
+        iframes.style = "width: 100%; overflow-y: scroll; height : " + (popularHeight - 70) + "px";
+        
+        $(iframes).on('load', function() {
+            var ct = $(this).contents();
+            ct.find('.tf_terminal_console').focus();
+        });
+        $('.ui-dialog-titlebar-close').text('X');
+
+        dia.show();
+        $(dia).draggable();
+    }
     fIconize() {
         const selfs = this;
         const fsRoot = $('.fs_root');
@@ -304,29 +330,6 @@ class FSRoot extends React.Component {
                 selfs.refresh();
             });
         } else {
-            /*
-            FSUtil.ajaxx({
-                data   : $('#form_allsearch').serialize(),
-                method : "POST",
-                dataType : "json"
-            }).then((data) => {
-                if(data.list.length <= 0) {
-                    selfs.setState({
-                        allsearching : true,
-                        allsclist : ['[EMPTY]'],
-                        dirs : [],
-                        files : []
-                    });
-                } else {
-                    selfs.setState({
-                        allsearching : true,
-                        allsclist : data.list,
-                        dirs : [],
-                        files : []
-                    });
-                }
-            });
-            */
             this.setState({
                 allsearching : true,
                 allsclist : ['...'],
@@ -392,7 +395,7 @@ class FSRoot extends React.Component {
                                 <input type='button' className='btn_upload btnx privilege_element invisible lang_attr_element' value='업로드' data-lang-target='value' data-lang-en='Upload' />
                                 <input type='button' className='btn_mkdir  btnx privilege_element invisible lang_attr_element' value='새 폴더' data-lang-target='value' data-lang-en='New Folder' />
                                 <input type='button' className='btn_config btnx privilege_element only_admin invisible lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config' />
-                                <input type='button' className='btn_console btnx lang_attr_element' value='콘솔' data-lang-target='value' data-lang-en='Console' accessKey="t" />
+                                <input type='button' className='btn_console btnx lang_attr_element' value='콘솔' data-lang-target='value' data-lang-en='Console' accessKey="t" onClick={() => { selfs.onClickConsole(); }}/>
                             </div>
                         </div>
                         {
