@@ -111,6 +111,49 @@ class FSRoot extends React.Component {
             location.href = ctxPath + '/jsp/fs/' + 'fsdown.jsp?path=' + encodeURIComponent(inpPath.val()) + "&filename=" + encodeURIComponent($(this).attr('data-name'));
         }
     }
+    onClickDelete(file) {
+        const selfs = this;
+        if(file.type == 'dir') {
+            let confirmMsg = 'Really? Do you want to delete this directory?';
+            if(FSUtil.detectLanguage() == 'ko') confirmMsg = '이 폴더를 정말 삭제하시겠습니까?';
+            
+            if(confirm(confirmMsg)) {
+                FSUtil.ajax({
+                    data : {
+                        path : file.value,
+                        dels : 'dir',
+                        praction : 'remove'
+                    },
+                    method : 'POST',
+                    dataType : 'JSON',
+                    success : function(data) {
+                        if(! data.success) alert(data.message);
+                        selfs.refresh();
+                    }
+                });
+            }
+        } else {
+            let confirmMsg = 'Really? Do you want to delete this file?';
+            if(FSUtil.detectLanguage() == 'ko') confirmMsg = '이 파일을 정말 삭제하시겠습니까?';
+            
+            if(confirm(confirmMsg)) {
+                FSUtil.ajax({
+                    data : {
+                        path : selfs.state.path,
+                        name : file.name,
+                        dels : file.type,
+                        praction : 'remove'
+                    },
+                    method : 'POST',
+                    dataType : 'JSON',
+                    success : function(data) {
+                        if(! data.success) alert(data.message);
+                        selfs.refresh();
+                    }
+                });
+            }
+        }
+    }
     render() {
         const selfs = this;
         return (
@@ -165,7 +208,7 @@ class FSRoot extends React.Component {
                                         <col style={{width: '50px'}} />
                                         <col />
                                         <col style={{width: '100px'}} />
-                                        <col style={{width: '50px'}} className='col_controls' />
+                                        <col style={{width: '80px'}} className='col_controls' />
                                     </colgroup>
                                     <tbody className='fs_list'>
                                         {
@@ -175,7 +218,13 @@ class FSRoot extends React.Component {
                                                         <tr key={index} className={"element tr_dir tr_dir_" + index + " no_icon"}>
                                                             <td className='td_mark_dir'><img style={{width: '20px', height: '20px'}} src={FSUtil.ctx + '/css/images/dir.ico'}/></td>
                                                             <td colSpan="2"><a href='#' className='link_dir ellipsi binded_click' data-path={fileOne.name} onClick={() => { this.onClickDir(fileOne); }}>{fileOne.name}</a></td>
-                                                            <td className='td_buttons'></td>
+                                                            <td className='td_buttons'>
+                                                                {
+                                                                    (fileOne.elements <= 0 && selfs.state.privilege) ? (
+                                                                        <input type='button' className='btn_delete btnx' value='X' onClick={ () => { selfs.onClickDelete(fileOne); } }/>
+                                                                    ) : null
+                                                                }
+                                                            </td>
                                                         </tr>
                                                     )
                                                 } else if(fileOne.type == 'ctrl') {
@@ -190,11 +239,47 @@ class FSRoot extends React.Component {
                                                             <td className='td_mark_file'><img style={{width: '20px', height: '20px'}} src={FSUtil.ctx + '/css/images/files.png'}/></td>
                                                             <td className="filednd">
                                                                 <div className="div_td_file_a">
-                                                                    <a href='#' className="link_file" data-path="" data-name={fileOne.name} onClick={() => { this.onClickFile(fileOne); }}>{fileOne.name}</a>
+                                                                    <a href='#' className="link_file" data-path={ this.state.path } data-name={fileOne.name} onClick={() => { this.onClickFile(fileOne); }}>{fileOne.name}</a>
                                                                 </div>
+                                                                {
+                                                                    fileOne.previewing ? (
+                                                                        <div className='div_td_file_preview full'>
+                                                                            {
+                                                                                fileOne.previewType == '1' ? (
+                                                                                    <img    className='img_preview    preview_element full' style={{'maxHeight' : (((window.innerHeight / 2) < 200 ? 200 : (window.innerHeight / 2)) + 'px'), 'overflow-y' : 'scroll'}} src={ FSUtil.ctx + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent(selfs.state.path) + "&filename=" + encodeURIComponent(fileOne.name) + "&mode=VIEW" + FSUtil.addTokenParameterString() }/>
+                                                                                ) : fileOne.previewType == '2' ? (
+                                                                                    <video  className='video_preview  preview_element full' style={{'maxHeight' : (((window.innerHeight / 2) < 200 ? 200 : (window.innerHeight / 2)) + 'px'), 'overflow-y' : 'scroll'}} src={ FSUtil.ctx + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent(selfs.state.path) + "&filename=" + encodeURIComponent(fileOne.name) + "&mode=VIEW" + FSUtil.addTokenParameterString() }/>
+                                                                                ) : fileOne.previewType == '3' ? (
+                                                                                    <audio  className='audio_preview  preview_element full' style={{'maxHeight' : (((window.innerHeight / 2) < 200 ? 200 : (window.innerHeight / 2)) + 'px'), 'overflow-y' : 'scroll'}} src={ FSUtil.ctx + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent(selfs.state.path) + "&filename=" + encodeURIComponent(fileOne.name) + "&mode=VIEW" + FSUtil.addTokenParameterString() }/>
+                                                                                ) : fileOne.previewType == '4' ? (
+                                                                                    <iframe className='iframe_preview preview_element full' style={{'maxHeight' : (((window.innerHeight / 2) < 200 ? 200 : (window.innerHeight / 2)) + 'px'), 'overflow-y' : 'scroll'}} src={ FSUtil.ctx + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent(selfs.state.path) + "&filename=" + encodeURIComponent(fileOne.name) + "&mode=VIEW" + FSUtil.addTokenParameterString() }></iframe>
+                                                                                ) : null
+                                                                            }
+                                                                        </div>
+                                                                    ) : null
+                                                                }
                                                             </td>
                                                             <td className='td_file_size filednd' style={{textAlign: 'right'}}>{fileOne.size}</td>
-                                                            <td className='td_buttons'></td>
+                                                            <td className='td_buttons' style={{textAlign: 'right'}}>
+                                                                <span>
+                                                                {
+                                                                    (fileOne.previewType >= 0 && (! fileOne.over_prev)) ? (
+                                                                        fileOne.previewing ? (
+                                                                            <input type='button' className='btn_preview btnx not_opened' value='▲' onClick={ () => { fileOne.previewing = false; selfs.forceUpdate(); }}/>
+                                                                        ) : (
+                                                                            <input type='button' className='btn_preview btnx not_opened' value='▼' onClick={ () => { fileOne.previewing = true; selfs.forceUpdate(); }}/>
+                                                                        )
+                                                                    ) : null
+                                                                }
+                                                                </span>
+                                                                <span>
+                                                                {
+                                                                    (selfs.state.privilege == 'edit') ? (
+                                                                        <input type='button' className='btn_delete btnx' value='X' onClick={ () => { selfs.onClickDelete(fileOne); } }/>
+                                                                    ) : null
+                                                                }
+                                                                </span>
+                                                            </td>
                                                         </tr>
                                                     )
                                                 }
@@ -271,6 +356,7 @@ class FSAccountBar extends React.Component {
     async login() {
         const res = await this.trans('login');
         await this.reloads(res, true);
+        document.getElementById('form_fs').submit();
     }
     async logout() {
         const res = await this.trans('logout');
@@ -279,6 +365,7 @@ class FSAccountBar extends React.Component {
             FSUtil.storage.session.remove("fsid"   );
             FSUtil.storage.session.remove("fstoken");
         }
+        document.getElementById('form_fs').submit();
     }
     render() { 
         const selfs = this;
