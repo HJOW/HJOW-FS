@@ -49,6 +49,8 @@ class FSRoot extends React.Component {
     state = {
         path : '',
         excepts : '',
+        allsearching : false,
+        allsclist : [],
         dirs : [],
         files : [],
         success : false,
@@ -289,6 +291,68 @@ class FSRoot extends React.Component {
             }
         });
     }
+    allsearch() {
+        const selfs = this;
+        const keyword = document.getElementById('inp_allsearch').value;
+
+        if(FSUtil.isEmpty(keyword)) {
+            selfs.setState({
+                allsearching : false,
+                allsclist : []
+            }, () => {
+                selfs.refresh();
+            });
+        } else {
+            /*
+            FSUtil.ajaxx({
+                data   : $('#form_allsearch').serialize(),
+                method : "POST",
+                dataType : "json"
+            }).then((data) => {
+                if(data.list.length <= 0) {
+                    selfs.setState({
+                        allsearching : true,
+                        allsclist : ['[EMPTY]'],
+                        dirs : [],
+                        files : []
+                    });
+                } else {
+                    selfs.setState({
+                        allsearching : true,
+                        allsclist : data.list,
+                        dirs : [],
+                        files : []
+                    });
+                }
+            });
+            */
+            this.setState({
+                allsearching : true,
+                allsclist : ['...'],
+                dirs : [],
+                files : []
+            }, () => {
+                FSUtil.ajaxx({
+                    data   : $('#form_allsearch').serialize(),
+                    method : "POST",
+                    dataType : "json"
+                }).then((data) => {
+                    if(data.list.length <= 0) {
+                        selfs.setState({
+                            allsearching : true,
+                            allsclist : ['[EMPTY]']
+                        });
+                    } else {
+                        selfs.setState({
+                            allsearching : true,
+                            allsclist : data.list
+                        });
+                    }
+                });
+            });
+        }
+        return false;
+    }
     render() {
         const selfs = this;
         return (
@@ -299,15 +363,17 @@ class FSRoot extends React.Component {
                             <h2 className='fs_title'></h2>
                         </div>
                         <div className='col-sm-4 fs_allsearch align_right'>
-                            <form className='form_allsearch' onSubmit={() => {return false}}>
+                            <form className='form_allsearch' id='form_allsearch' onSubmit={(e) => { e.preventDefault(); selfs.allsearch(); return false; }}>
                                 <input type='hidden' name='path' className='hidden_path' value='' />
                                 <input type='hidden' name='all'  className='hidden_conf' value='true' />
-                                <input type='text'   className='inp_allsearch lang_attr_element reloading_readonly'      name='keyword' placeholder="전체 디렉토리 검색" data-lang-target='placeholder' data-lang-en='Search whole directories' style={{ width: '200px' }}/>
+                                <input type='hidden' name='praction' value='listall' />
+                                <input type='text'   className='inp_allsearch lang_attr_element reloading_readonly' id='inp_allsearch' name='keyword' placeholder="전체 디렉토리 검색" data-lang-target='placeholder' data-lang-en='Search whole directories' style={{ width: '200px' }}/>
                                 <input type='submit' className='btn_allsearch lang_attr_element reloading_disabled btnx' value='검색' data-lang-target='value' data-lang-en='Search' />
                             </form>
                         </div>
                     </div>
-                    <form className='form_fs' id='form_fs' onSubmit={() => {
+                    <form className='form_fs' id='form_fs' onSubmit={(e) => {
+                        e.preventDefault();
                         selfs.refresh();
                         return false;
                     }}>
@@ -328,102 +394,131 @@ class FSRoot extends React.Component {
                                 <input type='button' className='btn_console btnx lang_attr_element' value='콘솔' data-lang-target='value' data-lang-en='Console' accessKey="t" />
                             </div>
                         </div>
-                        <div className='row fs_search'>
-                            <div className='col-sm-10'>
-                                <input type='text' className='inp_search full lang_attr_element reloading_readonly' name='keyword' placeholder="디렉토리 내 검색" data-lang-target='placeholder' data-lang-en='Search in current directory' />
-                            </div>
-                            <div className='col-sm-2'>
-                                <input type='submit' className='btn_search full lang_attr_element reloading_disabled btnx' value='검색' data-lang-target='value' data-lang-en='Search' />
-                            </div>
-                        </div>
-                        <div className='row fs_root'>
-                            <div className='col-sm-12'>
-                                <table className="table table-hover full fs_table_list">
-                                    <colgroup>
-                                        <col style={{width: '50px'}} />
-                                        <col />
-                                        <col style={{width: '100px'}} />
-                                        <col style={{width: '80px'}} className='col_controls' />
-                                    </colgroup>
-                                    <tbody className='fs_list'>
-                                        {
-                                            FSUtil.concatArray(selfs.state.dirs, selfs.state.files).map((fileOne, index) => {
-                                                if(fileOne.type == 'dir') {
-                                                    return (
-                                                        <tr key={index} className={"element tr_dir tr_dir_" + index + " no_icon"}>
-                                                            <td className='td_mark_dir'><img style={{width: '20px', height: '20px'}} src={FSUtil.ctx + '/css/images/dir.ico'}/></td>
-                                                            <td colSpan="2"><a href='#' className='link_dir ellipsi binded_click' data-path={fileOne.name} onClick={() => { this.onClickDir(fileOne); }}>{fileOne.name}</a></td>
-                                                            <td className='td_buttons'>
-                                                                {
-                                                                    (fileOne.elements <= 0 && selfs.state.privilege) ? (
-                                                                        <input type='button' className='btn_delete btnx' value='X' onClick={ () => { selfs.onClickDelete(fileOne); } }/>
-                                                                    ) : null
-                                                                }
-                                                            </td>
-                                                        </tr>
-                                                    )
-                                                } else if(fileOne.type == 'ctrl') {
-                                                    return (
-                                                        <tr key={index} className={"element element_special back"}>
-                                                            <td colSpan='4'><a href='#' className='link_back lang_element' data-lang-en='[BACK]' onClick={() => { this.onClickCtrl(fileOne); }}>{fileOne.name}</a></td>
-                                                        </tr>
-                                                    )
-                                                } else {
-                                                    return (
-                                                        <tr key={index} className='element tr_file no_icon'>
-                                                            <td className='td_mark_file'><img style={{width: '20px', height: '20px'}} src={FSUtil.ctx + '/css/images/files.png'}/></td>
-                                                            <td className="filednd">
-                                                                <div className="div_td_file_a">
-                                                                    <a href='#' className="link_file" data-path={ this.state.path } data-name={fileOne.name} onClick={() => { this.onClickFile(fileOne); }}>{fileOne.name}</a>
-                                                                </div>
-                                                                {
-                                                                    fileOne.previewing ? (
-                                                                        <div className='div_td_file_preview full'>
+                        {
+                            selfs.state.allsearching ? (
+                                <div>
+                                    <div className='row fs_root'>
+                                        <div className='col-sm-12'>
+                                            <table className="table table-hover full fs_table_list">
+                                                <colgroup>
+                                                    <col/>
+                                                </colgroup>
+                                                <tbody className='fs_list'>
+                                                    {
+                                                        selfs.state.allsclist.map((fileOne, index) => {
+                                                            return (
+                                                                <tr key={index} className={"element tr_file tr_file_" + index}>
+                                                                    <td className="td_allsearch ellipsis">{fileOne}</td>
+                                                                </tr>
+                                                            )
+                                                        })
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div>
+                                    <div className='row fs_search'>
+                                        <div className='col-sm-10'>
+                                            <input type='text' className='inp_search full lang_attr_element reloading_readonly' name='keyword' placeholder="디렉토리 내 검색" data-lang-target='placeholder' data-lang-en='Search in current directory' />
+                                        </div>
+                                        <div className='col-sm-2'>
+                                            <input type='submit' className='btn_search full lang_attr_element reloading_disabled btnx' value='검색' data-lang-target='value' data-lang-en='Search' />
+                                        </div>
+                                    </div>
+                                    <div className='row fs_root'>
+                                        <div className='col-sm-12'>
+                                            <table className="table table-hover full fs_table_list">
+                                                <colgroup>
+                                                    <col style={{width: '50px'}} />
+                                                    <col />
+                                                    <col style={{width: '100px'}} />
+                                                    <col style={{width: '80px'}} className='col_controls' />
+                                                </colgroup>
+                                                <tbody className='fs_list'>
+                                                    {
+                                                        FSUtil.concatArray(selfs.state.dirs, selfs.state.files).map((fileOne, index) => {
+                                                            if(fileOne.type == 'dir') {
+                                                                return (
+                                                                    <tr key={index} className={"element tr_dir tr_dir_" + index + " no_icon"}>
+                                                                        <td className='td_mark_dir'><img style={{width: '20px', height: '20px'}} src={FSUtil.ctx + '/css/images/dir.ico'}/></td>
+                                                                        <td colSpan="2"><a href='#' className='link_dir ellipsi binded_click' data-path={fileOne.name} onClick={() => { this.onClickDir(fileOne); }}>{fileOne.name}</a></td>
+                                                                        <td className='td_buttons'>
                                                                             {
-                                                                                fileOne.previewType == '1' ? (
-                                                                                    <img    className='img_preview    preview_element full' style={{'maxHeight' : (((window.innerHeight / 2) < 200 ? 200 : (window.innerHeight / 2)) + 'px'), 'overflow-y' : 'scroll'}} src={ FSUtil.ctx + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent(selfs.state.path) + "&filename=" + encodeURIComponent(fileOne.name) + "&mode=VIEW" + FSUtil.addTokenParameterString() }/>
-                                                                                ) : fileOne.previewType == '2' ? (
-                                                                                    <video  className='video_preview  preview_element full' style={{'maxHeight' : (((window.innerHeight / 2) < 200 ? 200 : (window.innerHeight / 2)) + 'px'), 'overflow-y' : 'scroll'}} src={ FSUtil.ctx + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent(selfs.state.path) + "&filename=" + encodeURIComponent(fileOne.name) + "&mode=VIEW" + FSUtil.addTokenParameterString() }/>
-                                                                                ) : fileOne.previewType == '3' ? (
-                                                                                    <audio  className='audio_preview  preview_element full' style={{'maxHeight' : (((window.innerHeight / 2) < 200 ? 200 : (window.innerHeight / 2)) + 'px'), 'overflow-y' : 'scroll'}} src={ FSUtil.ctx + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent(selfs.state.path) + "&filename=" + encodeURIComponent(fileOne.name) + "&mode=VIEW" + FSUtil.addTokenParameterString() }/>
-                                                                                ) : fileOne.previewType == '4' ? (
-                                                                                    <iframe className='iframe_preview preview_element full' style={{'maxHeight' : (((window.innerHeight / 2) < 200 ? 200 : (window.innerHeight / 2)) + 'px'), 'overflow-y' : 'scroll'}} src={ FSUtil.ctx + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent(selfs.state.path) + "&filename=" + encodeURIComponent(fileOne.name) + "&mode=VIEW" + FSUtil.addTokenParameterString() }></iframe>
+                                                                                (fileOne.elements <= 0 && selfs.state.privilege) ? (
+                                                                                    <input type='button' className='btn_delete btnx' value='X' onClick={ () => { selfs.onClickDelete(fileOne); } }/>
                                                                                 ) : null
                                                                             }
-                                                                        </div>
-                                                                    ) : null
-                                                                }
-                                                            </td>
-                                                            <td className='td_file_size filednd' style={{textAlign: 'right'}}>{fileOne.size}</td>
-                                                            <td className='td_buttons' style={{textAlign: 'right'}}>
-                                                                <span>
-                                                                {
-                                                                    (fileOne.previewType >= 0 && (! fileOne.over_prev)) ? (
-                                                                        fileOne.previewing ? (
-                                                                            <input type='button' className='btn_preview btnx not_opened' value='▲' onClick={ () => { fileOne.previewing = false; selfs.forceUpdate(); }}/>
-                                                                        ) : (
-                                                                            <input type='button' className='btn_preview btnx not_opened' value='▼' onClick={ () => { fileOne.previewing = true; selfs.forceUpdate(); }}/>
-                                                                        )
-                                                                    ) : null
-                                                                }
-                                                                </span>
-                                                                <span>
-                                                                {
-                                                                    (selfs.state.privilege == 'edit') ? (
-                                                                        <input type='button' className='btn_delete btnx' value='X' onClick={ () => { selfs.onClickDelete(fileOne); } }/>
-                                                                    ) : null
-                                                                }
-                                                                </span>
-                                                            </td>
-                                                        </tr>
-                                                    )
-                                                }
-                                            })
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                )
+                                                            } else if(fileOne.type == 'ctrl') {
+                                                                return (
+                                                                    <tr key={index} className={"element element_special back"}>
+                                                                        <td colSpan='4'><a href='#' className='link_back lang_element' data-lang-en='[BACK]' onClick={() => { this.onClickCtrl(fileOne); }}>{fileOne.name}</a></td>
+                                                                    </tr>
+                                                                )
+                                                            } else {
+                                                                return (
+                                                                    <tr key={index} className='element tr_file no_icon'>
+                                                                        <td className='td_mark_file'><img style={{width: '20px', height: '20px'}} src={FSUtil.ctx + '/css/images/files.png'}/></td>
+                                                                        <td className="filednd">
+                                                                            <div className="div_td_file_a">
+                                                                                <a href='#' className="link_file" data-path={ this.state.path } data-name={fileOne.name} onClick={() => { this.onClickFile(fileOne); }}>{fileOne.name}</a>
+                                                                            </div>
+                                                                            {
+                                                                                fileOne.previewing ? (
+                                                                                    <div className='div_td_file_preview full'>
+                                                                                        {
+                                                                                            fileOne.previewType == '1' ? (
+                                                                                                <img    className='img_preview    preview_element full' style={{'maxHeight' : (((window.innerHeight / 2) < 200 ? 200 : (window.innerHeight / 2)) + 'px'), 'overflow-y' : 'scroll'}} src={ FSUtil.ctx + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent(selfs.state.path) + "&filename=" + encodeURIComponent(fileOne.name) + "&mode=VIEW" + FSUtil.addTokenParameterString() }/>
+                                                                                            ) : fileOne.previewType == '2' ? (
+                                                                                                <video  className='video_preview  preview_element full' style={{'maxHeight' : (((window.innerHeight / 2) < 200 ? 200 : (window.innerHeight / 2)) + 'px'), 'overflow-y' : 'scroll'}} src={ FSUtil.ctx + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent(selfs.state.path) + "&filename=" + encodeURIComponent(fileOne.name) + "&mode=VIEW" + FSUtil.addTokenParameterString() }/>
+                                                                                            ) : fileOne.previewType == '3' ? (
+                                                                                                <audio  className='audio_preview  preview_element full' style={{'maxHeight' : (((window.innerHeight / 2) < 200 ? 200 : (window.innerHeight / 2)) + 'px'), 'overflow-y' : 'scroll'}} src={ FSUtil.ctx + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent(selfs.state.path) + "&filename=" + encodeURIComponent(fileOne.name) + "&mode=VIEW" + FSUtil.addTokenParameterString() }/>
+                                                                                            ) : fileOne.previewType == '4' ? (
+                                                                                                <iframe className='iframe_preview preview_element full' style={{'maxHeight' : (((window.innerHeight / 2) < 200 ? 200 : (window.innerHeight / 2)) + 'px'), 'overflow-y' : 'scroll'}} src={ FSUtil.ctx + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent(selfs.state.path) + "&filename=" + encodeURIComponent(fileOne.name) + "&mode=VIEW" + FSUtil.addTokenParameterString() }></iframe>
+                                                                                            ) : null
+                                                                                        }
+                                                                                    </div>
+                                                                                ) : null
+                                                                            }
+                                                                        </td>
+                                                                        <td className='td_file_size filednd' style={{textAlign: 'right'}}>{fileOne.size}</td>
+                                                                        <td className='td_buttons' style={{textAlign: 'right'}}>
+                                                                            <span>
+                                                                            {
+                                                                                (fileOne.previewType >= 0 && (! fileOne.over_prev)) ? (
+                                                                                    fileOne.previewing ? (
+                                                                                        <input type='button' className='btn_preview btnx not_opened' value='▲' onClick={ () => { fileOne.previewing = false; selfs.forceUpdate(); }}/>
+                                                                                    ) : (
+                                                                                        <input type='button' className='btn_preview btnx not_opened' value='▼' onClick={ () => { fileOne.previewing = true; selfs.forceUpdate(); }}/>
+                                                                                    )
+                                                                                ) : null
+                                                                            }
+                                                                            </span>
+                                                                            <span>
+                                                                            {
+                                                                                (selfs.state.privilege == 'edit') ? (
+                                                                                    <input type='button' className='btn_delete btnx' value='X' onClick={ () => { selfs.onClickDelete(fileOne); } }/>
+                                                                                ) : null
+                                                                            }
+                                                                            </span>
+                                                                        </td>
+                                                                    </tr>
+                                                                )
+                                                            }
+                                                        })
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        }
                     </form>
                 </div>
                 <div className='fs_filelist fs_filelist_anonymous full invisible'>
