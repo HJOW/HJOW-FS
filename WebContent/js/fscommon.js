@@ -468,7 +468,7 @@ function FSUtilClass() {
                 oldError(jqXHR, textStatus, errorThrown);
                 if(resolved) return;
                 resolved = true;
-                reject(textStatus);
+                reject('Error : ' + textStatus + '\n' + errorThrown);
             };
 
             newObj.complete = function() {

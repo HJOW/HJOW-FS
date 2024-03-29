@@ -43,17 +43,10 @@ class FSRoot extends React.Component {
     }
     trans() {
         FSUtil.setContextPath(this.props.basic.ctxPath);
-        return new Promise(function(resolve, reject) {
-            FSUtil.ajax({
-                data   : $('#form_fs').serialize(),
-                method : "POST",
-                dataType : "json",
-                success : function(data) {
-                    resolve(data);
-                }, error : function(jqXHR, textStatus, errorThrown) {
-                    reject(errorThrown);
-                }
-            });
+        return FSUtil.ajaxx({
+            data   : $('#form_fs').serialize(),
+            method : "POST",
+            dataType : "json"
         });
     }
     reloads(data) {
@@ -235,7 +228,8 @@ class FSAccountBar extends React.Component {
         logined : false,
         idtype : 'G',
         nick : 'Guest',
-        noanonymous : false
+        noanonymous : false,
+        req : 'status'
     }
     constructor(props) {
         super(props);
@@ -246,51 +240,60 @@ class FSAccountBar extends React.Component {
     }
     trans(req) {
         FSUtil.setContextPath(this.props.basic.ctxPath);
-        return new Promise(function(resolve, reject) {
-            FSUtil.ajax({
-                data   : $('#form_fs_login').serialize() + '&req=' + req,
-                method : "POST",
-                dataType : "json",
-                success : function(data) {
-                    resolve(data);
-                }, error : function(jqXHR, textStatus, errorThrown) {
-                    reject(errorThrown);
-                }
-            });
+        return FSUtil.ajaxx({
+            data   : $('#form_fs_login').serialize() + '&req=' + req,
+            method : "POST",
+            dataType : "json",
         });
     }
     reloads(data, alerts) {
-        if(alerts && (! data.success)) { alert(data.message); location.reload(); return; };
-        if(data.needrefresh) { location.reload(); return; }
-        if(data.token) {
-            if(FSUtil.detectStorage()) {
-                FSUtil.storage.session.put("fsid"   , data.id   );
-                FSUtil.storage.session.put("fstoken", data.token);
+        const selfs = this;
+        return new Promise((resolve, reject) => {
+            if(alerts && (! data.success)) { alert(data.message); location.reload(); resolve(); return; };
+            if(data.needrefresh) { location.reload(); resolve(); return; }
+            if(data.token) {
+                if(FSUtil.detectStorage()) {
+                    FSUtil.storage.session.put("fsid"   , data.id   );
+                    FSUtil.storage.session.put("fstoken", data.token);
+                }
             }
+    
+            selfs.state.noanonymous = data.noanonymous;
+            selfs.state.logined     = data.logined;
+            if(selfs.state.logined) {
+                selfs.state.idtype  = data.idtype;
+                selfs.state.nick    = data.nick;
+            }
+            
+            selfs.forceUpdate(() => { resolve(); });
+        });
+    }
+    async login() {
+        const res = await this.trans('login');
+        await this.reloads(res, true);
+    }
+    async logout() {
+        const res = await this.trans('logout');
+        await this.reloads(res, true);
+        if(FSUtil.detectStorage()) {
+            FSUtil.storage.session.remove("fsid"   );
+            FSUtil.storage.session.remove("fstoken");
         }
-
-        this.state.noanonymous = data.noanonymous;
-        this.state.logined     = data.logined;
-        if(this.state.logined) {
-            this.state.idtype  = data.idtype;
-            this.state.nick    = data.nick;
-        }
-        
-        this.forceUpdate();
     }
     render() { 
+        const selfs = this;
         return (
             <div>
                 <div className='container valign_middle full'>
-                    <form onSubmit={() => {return false}} className='form_fs_login' id='form_fs_login'>
+                    <form onSubmit={() => { selfs.login(); return false; }} className='form_fs_login' id='form_fs_login'>
                     <input type='hidden' name='praction' value='account'/>
                     {
                         this.state.logined ? 
                             (
                                 <div className='row login_element logined padding_top_10'>
                                     <div className='col-sm-12'>
-                                        <span className='lang_element' data-lang-en='Welcome, '></span><span className='span_type'></span> <span className='span_nick'></span><span className='lang_element' data-lang-en=''> 님 환영합니다.</span> 
-                                        <input type='button' value='로그아웃' className='btn_logout btnx lang_attr_element' data-lang-target='value' data-lang-en='LOGOUT'/>
+                                        <span className='lang_element' data-lang-en='Welcome, '></span><span className='span_type'></span> <span className='span_nick'>{this.state.nick}</span><span className='lang_element' data-lang-en=''> 님 환영합니다.</span> 
+                                        <input type='button' value='로그아웃' className='btn_logout btnx lang_attr_element' data-lang-target='value' data-lang-en='LOGOUT' onClick={() => { selfs.logout(); }}/>
                                     </div>
                                 </div>                                 
                             )
