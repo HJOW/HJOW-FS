@@ -153,6 +153,7 @@ class FSRoot extends React.Component {
             iframes.style = "width: 100%; overflow-y: hidden; height : " + (FSCTX.captSizes.height + 320 - 90) + "px";
             
             dia.show();
+            $(dia).draggable();
         } else {
             location.href = FSCTX.ctxPath + '/jsp/fs/' + 'fsdown.jsp?path=' + encodeURIComponent(this.state.path) + "&filename=" + encodeURIComponent(file.name);
         }
@@ -528,10 +529,10 @@ class FSRoot extends React.Component {
                     <form className='form_hidden' target='_blank'></form>
                 </div>
                 <div className='fs_pops invisible_wh'>
-                    <dialog className='fs_pop_captdown fs_pop_in full' id='fs_pop_captdown'><div className='div_dialog_header'><button className="btn_dialog_close" onClick={() => { document.getElementById('fs_pop_captdown').close(); }}>X</button></div><iframe></iframe></dialog>
-                    <dialog className='fs_pop_upload   fs_pop_in full' id='fs_pop_upload'  ><div className='div_dialog_header'><button className="btn_dialog_close" onClick={() => { document.getElementById('fs_pop_upload').close();   }}>X</button></div><iframe></iframe></dialog>
-                    <dialog className='fs_pop_console  fs_pop_in full' id='fs_pop_console' ><div className='div_dialog_header'><button className="btn_dialog_close" onClick={() => { document.getElementById('fs_pop_console').close();  }}>X</button></div><iframe></iframe></dialog>
-                    <dialog className='fs_pop_admin    fs_pop_in full' id='fs_pop_admin'   ><div className='div_dialog_header'><button className="btn_dialog_close" onClick={() => { document.getElementById('fs_pop_admin').close();    }}>X</button></div><iframe></iframe></dialog>
+                    <dialog className='fs_pop_captdown fs_pop_in full' id='fs_pop_captdown'><div className='div_dialog_header'><span className='span_dialog_title'>Dialog</span><button className="btn_dialog_close" onClick={() => { document.getElementById('fs_pop_captdown').close(); }}>X</button></div><iframe></iframe></dialog>
+                    <dialog className='fs_pop_upload   fs_pop_in full' id='fs_pop_upload'  ><div className='div_dialog_header'><span className='span_dialog_title'>Dialog</span><button className="btn_dialog_close" onClick={() => { document.getElementById('fs_pop_upload').close();   }}>X</button></div><iframe></iframe></dialog>
+                    <dialog className='fs_pop_console  fs_pop_in full' id='fs_pop_console' ><div className='div_dialog_header'><span className='span_dialog_title'>Dialog</span><button className="btn_dialog_close" onClick={() => { document.getElementById('fs_pop_console').close();  }}>X</button></div><iframe></iframe></dialog>
+                    <dialog className='fs_pop_admin    fs_pop_in full' id='fs_pop_admin'   ><div className='div_dialog_header'><span className='span_dialog_title'>Dialog</span><button className="btn_dialog_close" onClick={() => { document.getElementById('fs_pop_admin').close();    }}>X</button></div><iframe></iframe></dialog>
                 </div>
             </div>
         )
