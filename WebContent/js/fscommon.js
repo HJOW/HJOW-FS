@@ -441,6 +441,44 @@ function FSUtilClass() {
         
         $.ajax(obj);
     };
+
+    this.ajaxx = function ajaxx(ajaxParamJson) {
+        return new Promise(function(resolve, reject) {
+            var newObj = {};
+            $.each(ajaxParamJson, function(k, v) { newObj[k] = v; });
+
+            var oldSuccess  = newObj.success;
+            var oldError    = newObj.error;
+            var oldComplete = newObj.complete;
+
+            if(typeof(oldSuccess ) != 'function') { oldSuccess  = function(data) {}; }
+            if(typeof(oldError   ) != 'function') { oldError    = function(jqXHR, textStatus, errorThrown) {}; }
+            if(typeof(oldComplete) != 'function') { oldComplete = function() {}; }
+
+            var resolved = false;
+
+            newObj.success = function(data) {
+                oldSuccess(data);
+                if(resolved) return;
+                resolved = true;
+                resolve(data);
+            };
+
+            newObj.error = function(jqXHR, textStatus, errorThrown) {
+                oldError(jqXHR, textStatus, errorThrown);
+                if(resolved) return;
+                resolved = true;
+                reject(textStatus);
+            };
+
+            newObj.complete = function() {
+                if(resolved) return;
+                reject('AJAX completed without response');
+            };
+
+            FSUtil.ajax(newObj);
+        });
+    };
     
     this.addTokenParameterString = function addTokenParameterString() {
         var tkId  = this.storage.session.get('fsid'   );

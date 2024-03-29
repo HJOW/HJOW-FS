@@ -32,6 +32,7 @@ String ctxPathCmm = request.getContextPath();
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/html5shiv-printshiv.min.js'></script>
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/videojs-ie8.min.js'></script>
 <![endif]-->
+<script type='text/javascript' src='<%= ctxPathCmm %>/js/polyfill.min.js'></script>
 <% } %>
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/jquery-1.12.4.js'></script>
 <script type='text/javascript' src='<%= ctxPathCmm %>/js/jquery-ui.js'></script>
