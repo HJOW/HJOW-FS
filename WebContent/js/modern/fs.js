@@ -17,6 +17,33 @@ limitations under the License.
 /**
  * Modern FS page with React
  */
+
+class FSContext extends FSBasic {
+    pages = {}
+    state = {
+        logined : false,
+        idtype : 'G',
+        nick : 'Guest',
+        noanonymous : false
+    }
+    constructor() { super(); }
+    forceUpdate() {
+        const selfs = this;
+        return new Promise((resolve, reject) => {
+            const res = resolve;
+            let promises = [];
+            for(let key in selfs.pages) {
+                if(selfs.pages[key]) {
+                    promises.push(new Promise((resolve, reject) => {
+                        selfs.pages[key].forceUpdate(() => { resolve(); });
+                    }));
+                }
+            }
+            Promise.all(promises).then(() => { res(); });
+        });
+    }
+}
+const FSCTX = new FSContext();
  
 class FSRoot extends React.Component {
     state = {
@@ -30,7 +57,7 @@ class FSRoot extends React.Component {
     }
     constructor(props) {
         super(props);
-        console.log(props);
+        FSCTX.pages['root'] = this;
     }
     componentDidMount() {
         this.refresh();
@@ -38,11 +65,11 @@ class FSRoot extends React.Component {
     refresh() {
         const selfs = this;
         return new Promise((resolve, reject) => {
-            selfs.trans().then((data) => { selfs.reloads(data).then(() => { FSUtil.applyLanguage(); resolve(data); }); });
+            selfs.trans().then((data) => { selfs.reloads(data).then(() => { selfs.applyFSChanges(); resolve(data); }); });
         });
     }
     trans() {
-        FSUtil.setContextPath(this.props.basic.ctxPath);
+        FSUtil.setContextPath(FSCTX.ctxPath);
         return FSUtil.ajaxx({
             data   : $('#form_fs').serialize(),
             method : "POST",
@@ -70,8 +97,25 @@ class FSRoot extends React.Component {
             }
     
             console.log(selfs.state);
-            selfs.forceUpdate(() => { resolve(); selfs.fIconize(); });
+            selfs.forceUpdate(() => { resolve(); });
         });
+    }
+    applyFSChanges() {
+        const selfs = this;
+        this.fIconize();
+        FSUtil.applyLanguage();
+        if(this.state.privilege == 'edit') {
+            FSUtil.applyDragAndDrop($('.fs_root'), FSCTX.ctxPath, selfs.state.path);
+        } else {
+            $('.fs_root').find('.filednd').each(function() {
+                var area = $(this);
+                area.off('drop');
+                area.off('dragover');
+                area.off('dragenter');
+                area.off('dragleave');
+                area.removeClass('filedndin');
+            });
+        }
     }
     onClickCtrl(action) {
         const selfs = this;
@@ -99,16 +143,16 @@ class FSRoot extends React.Component {
     onClickFile(file) {
         let theme = '';
         if($('body').is('.dark')) theme='dark';
-        if(this.props.basic.useCaptchaDown) {
+        if(FSCTX.useCaptchaDown) {
             const dia = document.getElementById('fs_pop_captdown');
-            dia.style = "width : " + (this.props.basic.captSizes.width + 300) + "px; height : " + (this.props.basic.captSizes.height + 320) + "px; position: fixed; top: 100px; left : 100px;";
+            dia.style = "width : " + (FSCTX.captSizes.width + 300) + "px; height : " + (FSCTX.captSizes.height + 320) + "px; position: fixed; top: 100px; left : 100px;";
             const iframes = dia.getElementsByTagName('iframe')[0];
-            iframes.src = this.props.basic.ctxPath + '/jsp/fs/fscaptdown.jsp?popin=true&theme=' + theme + '&path=' + encodeURIComponent(this.state.path) + "&filename=" + encodeURIComponent(file.name) + FSUtil.addTokenParameterString();
-            iframes.style = "width: 100%; overflow-y: hidden; height : " + (this.props.basic.captSizes.height + 320 - 90) + "px";
+            iframes.src = FSCTX.ctxPath + '/jsp/fs/fscaptdown.jsp?popin=true&theme=' + theme + '&path=' + encodeURIComponent(this.state.path) + "&filename=" + encodeURIComponent(file.name) + FSUtil.addTokenParameterString();
+            iframes.style = "width: 100%; overflow-y: hidden; height : " + (FSCTX.captSizes.height + 320 - 90) + "px";
             
             dia.show();
         } else {
-            location.href = this.props.basic.ctxPath + '/jsp/fs/' + 'fsdown.jsp?path=' + encodeURIComponent(this.state.path) + "&filename=" + encodeURIComponent(file.name);
+            location.href = FSCTX.ctxPath + '/jsp/fs/' + 'fsdown.jsp?path=' + encodeURIComponent(this.state.path) + "&filename=" + encodeURIComponent(file.name);
         }
     }
     onClickDelete(file) {
@@ -172,11 +216,11 @@ class FSRoot extends React.Component {
             const tdIcon = $(this).find('.td_mark_file');
             tdIcon.empty();
             tdIcon.append("<img style='width: 20px; height: 20px;'/>");
-            tdIcon.find('img').attr('src', selfs.props.basic.ctxPath + '/css/images/files.png');
+            tdIcon.find('img').attr('src', FSCTX.ctxPath + '/css/images/files.png');
             tdIcon.find('img').attr('alt', 'File');
         });
         
-        if(! selfs.props.basic.useIcon) return;
+        if(! FSCTX.useIcon) return;
         
         let iconizeWorkSize = 10;
         let iconizeIndex = 0;
@@ -409,13 +453,13 @@ class FSAccountBar extends React.Component {
     }
     constructor(props) {
         super(props);
-        console.log(props);
+        FSCTX.pages['account'] = this;
     }
     componentDidMount() {
         this.trans('status').then((data) => { this.reloads(data, true); });
     }
     trans(req) {
-        FSUtil.setContextPath(this.props.basic.ctxPath);
+        FSUtil.setContextPath(FSCTX.ctxPath);
         return FSUtil.ajaxx({
             data   : $('#form_fs_login').serialize() + '&req=' + req,
             method : "POST",
@@ -440,18 +484,21 @@ class FSAccountBar extends React.Component {
                 selfs.state.idtype  = data.idtype;
                 selfs.state.nick    = data.nick;
             }
-            
-            selfs.forceUpdate(() => { resolve(); });
+            FSCTX.state = selfs.state;
+            FSCTX.forceUpdate(() => { resolve(); });
         });
     }
+    async refresh(req, alerts) {
+        const res = await this.trans(req);
+        await this.reloads(res, alerts);
+        return res;
+    }
     async login() {
-        const res = await this.trans('login');
-        await this.reloads(res, true);
+        await this.refresh('login', true);
         document.getElementById('form_fs').submit();
     }
     async logout() {
-        const res = await this.trans('logout');
-        await this.reloads(res, true);
+        await this.refresh('logout', true);
         if(FSUtil.detectStorage()) {
             FSUtil.storage.session.remove("fsid"   );
             FSUtil.storage.session.remove("fstoken");
@@ -490,8 +537,8 @@ class FSAccountBar extends React.Component {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className='div_captcha_login d_inline_block valign_middle' style={{ width: (this.props.basic.captSizes.width + 10) + 'px', height: '60px' }}>
-                                        <iframe className='if_captcha_l valign_middle' style={{width: (this.props.basic.captSizes.width + 5) + 'px', height : (this.props.basic.captSizes.height + 5) + 'px', border: 0}} src={this.props.basic.ctxPath + '/jsp/fs/fscaptin.jsp?key=fsl&scale=1&randomize=true&theme=' + this.props.basic.getTheme() + FSUtil.addTokenParameterString()}></iframe>
+                                    <div className='div_captcha_login d_inline_block valign_middle' style={{ width: (FSCTX.captSizes.width + 10) + 'px', height: '60px' }}>
+                                        <iframe className='if_captcha_l valign_middle' style={{width: (FSCTX.captSizes.width + 5) + 'px', height : (FSCTX.captSizes.height + 5) + 'px', border: 0}} src={FSCTX.ctxPath + '/jsp/fs/fscaptin.jsp?key=fsl&scale=1&randomize=true&theme=' + FSCTX.getTheme() + FSUtil.addTokenParameterString()}></iframe>
                                     </div>
                                     <div className='div_captcha_login d_inline_block valign_middle padding_top_10' style={{'marginLeft': '10px', height : '60px', 'textAlign' : 'left'}}>
                                         <input type='text' className='inp_captcha_l inp_login_element lang_attr_element valign_middle' name='captcha' placeholder='옆의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code left'/>
