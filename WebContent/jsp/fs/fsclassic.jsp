@@ -847,13 +847,13 @@ $(function() {
             <input type='hidden' name='excepts' class='hidden_excepts' value='' />
             <input type='hidden' name='praction' value='list' />
             <div class='row fs_directory'>
-                <div class='col-sm-10'>
+                <div class='col-sm-9'>
                     <h4 class='path_title'>
                         <span class='lang_element' data-lang-en='Current Directory : '>현재
                             디렉토리 : </span><span class='path'></span>
                     </h4>
                 </div>
-                <div class='col-sm-2 align_right'>
+                <div class='col-sm-3 align_right'>
                     <input type='button' class='btn_upload btnx privilege_element invisible lang_attr_element' value='업로드' data-lang-target='value' data-lang-en='Upload' />
                     <input type='button' class='btn_mkdir  btnx privilege_element invisible lang_attr_element' value='새 폴더' data-lang-target='value' data-lang-en='New Folder' />
                     <input type='button' class='btn_config btnx privilege_element only_admin invisible lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config' />

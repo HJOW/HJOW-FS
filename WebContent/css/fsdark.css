@@ -49,7 +49,7 @@ body.dark div.fs_div div, body.dark div.fs_div p, body.dark div.fs_div span, bod
     color: #C9C9C9;
 }
 
-body.dark div.fs_div a {
+body.dark div.fs_div a, body.dark div.fs_div table td a, body.dark div.fs_div table th a, body.dark div.fs_div div a {
 	color: rgb(110, 150, 230);
 }
 

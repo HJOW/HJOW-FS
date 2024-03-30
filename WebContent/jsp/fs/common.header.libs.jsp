@@ -22,6 +22,9 @@ String ctxPathCmm = request.getContextPath();
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/jquery-ui.theme.css"/>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/bootstrap.css"/>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/bootstrap-theme.css"/>
+<% if(FSControl.useModern(request)) { %>
+<link rel="stylesheet" href="<%= ctxPathCmm %>/css/bootstrap.theme.dark.css"/>
+<% } %>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/fonts.css"/>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/fs.css"/>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/fsdark.css"/>
@@ -63,7 +66,7 @@ function FSBasic() {
     };
     this.getTheme = function getTheme() {
     	if($('body').is('.dark'))   return 'dark';
-        else if(fsRoot.is('.dark')) return 'dark';
+        else if($('.fs_root').is('.dark')) return 'dark';
     	return 'light';
     };
 }

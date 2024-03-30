@@ -1,15 +1,64 @@
 @charset "UTF-8";
 
-div.fs_div dialog {
+body.modern div.fs_div dialog {
 	padding: 0;
 	border: 2px solid rgba(50, 50, 50, 0.9);
 	background-color: rgba(255, 255, 255, 0.9);
 }
-div.fs_div dialog .div_dialog_header {
+body.modern div.fs_div dialog .div_dialog_header {
 	padding: 2px 2px 2px 2px;
 	text-align: left;
 }
 
-div.fs_div dialog .div_dialog_header button {
+body.modern div.fs_div dialog .div_dialog_header button {
 	float: right;
+}
+
+body.modern div.fs_div table tbody.fs_list tr {
+	height : 60px;
+}
+
+body.modern div.fs_div table tbody.fs_list td, div.fs_div table tbody.fs_list th {
+    vertical-align: middle;
+}
+
+body.modern div.fs_div .fs_allsearch input {
+	display: inline-block;
+}
+
+body.modern div.fs_div a:not(.btn), div.fs_div table td a:not(.btn), div.fs_div table th a:not(.btn), div.fs_div div a:not(.btn) {
+    color: rgb(90, 120, 200);
+    text-decoration: none;
+    text-decoration-line: none;
+}
+
+body.modern div.fs_div a:not(.btn), div.fs_div table td a:not(.btn), div.fs_div table th a:not(.btn), div.fs_div div a:not(.btn) {
+    color: rgb(90, 120, 200);
+}
+
+body.modern .table-hover > tbody > tr:hover {
+    background-color: #C8C8E8;
+}
+
+body.modern .table > thead > tr > td.active,
+body.modern .table > tbody > tr > td.active,
+body.modern .table > tfoot > tr > td.active,
+body.modern .table > thead > tr > th.active,
+body.modern .table > tbody > tr > th.active,
+body.modern .table > tfoot > tr > th.active,
+body.modern .table > thead > tr.active > td,
+body.modern .table > tbody > tr.active > td,
+body.modern .table > tfoot > tr.active > td,
+body.modern .table > thead > tr.active > th,
+body.modern .table > tbody > tr.active > th,
+body.modern .table > tfoot > tr.active > th {
+    background-color: #C8C8E8;
+}
+
+body.modern .table-hover > tbody > tr > td.active:hover,
+body.modern .table-hover > tbody > tr > th.active:hover,
+body.modern .table-hover > tbody > tr.active:hover > td,
+body.modern .table-hover > tbody > tr:hover > .active,
+body.modern .table-hover > tbody > tr.active:hover > th {
+    background-color: #cbcbeb;
 }

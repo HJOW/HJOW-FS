@@ -1,6 +1,37 @@
 @charset "UTF-8";
 
-body.dark div.fs_div dialog {
+body.dark.modern div.fs_div dialog {
     border: 2px solid rgba(150, 150, 150, 0.9);
     background-color: rgba(55, 55, 55, 0.9);
+}
+
+body.dark.modern div.fs_div a:not(.btn), body.dark.modern div.fs_div table td a:not(.btn), body.dark.modern div.fs_div table th a:not(.btn), body.dark.modern div.fs_div div a:not(.btn) {
+    color: rgb(110, 150, 230);
+}
+
+body.dark.modern .table-hover > tbody > tr:hover {
+  background-color: #282828;
+}
+
+body.dark.modern .table > thead > tr > td.active,
+body.dark.modern .table > tbody > tr > td.active,
+body.dark.modern .table > tfoot > tr > td.active,
+body.dark.modern .table > thead > tr > th.active,
+body.dark.modern .table > tbody > tr > th.active,
+body.dark.modern .table > tfoot > tr > th.active,
+body.dark.modern .table > thead > tr.active > td,
+body.dark.modern .table > tbody > tr.active > td,
+body.dark.modern .table > tfoot > tr.active > td,
+body.dark.modern .table > thead > tr.active > th,
+body.dark.modern .table > tbody > tr.active > th,
+body.dark.modern .table > tfoot > tr.active > th {
+  background-color: #282828;
+}
+
+body.dark.modern .table-hover > tbody > tr > td.active:hover,
+body.dark.modern .table-hover > tbody > tr > th.active:hover,
+body.dark.modern .table-hover > tbody > tr.active:hover > td,
+body.dark.modern .table-hover > tbody > tr:hover > .active,
+body.dark.modern .table-hover > tbody > tr.active:hover > th {
+  background-color: #1b1b1b;
 }

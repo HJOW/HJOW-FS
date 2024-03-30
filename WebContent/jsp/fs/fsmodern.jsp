@@ -16,6 +16,9 @@ limitations under the License.
 */
 %>
 <div id='fs_root' class='fs_root fs_div'></div>
+<script>
+$(function() { $('body').addClass('modern'); });
+</script>
 <script type="text/babel" data-presets="es2015,react" data-plugins="transform-es2015-modules-umd">
 ReactDOM.createRoot(document.getElementById('fs_root')).render(<FSRoot basic={new FSBasic()}/>);
 </script>

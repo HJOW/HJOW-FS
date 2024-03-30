@@ -25,6 +25,7 @@ https://github.com/HJOW/HJOW-FS
 jQuery (https://jquery.com/)
 jQuery UI (https://jquery.com/)
 bootstrap (https://getbootstrap.com/)
+bootswatch (https://bootswatch.com/3/cyborg/)
 video.js (http://videojs.com/) Copyright Brightcove, Inc.
 promise-polyfill (https://github.com/taylorhakes/promise-polyfill)
 Apache Common Codec (https://commons.apache.org/proper/commons-codec/) - Choosable library (Necessary on JDK 9 or above)

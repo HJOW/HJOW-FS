@@ -462,13 +462,13 @@ class FSRoot extends React.Component {
                         <div className='col-sm-8'>
                             <h2 className='fs_title'></h2>
                         </div>
-                        <div className='col-sm-4 fs_allsearch align_right'>
+                        <div className='col-sm-4 fs_allsearch align_right' style={{height: '60px'}}>
                             <form className='form_allsearch' id='form_allsearch' onSubmit={(e) => { e.preventDefault(); selfs.allsearch(); return false; }}>
                                 <input type='hidden' name='path' className='hidden_path' value='' />
                                 <input type='hidden' name='all'  className='hidden_conf' value='true' />
                                 <input type='hidden' name='praction' value='listall' />
-                                <input type='text'   className='inp_allsearch lang_attr_element reloading_readonly' id='inp_allsearch' name='keyword' placeholder="전체 디렉토리 검색" data-lang-target='placeholder' data-lang-en='Search whole directories' style={{ width: '200px' }}/>
-                                <input type='submit' className='btn_allsearch lang_attr_element reloading_disabled btnx' value='검색' data-lang-target='value' data-lang-en='Search' />
+                                <input type='text'   className='inp_allsearch lang_attr_element reloading_readonly form-control' id='inp_allsearch' name='keyword' placeholder="전체 디렉토리 검색" data-lang-target='placeholder' data-lang-en='Search whole directories' style={{ width: '200px' }}/>
+                                <input type='submit' className='btn_allsearch lang_attr_element reloading_disabled btnx btn btn-default' value='검색' data-lang-target='value' data-lang-en='Search'/>
                             </form>
                         </div>
                     </div>
@@ -481,27 +481,26 @@ class FSRoot extends React.Component {
                         <input type='hidden' name='excepts' className='hidden_excepts' value={this.state.excepts} />
                         <input type='hidden' name='praction' value='list' />
                         <div className='row fs_directory'>
-                            <div className='col-sm-10'>
+                            <div className='col-sm-9'>
                                 <h4 className='path_title'>
-                                    <span className='lang_element' data-lang-en='Current Directory : '>현재
-                                        디렉토리 : </span><span className='path'></span>
+                                    <span className='lang_element' data-lang-en='Current Directory : '>현재 디렉토리 : </span><span className='path'>{'/' + selfs.state.path}</span>
                                 </h4>
                             </div>
-                            <div className='col-sm-2 align_right'>
+                            <div className='col-sm-3 align_right'>
                                 {
                                     selfs.state.privilege == 'edit' ? (
                                         <span>
-                                            <input type='button' className='btn_mkdir  btnx privilege_element lang_attr_element' value='새 폴더' data-lang-target='value' data-lang-en='New Folder' onClick={() => { selfs.onClickNewDir(); }}/>
+                                            <input type='button' className='btn_mkdir  btnx btn btn-default privilege_element lang_attr_element' value='새 폴더' data-lang-target='value' data-lang-en='New Folder' onClick={() => { selfs.onClickNewDir(); }}/>
                                         </span>
                                     ) : null
                                 }
                                 {
                                     FSCTX.state.idtype == 'A' ? (
-                                        <input type='button' className='btn_config btnx privilege_element only_admin lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config' onClick={() => { selfs.onClickConfig(); }}/>
+                                        <input type='button' className='btn_config btnx btn btn-default privilege_element only_admin lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config' onClick={() => { selfs.onClickConfig(); }}/>
                                     ) : null
                                 }
-                                <input type='button' className='btn_console btnx lang_attr_element' value='콘솔' data-lang-target='value' data-lang-en='Console' accessKey="t" onClick={() => { selfs.onClickConsole(); }}/>
-                                <input type='button' className='btn_classic btnx lang_attr_element' value='클래식' data-lang-target='value' data-lang-en='Classic' onClick={() => { selfs.onClickClassic(); }}/>
+                                <input type='button' className='btn_console btnx btn btn-default lang_attr_element' value='콘솔' data-lang-target='value' data-lang-en='Console' accessKey="t" onClick={() => { selfs.onClickConsole(); }}/>
+                                <input type='button' className='btn_classic btnx btn btn-default lang_attr_element' value='클래식' data-lang-target='value' data-lang-en='Classic' onClick={() => { selfs.onClickClassic(); }}/>
                             </div>
                         </div>
                         {
@@ -532,10 +531,10 @@ class FSRoot extends React.Component {
                                 <div>
                                     <div className='row fs_search'>
                                         <div className='col-sm-10'>
-                                            <input type='text' className='inp_search full lang_attr_element reloading_readonly' name='keyword' placeholder="디렉토리 내 검색" data-lang-target='placeholder' data-lang-en='Search in current directory' />
+                                            <input type='text' className='inp_search full lang_attr_element reloading_readonly form-control' name='keyword' placeholder="디렉토리 내 검색" data-lang-target='placeholder' data-lang-en='Search in current directory' />
                                         </div>
                                         <div className='col-sm-2'>
-                                            <input type='submit' className='btn_search full lang_attr_element reloading_disabled btnx' value='검색' data-lang-target='value' data-lang-en='Search' />
+                                            <input type='submit' className='btn_search full lang_attr_element reloading_disabled btnx btn btn-default' value='검색' data-lang-target='value' data-lang-en='Search' />
                                         </div>
                                     </div>
                                     <div className='row fs_root'>
@@ -558,7 +557,7 @@ class FSRoot extends React.Component {
                                                                         <td className='td_buttons'>
                                                                             {
                                                                                 (fileOne.elements <= 0 && selfs.state.privilege == 'edit') ? (
-                                                                                    <input type='button' className='btn_delete btnx' value='X' onClick={ () => { selfs.onClickDelete(fileOne); } }/>
+                                                                                    <input type='button' className='btn_delete btnx btn btn-default' value='X' onClick={ () => { selfs.onClickDelete(fileOne); } }/>
                                                                                 ) : null
                                                                             }
                                                                         </td>
@@ -602,9 +601,9 @@ class FSRoot extends React.Component {
                                                                             {
                                                                                 (fileOne.previewType >= 0 && (! fileOne.over_prev)) ? (
                                                                                     fileOne.previewing ? (
-                                                                                        <input type='button' className='btn_preview btnx not_opened' value='▲' onClick={ () => { fileOne.previewing = false; selfs.forceUpdate(); }}/>
+                                                                                        <input type='button' className='btn_preview btnx btn btn-default not_opened' value='▲' onClick={ () => { fileOne.previewing = false; selfs.forceUpdate(); }}/>
                                                                                     ) : (
-                                                                                        <input type='button' className='btn_preview btnx not_opened' value='▼' onClick={ () => { fileOne.previewing = true; selfs.forceUpdate(); }}/>
+                                                                                        <input type='button' className='btn_preview btnx btn btn-default not_opened' value='▼' onClick={ () => { fileOne.previewing = true; selfs.forceUpdate(); }}/>
                                                                                     )
                                                                                 ) : null
                                                                             }
@@ -612,7 +611,7 @@ class FSRoot extends React.Component {
                                                                             <span>
                                                                             {
                                                                                 (selfs.state.privilege == 'edit') ? (
-                                                                                    <input type='button' className='btn_delete btnx' value='X' onClick={ () => { selfs.onClickDelete(fileOne); } }/>
+                                                                                    <input type='button' className='btn_delete btnx btn btn-default' value='X' onClick={ () => { selfs.onClickDelete(fileOne); } }/>
                                                                                 ) : null
                                                                             }
                                                                             </span>
@@ -715,7 +714,7 @@ class FSAccountBar extends React.Component {
         return (
             <div>
                 <div className='container valign_middle full'>
-                    <form onSubmit={() => { selfs.login(); return false; }} className='form_fs_login' id='form_fs_login'>
+                    <form onSubmit={() => { selfs.login(); return false; }} className='form_fs_login' id='form_fs_login' method='POST'>
                     <input type='hidden' name='praction' value='account'/>
                     {
                         this.state.logined ? 
@@ -723,33 +722,33 @@ class FSAccountBar extends React.Component {
                                 <div className='row login_element logined padding_top_10'>
                                     <div className='col-sm-12'>
                                         <span className='lang_element' data-lang-en='Welcome, '></span><span className='span_type'></span> <span className='span_nick'>{this.state.nick}</span><span className='lang_element' data-lang-en=''> 님 환영합니다.</span> 
-                                        <input type='button' value='로그아웃' className='btn_logout btnx lang_attr_element' data-lang-target='value' data-lang-en='LOGOUT' onClick={() => { selfs.logout(); }}/>
+                                        <input type='button' value='로그아웃' className='btn_logout btnx btn btn-default lang_attr_element' data-lang-target='value' data-lang-en='LOGOUT' onClick={() => { selfs.logout(); }}/>
                                     </div>
                                 </div>                                 
                             )
                         :
                             (
                                 <div className='row login_element not_logined padding_top_10'>
-                                    <div className='container show-grid d_inline_block valign_middle' style={{ width: '270px', height: '60px' }}>
+                                    <div className='container show-grid d_inline_block valign_middle' style={{ width: '320px', height: '80px' }}>
                                         <div className='row'>
                                             <div className='col-xs-12'>
-                                                <span style={{display: 'inline-block', width: '80px'}}>ID</span><input type='text' name='id' className='inp_login_element' style={{width: '150px'}}/>
+                                                <span style={{display: 'inline-block', width: '80px'}}>ID</span><input type='text' name='id' className='inp_login_element form-control' style={{display: 'inline-block', width: '150px'}}/>
                                             </div>
                                         </div>
                                         <div className='row'>
                                             <div className='col-xs-12'>
-                                                <span style={{display: 'inline-block', width: '80px'}} className='lang_element' data-lang-en='Password'>암호</span><input type='password' name='pw' className='inp_login_element' style={{width: '150px'}}/>
+                                                <span style={{display: 'inline-block', width: '80px'}} className='lang_element' data-lang-en='Password'>암호</span><input type='password' name='pw' className='inp_login_element form-control' style={{display: 'inline-block', width: '150px'}}/>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className='div_captcha_login d_inline_block valign_middle' style={{ width: (FSCTX.captSizes.width + 10) + 'px', height: '60px' }}>
+                                    <div className='div_captcha_login d_inline_block valign_middle' style={{ width: (FSCTX.captSizes.width + 10) + 'px', height: '60px', paddingTop: '5px' }}>
                                         <iframe className='if_captcha_l valign_middle' style={{width: (FSCTX.captSizes.width + 5) + 'px', height : (FSCTX.captSizes.height + 5) + 'px', border: 0}} src={FSCTX.ctxPath + '/jsp/fs/fscaptin.jsp?key=fsl&scale=1&randomize=true&theme=' + FSCTX.getTheme() + FSUtil.addTokenParameterString()}></iframe>
                                     </div>
                                     <div className='div_captcha_login d_inline_block valign_middle padding_top_10' style={{'marginLeft': '10px', height : '60px', 'textAlign' : 'left'}}>
-                                        <input type='text' className='inp_captcha_l inp_login_element lang_attr_element valign_middle' name='captcha' placeholder='옆의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code left'/>
+                                        <input type='text' className='inp_captcha_l inp_login_element lang_attr_element valign_middle form-control' name='captcha' placeholder='옆의 코드 입력' data-lang-target='placeholder' data-lang-en='Input the code left'/>
                                     </div>
                                     <div className='d_inline_block valign_middle' style={{width: '100px', height : '60px'}}>
-                                        <input type='submit' value='로그인' className='lang_attr_element btnx' data-lang-target='value' data-lang-en='LOGIN' style={{height : '50px'}}/>
+                                        <input type='submit' value='로그인' className='lang_attr_element btnx btn btn-default' data-lang-target='value' data-lang-en='LOGIN' style={{height : '50px'}}/>
                                     </div>
                                 </div>  
                             )

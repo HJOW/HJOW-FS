@@ -17,6 +17,7 @@ limitations under the License.
 body, div.fs_div {
     margin: 0; padding: 0;
     background-color: #FFFFFF;
+    color: #333333;
 }
 
 body.noscroll, div.noscroll {
@@ -34,10 +35,12 @@ div.fs_div td.td_mark_dir, div.fs_div div.td_mark_dir {
 
 div.fs_div .container {
     background-color: #FEFEFE;
+    color: #333333;
 }
 
 div.fs_div .container div, div.fs_div .container p, div.fs_div .container table {
     background-color: #FAFAFA;
+    color: #333333;
 }
 
 div.fs_div .container table.bordered td, div.fs_div .container table.bordered th {
@@ -74,7 +77,34 @@ div.fs_div div, div.fs_div p, div.fs_div h1, div.fs_div h2, div.fs_div h3, div.f
 }
 
 div.fs_div .table-hover tdiv.fs_div tr:hover {
-  background-color: #EAEAEA;
+    background-color: #EAEAEA;
+}
+
+div.fs_div .table-hover > tbody > tr:hover {
+    background-color: #C8C8E8;
+}
+
+div.fs_div .table > thead > tr > td.active,
+div.fs_div .table > tbody > tr > td.active,
+div.fs_div .table > tfoot > tr > td.active,
+div.fs_div .table > thead > tr > th.active,
+div.fs_div .table > tbody > tr > th.active,
+div.fs_div .table > tfoot > tr > th.active,
+div.fs_div .table > thead > tr.active > td,
+div.fs_div .table > tbody > tr.active > td,
+div.fs_div .table > tfoot > tr.active > td,
+div.fs_div .table > thead > tr.active > th,
+div.fs_div .table > tbody > tr.active > th,
+div.fs_div .table > tfoot > tr.active > th {
+    background-color: #C8C8E8;
+}
+
+div.fs_div .table-hover > tbody > tr > td.active:hover,
+div.fs_div .table-hover > tbody > tr > th.active:hover,
+div.fs_div .table-hover > tbody > tr.active:hover > td,
+div.fs_div .table-hover > tbody > tr:hover > .active,
+div.fs_div .table-hover > tbody > tr.active:hover > th {
+    background-color: #cbcbeb;
 }
 
 div.fs_div .full, div.fs_div.full {
@@ -83,7 +113,7 @@ div.fs_div .full, div.fs_div.full {
 div.fs_div .fullforce, div.fs_div.fullforce {
     width: 100% !important;
 }
-div.fs_div a {
+div.fs_div a, div.fs_div table td a, div.fs_div table th a, div.fs_div div a {
     color: rgb(90, 120, 200);
     text-decoration: none;
     text-decoration-line: none;
