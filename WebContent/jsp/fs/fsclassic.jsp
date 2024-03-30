@@ -140,7 +140,15 @@ $(function() {
     
     pops['console'] = {};
     pops['console'].iframe = popRoot.find('.fs_pop_console').find('iframe');
-    pops['console'].dialog = popRoot.find('.fs_pop_console').dialog({ autoOpen : false, title : 'Console', width : popularWidth, height : popularHeight, resize : function(event, ui) { pops['console'].iframe.height(ui.size.height - 90);  } });
+    pops['console'].resizeFunc = function(height) {
+        pops['console'].iframe.height(height - 90);
+        pops['console'].iframe.contents().find('.mainelement').height(height - 160);
+    }
+    var dialogOpt = { autoOpen : false, title : 'Console', width : popularWidth, height : popularHeight};
+    dialogOpt.resize = function(event, ui) {
+    	pops['console'].resizeFunc(ui.size.height);
+    };
+    pops['console'].dialog = popRoot.find('.fs_pop_console').dialog(dialogOpt);
     pops['console'].open   = function() {
         var d   = pops['console'].dialog;
         var ifr = pops['console'].iframe;
@@ -153,6 +161,10 @@ $(function() {
         ifr.on('load', function() {
             var ct = ifr.contents();
             ct.find('.tf_terminal_console').focus();
+            
+            setTimeout(function() {
+                pops['console'].resizeFunc(d.height());
+            }, 1000);
         });
         $('.ui-dialog-titlebar-close').text('X');
         d.dialog('open');

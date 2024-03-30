@@ -220,6 +220,10 @@ class FSRoot extends React.Component {
         $(iframes).on('load', function() {
             var ct = $(this).contents();
             ct.find('.tf_terminal_console').focus();
+
+            setTimeout(() => {
+                ct.find('.mainelement').height($(iframes).height() - 140);
+            }, 1000);
         });
         $('.ui-dialog-titlebar-close').text('X');
 
@@ -296,6 +300,32 @@ class FSRoot extends React.Component {
                 selfs.refresh();
             }
         });
+    }
+    onClickConfig() {
+        const dia = document.getElementById('fs_pop_admin');
+
+        let theme = '';
+        if($('body').is('.dark')) theme='dark';
+
+        let popularWidth, popularHeight;
+        popularWidth  = window.innerWidth  - 120;
+        popularHeight = 550;
+        if(popularWidth  < 780) popularWidth  = 780;
+        if(popularHeight < 550) popularHeight = 550;
+
+        dia.style = "width : " + popularWidth + "px; height : " + popularHeight + "px; position: fixed; top: 100px; left : 100px; overflow: hidden";
+        const iframes = dia.getElementsByTagName('iframe')[0];
+        iframes.src = FSCTX.ctxPath + '/jsp/fs/fsadmin.jsp?popin=true&theme=' + theme + FSUtil.addTokenParameterString();
+        iframes.style = "width: 100%; overflow-y: scroll; height : " + (popularHeight - 70) + "px";
+        
+        $(iframes).on('load', function() {
+            var ct = $(this).contents();
+            ct.find('.tf_terminal_console').focus();
+        });
+        $('.ui-dialog-titlebar-close').text('X');
+
+        dia.show();
+        $(dia).draggable();
     }
     fIconize() {
         const selfs = this;
@@ -466,8 +496,8 @@ class FSRoot extends React.Component {
                                     ) : null
                                 }
                                 {
-                                    FSCTX.idtype == 'A' ? (
-                                        <input type='button' className='btn_config btnx privilege_element only_admin lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config' />
+                                    FSCTX.state.idtype == 'A' ? (
+                                        <input type='button' className='btn_config btnx privilege_element only_admin lang_attr_element' value='설정' data-lang-target='value' data-lang-en='Config' onClick={() => { selfs.onClickConfig(); }}/>
                                     ) : null
                                 }
                                 <input type='button' className='btn_console btnx lang_attr_element' value='콘솔' data-lang-target='value' data-lang-en='Console' accessKey="t" onClick={() => { selfs.onClickConsole(); }}/>
