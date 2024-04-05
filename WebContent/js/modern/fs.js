@@ -153,6 +153,12 @@ class FSRoot extends React.Component {
             
             dia.show();
             $(dia).draggable();
+            $(dia).resizable({
+                resize : function(e, ui) {
+                    $(this).find('iframe').width( ui.size.width  - 10);
+                    $(this).find('iframe').height(ui.size.height - 20);
+                }
+            });
         } else {
             location.href = FSCTX.ctxPath + '/jsp/fs/' + 'fsdown.jsp?path=' + encodeURIComponent(this.state.path) + "&filename=" + encodeURIComponent(file.name);
         }
@@ -218,7 +224,7 @@ class FSRoot extends React.Component {
         iframes.style = "width: 100%; overflow-y: scroll; height : " + (popularHeight - 70) + "px";
         
         $(iframes).on('load', function() {
-            var ct = $(this).contents();
+            const ct = $(this).contents();
             ct.find('.tf_terminal_console').focus();
 
             setTimeout(() => {
@@ -229,6 +235,14 @@ class FSRoot extends React.Component {
 
         dia.show();
         $(dia).draggable();
+        $(dia).resizable({
+            resize : function(e, ui) {
+                $(this).find('iframe').width( ui.size.width  - 10);
+                $(this).find('iframe').height(ui.size.height - 20);
+                const ct = $(this).find('iframe').contents();
+                ct.find('.mainelement').height(ui.size.height - 20 - 140);
+            }
+        });
     }
     onClickClassic() {
         let popularWidth, popularHeight;
@@ -326,6 +340,33 @@ class FSRoot extends React.Component {
 
         dia.show();
         $(dia).draggable();
+        $(dia).resizable({
+            resize : function(e, ui) {
+                $(this).find('iframe').width( ui.size.width  - 10);
+                $(this).find('iframe').height(ui.size.height - 20);
+            }
+        });
+    }
+    onClickAllSrchRes(fileOne) {
+        const selfs = this;
+        const keyw   = document.getElementById('inp_allsearch').value;
+        const splits = fileOne.split('/');
+        let   newPath = '';
+
+        for(let ldx = 0; ldx < splits.length - 1; ldx++) {
+            if(ldx != 0) newPath += '/';
+            newPath += splits[ldx];
+        }
+
+        document.getElementById('inp_allsearch').value = '';
+        this.setState({
+            path : newPath,
+            allsearching : false,
+            allsclist : []
+        }, () => {
+            document.getElementById('inp_search').value = keyw;
+            selfs.refresh();
+        });
     }
     fIconize() {
         const selfs = this;
@@ -506,6 +547,16 @@ class FSRoot extends React.Component {
                         {
                             selfs.state.allsearching ? (
                                 <div>
+                                    <div className='row fs_allsrchcncl'>
+                                        <div className='col-sm-12'>
+                                            <input type='button' className='btn_cancel_allsearch btnx btn btn-default lang_attr_element full' id='btn_cancel_allsearch' value='전체 검색 종료' data-lang-target='value' data-lang-en='End All-Searching' onClick={() => {
+                                                document.getElementById('inp_allsearch'       ).value = '';
+                                                document.getElementById('btn_cancel_allsearch').value = '';
+                                                selfs.allsearch();
+                                                return false;
+                                            }}/>
+                                        </div>
+                                    </div>
                                     <div className='row fs_root'>
                                         <div className='col-sm-12'>
                                             <table className="table table-hover full fs_table_list">
@@ -517,7 +568,15 @@ class FSRoot extends React.Component {
                                                         selfs.state.allsclist.map((fileOne, index) => {
                                                             return (
                                                                 <tr key={index} className={"element tr_file tr_file_" + index}>
-                                                                    <td className="td_allsearch ellipsis">{fileOne}</td>
+                                                                    <td className="td_allsearch ellipsis">
+                                                                        {
+                                                                            fileOne == '[EMPTY]' ? (
+                                                                                '' + fileOne
+                                                                            ) : (
+                                                                                <a href='#' data-file={fileOne} onClick={() => { selfs.onClickAllSrchRes(fileOne); }}>{fileOne}</a>
+                                                                            )
+                                                                        }
+                                                                    </td>
                                                                 </tr>
                                                             )
                                                         })
@@ -531,7 +590,7 @@ class FSRoot extends React.Component {
                                 <div>
                                     <div className='row fs_search'>
                                         <div className='col-sm-10'>
-                                            <input type='text' className='inp_search full lang_attr_element reloading_readonly form-control' name='keyword' placeholder="디렉토리 내 검색" data-lang-target='placeholder' data-lang-en='Search in current directory' />
+                                            <input type='text' className='inp_search full lang_attr_element reloading_readonly form-control' id='inp_search' name='keyword' placeholder="디렉토리 내 검색" data-lang-target='placeholder' data-lang-en='Search in current directory' />
                                         </div>
                                         <div className='col-sm-2'>
                                             <input type='submit' className='btn_search full lang_attr_element reloading_disabled btnx btn btn-default' value='검색' data-lang-target='value' data-lang-en='Search' />
