@@ -85,7 +85,7 @@ import hjow.common.json.JsonObject;
 import hjow.common.util.*;
 
 public class FSControl {
-    public static final int[] VERSION = {0, 2, 1, 34};
+    public static final int[] VERSION = {0, 2, 2, 35};
     public static final long  FIRST_ACCESS_TIME = System.currentTimeMillis();
     private static FSControl instance = null;
     
