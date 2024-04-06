@@ -17,5 +17,9 @@ limitations under the License.
 %>
 <div id='fs_accbar' class='fs_accbar fs_div full'></div>
 <script type="text/babel" data-presets="es2015,react" data-plugins="transform-es2015-modules-umd">
-ReactDOM.createRoot(document.getElementById('fs_accbar')).render(<FSAccountBar basic={new FSBasic()}/>);
+if(! <%= fsc.isInstalled() %>) {
+    location.href = "<%= fsc.getContextPath() %>/jsp/fs/fsinstall.jsp";
+} else {
+    ReactDOM.createRoot(document.getElementById('fs_accbar')).render(<FSAccountBar basic={new FSBasic()}/>);
+}
 </script>
