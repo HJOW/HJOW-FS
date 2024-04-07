@@ -18,7 +18,7 @@ limitations under the License.
 <div id='fs_root' class='fs_root fs_div'></div>
 <script>
 $(function() {
-	$('body').addClass('modern'); 
+	$('body').addClass('modern').addClass('dark');
 });
 </script>
 <script type="text/babel" data-presets="es2015,react" data-plugins="transform-es2015-modules-umd">

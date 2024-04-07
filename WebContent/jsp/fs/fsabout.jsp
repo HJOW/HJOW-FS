@@ -23,6 +23,8 @@ limitations under the License.
 $(function() {
     var ctxPath = "<%=fsc.getContextPath()%>";
     var taAbout = $('.ta_about');
+    
+    $('body').addClass('classic');
 
     $('.btn_close').on('click', function() {
         window.close();

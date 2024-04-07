@@ -52,6 +52,8 @@ if(! fsc.isInstalled()) {
                 }
             }
             
+            bodys.addClass('classic');
+            
             form.find("[name='readfileicon']").prop('checked', true);
             form.find("[name='useconsole']").prop('checked', true);
             form.find("[name='usesession']").prop('checked', true);

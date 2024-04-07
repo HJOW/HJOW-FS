@@ -24,6 +24,7 @@ limitations under the License.
 <script type='text/javascript'>
 $(function() {
     $('.tf_terminal_console').focus();
+    $('body').addClass('classic');
 });
 </script>
 </head>

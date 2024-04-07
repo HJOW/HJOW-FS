@@ -39,6 +39,7 @@ $(function() {
 
     $('.hidden_path').val(path);
     $('.div_path').text('DIR : /' + path);
+    $('body').addClass('classic');
 });
 </script>
 </head>

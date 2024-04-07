@@ -55,7 +55,10 @@ $(function() {
     captSizes['width' ] = <%= fsc.getCaptchaWidth()  %>;
     captSizes['height'] = <%= fsc.getCaptchaHeight() %>;
     
+    $('body').addClass('classic');
+    
     var fsRoot = $('.fs_root');
+    fsRoot.addClass('classic');
     
     var form     = fsRoot.find('.form_fs');
     var tables   = fsRoot.find('.fs_table_list');
