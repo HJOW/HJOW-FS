@@ -850,6 +850,8 @@ public class FSControl {
                 conf.put("sHiddenDirs"         , sHiddenDir);
                 conf.put("HiddenDirs"          , new JsonArray());
                 conf.put("Path"                , rootPath.getCanonicalPath());
+                conf.put("AdsPublisherId"      , "");
+                conf.put("NoScheduler"         , new Boolean(false));
                 conf.put("UseAccount"          , new Boolean(! noLogin));
                 conf.put("UseCaptchaDown"      , new Boolean(useCaptchaDown));
                 conf.put("UseCaptchaLogin"     , new Boolean(useCaptchaLogin));
