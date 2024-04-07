@@ -2289,6 +2289,10 @@ public class FSControl {
         try {
             if(! FSUtils.canBeFileName(fileName)) throw new RuntimeException("Illegal character on file's name - " + fileName);
             
+            if(noAnonymous && ("G").equalsIgnoreCase(String.valueOf(sessions.get("idtype")))) {
+            	throw new RuntimeException("No privilege");
+            }
+            
             if(captchaDownload) {
                 if(! viewMode) {
                     if(code.equals("SKIP")) {
