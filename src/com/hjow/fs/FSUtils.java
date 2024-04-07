@@ -239,12 +239,22 @@ public class FSUtils {
         return res;
     }
     
-    /** Create random token string */
+    /** 
+     * Create random token string
+     * 
+     * @see FSControl.createToken
+     */
+    @Deprecated
     public static String createToken(String id) {
         return createToken(id, "1", "2", "3");
     }
     
-    /** Create random token string */
+    /** 
+     * Create random token string 
+     * 
+     * @see FSControl.createToken
+     */
+    @Deprecated
     public static String createToken(String id, String s1, String s2, String s3) {
         if(id == null) return "";
         if(s1 == null) s1 = "";

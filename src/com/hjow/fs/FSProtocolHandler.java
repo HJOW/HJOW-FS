@@ -115,7 +115,7 @@ public class FSProtocolHandler implements Closeable {
                 if(randm != null) {
                     boolean randomize = DataUtil.parseBoolean(randm);
                     if(randomize) {
-                        int randomNo  = (int) Math.round(1000000 + Math.random() * 1000000 + Math.random() * 10000 + Math.random() * 100);
+                        int randomNo  = (int) Math.round(1000000 + FSControl.random() * 1000000 + FSControl.random() * 10000 + FSControl.random() * 100);
                         String strRan = String.valueOf(randomNo).substring(0, 7);
                         
                         code = strRan;

@@ -70,6 +70,7 @@ import javax.swing.filechooser.FileSystemView;
 import com.hjow.fs.console.FSConsole;
 import com.hjow.fs.console.FSConsoleResult;
 import com.hjow.fs.cttype.FSContentType;
+import com.hjow.fs.etc.Randomizer;
 import com.hjow.fs.lister.FSDefaultLister;
 import com.hjow.fs.lister.FSFileLister;
 import com.hjow.fs.lister.FSFileListingResult;
@@ -2732,7 +2733,7 @@ public class FSControl {
                     } else {
                         tokenID = sessionMap.get("id").toString();
                     }
-                    tokenVal = FSUtils.createToken(tokenID, String.valueOf(conf.get("S1")), String.valueOf(conf.get("S2")), String.valueOf(conf.get("S3")));
+                    tokenVal = createToken(tokenID, String.valueOf(conf.get("S1")), String.valueOf(conf.get("S2")), String.valueOf(conf.get("S3")));
                     createToken(tokenID, tokenVal, now + (1000L * 60 * tokenLifeTime), null);
                 }
                 
@@ -3136,7 +3137,7 @@ public class FSControl {
                             }
                             
                             // Create new token
-                            String newToken = FSUtils.createToken(nId, String.valueOf(conf.get("S1")), String.valueOf(conf.get("S2")), String.valueOf(conf.get("S3")));
+                            String newToken = createToken(nId, String.valueOf(conf.get("S1")), String.valueOf(conf.get("S2")), String.valueOf(conf.get("S3")));
                             
                             JsonObject tokenSessionObj = new JsonObject();
                             tokenSessionObj.put("fssession", accountJsonNew.toJSON());
@@ -5142,6 +5143,34 @@ public class FSControl {
             	if(prvInfLoop >= 1000) break;
             }
         } catch(InterruptedException ignores) {}
+    }
+    
+    /** Return random 0 ~ 0.999999... number. */
+    public static double random() {
+    	if(instance == null) return Math.random();
+    	
+    	for(FSPack pk : instance.packs) {
+    		if(pk instanceof Randomizer) {
+    			return ((Randomizer) pk).generate();
+    		}
+    	}
+    	
+    	return Math.random();
+    }
+    
+    /** Create random token string */
+    public static String createToken(String id) {
+        return createToken(id, "1", "2", "3");
+    }
+    
+    /** Create random token string */
+    public static String createToken(String id, String s1, String s2, String s3) {
+    	if(id == null) return "";
+        if(s1 == null) s1 = "";
+        if(s2 == null) s2 = "";
+        if(s3 == null) s3 = "";
+        String originalString = SecurityUtil.hash(s1 + id, "SHA-256") + s3 + SecurityUtil.hash(Math.round(random() * 100000000) + s2 + System.currentTimeMillis(), "SHA-256");
+        return SecurityUtil.hash(originalString, "SHA-256");
     }
     
     /** Detect modern web usage */
