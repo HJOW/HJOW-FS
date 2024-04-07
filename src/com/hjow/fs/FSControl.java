@@ -394,12 +394,12 @@ public class FSControl {
             propIn = null;
             
             // Applying Configs
-            if(conf.get("Installed") != null) {
-                installed = DataUtil.parseBoolean(conf.get("Installed").toString().trim());
+            if(getConfig("Installed") != null) {
+                installed = DataUtil.parseBoolean(getStringConfig("Installed").trim());
             }
             if(installed) {
-                if(conf.get("Path") != null) {
-                    storPath = conf.get("Path").toString().trim();
+                if(getConfig("Path") != null) {
+                    storPath = getConfig("Path").toString().trim();
                 }
                 rootPath  = new File(storPath);
                 if(! rootPath.exists()) rootPath.mkdirs();
@@ -416,10 +416,10 @@ public class FSControl {
             
             // Searching FSPack declared from config (This config value is array filled with FSPack class names)
             List<String> packList = new ArrayList<String>();
-            if(conf.get("Packs") != null) {
+            if(getConfig("Packs") != null) {
                 JsonArray arr = null;
-                if(conf.get("Packs") instanceof JsonArray) arr = (JsonArray) conf.get("Packs");
-                else arr = (JsonArray) JsonCompatibleUtil.parseJson(conf.get("Packs").toString().trim());
+                if(getConfig("Packs") instanceof JsonArray) arr = (JsonArray) getConfig("Packs");
+                else arr = (JsonArray) JsonCompatibleUtil.parseJson(getConfig("Packs").toString().trim());
                 for(Object a : arr) {
                     String packClass = a.toString().trim();
                     if(! packList.contains(packClass)) packList.add(packClass);
@@ -1028,6 +1028,9 @@ public class FSControl {
                 Object hiddenDirs = JsonCompatibleUtil.parseJson(FSUtils.removeLineComments(sHiddenDirs, '#').trim()); // Checking valid JSON
                 if(! (hiddenDirs instanceof JsonArray)) throw new RuntimeException("'Hidden Folders' Should be a JSON array.");
                 
+                String adsPubId = request.getParameter("adspublisherid");
+                if(adsPubId == null) adsPubId = "";
+                
                 String sMaxSize = request.getParameter("limitsize");
                 if(sMaxSize == null) sMaxSize = "" + (1024 * 1024);
                 Long.parseLong(sMaxSize); // Checking valid number
@@ -1073,6 +1076,7 @@ public class FSControl {
                 conf.put("Title", titles);
                 conf.put("sHiddenDirs", sHiddenDirs);
                 conf.put("HiddenDirs", hiddenDirs);
+                conf.put("AdsPublisherId", adsPubId);
                 conf.put("UseCaptchaDown" , new Boolean(useCaptchaDown));
                 if(! noLogin) {
                     conf.put("UseCaptchaLogin", new Boolean(useCaptchaLogin));
@@ -1629,7 +1633,7 @@ public class FSControl {
             sessionNewMap.put("lang", lang);
             
             // Getting hidden directories
-            Object oHiddenDir = conf.get("HiddenDirs");
+            Object oHiddenDir = getConfig("HiddenDirs");
             List<String> hiddenDirList = new ArrayList<String>();
             
             String idtype = sessionNewMap.get("idtype").toString();
@@ -2733,7 +2737,7 @@ public class FSControl {
                     } else {
                         tokenID = sessionMap.get("id").toString();
                     }
-                    tokenVal = createToken(tokenID, String.valueOf(conf.get("S1")), String.valueOf(conf.get("S2")), String.valueOf(conf.get("S3")));
+                    tokenVal = createToken(tokenID, String.valueOf(getConfig("S1")), String.valueOf(getConfig("S2")), String.valueOf(getConfig("S3")));
                     createToken(tokenID, tokenVal, now + (1000L * 60 * tokenLifeTime), null);
                 }
                 
@@ -2977,9 +2981,9 @@ public class FSControl {
                     
                     if(msg.equals("")) {
                         String s1, s2, s3;
-                        s1 = conf.get("S1").toString();
-                        s2 = conf.get("S2").toString();
-                        s3 = conf.get("S3").toString();
+                        s1 = getConfig("S1").toString();
+                        s2 = getConfig("S2").toString();
+                        s3 = getConfig("S3").toString();
                         String pwInput = SecurityUtil.hash(s1 + pw + s2 + salt + id + s3, "SHA-256");
                         
                         if(! accountOne.get("pw").equals(pwInput)) {
@@ -3137,7 +3141,7 @@ public class FSControl {
                             }
                             
                             // Create new token
-                            String newToken = createToken(nId, String.valueOf(conf.get("S1")), String.valueOf(conf.get("S2")), String.valueOf(conf.get("S3")));
+                            String newToken = createToken(nId, String.valueOf(getConfig("S1")), String.valueOf(getConfig("S2")), String.valueOf(getConfig("S3")));
                             
                             JsonObject tokenSessionObj = new JsonObject();
                             tokenSessionObj.put("fssession", accountJsonNew.toJSON());
@@ -4173,14 +4177,6 @@ public class FSControl {
         return lang;
     }
 
-    public JsonObject getConfig() {
-        return conf;
-    }
-
-    public void setConfig(JsonObject conf) {
-        this.conf = conf;
-    }
-
     public long getConfigReadDate() {
         return confReads;
     }
@@ -4686,112 +4682,112 @@ public class FSControl {
     }
     
     public synchronized void applyConfigs() {
-        if(conf.get("NoAnonymous") != null) {
-            noAnonymous = DataUtil.parseBoolean(conf.get("NoAnonymous").toString().trim());
+        if(getConfig("NoAnonymous") != null) {
+            noAnonymous = DataUtil.parseBoolean(getConfig("NoAnonymous").toString().trim());
         } else {
             conf.put("NoAnonymous", new Boolean(noAnonymous));
         }
-        if(conf.get("UseAccount") != null) {
-            noLogin = (! DataUtil.parseBoolean(conf.get("UseAccount").toString().trim()));
+        if(getConfig("UseAccount") != null) {
+            noLogin = (! DataUtil.parseBoolean(getConfig("UseAccount").toString().trim()));
         } else {
             conf.put("UseAccount", new Boolean(! noLogin));
         }
-        if(conf.get("UseSession") != null) {
-            useSession = DataUtil.parseBoolean(conf.get("UseSession").toString().trim());
+        if(getConfig("UseSession") != null) {
+            useSession = DataUtil.parseBoolean(getConfig("UseSession").toString().trim());
         } else {
             conf.put("UseSession", new Boolean(useSession));
         }
-        if(conf.get("UseToken") != null) {
-            useToken = DataUtil.parseBoolean(conf.get("UseToken").toString().trim());
+        if(getConfig("UseToken") != null) {
+            useToken = DataUtil.parseBoolean(getConfig("UseToken").toString().trim());
         } else {
             conf.put("UseToken", new Boolean(useToken));
         }
-        if(conf.get("UseGZIP") != null) {
-        	useGzip = DataUtil.parseBoolean(conf.get("UseGZIP").toString().trim());
+        if(getConfig("UseGZIP") != null) {
+        	useGzip = DataUtil.parseBoolean(getConfig("UseGZIP").toString().trim());
         }
-        if(conf.get("ReadOnly") != null) {
-            readOnly = DataUtil.parseBoolean(conf.get("ReadOnly").toString().trim());
+        if(getConfig("ReadOnly") != null) {
+            readOnly = DataUtil.parseBoolean(getConfig("ReadOnly").toString().trim());
         } else {
             conf.put("ReadOnly", new Boolean(readOnly));
         }
-        if(conf.get("AllowSystemCommand") != null) {
-            allowSysCmd = DataUtil.parseBoolean(conf.get("AllowSystemCommand").toString().trim());
+        if(getConfig("AllowSystemCommand") != null) {
+            allowSysCmd = DataUtil.parseBoolean(getConfig("AllowSystemCommand").toString().trim());
         } else {
             conf.put("AllowSystemCommand", new Boolean(allowSysCmd));
         }
-        if(conf.get("UseConsole") != null) {
-            noConsole = (! DataUtil.parseBoolean(conf.get("UseConsole").toString().trim()));
+        if(getConfig("UseConsole") != null) {
+            noConsole = (! DataUtil.parseBoolean(getConfig("UseConsole").toString().trim()));
         } else {
             conf.put("UseConsole", new Boolean(! noConsole));
         }
-        if(conf.get("UseCaptchaDown") != null) {
-            captchaDownload = DataUtil.parseBoolean(conf.get("UseCaptchaDown").toString().trim());
+        if(getConfig("UseCaptchaDown") != null) {
+            captchaDownload = DataUtil.parseBoolean(getConfig("UseCaptchaDown").toString().trim());
         } else {
             conf.put("UseCaptchaDown", new Boolean(captchaDownload));
         }
-        if(conf.get("UseCaptchaLogin") != null) {
-            captchaLogin = DataUtil.parseBoolean(conf.get("UseCaptchaLogin").toString().trim());
+        if(getConfig("UseCaptchaLogin") != null) {
+            captchaLogin = DataUtil.parseBoolean(getConfig("UseCaptchaLogin").toString().trim());
         } else {
             conf.put("UseCaptchaLogin", new Boolean(captchaLogin));
         }
-        if(conf.get("LimitDownloadSize") != null) {
-            limitSize = Long.parseLong(conf.get("LimitDownloadSize").toString().trim());
+        if(getConfig("LimitDownloadSize") != null) {
+            limitSize = Long.parseLong(getConfig("LimitDownloadSize").toString().trim());
             limitPrev = limitSize / 10;
         } else {
             conf.put("LimitDownloadSize", limitSize + "");
         }
-        if(conf.get("LimitPreviewSize") != null) {
-            limitPrev = Long.parseLong(conf.get("LimitPreviewSize").toString().trim());
+        if(getConfig("LimitPreviewSize") != null) {
+            limitPrev = Long.parseLong(getConfig("LimitPreviewSize").toString().trim());
         } else {
             conf.put("LimitPreviewSize", limitPrev + "");
         }
-        if(conf.get("LimitFilesSinglePage") != null) {
-            limitCount = Integer.parseInt(conf.get("LimitFilesSinglePage").toString().trim());
+        if(getConfig("LimitFilesSinglePage") != null) {
+            limitCount = Integer.parseInt(getConfig("LimitFilesSinglePage").toString().trim());
         } else {
             conf.put("LimitFilesSinglePage", new Integer(limitCount));
         }
-        if(conf.get("BufferSize") != null) {
-            bufferSize = Integer.parseInt(conf.get("BufferSize").toString().trim());
+        if(getConfig("BufferSize") != null) {
+            bufferSize = Integer.parseInt(getConfig("BufferSize").toString().trim());
             if(bufferSize <= 1) bufferSize = 1;
         } else {
             conf.put("BufferSize", new Integer(bufferSize));
         }
-        if(conf.get("SleepGap") != null) {
-            sleepGap = Integer.parseInt(conf.get("SleepGap").toString().trim());
+        if(getConfig("SleepGap") != null) {
+            sleepGap = Integer.parseInt(getConfig("SleepGap").toString().trim());
             if(sleepGap < 20) sleepGap = 20;
         }
-        if(conf.get("SleepRoutine") != null) {
-            sleepRoutine = Integer.parseInt(conf.get("SleepRoutine").toString().trim());
+        if(getConfig("SleepRoutine") != null) {
+            sleepRoutine = Integer.parseInt(getConfig("SleepRoutine").toString().trim());
             if(sleepRoutine <= 1) sleepRoutine = 1;
         }
-        if(conf.get("ReadFileIcon") != null) {
-            readFileIcon = DataUtil.parseBoolean(conf.get("ReadFileIcon").toString().trim());
+        if(getConfig("ReadFileIcon") != null) {
+            readFileIcon = DataUtil.parseBoolean(getConfig("ReadFileIcon").toString().trim());
         } else {
             conf.put("ReadFileIcon", new Boolean(readFileIcon));
         }
-        if(conf.get("Salt") != null) {
-            salt = conf.get("Salt").toString().trim();
+        if(getConfig("Salt") != null) {
+            salt = getConfig("Salt").toString().trim();
         }
-        if(conf.get("LoginFailCountLimit") != null) {
-            loginFailCountLimit = Integer.parseInt(conf.get("LoginFailCountLimit").toString().trim());
+        if(getConfig("LoginFailCountLimit") != null) {
+            loginFailCountLimit = Integer.parseInt(getConfig("LoginFailCountLimit").toString().trim());
         }
-        if(conf.get("LoginFailOverTime") != null) {
-            loginFailOverMinute = Integer.parseInt(conf.get("LoginFailOverTime").toString().trim());
+        if(getConfig("LoginFailOverTime") != null) {
+            loginFailOverMinute = Integer.parseInt(getConfig("LoginFailOverTime").toString().trim());
             if(loginFailOverMinute <= 0) loginFailOverMinute = 1;
         }
-        if(conf.get("TokenLifeTime") != null) {
-            tokenLifeTime = Integer.parseInt(conf.get("TokenLifeTime").toString().trim());
+        if(getConfig("TokenLifeTime") != null) {
+            tokenLifeTime = Integer.parseInt(getConfig("TokenLifeTime").toString().trim());
         }
-        if(conf.get("Title") != null) {
-            String tx = conf.get("Title").toString().trim();
+        if(getConfig("Title") != null) {
+            String tx = getConfig("Title").toString().trim();
             if(! tx.equals("")) title = tx;
         } else {
             conf.put("Title", title);
         }
-        if(conf.get("Log") != null) {
+        if(getConfig("Log") != null) {
             JsonObject confLog = null;
-            if(conf.get("Log") instanceof JsonObject) confLog = (JsonObject) conf.get("Log");
-            else confLog = (JsonObject) JsonObject.parseJson(conf.get("Log").toString());
+            if(getConfig("Log") instanceof JsonObject) confLog = (JsonObject) getConfig("Log");
+            else confLog = (JsonObject) JsonObject.parseJson(getConfig("Log").toString());
             
             if(confLog.get("OnFile") != null) {
                 logOnFile = DataUtil.parseBoolean(confLog.get("OnFile").toString().trim());
@@ -4905,7 +4901,7 @@ public class FSControl {
         JsonArray dirPrv = getSessionDirectoryPrivileges(jsonSess);
         if(dirPrv == null) dirPrv = new JsonArray();
         
-        Object oHiddenDir = conf.get("HiddenDirs");
+        Object oHiddenDir = getConfig("HiddenDirs");
         List<String> hiddenDirList = new ArrayList<String>();
         
         if(oHiddenDir != null) {
@@ -4987,6 +4983,29 @@ public class FSControl {
                 e.eventOccured(event, action, req);
             }
         }
+    }
+    
+    /** Get config value (May be null, String, Boolean, Number, JsonObject, or JsonArray) */
+    public Object getConfig(String key) {
+    	return conf.get(key);
+    }
+    
+    /** Get configuration object */
+    public JsonObject getConfig() {
+        return conf;
+    }
+
+    /** Replace whole configuration object */
+    public void setConfig(JsonObject conf) {
+        this.conf = conf;
+    }
+    
+    /** Get config value (If not exists, return empty String. If the value's type is not String, then force 'toString'ed.) */
+    public String getStringConfig(String key) {
+    	Object cfg = getConfig(key);
+    	if(cfg == null) return "";
+    	if(cfg instanceof String) return (String) cfg;
+    	return cfg.toString();
     }
     
     /** Delete all tokens */

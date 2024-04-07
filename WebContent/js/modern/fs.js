@@ -603,7 +603,7 @@ class FSRoot extends React.Component {
                                                     <col style={{width: '50px'}} />
                                                     <col />
                                                     <col style={{width: '100px'}} />
-                                                    <col style={{width: '80px'}} className='col_controls' />
+                                                    <col style={{width: '100px'}} className='col_controls' />
                                                 </colgroup>
                                                 <tbody className='fs_list'>
                                                     {

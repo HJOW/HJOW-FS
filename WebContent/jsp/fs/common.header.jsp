@@ -20,6 +20,7 @@ if(theme == null) theme = "";
 theme = FSUtils.removeSpecials(theme);
 %>
 <jsp:include page="common.header.libs.jsp"></jsp:include>
+<jsp:include page="common.ads.jsp"></jsp:include>
 <script type='text/javascript'>
 $(function() {
     var lang = FSUtil.applyLanguage(bodys);

@@ -49,6 +49,8 @@ limitations under the License.
                 else                       $(this).prop('checked', true ); 
             });
             
+            form.find('.a_where_ads_pubid').attr('href', ctxPath + '/css/images/adsense_how.png');
+            
             FSUtil.applyLanguage(bodys);
             FSUtil.setContextPath(ctxPath);
             
@@ -144,6 +146,9 @@ limitations under the License.
                             	form.find("input").prop('disabled', true);
                             	form.find("textarea").prop('disabled', true);
                             	form.find("select").prop('disabled', true);
+                            }
+                            if(! FSUtil.isEmpty(conf['AdsPublisherId'])) {
+                            	form.find("[name='adspublisherid']").val(conf['AdsPublisherId']);
                             }
                         }, error : function(jqXHR, textStatus, errorThrown) {
                             alert('Error : ' + textStatus + '\n' + errorThrown)
@@ -387,6 +392,13 @@ limitations under the License.
                             <div class='col-sm-12'>
                                 <div><h4 class='lang_element' data-lang-en='Hidden Folders'>숨김 폴더</h4></div>
                                 <div><textarea name='hiddendirs' class='full' style='min-height: 300px;'>[]</textarea></div>
+                            </div>
+                        </div>
+                        <div class='row'>
+                            <div class='col-sm-2 lang_element' style='width:150px' data-lang-en='ADS Publisher ID'>ADS 게시자 ID</div>
+                            <div class='col-sm-10'>
+                                <input type='text' name='adspublisherid' class='lang_attr_element' placeholder="구글 애드센스 게시자 ID (사용하지 않으면 비우세요)" data-lang-target='placeholder' data-lang-en='Google Adsense publisher ID (Empty here if you does not want ads)' style='min-width: 400px;'/>
+                                <a href="#" class='a_where_ads_pubid' target='_blank'>Where?</a>
                             </div>
                         </div>
                         <div class='row'>
