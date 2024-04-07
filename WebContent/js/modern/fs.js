@@ -27,7 +27,7 @@ class FSContext extends FSBasic {
         noanonymous : false
     }
     constructor() { super(); }
-    forceUpdate() {
+    forceUpdate(callback) {
         const selfs = this;
         return new Promise((resolve, reject) => {
             const res = resolve;
@@ -39,7 +39,10 @@ class FSContext extends FSBasic {
                     }));
                 }
             }
-            Promise.all(promises).then(() => { res(); });
+            Promise.all(promises).then(() => {
+                if(typeof(callback) == 'function') callback();
+                res();
+            });
         });
     }
 }
@@ -67,7 +70,6 @@ class FSRoot extends React.Component {
     refresh() {
         const selfs = this;
         return new Promise((resolve, reject) => {
-            // $('.fs_root').find('.img_icon').remove();
             selfs.trans().then((data) => { selfs.reloads(data).then(() => { selfs.applyFSChanges(); resolve(data); }); });
         });
     }
@@ -98,7 +100,6 @@ class FSRoot extends React.Component {
                 selfs.state.files = FSUtil.concatArray(newArr, selfs.state.files);
             }
     
-            console.log(selfs.state);
             selfs.forceUpdate(() => { resolve(); });
         });
     }
@@ -497,6 +498,9 @@ class FSRoot extends React.Component {
     }
     render() {
         const selfs = this;
+        if(FSCTX.state.noanonymous && (! FSCTX.state.logined)) {
+            return (<div className='fs_filelist fs_filelist_anonymous full invisible'></div>);
+        }
         return (
             <div>
                 <div className='fs_filelist fs_filelist_view container show-grid full'>
@@ -690,9 +694,6 @@ class FSRoot extends React.Component {
                         }
                     </form>
                 </div>
-                <div className='fs_filelist fs_filelist_anonymous full invisible'>
-                    
-                </div>
                 <div className='fs_hform invisible_wh'>
                     <form className='form_hidden' target='_blank'></form>
                 </div>
@@ -749,7 +750,17 @@ class FSAccountBar extends React.Component {
                 selfs.state.nick    = data.nick;
             }
             FSCTX.state = selfs.state;
-            FSCTX.forceUpdate(() => { resolve(); });
+            FSCTX.forceUpdate(() => {
+                if(FSCTX.state.noanonymous) {
+                    const anonyFields = document.getElementsByClassName('fs_filelist_anonymous');
+                    for(let idx=0; idx<anonyFields.length; idx++) {
+                        anonyFields[idx].innerHTML = document.getElementById('fs_filelist_anonymous_source').innerHTML;
+                        anonyFields[idx].classList.remove('invisible');
+                    }
+                    // $('.fs_filelist_anonymous').html($('#fs_filelist_anonymous_source').html());
+                }
+                resolve(); 
+            });
         });
     }
     async refresh(req, alerts) {

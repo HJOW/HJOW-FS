@@ -28,4 +28,7 @@ if(! <%= fsc.isInstalled() %>) {
     ReactDOM.createRoot(document.getElementById('fs_root')).render(<FSRoot basic={new FSBasic()}/>);
 }
 </script>
+<div class='full invisible' id='fs_filelist_anonymous_source'>
+    <jsp:include page="fsanonymousblock.jsp"></jsp:include>
+</div>
 <jsp:include page="common.footer.jsp"></jsp:include>
