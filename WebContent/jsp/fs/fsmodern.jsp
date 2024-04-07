@@ -28,3 +28,4 @@ if(! <%= fsc.isInstalled() %>) {
     ReactDOM.createRoot(document.getElementById('fs_root')).render(<FSRoot basic={new FSBasic()}/>);
 }
 </script>
+<jsp:include page="common.footer.jsp"></jsp:include>
