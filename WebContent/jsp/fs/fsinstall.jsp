@@ -39,6 +39,8 @@ if(! fsc.isInstalled()) {
             var bodys = $('body');
             if(bodys.is('.popup')) bodys.removeClass('dark');
             
+            bodys.addClass('classic').removeClass('modern');
+            
             var ctxPath = "<%=fsc.getContextPath()%>";
             var form    = $('.form_fs_ins');
             var chkAc   = form.find('.chk_account');
@@ -51,8 +53,6 @@ if(! fsc.isInstalled()) {
                     bodys.addClass('dark');
                 }
             }
-            
-            bodys.addClass('classic');
             
             form.find("[name='readfileicon']").prop('checked', true);
             form.find("[name='useconsole']").prop('checked', true);

@@ -1,0 +1,161 @@
+@charset "UTF-8";
+
+div.fs_div .full, div.fs_div.full {
+    width: 100%;
+}
+div.fs_div .fullforce, div.fs_div.fullforce {
+    width: 100% !important;
+}
+div.fs_div a, div.fs_div table td a, div.fs_div table th a, div.fs_div div a {
+    color: rgb(90, 120, 200);
+    text-decoration: none;
+    text-decoration-line: none;
+}
+div.fs_div .invisible {
+    display: none !important;
+}
+div.fs_div .invisible_wh {
+    height: 0px !important;
+    overflow: hidden !important;
+}
+div.fs_div .fs_filedndacts {
+    overflow: hidden;
+    height: 0px;
+}
+div.fs_div .fs_search {
+    padding-bottom: 10px;
+}
+div.fs_div .align_center {
+    text-align: center;
+}
+div.fs_div .align_right {
+    text-align: right;
+}
+div.fs_div .margin_top_10 {
+    margin-top: 10px;
+}
+div.fs_div .margin_top_20 {
+    margin-top: 20px;
+}
+div.fs_div .margin_left_10 {
+    margin-left: 10px;
+}
+div.fs_div .margin_left_20 {
+    margin-left: 20px;
+}
+div.fs_div .margin_bottom_10 {
+    margin-bottom: 10px;
+}
+div.fs_div .margin_bottom_20 {
+    margin-bottom: 20px;
+}
+div.fs_div .padding_top_10 {
+    padding-top: 10px;
+}
+div.fs_div .padding_top_20 {
+    padding-top: 20px;
+}
+div.fs_div .padding_bottom_10 {
+    padding-bottom: 10px;
+}
+div.fs_div .padding_bottom_20 {
+    padding-bottom: 20px;
+}
+div.fs_div .d_inline_block{
+    display: inline-block;
+    margin-left: 5px;
+}
+div.fs_div .valign_middle {
+    vertical-align: middle;
+}
+div.fs_div .ellipsis {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+div.fs_div .filedndin {
+    background-color: red !important;
+}
+div.fs_div .padall5 {
+    padding: 5px 5px 5px 5px !important;
+}
+div.fs_div .padall10 {
+    padding: 10px 10px 10px 10px !important;
+}
+div.fs_div .padall20 {
+    padding: 20px 20px 20px 20px !important;
+}
+div.fs_install_manual_root td, div.fs_div.fs_install_manual_root th {
+    vertical-align: top;
+}
+div.fs_install_manual_root td, div.fs_div.fs_install_manual_root td span {
+    text-align: left;
+}
+div.fs_div a.flatbutton, div.fs_div input.flatbutton, div.fs_div button.flatbutton { 
+    background-color: rgb(255, 255, 255);
+    border: 1px solid rgb(90, 120, 200);
+    color: rgb(90, 120, 200);
+    font-family: D2Coding, 'D2 coding', NanumGothicCoding, '나눔고딕코딩', NanumGothic, '나눔고딕', 돋움;
+    font-weight: bolder;
+    min-height: 25px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 11px;
+    padding-right: 11px;
+    border-radius: 1px;
+    cursor: pointer;
+    text-decoration: none;
+    text-decoration-line: none;
+}
+div.fs_div a.flatbutton.thick, div.fs_div input.flatbutton.thick, div.fs_div button.flatbutton.thick {
+    border: 3px solid rgb(90, 120, 200);
+    background-color: rgb(200, 200, 200);
+}
+div.fs_div a.flatbutton.green, div.fs_div input.flatbutton.green, div.fs_div button.flatbutton.green {
+    border: 1px solid rgb(90, 200, 120);
+    color: rgb(90, 200, 120);
+}
+div.fs_div a.flatbutton.green.thick, div.fs_div input.flatbutton.green.thick, div.fs_div button.flatbutton.green.thick {
+    border: 3px solid rgb(90, 200, 120);
+}
+div.fs_div a.flatbutton.red, div.fs_div input.flatbutton.red, div.fs_div button.flatbutton.red {
+    border: 1px solid rgb(200, 120, 120);
+    color: rgb(200, 120, 120);
+}
+div.fs_div a.flatbutton.red.thick, div.fs_div input.flatbutton.red.thick, div.fs_div button.flatbutton.red.thick {
+    border: 3px solid rgb(200, 120, 120);
+}
+div.fs_div a.flatbutton.disabled, div.fs_div input.flatbutton.disabled, div.fs_div button.flatbutton.disabled {
+    border: 1px solid rgb(180, 180, 180);
+    color: rgb(180, 180, 180);
+}
+div.fs_div a.flatbutton.disabled.thick, div.fs_div input.flatbutton.disabled.thick, div.fs_div button.flatbutton.disabled.thick {
+    border: 3px solid rgb(180, 180, 180);
+}
+div.fs_div a.flatbutton:hover, div.fs_div input.flatbutton:hover, div.fs_div button.flatbutton:hover {
+    background-color: rgb(110, 150, 230);
+    box-shadow: 2px 2px 2px 0 rgb(70, 100, 150);
+}
+div.fs_div a.flatbutton.green:hover, div.fs_div input.flatbutton.green:hover, div.fs_div button.flatbutton.green:hover {
+    background-color: rgb(110, 230, 150);
+}
+div.fs_div a.flatbutton.red:hover, div.fs_div input.flatbutton.red:hover, div.fs_div button.flatbutton.red:hover {
+    background-color: rgb(220, 130, 130);
+}
+div.fs_div a.flatbutton.disabled:hover, div.fs_div input.flatbutton.disabled:hover, div.fs_div button.flatbutton.disabled:hover {
+    background-color: rgb(255, 255, 255);
+    border: 1px solid rgb(180, 180, 180);
+    box-shadow: 0;
+}
+div.fs_div a.flatbutton.disabled.thick:hover, div.fs_div input.flatbutton.disabled.thick:hover, div.fs_div button.flatbutton.disabled.thick:hover {
+    background-color: rgb(200, 200, 200);
+    border: 3px solid rgb(180, 180, 180);
+}
+
+.ui-dialog .ui-dialog-content.fs_pop_in {
+    overflow: hidden;
+}
+
+.ui-dialog .ui-dialog-content.fs_pop_in.full {
+    width: 100% !important;
+}

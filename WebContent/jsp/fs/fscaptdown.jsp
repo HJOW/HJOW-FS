@@ -74,7 +74,7 @@ $(function() {
     var fileName = form.find('.hid_name').val();
     var ext      = '';
     
-    $('body').addClass('classic');
+    $('body').addClass('classic').removeClass('modern');
 
     var spl = fileName.split('.');
     if(spl.length >= 2) {

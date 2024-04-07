@@ -61,6 +61,7 @@ class FSRoot extends React.Component {
         FSCTX.pages['root'] = this;
     }
     componentDidMount() {
+        $('body').addClass('modern').removeClass('classic');
         this.refresh();
     }
     refresh() {
@@ -641,13 +642,13 @@ class FSRoot extends React.Component {
                                                                                     <div className='div_td_file_preview full'>
                                                                                         {
                                                                                             fileOne.previewType == '1' ? (
-                                                                                                <img    className='img_preview    preview_element full' style={{'maxHeight' : (((window.innerHeight / 2) < 200 ? 200 : (window.innerHeight / 2)) + 'px'), 'overflow-y' : 'scroll'}} src={ FSUtil.ctx + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent(selfs.state.path) + "&filename=" + encodeURIComponent(fileOne.name) + "&mode=VIEW" + FSUtil.addTokenParameterString() }/>
+                                                                                                <img    className='img_preview    preview_element full' style={{'maxHeight' : (((window.innerHeight / 2) < 200 ? 200 : (window.innerHeight / 2)) + 'px'), 'overflowY' : 'scroll'}} src={ FSUtil.ctx + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent(selfs.state.path) + "&filename=" + encodeURIComponent(fileOne.name) + "&mode=VIEW" + FSUtil.addTokenParameterString() }/>
                                                                                             ) : fileOne.previewType == '2' ? (
-                                                                                                <video  className='video_preview  preview_element full' style={{'maxHeight' : (((window.innerHeight / 2) < 200 ? 200 : (window.innerHeight / 2)) + 'px'), 'overflow-y' : 'scroll'}} src={ FSUtil.ctx + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent(selfs.state.path) + "&filename=" + encodeURIComponent(fileOne.name) + "&mode=VIEW" + FSUtil.addTokenParameterString() }/>
+                                                                                                <video  className='video_preview  preview_element full' style={{'maxHeight' : (((window.innerHeight / 2) < 200 ? 200 : (window.innerHeight / 2)) + 'px'), 'overflowY' : 'scroll'}} src={ FSUtil.ctx + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent(selfs.state.path) + "&filename=" + encodeURIComponent(fileOne.name) + "&mode=VIEW" + FSUtil.addTokenParameterString() }/>
                                                                                             ) : fileOne.previewType == '3' ? (
-                                                                                                <audio  className='audio_preview  preview_element full' style={{'maxHeight' : (((window.innerHeight / 2) < 200 ? 200 : (window.innerHeight / 2)) + 'px'), 'overflow-y' : 'scroll'}} src={ FSUtil.ctx + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent(selfs.state.path) + "&filename=" + encodeURIComponent(fileOne.name) + "&mode=VIEW" + FSUtil.addTokenParameterString() }/>
+                                                                                                <audio  className='audio_preview  preview_element full' style={{'maxHeight' : (((window.innerHeight / 2) < 200 ? 200 : (window.innerHeight / 2)) + 'px'), 'overflowY' : 'scroll'}} src={ FSUtil.ctx + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent(selfs.state.path) + "&filename=" + encodeURIComponent(fileOne.name) + "&mode=VIEW" + FSUtil.addTokenParameterString() }/>
                                                                                             ) : fileOne.previewType == '4' ? (
-                                                                                                <iframe className='iframe_preview preview_element full' style={{'maxHeight' : (((window.innerHeight / 2) < 200 ? 200 : (window.innerHeight / 2)) + 'px'), 'overflow-y' : 'scroll'}} src={ FSUtil.ctx + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent(selfs.state.path) + "&filename=" + encodeURIComponent(fileOne.name) + "&mode=VIEW" + FSUtil.addTokenParameterString() }></iframe>
+                                                                                                <iframe className='iframe_preview preview_element full' style={{'height' : (((window.innerHeight / 2) < 200 ? 200 : (window.innerHeight / 2)) + 'px'), 'overflowY' : 'scroll'}} src={ FSUtil.ctx + "/jsp/fs/fsdown.jsp?path=" + encodeURIComponent(selfs.state.path) + "&filename=" + encodeURIComponent(fileOne.name) + "&mode=VIEW" + FSUtil.addTokenParameterString() }></iframe>
                                                                                             ) : null
                                                                                         }
                                                                                     </div>
@@ -781,7 +782,7 @@ class FSAccountBar extends React.Component {
                                 <div className='row login_element logined padding_top_10'>
                                     <div className='col-sm-12'>
                                         <span className='lang_element' data-lang-en='Welcome, '></span><span className='span_type'></span> <span className='span_nick'>{this.state.nick}</span><span className='lang_element' data-lang-en=''> 님 환영합니다.</span> 
-                                        <input type='button' value='로그아웃' className='btn_logout btnx btn btn-default lang_attr_element' data-lang-target='value' data-lang-en='LOGOUT' onClick={() => { selfs.logout(); }}/>
+                                        <input type='button' value='로그아웃' className='btn_logout btnx btn btn-default lang_attr_element margin_left_20' data-lang-target='value' data-lang-en='LOGOUT' onClick={() => { selfs.logout(); }}/>
                                     </div>
                                 </div>                                 
                             )

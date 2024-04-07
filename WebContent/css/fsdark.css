@@ -14,127 +14,127 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-body.dark {
+body.dark.classic {
 	background-color: #2f2f2f;
 }
 
-body.dark, body.dark pre, body.dark div, body.dark p {
+body.dark.classic, body.dark.classic pre, body.dark.classic div, body.dark.classic p {
     color: #C9C9C9;
 }
 
-body.dark .container {
+body.dark.classic .container {
 	background-color: #3b3b3b;
 	color: #C9C9C9;
 }
 
-body.dark div.fs_div .container div, body.dark div.fs_div .container p, body.dark div.fs_div .container table, body.dark div.fs_div div {
+body.dark.classic div.fs_div .container div, body.dark.classic div.fs_div .container p, body.dark.classic div.fs_div .container table, body.dark.classic div.fs_div div {
     background-color: #3b3b3b;
 }
 
-body.dark div.fs_div input, body.dark div.fs_div textarea, body.dark div.fs_div select {
+body.dark.classic div.fs_div input, body.dark.classic div.fs_div textarea, body.dark.classic div.fs_div select {
     background-color: #4b4b4b;
     color: #C1C1C1;
 }
 
-body.dark div.fs_div input.btnx, body button.btnx {
+body.dark.classic div.fs_div input.btnx, body button.btnx {
     background-color: #3F3F3F;
 }
 
-body.dark div.fs_div input.btnx:disabled, body button.btnx:disabled, body.dark div.fs_div input.btnx.disabled, body button.btnx.disabled {
+body.dark.classic div.fs_div input.btnx:disabled, body button.btnx:disabled, body.dark.classic div.fs_div input.btnx.disabled, body button.btnx.disabled {
 	color: #AAAAAA;
     background-color: #3B3B3B;
 }
 
-body.dark div.fs_div div, body.dark div.fs_div p, body.dark div.fs_div span, body.dark div.fs_div h1, body.dark div.fs_div h2, body.dark div.fs_div h3, body.dark div.fs_div h4, body.dark div.fs_div h5, body.dark div.fs_div h6, body.dark div.fs_div table, body.dark div.fs_div td, body.dark div.fs_div th {
+body.dark.classic div.fs_div div, body.dark.classic div.fs_div p, body.dark.classic div.fs_div span, body.dark.classic div.fs_div h1, body.dark.classic div.fs_div h2, body.dark.classic div.fs_div h3, body.dark.classic div.fs_div h4, body.dark.classic div.fs_div h5, body.dark.classic div.fs_div h6, body.dark.classic div.fs_div table, body.dark.classic div.fs_div td, body.dark.classic div.fs_div th {
     color: #C9C9C9;
 }
 
-body.dark div.fs_div a, body.dark div.fs_div table td a, body.dark div.fs_div table th a, body.dark div.fs_div div a {
+body.dark.classic div.fs_div a, body.dark.classic div.fs_div table td a, body.dark.classic div.fs_div table th a, body.dark.classic div.fs_div div a {
 	color: rgb(110, 150, 230);
 }
 
-body.dark div.fs_div td.td_mark_dir, body.dark div.fs_div div.td_mark_dir {
+body.dark.classic div.fs_div td.td_mark_dir, body.dark.classic div.fs_div div.td_mark_dir {
 	color: #E8DB5F;
 }
 
-body.dark div.fs_div .container table.bordered th, body.dark div.fs_div .container table.bordered td {
+body.dark.classic div.fs_div .container table.bordered th, body.dark.classic div.fs_div .container table.bordered td {
     border-right: 1px solid #4b4b4b;
 }
 
-body.dark div.fs_div .table-hover tbody tr:hover {
+body.dark.classic div.fs_div .table-hover tbody tr:hover {
   background-color: #4b4b4b;
 }
 
-body.dark div.fs_div a.flatbutton, body.dark div.fs_div input.flatbutton, body.dark div.fs_div button.flatbutton { 
+body.dark.classic div.fs_div a.flatbutton, body.dark.classic div.fs_div input.flatbutton, body.dark.classic div.fs_div button.flatbutton { 
     background-color: #3f3f3f;
     border: 1px solid rgb(110, 150, 230);
     color: rgb(110, 150, 230);
 }
 
-body.dark div.fs_div a.flatbutton.thick, body.dark div.fs_div input.flatbutton.thick, body.dark div.fs_div button.flatbutton.thick {
+body.dark.classic div.fs_div a.flatbutton.thick, body.dark.classic div.fs_div input.flatbutton.thick, body.dark.classic div.fs_div button.flatbutton.thick {
 	background-color: #4f4f6a;
 	border: 3px solid rgb(110, 150, 230);
 }
 
-body.dark div.fs_div a.flatbutton.green, input.flatbutton.green, button.flatbutton.green {
+body.dark.classic div.fs_div a.flatbutton.green, input.flatbutton.green, button.flatbutton.green {
     border: 1px solid rgb(110, 230, 150);
     color: rgb(110, 230, 150);
 }
 
-body.dark div.fs_div a.flatbutton.green.thick, input.flatbutton.green.thick, button.flatbutton.green.thick {
+body.dark.classic div.fs_div a.flatbutton.green.thick, input.flatbutton.green.thick, button.flatbutton.green.thick {
 	border: 3px solid rgb(110, 230, 150);
 }
 
-body.dark div.fs_div a.flatbutton.red, input.flatbutton.red, button.flatbutton.red {
+body.dark.classic div.fs_div a.flatbutton.red, input.flatbutton.red, button.flatbutton.red {
     border: 1px solid rgb(230, 120, 120);
     color: rgb(230, 120, 120);
 }
 
-body.dark div.fs_div a.flatbutton.red.thick, input.flatbutton.red.thick, button.flatbutton.red.thick {
+body.dark.classic div.fs_div a.flatbutton.red.thick, input.flatbutton.red.thick, button.flatbutton.red.thick {
 	border: 3px solid rgb(230, 120, 120);
 }
 
-body.dark div.fs_div a.flatbutton.disabled, body.dark div.fs_div input.flatbutton.disabled, body.dark div.fs_div button.flatbutton.disabled {
+body.dark.classic div.fs_div a.flatbutton.disabled, body.dark.classic div.fs_div input.flatbutton.disabled, body.dark.classic div.fs_div button.flatbutton.disabled {
     border: 1px solid rgb(110, 110, 110);
     color: rgb(110, 110, 110);
 }
 
-body.dark div.fs_div a.flatbutton.disabled.thick, body.dark div.fs_div input.flatbutton.disabled.thick, body.dark div.fs_div button.flatbutton.disabled.thick {
+body.dark.classic div.fs_div a.flatbutton.disabled.thick, body.dark.classic div.fs_div input.flatbutton.disabled.thick, body.dark.classic div.fs_div button.flatbutton.disabled.thick {
 	border: 3px solid rgb(110, 110, 110);
 }
 
-body.dark div.fs_div a.flatbutton:hover, body.dark div.fs_div input.flatbutton:hover, body.dark div.fs_div button.flatbutton:hover {
+body.dark.classic div.fs_div a.flatbutton:hover, body.dark.classic div.fs_div input.flatbutton:hover, body.dark.classic div.fs_div button.flatbutton:hover {
     background-color: #4f4f6a;
     box-shadow: 2px 2px 2px 0 rgb(70, 100, 150);
 }
 
-body.dark div.fs_div a.flatbutton.green:hover, body.dark div.fs_div input.flatbutton.green:hover, body.dark div.fs_div button.flatbutton.green:hover {
+body.dark.classic div.fs_div a.flatbutton.green:hover, body.dark.classic div.fs_div input.flatbutton.green:hover, body.dark.classic div.fs_div button.flatbutton.green:hover {
 	background-color: #4f6a4f;
 }
 
-body.dark div.fs_div a.flatbutton.red:hover, body.dark div.fs_div input.flatbutton.red:hover, body.dark div.fs_div button.flatbutton.red:hover {
+body.dark.classic div.fs_div a.flatbutton.red:hover, body.dark.classic div.fs_div input.flatbutton.red:hover, body.dark.classic div.fs_div button.flatbutton.red:hover {
 	background-color: #6a4f4f;
 }
 
-body.dark div.fs_div a.flatbutton.disabled:hover, body.dark div.fs_div input.flatbutton.disabled:hover, body.dark div.fs_div button.flatbutton.disabled:hover {
+body.dark.classic div.fs_div a.flatbutton.disabled:hover, body.dark.classic div.fs_div input.flatbutton.disabled:hover, body.dark.classic div.fs_div button.flatbutton.disabled:hover {
     border: 1px solid rgb(110, 110, 110);
     box-shadow: 0;
 }
 
-body.dark div.fs_div a.flatbutton.disabled.thick:hover, body.dark div.fs_div input.flatbutton.disabled.thick:hover, body.dark div.fs_div button.flatbutton.disabled.thick:hover {
+body.dark.classic div.fs_div a.flatbutton.disabled.thick:hover, body.dark.classic div.fs_div input.flatbutton.disabled.thick:hover, body.dark.classic div.fs_div button.flatbutton.disabled.thick:hover {
 	border: 3px solid rgb(110, 110, 110);
 }
 
-body.dark .ui-dialog {
+body.dark.classic .ui-dialog {
 	background-color: #2f2f2f;
 }
 
-body.dark .ui-dialog-content {
+body.dark.classic .ui-dialog-content {
     background-color: #2f2f2f;
     color: #C9C9C9;
 }
 
-body.dark .ui-dialog-titlebar {
+body.dark.classic .ui-dialog-titlebar {
 	background-color: #3f3f3f;
 	color: #C9C9C9;
 }

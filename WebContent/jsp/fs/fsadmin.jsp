@@ -31,7 +31,7 @@ limitations under the License.
             var bodys = $('body');
             if(bodys.is('.popup')) bodys.removeClass('dark');
             
-            bodys.addClass('classic');
+            bodys.addClass('classic').removeClass('modern');
             
             var ctxPath = "<%=fsc.getContextPath()%>";
             var form    = $('.form_fs_admin');

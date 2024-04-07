@@ -14,185 +14,100 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-body, div.fs_div {
+body.classic, .classic div.fs_div {
     margin: 0; padding: 0;
     background-color: #FFFFFF;
     color: #333333;
 }
 
-body.noscroll, div.noscroll {
+body.noscroll.classic, .classic div.noscroll {
 	overflow: hidden !important;
 }
 
-div.fs_div, div.fs_div div, div.fs_div span, div.fs_div a, div.fs_div p, div.fs_div pre, div.fs_div input {
+.classic div.fs_div, .classic div.fs_div div, .classic div.fs_div span, .classic div.fs_div a, .classic div.fs_div p, .classic div.fs_div pre, .classic div.fs_div input {
     font-family : D2Coding, 'D2 coding', NanumGothicCoding, '나눔고딕코딩', NanumGothic, '나눔고딕', 돋움;
     vertical-align: middle;
 }
 
-div.fs_div td.td_mark_dir, div.fs_div div.td_mark_dir {
+.classic div.fs_div td.td_mark_dir, .classic div.fs_div div.td_mark_dir {
     color: #C4B73B;
 }
 
-div.fs_div .container {
+.classic div.fs_div .container {
     background-color: #FEFEFE;
     color: #333333;
 }
 
-div.fs_div .container div, div.fs_div .container p, div.fs_div .container table {
+.classic div.fs_div .container div, .classic div.fs_div .container p, .classic div.fs_div .container table {
     background-color: #FAFAFA;
     color: #333333;
 }
 
-div.fs_div .container table.bordered td, div.fs_div .container table.bordered th {
+.classic div.fs_div .container table.bordered td, .classic div.fs_div .container table.bordered th {
 	border-right: 1px solid #333333;
 }
 
-div.fs_div .container table.padded td, div.fs_div .container table.padded th {
+.classic div.fs_div .container table.padded td, .classic div.fs_div .container table.padded th {
     padding-left : 8px;
     padding-right: 8px;
 }
 
-div.fs_div input, div.fs_div textarea, div.fs_div select {
+.classic div.fs_div input, .classic div.fs_div textarea, .classic div.fs_div select {
     background-color: #ECECEC;
     color: #222222;
 }
 
-div.fs_div input:disabled, div.fs_div textarea.disabled, div.fs_div select.disabled {
+.classic div.fs_div input:disabled, .classic div.fs_div textarea.disabled, .classic div.fs_div select.disabled {
     background-color: #BBBBBB;
     color: #888888;
 }
 
-div.fs_div input.btnx, div.fs_div button.btnx {
+.classic div.fs_div input.btnx, .classic div.fs_div button.btnx {
     background-color: #CCCCCC;
 }
 
-div.fs_div input.btnx:disabled, div.fs_div button.btnx:disabled, div.fs_div input.btnx.disabled, div.fs_div button.btnx.disabled {
+.classic div.fs_div input.btnx:disabled, .classic div.fs_div button.btnx:disabled, .classic div.fs_div input.btnx.disabled, .classic div.fs_div button.btnx.disabled {
     background-color: #BBBBBB;
     color: #888888;
 }
 
-div.fs_div div, div.fs_div p, div.fs_div h1, div.fs_div h2, div.fs_div h3, div.fs_div h4, div.fs_div h5, div.fs_div h6, div.fs_div table, div.fs_div td, div.fs_div th {
+.classic div.fs_div div, .classic div.fs_div p, .classic div.fs_div h1, .classic div.fs_div h2, .classic div.fs_div h3, .classic div.fs_div h4, .classic div.fs_div h5, .classic div.fs_div h6, .classic div.fs_div table, .classic div.fs_div td, .classic div.fs_div th {
     color: #333333;
     vertical-align: middle;
 }
 
-div.fs_div .table-hover tdiv.fs_div tr:hover {
+.classic div.fs_div .table-hover tdiv.fs_div tr:hover {
     background-color: #EAEAEA;
 }
 
-div.fs_div .table-hover > tbody > tr:hover {
+.classic div.fs_div .table-hover > tbody > tr:hover {
     background-color: #C8C8E8;
 }
 
-div.fs_div .table > thead > tr > td.active,
-div.fs_div .table > tbody > tr > td.active,
-div.fs_div .table > tfoot > tr > td.active,
-div.fs_div .table > thead > tr > th.active,
-div.fs_div .table > tbody > tr > th.active,
-div.fs_div .table > tfoot > tr > th.active,
-div.fs_div .table > thead > tr.active > td,
-div.fs_div .table > tbody > tr.active > td,
-div.fs_div .table > tfoot > tr.active > td,
-div.fs_div .table > thead > tr.active > th,
-div.fs_div .table > tbody > tr.active > th,
-div.fs_div .table > tfoot > tr.active > th {
+.classic div.fs_div .table > thead > tr > td.active,
+.classic div.fs_div .table > tbody > tr > td.active,
+.classic div.fs_div .table > tfoot > tr > td.active,
+.classic div.fs_div .table > thead > tr > th.active,
+.classic div.fs_div .table > tbody > tr > th.active,
+.classic div.fs_div .table > tfoot > tr > th.active,
+.classic div.fs_div .table > thead > tr.active > td,
+.classic div.fs_div .table > tbody > tr.active > td,
+.classic div.fs_div .table > tfoot > tr.active > td,
+.classic div.fs_div .table > thead > tr.active > th,
+.classic div.fs_div .table > tbody > tr.active > th,
+.classic div.fs_div .table > tfoot > tr.active > th {
     background-color: #C8C8E8;
 }
 
-div.fs_div .table-hover > tbody > tr > td.active:hover,
-div.fs_div .table-hover > tbody > tr > th.active:hover,
-div.fs_div .table-hover > tbody > tr.active:hover > td,
-div.fs_div .table-hover > tbody > tr:hover > .active,
-div.fs_div .table-hover > tbody > tr.active:hover > th {
+.classic div.fs_div .table-hover > tbody > tr > td.active:hover,
+.classic div.fs_div .table-hover > tbody > tr > th.active:hover,
+.classic div.fs_div .table-hover > tbody > tr.active:hover > td,
+.classic div.fs_div .table-hover > tbody > tr:hover > .active,
+.classic div.fs_div .table-hover > tbody > tr.active:hover > th {
     background-color: #cbcbeb;
 }
 
-div.fs_div .full, div.fs_div.full {
-    width: 100%;
-}
-div.fs_div .fullforce, div.fs_div.fullforce {
-    width: 100% !important;
-}
-div.fs_div a, div.fs_div table td a, div.fs_div table th a, div.fs_div div a {
-    color: rgb(90, 120, 200);
-    text-decoration: none;
-    text-decoration-line: none;
-}
-div.fs_div .invisible {
-    display: none !important;
-}
-div.fs_div .invisible_wh {
-	height: 0px !important;
-	overflow: hidden !important;
-}
-div.fs_div .fs_filedndacts {
-	overflow: hidden;
-	height: 0px;
-}
-div.fs_div .fs_search {
-    padding-bottom: 10px;
-}
-div.fs_div .align_center {
-	text-align: center;
-}
-div.fs_div .align_right {
-	text-align: right;
-}
-div.fs_div .margin_top_10 {
-	margin-top: 10px;
-}
-div.fs_div .margin_top_20 {
-    margin-top: 20px;
-}
-div.fs_div .margin_left_10 {
-    margin-left: 10px;
-}
-div.fs_div .margin_left_20 {
-    margin-left: 20px;
-}
-div.fs_div .margin_bottom_10 {
-    margin-bottom: 10px;
-}
-div.fs_div .margin_bottom_20 {
-    margin-bottom: 20px;
-}
-div.fs_div .padding_top_10 {
-    padding-top: 10px;
-}
-div.fs_div .padding_top_20 {
-    padding-top: 20px;
-}
-div.fs_div .padding_bottom_10 {
-    padding-bottom: 10px;
-}
-div.fs_div .padding_bottom_20 {
-    padding-bottom: 20px;
-}
-div.fs_div .d_inline_block{
-	display: inline-block;
-	margin-left: 5px;
-}
-div.fs_div .valign_middle {
-	vertical-align: middle;
-}
-div.fs_div .ellipsis {
-	overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-div.fs_div .filedndin {
-	background-color: red !important;
-}
-div.fs_div .padall5 {
-	padding: 5px 5px 5px 5px !important;
-}
-div.fs_div .padall10 {
-    padding: 10px 10px 10px 10px !important;
-}
-div.fs_div .padall20 {
-    padding: 20px 20px 20px 20px !important;
-}
-div.fs_install_manual_root {
+.classic div.fs_install_manual_root {
 	overflow-x: hidden;
 	overflow-y: scroll;
 	white-space: pre-wrap;
@@ -202,78 +117,4 @@ div.fs_install_manual_root {
 	border: 1px solid black;
 	padding: 5px 5px 5px 5px;
 	vertical-align: top !important;
-}
-div.fs_install_manual_root td, div.fs_div.fs_install_manual_root th {
-	vertical-align: top;
-}
-div.fs_install_manual_root td, div.fs_div.fs_install_manual_root td span {
-	text-align: left;
-}
-div.fs_div a.flatbutton, div.fs_div input.flatbutton, div.fs_div button.flatbutton { 
-	background-color: rgb(255, 255, 255);
-    border: 1px solid rgb(90, 120, 200);
-    color: rgb(90, 120, 200);
-    font-family: D2Coding, 'D2 coding', NanumGothicCoding, '나눔고딕코딩', NanumGothic, '나눔고딕', 돋움;
-    font-weight: bolder;
-    min-height: 25px;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    padding-left: 11px;
-    padding-right: 11px;
-    border-radius: 1px;
-    cursor: pointer;
-    text-decoration: none;
-    text-decoration-line: none;
-}
-div.fs_div a.flatbutton.thick, div.fs_div input.flatbutton.thick, div.fs_div button.flatbutton.thick {
-	border: 3px solid rgb(90, 120, 200);
-	background-color: rgb(200, 200, 200);
-}
-div.fs_div a.flatbutton.green, div.fs_div input.flatbutton.green, div.fs_div button.flatbutton.green {
-    border: 1px solid rgb(90, 200, 120);
-    color: rgb(90, 200, 120);
-}
-div.fs_div a.flatbutton.green.thick, div.fs_div input.flatbutton.green.thick, div.fs_div button.flatbutton.green.thick {
-	border: 3px solid rgb(90, 200, 120);
-}
-div.fs_div a.flatbutton.red, div.fs_div input.flatbutton.red, div.fs_div button.flatbutton.red {
-    border: 1px solid rgb(200, 120, 120);
-    color: rgb(200, 120, 120);
-}
-div.fs_div a.flatbutton.red.thick, div.fs_div input.flatbutton.red.thick, div.fs_div button.flatbutton.red.thick {
-	border: 3px solid rgb(200, 120, 120);
-}
-div.fs_div a.flatbutton.disabled, div.fs_div input.flatbutton.disabled, div.fs_div button.flatbutton.disabled {
-    border: 1px solid rgb(180, 180, 180);
-    color: rgb(180, 180, 180);
-}
-div.fs_div a.flatbutton.disabled.thick, div.fs_div input.flatbutton.disabled.thick, div.fs_div button.flatbutton.disabled.thick {
-	border: 3px solid rgb(180, 180, 180);
-}
-div.fs_div a.flatbutton:hover, div.fs_div input.flatbutton:hover, div.fs_div button.flatbutton:hover {
-	background-color: rgb(110, 150, 230);
-    box-shadow: 2px 2px 2px 0 rgb(70, 100, 150);
-}
-div.fs_div a.flatbutton.green:hover, div.fs_div input.flatbutton.green:hover, div.fs_div button.flatbutton.green:hover {
-	background-color: rgb(110, 230, 150);
-}
-div.fs_div a.flatbutton.red:hover, div.fs_div input.flatbutton.red:hover, div.fs_div button.flatbutton.red:hover {
-    background-color: rgb(220, 130, 130);
-}
-div.fs_div a.flatbutton.disabled:hover, div.fs_div input.flatbutton.disabled:hover, div.fs_div button.flatbutton.disabled:hover {
-	background-color: rgb(255, 255, 255);
-    border: 1px solid rgb(180, 180, 180);
-    box-shadow: 0;
-}
-div.fs_div a.flatbutton.disabled.thick:hover, div.fs_div input.flatbutton.disabled.thick:hover, div.fs_div button.flatbutton.disabled.thick:hover {
-	background-color: rgb(200, 200, 200);
-    border: 3px solid rgb(180, 180, 180);
-}
-
-.ui-dialog .ui-dialog-content.fs_pop_in {
-	overflow: hidden;
-}
-
-.ui-dialog .ui-dialog-content.fs_pop_in.full {
-	width: 100% !important;
 }

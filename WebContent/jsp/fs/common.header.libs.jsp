@@ -26,6 +26,7 @@ String ctxPathCmm = request.getContextPath();
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/bootstrap.theme.dark.css"/>
 <% } %>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/fonts.css"/>
+<link rel="stylesheet" href="<%= ctxPathCmm %>/css/fscommon.css"/>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/fs.css"/>
 <link rel="stylesheet" href="<%= ctxPathCmm %>/css/fsdark.css"/>
 <% if(! FSControl.useModern(request)) { %>

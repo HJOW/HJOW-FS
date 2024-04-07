@@ -55,10 +55,10 @@ $(function() {
     captSizes['width' ] = <%= fsc.getCaptchaWidth()  %>;
     captSizes['height'] = <%= fsc.getCaptchaHeight() %>;
     
-    $('body').addClass('classic');
+    $('body').addClass('classic').removeClass('modern');
     
     var fsRoot = $('.fs_root');
-    fsRoot.addClass('classic');
+    fsRoot.addClass('classic').removeClass('modern');
     
     var form     = fsRoot.find('.form_fs');
     var tables   = fsRoot.find('.fs_table_list');

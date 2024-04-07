@@ -1,10 +1,22 @@
 @charset "UTF-8";
 
+body.modern, .modern div.fs_div {
+    margin: 0; padding: 0;
+    background-color: #FFFFFF;
+    color: #333333;
+}
+
 body.modern div.fs_div dialog {
 	padding: 0;
 	border: 2px solid rgba(50, 50, 50, 0.9);
 	background-color: rgba(255, 255, 255, 0.9);
 }
+
+.modern div.fs_div .container div, .modern div.fs_div .container p, .modern div.fs_div .container table {
+	background-color: #FAFAFA;
+    color: #333333;
+}
+
 body.modern div.fs_div dialog .div_dialog_header {
 	padding: 2px 2px 2px 2px;
 	text-align: left;

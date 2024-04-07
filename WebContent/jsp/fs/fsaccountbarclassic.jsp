@@ -31,7 +31,7 @@ if(! fsc.isInstalled()) {
             var captLogin = acRoot.find('.if_captcha_l');
             var theme     = '';
             
-            acRoot.addClass('classic');
+            acRoot.addClass('classic').removeClass('modern');
             
             FSUtil.setContextPath(ctxPath);
             
