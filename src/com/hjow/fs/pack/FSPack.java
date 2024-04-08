@@ -1,5 +1,5 @@
 /*
-Copyright 2019 HJOW
+Copyright 2024 HJOW
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ import java.util.List;
 
 import com.hjow.fs.FSControl;
 import com.hjow.fs.cttype.FSContentType;
+import com.hjow.fs.schedule.FSSchedule;
 
+/** Class for FSPack instance. This instance can contains initize method, event handlers, and schedules. */
 public abstract class FSPack implements Serializable {
     private static final long serialVersionUID = 8739449348309321444L;
     public abstract long getSerial();
@@ -45,6 +47,10 @@ public abstract class FSPack implements Serializable {
     
     public List<FSControlEventHandler> getEventHandlers() {
         return new ArrayList<FSControlEventHandler>();
+    }
+    
+    public List<FSSchedule> schedules() {
+    	return new ArrayList<FSSchedule>();
     }
     
     @Override

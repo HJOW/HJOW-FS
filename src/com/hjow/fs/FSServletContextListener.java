@@ -21,8 +21,6 @@ import javax.servlet.ServletContextListener;
 
 import com.hjow.fs.schedule.FSScheduler;
 
-import hjow.common.util.DataUtil;
-
 /** Declare actions on server starts or server shutdown. */
 public class FSServletContextListener implements ServletContextListener {
     public FSServletContextListener() { }
@@ -30,8 +28,10 @@ public class FSServletContextListener implements ServletContextListener {
     @Override
     public synchronized void contextDestroyed(ServletContextEvent sce) {
         System.out.println(this.getClass().getName() + ".contextDestroyed STARTS");
-        FSProtocolHandler.disposeInstance();
+        destroying(FSControl.getInstance());
         FSScheduler.dispose();
+        try { Thread.sleep(2000L);  } catch(InterruptedException ignores) {}
+        FSProtocolHandler.disposeInstance();
         FSControl.disposeInstance();
         System.out.println(this.getClass().getName() + ".contextDestroyed END");
     }
@@ -58,9 +58,13 @@ public class FSServletContextListener implements ServletContextListener {
         try { Class.forName("javax.imageio.ImageIO");         } catch(ClassNotFoundException ignores) {}
         try { FSUtils.createImageCaptchaBase64("123456789", 200, 100, 10, 0, false, null); } catch(Throwable ignores) {}
         
-        if(! DataUtil.parseBoolean(ctrl.getConfig("NoScheduler"))) FSScheduler.startCycles();
+        initializing(ctx, ctrl);
         FSControl.waitProperInit();
         System.out.println(this.getClass().getName() + ".contextInitialized END at " + System.currentTimeMillis());
     }
     
+    /** Can be override */
+    public void initializing(ServletContext ctx, FSControl ctrl) {  }
+    /** Can be override */
+    public void destroying(FSControl ctrl) {}
 }

@@ -20,6 +20,7 @@ import java.util.List;
 import com.hjow.fs.FSControl;
 import hjow.common.core.Releasable;
 
+/** Schedule caller. Run infinite loop to execute registered schedules. */
 public class FSScheduler extends Thread implements Releasable {
 	private static final long serialVersionUID = -3110662917346474589L;
 	protected volatile boolean threadSwitch = true;
@@ -30,6 +31,7 @@ public class FSScheduler extends Thread implements Releasable {
     @Override
 	public void run() {
 		while(threadSwitch) {
+			running = true;
 			oneCycle();
 			
             try {
@@ -49,7 +51,8 @@ public class FSScheduler extends Thread implements Releasable {
     	super.start();
     }
     
-    protected synchronized void prepareCycle() {
+    /** Set repeat gap time of each schedules. */
+    protected synchronized final void prepareCycle() {
     	int index = 0;
     	while(index < schedules.size()) {
     		FSSchedule once = schedules.get(index);
@@ -58,7 +61,8 @@ public class FSScheduler extends Thread implements Releasable {
     	}
     }
     
-    protected synchronized void oneCycle() {
+    /** Run one cycle of loop. */
+    protected synchronized final void oneCycle() {
     	int index = 0;
     	while(threadSwitch && index < schedules.size()) {
     		try {
@@ -93,18 +97,22 @@ public class FSScheduler extends Thread implements Releasable {
     	try { schedules.clear(); } catch(Throwable ignores) {}
 	}
     
+    /** Register one schedule. The name of schedule should be a unique. */
     public static void add(FSSchedule schedule) {
-    	instance.schedules.add(schedule);
+    	if(! instance.schedules.contains(schedule)) instance.schedules.add(schedule);
     }
     
+    /** Check scheduling is active. */
     public static boolean isRunning() {
     	return instance.running;
     }
     
+    /** This method is called by FSServletContextListener. */
     public static void startCycles() {
     	instance.start();
     }
     
+    /** This method is called by FSServletContextListener. */
     public static void dispose() {
     	instance.releaseResource();
     }

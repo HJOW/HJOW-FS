@@ -41,4 +41,12 @@ public abstract class FSSchedule implements Serializable {
 		this.lefts = lefts;
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj == null) return false;
+		if(obj instanceof FSSchedule) {
+			return getName().equals(((FSSchedule) obj).getName());
+		}
+		return false;
+	}
 }

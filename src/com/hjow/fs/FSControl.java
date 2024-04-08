@@ -77,6 +77,8 @@ import com.hjow.fs.lister.FSFileListingResult;
 import com.hjow.fs.pack.FSControlEventHandler;
 import com.hjow.fs.pack.FSPack;
 import com.hjow.fs.pack.FSRequestHandler;
+import com.hjow.fs.schedule.FSSchedule;
+import com.hjow.fs.schedule.FSScheduler;
 import com.oreilly.servlet.MultipartRequest;
 import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 
@@ -442,19 +444,7 @@ public class FSControl {
                 try {
                     Class<?> pc = Class.forName(packClass);
                     FSPack pack = (FSPack) pc.newInstance();
-                    if(! pack.isAvail(VERSION)) continue;
-                    if(packs.contains(pack)) continue;
-                    pack.init(this);
-                    packs.add(pack);
-                    
-                    if(pack instanceof FSFileLister) this.lister = (FSFileLister) pack;
-                    
-                    List<FSContentType> typesBundled = pack.getContentTypes();
-                    if(typesBundled != null) {
-                        for(FSContentType t : typesBundled) {
-                            if(! ftypes.contains(t)) ftypes.add(t);
-                        }
-                    }
+                    addPack(pack);
                 } catch(Throwable tc) {
                     logIn("Exception when loading Pack " + packClass + " - (" + tc.getClass().getName() + ") " + tc.getMessage());
                 }
@@ -5012,6 +5002,32 @@ public class FSControl {
     	if(cfg == null) return "";
     	if(cfg instanceof String) return (String) cfg;
     	return cfg.toString();
+    }
+    
+    /** Add FSPack */
+    public void addPack(FSPack pack) {
+    	if(! pack.isAvail(VERSION)) return;
+        if(packs.contains(pack)) return;
+        
+        pack.init(this);
+        packs.add(pack);
+        
+        if(pack instanceof FSFileLister) this.lister = (FSFileLister) pack;
+        
+        List<FSContentType> typesBundled = pack.getContentTypes();
+        if(typesBundled != null) {
+            for(FSContentType t : typesBundled) {
+                if(! ftypes.contains(t)) ftypes.add(t);
+            }
+        }
+        
+        if(! DataUtil.parseBoolean(getConfig("NoScheduler"))) {
+        	List<FSSchedule> schedules = pack.schedules();
+            if(schedules != null) {
+            	for(FSSchedule s : schedules) { FSScheduler.add(s); }
+            	if(! schedules.isEmpty()) FSScheduler.startCycles();
+            }
+        }
     }
     
     /** Delete all tokens */
