@@ -126,6 +126,11 @@ body.dark.modern div.fs_div dialog {
     background-color: rgba(55, 55, 55, 0.9);
 }
 
+body.dark.modern div.fs_div dialog .ui-resizable-handle {
+    border: 2px solid rgba(150, 150, 150, 0.9);
+    background-color: rgba(150, 150, 150, 0.9);
+}
+
 body.dark.modern div.fs_div a:not(.btn), body.dark.modern div.fs_div table td a:not(.btn), body.dark.modern div.fs_div table th a:not(.btn), body.dark.modern div.fs_div div a:not(.btn) {
     color: rgb(110, 150, 230);
 }

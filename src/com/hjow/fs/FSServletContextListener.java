@@ -26,9 +26,9 @@ public class FSServletContextListener implements ServletContextListener {
     public FSServletContextListener() { }
 
     @Override
-    public synchronized void contextDestroyed(ServletContextEvent sce) {
+    public synchronized final void contextDestroyed(ServletContextEvent sce) {
         System.out.println(this.getClass().getName() + ".contextDestroyed STARTS");
-        destroying(FSControl.getInstance());
+        destroying(sce.getServletContext(), FSControl.getInstance());
         FSScheduler.dispose();
         try { Thread.sleep(2000L);  } catch(InterruptedException ignores) {}
         FSProtocolHandler.disposeInstance();
@@ -37,7 +37,7 @@ public class FSServletContextListener implements ServletContextListener {
     }
 
     @Override
-    public synchronized void contextInitialized(ServletContextEvent sce) {
+    public synchronized final void contextInitialized(ServletContextEvent sce) {
         System.out.println(this.getClass().getName() + ".contextInitialized STARTS");
         ServletContext ctx = sce.getServletContext();
         
@@ -63,8 +63,8 @@ public class FSServletContextListener implements ServletContextListener {
         System.out.println(this.getClass().getName() + ".contextInitialized END at " + System.currentTimeMillis());
     }
     
-    /** Can be override */
+    /** This method is called on the server starts. Can be override. */
     public void initializing(ServletContext ctx, FSControl ctrl) {  }
-    /** Can be override */
-    public void destroying(FSControl ctrl) {}
+    /** This method is called on the server stops. Can be override. */
+    public void destroying(ServletContext ctx, FSControl ctrl) { }
 }
