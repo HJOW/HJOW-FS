@@ -19,15 +19,19 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import com.hjow.fs.pack.FSJScriptLoader;
 import com.hjow.fs.schedule.FSScheduler;
 
 /** Declare actions on server starts or server shutdown. */
 public class FSServletContextListener implements ServletContextListener {
     public FSServletContextListener() { }
+    protected FSJScriptLoader loader = new FSJScriptLoader();
 
     @Override
     public synchronized final void contextDestroyed(ServletContextEvent sce) {
         System.out.println(this.getClass().getName() + ".contextDestroyed STARTS");
+        loader.destroying(sce.getServletContext(), FSControl.getInstance());
+        loader = null;
         destroying(sce.getServletContext(), FSControl.getInstance());
         FSScheduler.dispose();
         try { Thread.sleep(2000L);  } catch(InterruptedException ignores) {}
@@ -59,6 +63,10 @@ public class FSServletContextListener implements ServletContextListener {
         try { FSUtils.createImageCaptchaBase64("123456789", 200, 100, 10, 0, false, null); } catch(Throwable ignores) {}
         
         initializing(ctx, ctrl);
+        
+        if(loader == null) loader = new FSJScriptLoader();
+        loader.initializing(ctx, ctrl);
+        
         FSControl.waitProperInit();
         System.out.println(this.getClass().getName() + ".contextInitialized END at " + System.currentTimeMillis());
     }

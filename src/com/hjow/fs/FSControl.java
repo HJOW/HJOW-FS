@@ -85,7 +85,12 @@ import com.oreilly.servlet.multipart.DefaultFileRenamePolicy;
 import hjow.common.json.JsonArray;
 import hjow.common.json.JsonCompatibleUtil;
 import hjow.common.json.JsonObject;
-import hjow.common.util.*;
+import hjow.common.util.BrowserInfo;
+import hjow.common.util.ClassUtil;
+import hjow.common.util.DataUtil;
+import hjow.common.util.FileUtil;
+import hjow.common.util.GUIUtil;
+import hjow.common.util.SecurityUtil;
 
 public class FSControl {
     public static final int[] VERSION = {0, 2, 5, 38};
@@ -5002,6 +5007,14 @@ public class FSControl {
     	if(cfg == null) return "";
     	if(cfg instanceof String) return (String) cfg;
     	return cfg.toString();
+    }
+    
+    /** Get config value as boolean */
+    public boolean getBoolConfig(String key) {
+    	Object cfg = getConfig(key);
+    	if(cfg == null) return false;
+    	if(cfg instanceof Boolean) return ((Boolean) cfg).booleanValue();
+    	return DataUtil.parseBoolean(cfg);
     }
     
     /** Add FSPack */
