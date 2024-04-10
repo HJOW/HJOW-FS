@@ -25,17 +25,24 @@ public class FSScheduler extends Thread implements Releasable {
 	private static final long serialVersionUID = -3110662917346474589L;
 	protected volatile boolean threadSwitch = true;
 	protected volatile boolean running = false;
+	protected volatile long    runned  = 0L;
 	protected volatile List<FSSchedule> schedules = new LinkedList<FSSchedule>();
     private FSScheduler() { }
     
     @Override
 	public void run() {
+    	long now;
 		while(threadSwitch) {
 			running = true;
-			oneCycle();
+			
+			now = System.currentTimeMillis();
+			if(now - runned >= 1000L) {
+				runned = now;
+				oneCycle();
+			}
 			
             try {
-				Thread.sleep(1000L);
+				Thread.sleep(50L);
 			} catch(InterruptedException e) {
 				break;
 			}
