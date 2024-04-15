@@ -71,11 +71,16 @@ public class FSJScriptLoader {
             File fJs = new File(fCf.getCanonicalPath() + File.separator + "jscript");
             if(! fJs.exists()) {
                 fJs.mkdirs();
-                createManualFile(new File(fJs.getCanonicalPath() + File.separator + "README.txt"));
             }
             
             File fJsLib = new File(fJs.getCanonicalPath() + File.separator + "lib");
             if(! fJsLib.exists()) fJsLib.mkdirs();
+            
+            File fJsSche = new File(fJs.getCanonicalPath() + File.separator + "schedules");
+            if(! fJsSche.exists()) {
+            	fJsSche.mkdirs();
+                createManualFile(new File(fJs.getCanonicalPath() + File.separator + "README.txt"), "schedule");
+            }
             
             in1 = this.getClass().getResourceAsStream("/jscript.json");
             if(in1 == null) return;
@@ -124,14 +129,14 @@ public class FSJScriptLoader {
             };
             
             File[] listLib = fJsLib.listFiles(filter);
-            File[] listJs  = fJs.listFiles(filter);
+            File[] listJs  = fJsSche.listFiles(filter);
             
             for(File f : listJs) {
                 loadOne(f, listLib);
             }
             listJs = null;
             
-            File[] listJsDirs = fJs.listFiles(new FileFilter() {    
+            File[] listJsDirs = fJsSche.listFiles(new FileFilter() {    
                 @Override
                 public boolean accept(File pathname) {
                     if(pathname.isDirectory()) {
@@ -152,7 +157,7 @@ public class FSJScriptLoader {
             }
             listJs = null;
             
-            JsonArray arr = (JsonArray) JsonCompatibleUtil.parseJson(json.get("file"));
+            JsonArray arr = (JsonArray) JsonCompatibleUtil.parseJson(json.get("schedules"));
             if(arr == null) return;
             
             for(Object one : arr) {
@@ -211,52 +216,54 @@ public class FSJScriptLoader {
     
     /** Create README.txt file 
      * @throws IOException */
-    protected void createManualFile(File f) throws IOException {
-        StringBuilder res = new StringBuilder("");
-        
-        res = res.append("/*").append("\n");
-        res = res.append("This file is written on UTF-8.").append("\n");
-        res = res.append("").append("\n");
-        res = res.append("Write js file in this directory to register 'schedule' on FS.").append("\n");
-        res = res.append("See following example...").append("\n");
-        res = res.append("*/").append("\n");
-        res = res.append("").append("\n");
-        res = res.append("function getName() {                                                                             ").append("\n");
-        res = res.append("    // Return unique name                                                                          ").append("\n");
-        res = res.append("    return 'schedule_01';                                                                          ").append("\n");
-        res = res.append("}                                                                                                ").append("\n");
-        res = res.append("                                                                                                 ").append("\n");
-        res = res.append("function isLoop() {                                                                              ").append("\n");
-        res = res.append("    // If return false, this schedule will be called once only.                                    ").append("\n");
-        res = res.append("    // If return true, this schedule will be called repeats.                                       ").append("\n");
-        res = res.append("    return false;                                                                                  ").append("\n");
-        res = res.append("}                                                                                                ").append("\n");
-        res = res.append("                                                                                                 ").append("\n");
-        res = res.append("function after() {                                                                               ").append("\n");
-        res = res.append("    // If isLoop() return false, this schedule will be called after 'AFTER' seconds.               ").append("\n");
-        res = res.append("    // If isLoop() return true , this schedule will be called repeatly between 'AFTER' seconds.    ").append("\n");
-        res = res.append("    // This value is used as a 'AFTER' value.                                                      ").append("\n");
-        res = res.append("    return 1;                                                                                      ").append("\n");
-        res = res.append("}                                                                                                ").append("\n");
-        res = res.append("                                                                                                 ").append("\n");
-        res = res.append("function run(ctx, ctrl) {                                                                        ").append("\n");
-        res = res.append("    // This function is a real job of the schedule.                                                ").append("\n");
-        res = res.append("    //                                                                                             ").append("\n");
-        res = res.append("    // ctx  : ServletContext instance                                                              ").append("\n");
-        res = res.append("    // ctrl : FSControl instance                                                                   ").append("\n");
-        res = res.append("    //                                                                                             ").append("\n");
-        res = res.append("    // Write codes here to do something when this schedule called.                                 ").append("\n");
-        res = res.append("}                                                                                                ").append("\n");
-        res = res.append("                                                                                                 ").append("\n");
-        res = res.append("function dispose(ctx, ctrl) {                                                                    ").append("\n");
-        res = res.append("    // This function is called when the server preparing to shutdown.                              ").append("\n");
-        res = res.append("    //                                                                                             ").append("\n");
-        res = res.append("    // ctx  : ServletContext instance                                                              ").append("\n");
-        res = res.append("    // ctrl : FSControl instance                                                                   ").append("\n");
-        res = res.append("    //                                                                                             ").append("\n");
-        res = res.append("    // Write codes here to do something when the server is shutdown.                               ").append("\n");
-        res = res.append("}                                                                                                ").append("\n");
-        
-        FileUtil.writeString(f, "UTF-8", res.toString().trim());
+    protected void createManualFile(File f, String type) throws IOException {
+    	if(type.equalsIgnoreCase("schedule")) {
+    		StringBuilder res = new StringBuilder("");
+            
+            res = res.append("/*").append("\n");
+            res = res.append("This file is written on UTF-8.").append("\n");
+            res = res.append("").append("\n");
+            res = res.append("Write js file in this directory to register 'schedule' on FS.").append("\n");
+            res = res.append("See following example...").append("\n");
+            res = res.append("*/").append("\n");
+            res = res.append("").append("\n");
+            res = res.append("function getName() {                                                                             ").append("\n");
+            res = res.append("    // Return unique name                                                                          ").append("\n");
+            res = res.append("    return 'schedule_01';                                                                          ").append("\n");
+            res = res.append("}                                                                                                ").append("\n");
+            res = res.append("                                                                                                 ").append("\n");
+            res = res.append("function isLoop() {                                                                              ").append("\n");
+            res = res.append("    // If return false, this schedule will be called once only.                                    ").append("\n");
+            res = res.append("    // If return true, this schedule will be called repeats.                                       ").append("\n");
+            res = res.append("    return false;                                                                                  ").append("\n");
+            res = res.append("}                                                                                                ").append("\n");
+            res = res.append("                                                                                                 ").append("\n");
+            res = res.append("function after() {                                                                               ").append("\n");
+            res = res.append("    // If isLoop() return false, this schedule will be called after 'AFTER' seconds.               ").append("\n");
+            res = res.append("    // If isLoop() return true , this schedule will be called repeatly between 'AFTER' seconds.    ").append("\n");
+            res = res.append("    // This value is used as a 'AFTER' value.                                                      ").append("\n");
+            res = res.append("    return 1;                                                                                      ").append("\n");
+            res = res.append("}                                                                                                ").append("\n");
+            res = res.append("                                                                                                 ").append("\n");
+            res = res.append("function run(ctx, ctrl) {                                                                        ").append("\n");
+            res = res.append("    // This function is a real job of the schedule.                                                ").append("\n");
+            res = res.append("    //                                                                                             ").append("\n");
+            res = res.append("    // ctx  : ServletContext instance                                                              ").append("\n");
+            res = res.append("    // ctrl : FSControl instance                                                                   ").append("\n");
+            res = res.append("    //                                                                                             ").append("\n");
+            res = res.append("    // Write codes here to do something when this schedule called.                                 ").append("\n");
+            res = res.append("}                                                                                                ").append("\n");
+            res = res.append("                                                                                                 ").append("\n");
+            res = res.append("function dispose(ctx, ctrl) {                                                                    ").append("\n");
+            res = res.append("    // This function is called when the server preparing to shutdown.                              ").append("\n");
+            res = res.append("    //                                                                                             ").append("\n");
+            res = res.append("    // ctx  : ServletContext instance                                                              ").append("\n");
+            res = res.append("    // ctrl : FSControl instance                                                                   ").append("\n");
+            res = res.append("    //                                                                                             ").append("\n");
+            res = res.append("    // Write codes here to do something when the server is shutdown.                               ").append("\n");
+            res = res.append("}                                                                                                ").append("\n");
+            
+            FileUtil.writeString(f, "UTF-8", res.toString().trim());
+    	}
     }
 }

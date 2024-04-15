@@ -1,5 +1,5 @@
 {
     "use"   : true,
     "debug" : false,
-    "file"  : []
+    "schedules" : []
 }
