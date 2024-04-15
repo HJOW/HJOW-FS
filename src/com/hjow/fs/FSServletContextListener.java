@@ -21,24 +21,12 @@ import javax.servlet.ServletContextListener;
 
 import com.hjow.fs.pack.FSJScriptLoader;
 import com.hjow.fs.schedule.FSScheduler;
+import com.hjow.fs.servlets.FSServlet;
 
 /** Declare actions on server starts or server shutdown. */
 public class FSServletContextListener implements ServletContextListener {
     public FSServletContextListener() { }
     protected FSJScriptLoader loader = new FSJScriptLoader();
-
-    @Override
-    public synchronized final void contextDestroyed(ServletContextEvent sce) {
-        System.out.println(this.getClass().getName() + ".contextDestroyed STARTS");
-        loader.destroying(sce.getServletContext(), FSControl.getInstance());
-        loader = null;
-        destroying(sce.getServletContext(), FSControl.getInstance());
-        FSScheduler.dispose();
-        try { Thread.sleep(2000L);  } catch(InterruptedException ignores) {}
-        FSProtocolHandler.disposeInstance();
-        FSControl.disposeInstance();
-        System.out.println(this.getClass().getName() + ".contextDestroyed END");
-    }
 
     @Override
     public synchronized final void contextInitialized(ServletContextEvent sce) {
@@ -53,6 +41,8 @@ public class FSServletContextListener implements ServletContextListener {
         
         try { ctrl.removeAllTokens();         } catch(Throwable ignores) {}
         try { ctrl.emptyTempDirectory();      } catch(Throwable ignores) {}
+        
+        ctx.addServlet("fss", FSServlet.class);
         
         // Warming up
         
@@ -69,6 +59,19 @@ public class FSServletContextListener implements ServletContextListener {
         
         FSControl.waitProperInit();
         System.out.println(this.getClass().getName() + ".contextInitialized END at " + System.currentTimeMillis());
+    }
+    
+    @Override
+    public synchronized final void contextDestroyed(ServletContextEvent sce) {
+        System.out.println(this.getClass().getName() + ".contextDestroyed STARTS");
+        loader.destroying(sce.getServletContext(), FSControl.getInstance());
+        loader = null;
+        destroying(sce.getServletContext(), FSControl.getInstance());
+        FSScheduler.dispose();
+        try { Thread.sleep(2000L);  } catch(InterruptedException ignores) {}
+        FSProtocolHandler.disposeInstance();
+        FSControl.disposeInstance();
+        System.out.println(this.getClass().getName() + ".contextDestroyed END");
     }
     
     /** This method is called on the server starts. Can be override. */

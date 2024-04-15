@@ -29,6 +29,7 @@ bootswatch (https://bootswatch.com/3/cyborg/)
 video.js (http://videojs.com/) Copyright Brightcove, Inc.
 promise-polyfill (https://github.com/taylorhakes/promise-polyfill)
 Apache Common Codec (https://commons.apache.org/proper/commons-codec/) - Choosable library (Necessary on JDK 9 or above)
+HttpServlet source (https://github.com/javaee/servlet-spec/blob/master/src/main/java/javax/servlet/http/HttpServlet.java)
 favicon and image from freepik.com (https://kr.freepik.com/icon/files_220980)
 image from freepik.com (https://kr.freepik.com/icon/pdf-file_4347587)
 D2Coding font (https://github.com/Joungkyun/font-d2coding)
