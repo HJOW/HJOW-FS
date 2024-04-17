@@ -16,9 +16,8 @@ limitations under the License.
 package com.hjow.fs.pack;
 
 import java.io.Serializable;
-
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 
 public interface FSControlEventHandler extends Serializable {
-	public void eventOccured(String event, String action, HttpServletRequest req) throws Throwable;
+	public boolean eventOccured(String event, String action, HttpServletRequestWrapper req) throws Throwable;
 }

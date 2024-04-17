@@ -16,9 +16,13 @@ limitations under the License.
 package com.hjow.fs.pack;
 
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponseWrapper;
+
 import com.hjow.fs.FSControl;
 import hjow.common.json.JsonObject;
 
 public interface FSRequestHandler {
-    public JsonObject handle(FSControl ctrl, Map<String, String> parameters, JsonObject session);
+    public JsonObject handle(FSControl ctrl, Map<String, String> parameters, JsonObject session, HttpServletRequestWrapper req, HttpServletResponseWrapper res);
 }

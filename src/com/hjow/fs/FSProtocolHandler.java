@@ -49,9 +49,15 @@ public class FSProtocolHandler implements Closeable {
             
             pAction = pAction.toLowerCase().trim();
             
-            ctrl.invokeCallEvent("before",  pAction, request);
+            if(! ctrl.invokeCallEvent("before",  pAction, request)) return;
             
-            if(pAction.equals("list")) {
+            JsonObject json = ctrl.processHandler(pAction, request, response);
+            if(json != null) {
+            	response.reset();
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.getOutputStream().write(json.toJSON().getBytes("UTF-8"));
+            } else if(pAction.equals("list")) {
                 String pathParam = request.getParameter("path");
                 if(pathParam == null) pathParam = "";
                 pathParam = pathParam.trim();
@@ -66,14 +72,14 @@ public class FSProtocolHandler implements Closeable {
                 String excepts = request.getParameter("excepts");
                 if(excepts == null) excepts = "";
                 
-                JsonObject json = ctrl.list(request, pathParam, keyword, excepts);
+                json = ctrl.list(request, pathParam, keyword, excepts);
 
                 response.reset();
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
                 response.getOutputStream().write(json.toJSON().getBytes("UTF-8"));
             } else if(pAction.equals("listall")) {
-            	JsonObject json = ctrl.listAll(request);
+            	json = ctrl.listAll(request);
 
                 response.reset();
                 response.setContentType("application/json");
@@ -89,14 +95,14 @@ public class FSProtocolHandler implements Closeable {
                 response.setCharacterEncoding("UTF-8");
                 response.getOutputStream().write(msg.getBytes("UTF-8"));
             } else if(pAction.equals("account")) {
-                JsonObject json = ctrl.account(request);
+                json = ctrl.account(request);
                 
                 response.reset();
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
                 response.getOutputStream().write(json.toJSON().getBytes("UTF-8"));
             } else if(pAction.equals("console")) {
-                JsonObject json = ctrl.console(request);
+                json = ctrl.console(request);
                 
                 response.reset();
                 response.setContentType("application/json");
@@ -133,7 +139,7 @@ public class FSProtocolHandler implements Closeable {
                 if(ctype == null) ctype = "image";
                 ctype = ctype.trim().toLowerCase();
                 
-                JsonObject json = new JsonObject();
+                json = new JsonObject();
                 json.put("captype", ctype);
                 
                 String captRes = null;
@@ -152,7 +158,7 @@ public class FSProtocolHandler implements Closeable {
             } else if(pAction.equals("chcaptcha")) {
             	String key = request.getParameter("key");
             	
-            	JsonObject json = new JsonObject();
+            	json = new JsonObject();
                 json.put("avail", new Boolean(ctrl.isCaptchaCreated(request, key)));
             	
             	response.reset();
@@ -175,7 +181,7 @@ public class FSProtocolHandler implements Closeable {
             	String bg = request.getParameter("bg");
             	String bb = request.getParameter("bb");
 
-            	JsonObject json = new JsonObject();
+            	json = new JsonObject();
             	json.put("success", new Boolean(false));
             	json.put("message", "");
 
@@ -243,28 +249,28 @@ public class FSProtocolHandler implements Closeable {
             	response.setCharacterEncoding("UTF-8");
             	response.getOutputStream().write(json.toJSON().getBytes("UTF-8"));
             } else if(pAction.equals("install")) {
-                JsonObject json = ctrl.install(request);
+                json = ctrl.install(request);
                 
                 response.reset();
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
                 response.getOutputStream().write(json.toJSON().getBytes("UTF-8"));
             } else if(pAction.equals("admin")) {
-                JsonObject json = ctrl.admin(request);
+                json = ctrl.admin(request);
                 
                 response.reset();
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
                 response.getOutputStream().write(json.toJSON().getBytes("UTF-8"));
             } else if(pAction.equals("mkdir")) {
-            	JsonObject json = ctrl.mkdir(request);
+            	json = ctrl.mkdir(request);
             	
             	response.reset();
             	response.setContentType("application/json");
             	response.setCharacterEncoding("UTF-8");
             	response.getOutputStream().write(json.toJSON().getBytes("UTF-8"));
             } else if(pAction.equals("remove")) {
-                JsonObject json = ctrl.remove(request);
+                json = ctrl.remove(request);
             	
             	response.reset();
             	response.setContentType("application/json");
