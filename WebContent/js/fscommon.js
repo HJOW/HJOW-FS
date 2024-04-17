@@ -64,8 +64,8 @@ function FSUtilClass() {
     this.version = [];
     this.version.push(0);
     this.version.push(2);
-    this.version.push(5);
-    this.version.push(38);
+    this.version.push(6);
+    this.version.push(39);
 
     this.ctx = '';
     this.setContextPath = function(ctxPath) {
